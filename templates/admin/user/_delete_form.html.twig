@@ -1,0 +1,6 @@
+<form method="POST" action="{{ path('admin_user_delete', {id: user.id}) }}" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa người dùng này?');">
+    <input type="hidden" name="token" value="{{ csrf_token('delete') }}">
+    <button type="submit" class="btn btn-outline-danger" title="Xóa">
+        <i class="fa fa-trash"></i>
+    </button>
+</form>

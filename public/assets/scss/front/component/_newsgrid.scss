@@ -1,0 +1,422 @@
+// ============================================
+// NEWS GRID - Modern Card Design
+// ============================================
+
+.title-list-news-items {
+    .title-list-news-items-h1 {
+        font-size: 32px;
+        margin: 10px 0 15px;
+        color: $primaryColor;
+        font-weight: 700;
+
+        @media only screen and (max-width : 768px) {
+            position: relative;
+            font-size: 26px;
+            margin: 15px 0 15px;
+        }
+
+        &::before {
+            content: '';
+            display: inline-block;
+            width: 150px;
+            height: 2px;
+            background: linear-gradient(to right, transparent, $accentColor 50%, transparent);
+            vertical-align: middle;
+            margin-right: 15px;
+
+            @media only screen and (max-width: 767.98px) {
+                position: absolute;
+                left: 35%;
+                bottom: -5px;
+                height: 3px;
+                width: 80px;
+            }
+
+            @media only screen and (min-width: 768px) and (max-width : 1024px) {
+                position: absolute;
+                left: 43%;
+                bottom: -5px;
+                height: 3px;
+                width: 80px;
+            }
+        }
+
+        &::after {
+            content: '';
+            display: inline-block;
+            width: 150px;
+            height: 2px;
+            background: linear-gradient(to right, transparent, $accentColor 50%, transparent);
+            vertical-align: middle;
+            margin-left: 15px;
+
+            @media only screen and (max-width : 768px) {
+                display: none;
+            }
+        }
+
+        img {
+            height: 23px;
+            vertical-align: baseline;
+        }
+
+        span {
+            color: $accentColor;
+        }
+
+        i {
+            font-size: 17px;
+            vertical-align: middle;
+            margin-top: -5px;
+            margin-right: 0;
+            color: $accentColor;
+        }
+    }
+
+    p {
+        text-align: center;
+        font-style: normal;
+        width: 75%;
+        margin: 0 auto 30px;
+        color: $textSecondary;
+        font-size: 17px;
+        line-height: 1.6;
+
+        @media only screen and (max-width : 768px) {
+            width: 100%;
+        }
+    }
+}
+
+.ka-article-grid {
+    .ka-grid-item {
+        margin-bottom: 30px;
+
+        @media only screen and (max-width : 768px) {
+            margin-bottom: 15px;
+        }
+
+        &.d-none {
+            @media (min-width: 768px) and (max-width: 991.98px) {
+                display: none;
+            }
+        }
+
+        .ka-card-wrapper {
+            background: $white;
+            border-radius: $radiusMd;
+            overflow: hidden;
+            box-shadow: $shadowMd;
+            transition: $transitionBase;
+            border: 2px solid transparent;
+            height: 100%;
+            position: relative;
+
+            &.ka-card-vertical {
+                .ka-card-thumb {
+                    height: auto !important;
+                    aspect-ratio: 277 / 350;
+                    
+                    @supports not (aspect-ratio: 1 / 1) {
+                        height: 0 !important;
+                        padding-top: 126.35%; /* fallback */
+                    }
+                    
+                    picture {
+                        position: absolute;
+                        top: 0; left: 0; width: 100%; height: 100%;
+                        .img-thumbnail {
+                            position: absolute;
+                            top: 0; left: 0; width: 100%; height: 100%;
+                            object-fit: cover;
+                        }
+                    }
+                }
+            }
+
+            &::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 3px;
+                background: $gradientAccent;
+                opacity: 0;
+                transition: $transitionFast;
+                z-index: 1;
+            }
+
+            &:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 15px 35px rgba($primaryColor, 0.15);
+                border-color: rgba($accentColor, 0.3);
+
+                &::before {
+                    opacity: 1;
+                }
+
+                .ka-card-thumb {
+                    .img-thumbnail {
+                        transform: scale(1.1);
+                    }
+
+                    a {
+                        opacity: 1;
+
+                        i {
+                            transform: translate(-50%, -50%) rotate(0);
+                        }
+                    }
+                }
+            }
+
+            .ka-card-thumb {
+                display: block;
+                height: 200px;
+                overflow: hidden;
+                position: relative;
+
+                @media only screen and (max-width : 767.98px) {
+                    height: 220px;
+                }
+
+                @media (min-width: 768px) and (max-width: 991.98px) {
+                    height: 180px;
+                }
+
+                .img-thumbnail {
+                    padding: 0px;
+                    border-radius: 0px;
+                    border: none;
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    transition: $transitionBase;
+                }
+
+                a {
+                    position: absolute;
+                    width: 100%;
+                    height: 100%;
+                    top: 0;
+                    left: 0;
+                    background-color: rgba(26, 39, 68, 0.6);
+                    overflow: hidden;
+                    opacity: 0;
+                    transition: $transitionBase;
+
+                    i {
+                        display: block;
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        width: 50px;
+                        height: 50px;
+                        line-height: 46px;
+                        font-size: 1.2em;
+                        border: 2px solid $white;
+                        color: $white;
+                        text-align: center;
+                        border-radius: 50%;
+                        transform: translate(-50%, -50%) rotate(270deg);
+                        transition: $transitionBase;
+                    }
+                }
+            }
+
+            .ka-card-body {
+                padding: 15px 20px 20px;
+
+                h2 {
+                    font-family: $robotoCondesed;
+                    font-size: 17px;
+                    font-weight: 700;
+                    margin: 0 0 10px 0;
+                    min-height: 50px;
+                    line-height: 1.5;
+
+                    @media only screen and (max-width: 767.98px) {
+                        min-height: auto;
+                        margin-bottom: 10px;
+                    }
+
+                    a {
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        display: -webkit-box;
+                        line-height: 24px;
+                        max-height: 48px;
+                        line-clamp: 2;
+                        -webkit-line-clamp: 2;
+                        -webkit-box-orient: vertical;
+                        color: $primaryColor;
+                        text-align: left;
+                        transition: $transitionFast;
+
+                        &:hover {
+                            text-decoration: none;
+                            color: $accentColor;
+                        }
+                    }
+                }
+
+                h3 {
+                    font-family: $robotoCondesed;
+                    font-size: 18px;
+                    font-weight: 700;
+                    margin: 0 0 10px 0;
+                    min-height: 50px;
+                    line-height: 1.5;
+
+                    @media only screen and (max-width: 767.98px) {
+                        min-height: auto;
+                        margin-bottom: 10px;
+                    }
+
+                    a {
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        display: -webkit-box;
+                        line-height: 24px;
+                        max-height: 48px;
+                        line-clamp: 2;
+                        -webkit-line-clamp: 2;
+                        -webkit-box-orient: vertical;
+                        color: $primaryColor;
+                        text-align: left;
+                        transition: $transitionFast;
+
+                        &:hover {
+                            text-decoration: none;
+                            color: $accentColor;
+                        }
+                    }
+                }
+
+                p {
+                    font-size: 14px;
+                    margin-bottom: 0;
+                    line-height: 22px;
+                    text-align: left;
+                    color: $textSecondary;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    display: -webkit-box;
+                    line-clamp: 3;
+                    -webkit-line-clamp: 3;
+                    -webkit-box-orient: vertical;
+                }
+            }
+        }
+    }
+}
+
+/* Slide project hot - Modern Industrial Theme
+------------------------------------------------------------------------- */
+.project-hot {
+    margin: 0;
+    padding: 60px 0;
+    background: $surfaceLight;
+    position: relative;
+
+    @media only screen and (max-width: 767.98px) {
+        margin: 0;
+        padding: 40px 0;
+    }
+
+    .title-list-news-items {
+        h1 {
+            margin: 0 0 15px;
+            color: $primaryColor;
+
+            @media only screen and (max-width : 768px) {
+                font-size: 28px;
+                margin: 0 0 15px;
+            }
+        }
+
+        .block-underline {
+            margin-bottom: 40px;
+        }
+    }
+
+    .ka-article-grid {
+        .bx-wrapper {
+            border: none;
+            margin-bottom: 0;
+            box-shadow: none;
+
+            @media only screen and (min-width: 979.98px) {
+                max-width: 1170px !important;
+            }
+
+            .bx-viewport {
+                height: 100% !important;
+                overflow: visible !important;
+
+                .ka-grid-item {
+                    @media only screen and (min-width: 768px) {
+                        width: initial !important;
+                    }
+
+                    .ka-card-wrapper {
+                        width: 282px !important;
+                        margin: 10px;
+                        transition: $transitionBase;
+
+                        @media only screen and (max-width: 767.98px) {
+                            width: 100% !important;
+                            margin: 10px 0;
+                        }
+
+                        @media (min-width: 768px) and (max-width: 979.98px) {
+                            width: 220px !important;
+                        }
+
+                        &:hover {
+                            transform: translateY(-5px);
+                            box-shadow: $shadowLg;
+                        }
+                    }
+                }
+            }
+
+            // Slider controls styling
+            .bx-controls {
+                .bx-pager {
+                    bottom: -40px;
+
+                    .bx-pager-item {
+                        .bx-pager-link {
+                            background: rgba($primaryColor, 0.3);
+                            margin: 0 5px;
+                            width: 12px;
+                            height: 12px;
+                            border-radius: 50%;
+                            transition: $transitionFast;
+
+                            &:hover,
+                            &.active {
+                                background: $accentColor;
+                            }
+                        }
+                    }
+                }
+
+                .bx-prev,
+                .bx-next {
+                    background-color: $primaryColor;
+                    border-radius: $radiusSm;
+                    opacity: 0.8;
+                    transition: $transitionFast;
+
+                    &:hover {
+                        background-color: $accentColor;
+                        opacity: 1;
+                    }
+                }
+            }
+        }
+    }
+}

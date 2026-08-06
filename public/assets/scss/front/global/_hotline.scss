@@ -1,0 +1,215 @@
+// ============================================
+// HOTLINE & FLOATING CTAs - Modern Design
+// ============================================
+
+.td-scroll-up {
+    cursor: pointer;
+    position: fixed;
+    bottom: 30px;
+    right: 25px;
+    width: 45px;
+    height: 45px;
+    background: $gradientAccent;
+    z-index: 100;
+    border-radius: 50%;
+    box-shadow: $shadowLg;
+    transition: $transitionFast;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: $shadowXl;
+    }
+
+    @media only screen and (max-width: 767.98px) {
+        bottom: 20px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+    }
+
+    i {
+        position: relative;
+        color: $white;
+        font-size: 18px;
+        display: block;
+        text-align: center;
+        top: 0;
+        width: auto;
+    }
+}
+
+
+.hotline {
+    position: fixed;
+    bottom: 90px;
+    right: 25px;
+    text-align: center;
+    background: $white;
+    color: $white;
+    z-index: 100;
+    font-size: 20px;
+    text-transform: uppercase;
+    padding: 0px;
+    font-weight: bold;
+    border-radius: $radiusXl;
+    box-shadow: $shadowLg;
+
+    @media only screen and (max-width: 767.98px) {
+        right: 10px;
+        bottom: 75px;
+    }
+
+    .inner > a {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 18px;
+        font-weight: 700;
+        color: $primaryColor;
+        background-size: 22px;
+        position: relative;
+        border: 2px solid $accentColor;
+        border-radius: $radiusXl;
+        padding: 8px 20px 8px 50px;
+        min-height: 48px;
+        box-sizing: border-box;
+        transition: $transitionFast;
+
+        &:hover {
+            background-color: rgba(232, 93, 4, 0.05);
+            transform: translateY(-2px);
+            box-shadow: $shadowMd;
+        }
+
+        .phonering-alo-ph-img-circle {
+            width: 22px;
+            height: 22px;
+            top: calc(50% - 11px);
+            left: 15px;
+            position: absolute;
+            background: url(../../../images/icon-phone.png) no-repeat 0px center;
+            -webkit-animation: phonering-alo-circle-img-anim 1s infinite ease-in-out;
+            animation: phonering-alo-circle-img-anim 1s infinite ease-in-out;
+            -webkit-transform-origin: 50% 50%;
+            -ms-transform-origin: 50% 50%;
+            transform-origin: 50% 50%;
+            background-size: 22px;
+        }
+    }
+}
+
+@-webkit-keyframes phonering-alo-circle-anim {
+    0% {
+        -webkit-transform:rotate(0) scale(.5) skew(1deg);
+        -webkit-opacity:.1
+    }
+
+    30% {
+        -webkit-transform:rotate(0) scale(.7) skew(1deg);
+        -webkit-opacity:.5
+    }
+
+    100% {
+        -webkit-transform:rotate(0) scale(1) skew(1deg);
+        -webkit-opacity:.1
+    }
+}
+
+@-webkit-keyframes phonering-alo-circle-fill-anim {
+    0% {
+        -webkit-transform:rotate(0) scale(.7) skew(1deg);
+        opacity:.2
+    }
+
+    50% {
+        -webkit-transform:rotate(0) scale(1) skew(1deg);
+        opacity:.2
+    }
+
+    100% {
+        -webkit-transform:rotate(0) scale(.7) skew(1deg);
+        opacity:.2
+    }
+}
+
+@-webkit-keyframes phonering-alo-circle-img-anim {
+    0% {
+        -webkit-transform:rotate(0) scale(1) skew(1deg)
+    }
+
+    10% {
+        -webkit-transform:rotate(-25deg) scale(1) skew(1deg)
+    }
+
+    20% {
+        -webkit-transform:rotate(25deg) scale(1) skew(1deg)
+    }
+
+    30% {
+        -webkit-transform:rotate(-25deg) scale(1) skew(1deg)
+    }
+
+    40% {
+        -webkit-transform:rotate(25deg) scale(1) skew(1deg)
+    }
+
+    50% {
+        -webkit-transform:rotate(0) scale(1) skew(1deg)
+    }
+
+    100% {
+        -webkit-transform:rotate(0) scale(1) skew(1deg)
+    }
+}
+
+.giuseart-pc-contact-bar {
+    right: 25px;
+    bottom: 45%;
+    position: fixed;
+    z-index: 100;
+    margin-bottom: 0;
+    padding-left: 0;
+
+    @media only screen and (max-width: 767.98px) {
+        right: 10px;
+    }
+
+    li {
+        width: 48px;
+        height: 48px;
+        overflow: hidden;
+        margin-bottom: 16px;
+        list-style: none;
+        border-radius: 50%;
+        box-shadow: $shadowMd;
+        transition: $transitionFast;
+
+        &:hover {
+            transform: translateX(-5px) scale(1.1);
+            box-shadow: $shadowLg;
+        }
+    }
+
+    li a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+    }
+
+    li.facebook {
+        background: url(../../../images/fb.png);
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+
+    li.zalo {
+        background: url(../../../images/zl.png);
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+}

@@ -1,0 +1,87 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block body_id 'admin_redirect_index' %}
+
+{% block main %}
+    <div class="content mt-3">
+        <div class="animated fadeIn">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <strong class="card-title">Redirects</strong>
+                            <div>
+                                <a href="{{ path('admin_redirect_new') }}" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Add New</a>
+                                <a href="{{ path('admin_redirect_export_csv') }}" class="btn btn-success btn-sm"><i class="fa fa-download"></i> Export CSV</a>
+                                <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#importCsvModal"><i class="fa fa-upload"></i> Import CSV</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <table id="bootstrap-data-table" class="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Source</th>
+                                        <th>Destination</th>
+                                        <th>Type</th>
+                                        <th>Status Code</th>
+                                        <th>Active</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in objects %}
+                                    <tr>
+                                        <td>{{ row.getSourceUrl() }}</td>
+                                        <td>{{ row.getDestinationUrl() }}</td>
+                                        <td>{{ row.getMatchType() }}</td>
+                                        <td>{{ row.getStatusCode() }}</td>
+                                        <td>
+                                            <span class="badge {{ row.getIsActive() ? 'badge-success' : 'badge-secondary' }}">
+                                                {{ row.getIsActive() ? 'Yes' : 'No' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="item-actions">
+                                                <a href="{{ path('admin_redirect_edit', {id: row.id}) }}" class="btn-sm text-primary">
+                                                    <i class="fa fa-edit" aria-hidden="true"></i>
+                                                </a>
+                                                {{ include('admin/redirect/_delete_form.html.twig', {object: row}, with_context = false) }}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import CSV Modal -->
+    <div class="modal fade" id="importCsvModal" tabindex="-1" role="dialog" aria-labelledby="importCsvModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <form action="{{ path('admin_redirect_import_csv') }}" method="POST" enctype="multipart/form-data">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="importCsvModalLabel">Import CSV</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <div class="form-group">
+                    <label>Select CSV File</label>
+                    <input type="file" name="csv_file" class="form-control-file" required accept=".csv,.txt">
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Import</button>
+              </div>
+            </div>
+        </form>
+      </div>
+    </div>
+{% endblock %}

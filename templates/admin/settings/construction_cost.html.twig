@@ -1,0 +1,286 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}Cài đặt Đơn giá Xây dựng{% endblock %}
+
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <div class="col-sm-4">
+            <div class="page-header float-left">
+                <div class="page-title">
+                    <h1>Đơn giá xây dựng</h1>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-8">
+            <div class="page-header float-right">
+                <div class="page-title">
+                    <ol class="breadcrumb text-right">
+                        <li><a href="{{ path('admin_dashboard_index') }}">Dashboard</a></li>
+                        <li><a href="{{ path('admin_settings_global') }}">Cài đặt</a></li>
+                        <li class="active">Đơn giá xây dựng</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block main %}
+    <div class="content mt-3">
+        <div class="animated fadeIn">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <strong>Cài đặt Hệ số & Đơn giá Dự toán</strong>
+                        </div>
+                        <div class="card-body card-block">
+                            {{ form_start(form, {'attr': {'class': 'form-horizontal'}}) }}
+                            
+                            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="base-price-tab" data-toggle="tab" href="#base-price" role="tab" aria-controls="base-price" aria-selected="true">Đơn giá gốc</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="coefficient-tab" data-toggle="tab" href="#coefficient" role="tab" aria-controls="coefficient" aria-selected="false">Hệ số Móng - Mái</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="additional-tab" data-toggle="tab" href="#additional" role="tab" aria-controls="additional" aria-selected="false">Hạng mục phụ trợ</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="surcharge-tab" data-toggle="tab" href="#surcharge" role="tab" aria-controls="surcharge" aria-selected="false">Phụ phí</a>
+                                </li>
+                            </ul>
+                            
+                            <div class="tab-content mt-4" id="myTabContent">
+                                <!-- TAB 1: ĐƠN GIÁ GỐC -->
+                                <div class="tab-pane fade show active" id="base-price" role="tabpanel" aria-labelledby="base-price-tab">
+                                    <div class="alert alert-info">
+                                        Đơn giá chuẩn áp dụng cho nhà có tổng diện tích sàn <strong>>= 60m²</strong>.
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h5 class="mb-3">Phần thô (VNĐ/m²)</h5>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_nha_pho_phan_tho, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_nha_pho_phan_tho) }}</div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_biet_thu_phan_tho, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_biet_thu_phan_tho) }}</div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_nha_cap4_phan_tho, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_nha_cap4_phan_tho) }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h5 class="mb-3">Trọn gói (VNĐ/m²)</h5>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_nha_pho_tron_goi, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_nha_pho_tron_goi) }}</div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_biet_thu_tron_goi, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_biet_thu_tron_goi) }}</div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_nha_cap4_tron_goi, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_nha_cap4_tron_goi) }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- TAB 2: HỆ SỐ MÓNG - MÁI -->
+                                <div class="tab-pane fade" id="coefficient" role="tabpanel" aria-labelledby="coefficient-tab">
+                                    <div class="alert alert-secondary">
+                                        Nhập hệ số tính diện tích. Ví dụ: 50% thì nhập <code>0.5</code>, 100% nhập <code>1.0</code>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h5 class="mb-3">Phần móng</h5>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_mong_don_ratio, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_mong_don_ratio) }}</div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_mong_bang_ratio, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_mong_bang_ratio) }}</div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_mong_coc_ratio, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_mong_coc_ratio) }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h5 class="mb-3">Phần mái</h5>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_mai_ton_ratio, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_mai_ton_ratio) }}</div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_mai_btct_ratio, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_mai_btct_ratio) }}</div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_mai_ngoi_xago_ratio, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_mai_ngoi_xago_ratio) }}</div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_mai_ngoi_btct_ratio, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_mai_ngoi_btct_ratio) }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- TAB 3: HẠNG MỤC PHỤ TRỢ -->
+                                <div class="tab-pane fade" id="additional" role="tabpanel" aria-labelledby="additional-tab">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h5 class="mb-3">Phần nổi</h5>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_lung_ratio, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_lung_ratio) }}</div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_tum_ratio, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_tum_ratio) }}</div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_san_thuong_ratio, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_san_thuong_ratio) }}</div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_san_thuong_mai_ratio, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_san_thuong_mai_ratio) }}</div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_ban_cong_area, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_ban_cong_area) }}</div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_san_vuon_ratio, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_san_vuon_ratio) }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h5 class="mb-3">Tầng hầm (Độ sâu)</h5>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_ham_1_0_1_2_ratio, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_ham_1_0_1_2_ratio) }}</div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_ham_1_2_1_5_ratio, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_ham_1_2_1_5_ratio) }}</div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_ham_1_5_1_7_ratio, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_ham_1_5_1_7_ratio) }}</div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_ham_1_7_2_0_ratio, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_ham_1_7_2_0_ratio) }}</div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_ham_2_0_2_5_ratio, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_ham_2_0_2_5_ratio) }}</div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_ham_2_5_3_0_ratio, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_ham_2_5_3_0_ratio) }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- TAB 4: PHỤ PHÍ CHUNG -->
+                                <div class="tab-pane fade" id="surcharge" role="tabpanel" aria-labelledby="surcharge-tab">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h5 class="mb-3">Phụ phí diện tích nhỏ</h5>
+                                            <div class="alert alert-warning">
+                                                Khi diện tích sàn nhỏ hơn ngưỡng, đơn giá gốc sẽ được tăng thêm % phụ phí.
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_small_area_threshold, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">
+                                                    <div class="input-group">
+                                                        {{ form_widget(form.cost_small_area_threshold) }}
+                                                        <div class="input-group-addon">m²</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_small_area_surcharge, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">
+                                                    <div class="input-group">
+                                                        {{ form_widget(form.cost_small_area_surcharge) }}
+                                                        <div class="input-group-addon">%</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <h5 class="mb-3 mt-4">Hệ số mức đầu tư</h5>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_level_tb_kha_ratio, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_level_tb_kha_ratio) }}</div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_level_kha_plus_ratio, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">{{ form_widget(form.cost_level_kha_plus_ratio) }}</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <h5 class="mb-3">Điều kiện thi công</h5>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_hem_3_5m_surcharge, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">
+                                                    <div class="input-group">
+                                                        {{ form_widget(form.cost_hem_3_5m_surcharge) }}
+                                                        <div class="input-group-addon">%</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_hem_nho_3m_surcharge, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">
+                                                    <div class="input-group">
+                                                        {{ form_widget(form.cost_hem_nho_3m_surcharge) }}
+                                                        <div class="input-group-addon">%</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row form-group">
+                                                <div class="col col-md-5">{{ form_label(form.cost_2_mat_tien_surcharge, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                                <div class="col-12 col-md-7">
+                                                    <div class="input-group">
+                                                        {{ form_widget(form.cost_2_mat_tien_surcharge) }}
+                                                        <div class="input-group-addon">%</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                {{ form_rest(form) }}
+                            </div>
+                            
+                            <div class="card-footer text-right mt-3">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fa fa-dot-circle-o"></i> Lưu cấu hình
+                                </button>
+                            </div>
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

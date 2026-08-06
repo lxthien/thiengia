@@ -1,0 +1,36 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block body_id 'admin_post_new' %}
+
+{% block body_class 'admin_new new' %}
+
+{% block main %}
+	<div class="content mt-3">
+		<div class="animated fadeIn">
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="card">
+						<div class="card-header">
+							<strong class="card-title">{{ 'title.newscategory_new'|trans }}</strong>
+						</div>
+						<div class="card-body">
+							<div id="pay-invoice">
+								<div class="card-body">
+									{{ include('admin/newscategory/_form.html.twig', {
+										form: form,
+										button_label: 'label.create_newscategory'|trans,
+										include_back_to_home_link: true,
+									}, with_context = false) }}
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- .card -->
+				</div>
+				<!--/.col-->
+			</div>
+		</div>
+		<!-- .animated -->
+	</div>
+	<!-- .content -->
+{% endblock %}

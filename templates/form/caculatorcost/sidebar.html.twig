@@ -1,0 +1,71 @@
+<div class="ka-sidebar-widget ka-calc-sidebar">
+    <div class="ka-widget-header">
+        <div class="ka-header-icon">
+            <i class="fas fa-calculator"></i>
+        </div>
+        <span>Dự Toán Chi Phí</span>
+        <div class="ka-header-stripe"></div>
+    </div>
+    <div class="ka-widget-body">
+        {{ form_start(form, {'attr': {'class': 'ka-sidebar-form'}}) }}
+        <div class="ka-form-row">
+            <div class="ka-form-group">
+                {{ form_label(form.type) }}
+                {{ form_widget(form.type) }}
+            </div>
+        </div>
+        <div class="ka-form-row">
+            <div class="ka-form-group">
+                {{ form_label(form.method) }}
+                {{ form_widget(form.method) }}
+            </div>
+        </div>
+        <div class="ka-form-row">
+            <div class="ka-form-group">
+                {{ form_label(form.muc_dau_tu) }}
+                {{ form_widget(form.muc_dau_tu) }}
+            </div>
+        </div>
+        <div class="ka-form-row ka-flex-row">
+            <div class="ka-form-group ka-col-6">
+                {{ form_label(form.wide) }}
+                {{ form_widget(form.wide) }}
+            </div>
+            <div class="ka-form-group ka-col-6">
+                {{ form_label(form.long) }}
+                {{ form_widget(form.long) }}
+            </div>
+        </div>
+        <div class="ka-form-row ka-flex-row">
+            <div class="ka-form-group ka-col-6">
+                {{ form_label(form.floor) }}
+                {{ form_widget(form.floor) }}
+            </div>
+            <div class="ka-form-group ka-col-6">
+                {{ form_label(form.mong) }}
+                {{ form_widget(form.mong) }}
+            </div>
+        </div>
+        <div class="ka-form-row">
+            <div class="ka-form-group">
+                {{ form_label(form.mai) }}
+                {{ form_widget(form.mai) }}
+            </div>
+        </div>
+        <div class="ka-form-row" style="display:none;">
+            {{ form_widget(form.mat_tien) }}
+            {{ form_widget(form.hem) }}
+            {{ form_widget(form.lung) }}
+            {{ form_widget(form.tum) }}
+            {{ form_widget(form.san_thuong) }}
+            {{ form_widget(form.ban_cong) }}
+            {{ form_widget(form.tang_ham) }}
+            {{ form_widget(form.san_vuon) }}
+        </div>
+        <div class="ka-form-actions">
+            {{ form_widget(form.caculator, {'attr': {'class': 'ka-btn-calc'}}) }}
+            {{ form_widget(form.reset, {'attr': {'class': 'ka-btn-reset'}}) }}
+        </div>
+        {{ form_end(form) }}
+    </div>
+</div>

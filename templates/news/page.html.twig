@@ -1,0 +1,85 @@
+{% extends 'layout.html.twig' %}
+
+{% block stylesheets %}
+	<link href="{{ absolute_url(asset('build/css/news.css')) }}" rel="preload stylesheet" as="style" onload="this.rel='stylesheet'">
+	<noscript><link rel="stylesheet" href="{{ absolute_url(asset('build/css/news.css')) }}"></noscript>
+{% endblock %}
+
+{% block title %}
+	{{ post.getPageTitle() is not null ? post.getPageTitle() : post.getTitle() }}
+{% endblock %}
+{% block description %}
+	{{ post.getPageDescription() is not null ? post.getPageDescription() : post.getDescription() }}
+{% endblock %}
+{% block keyword %}
+	{{ post.getPageKeyword() }}
+{% endblock %}
+
+{% block structuredOpenGraph %}
+	<meta property="og:type" content="article"/>
+	<meta property="og:title" content="{{ post.getPageTitle() is not null ? post.getPageTitle() : post.getTitle() }}"/>
+	<meta property="og:description" content="{{ post.getPageDescription() is not null ? post.getPageDescription() : post.getDescription() }}"/>
+	<meta property="article:author" content="{{ post.getAuthor().getName() }}"/>
+	<meta property="article:published_time" content="{{ post.getCreatedAt()|date("Y-m-d h:m:s") ~ "+07:00" }}"/>
+	<meta property="article:modified_time" content="{{ post.getUpdatedAt()|date("Y-m-d h:m:s") ~ "+07:00" }}"/>
+	{% set imagePathFilter = (vich_uploader_asset(post, 'imageFile') ?: absolute_url(asset('assets/images/no-image.png')))|imagine_filter('news_share_1200_630') %}
+	<meta property="og:image" content="{{ absolute_url(imagePathFilter) }}"/>
+	<meta property="og:image:alt" content="{{ post.getTitle() }}"/>
+	<meta property="og:image:width" content="1200"/>
+	<meta property="og:image:height" content="630"/>
+{% endblock %}
+
+{% block blogPosting %}
+	{% if post.getSchemaMarkup() %}
+		{{ post.getSchemaMarkup()|raw }}
+	{% endif %}
+{% endblock %}
+
+{% block body %}
+	<div class="container page ka-page-detail">
+		<div class="row">
+			<div
+				class="col-12 col-md-12 col-lg-9 ka-content-column">
+				{# breadcrumbs #}
+				{{ include('news/components/breadcrumbs.html.twig') }}
+
+				<article id="post-{{ post.getId() }}" class="ka-article-wrapper">
+					<h1 class="ka-article-title">{{ post.getTitle() }}</h1>
+					<p class="ka-article-meta">Cập nhật ngày:
+						{{ post.getUpdatedAt()|date('d/m/Y') }}
+						bởi
+						<a href="{{ path('dynamic_post_page', {'slug': 'nguyenduytuan'}) }}" target="_blank" class="last-modified-author">Nguyễn Duy Tuấn</a>
+					</p>
+
+					{% for message in app.flashes('error') %}
+						<div class="alert alert-danger" role="alert">
+							{{ message }}
+						</div>
+					{% endfor %}
+					{% for message in app.flashes('notice') %}
+						<div class="alert alert-success" role="alert">
+							{{ message }}
+						</div>
+					{% endfor %}
+
+					<div class="ka-article-body">
+						{% if pageBuilderBlocks is defined and pageBuilderBlocks is not empty %}
+							{{ include('page_builder/_blocks.html.twig', {blocks: pageBuilderBlocks, contactBlockForm: contactBlockForm|default(null)}) }}
+						{% else %}
+							{{ contentsLazy|raw }}
+						{% endif %}
+					</div>
+
+					<div class="ka-article-interactions">
+						{{ include('news/rating/rating.html.twig') }}
+					</div>
+					{{ include('news/components/author.html.twig') }}
+					{{ include('news/comments/list.html.twig') }}
+					{{ include('news/comments/form.html.twig') }}
+				</article>
+			</div>
+
+			{{ include('layout/sidebar.html.twig') }}
+		</div>
+	</div>
+{% endblock %}

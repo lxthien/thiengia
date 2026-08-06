@@ -1,0 +1,48 @@
+{% set filterType = (category is defined and category and category.getCardFormat != null) ? category.getCardFormat() : 'news_277_220' %}
+{% set isVerticalCard = filterType == 'news_277_350' %}
+{% set filterTypeMobile = isVerticalCard ? 'news_345_435' : 'news_345_250' %}
+
+{% set imagePath = (vich_uploader_asset(row, 'imageFile') ? vich_uploader_asset(row, 'imageFile') : asset('assets/images/no-image.png')) %}
+{% set imagePathFilter = (vich_uploader_asset(row, 'imageFile') ? vich_uploader_asset(row, 'imageFile') : asset('assets/images/no-image.png')) | imagine_filter(filterType) %}
+{% set imagePathFilterMobile = (vich_uploader_asset(row, 'imageFile') ? vich_uploader_asset(row, 'imageFile') : asset('assets/images/no-image.png')) | imagine_filter(filterTypeMobile) %}
+                        
+{% if convert_images.fileExists(imagePath) == false %}
+    {% set imagePath = imagePath | imagine_filter(filterType) %}
+    {% set imagePathMobile = imagePath | imagine_filter(filterTypeMobile) %}
+{% else %}
+    {% set imagePath = convert_images.webpConvert(imagePathFilter, '', true) %}
+    {% set imagePathMobile = convert_images.webpConvert(imagePathFilterMobile, '', true) %}
+{% endif %}
+
+<article class="col-xs-12 col-sm-4 col-md-3 ka-grid-item {{ loop.index == 4 ? 'd-none' : '' }}">
+    <div class="ka-card-wrapper {{ isVerticalCard ? 'ka-card-vertical' : '' }}">
+        <div class="ka-card-thumb">
+            <picture>
+                <!--[if IE 9]><video style="display: none"><![endif]-->
+                <source
+                    data-srcset="{{ imagePathMobile != false ? asset(imagePathMobile) : asset(imagePathFilterMobile) }}"
+                    media="(max-width: 800px)" />
+                <source
+                    data-srcset="{{ imagePath != false ? asset(imagePath) : asset(imagePathFilter) }}"
+                    media="(min-width: 801px)" />
+                <!--[if IE 9]></video><![endif]-->
+                <img
+                    src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+                    data-src="{{ imagePath != false ? asset(imagePath) : asset(imagePathFilter) }}"
+                    class="mr-3 img-thumbnail lazyload"
+                    alt="{{row.getTitle()}}"
+                    width="277"
+                    height="{{ isVerticalCard ? '350' : '220' }}" />
+            </picture>
+            <a title="{{ row.getTitle() }}" href="{{ path('dynamic_post_page', {'slug': row.getUrl() }) }}">
+                <i class="fa fa-link"></i>
+            </a>
+        </div>
+        <div class="ka-card-body">
+            <h3 class="mt-0 mb-1">
+                <a href="{{ path('dynamic_post_page', {'slug': row.getUrl() }) }}" title="{{ row.getTitle() }}">{{ row.getTitle() }}</a>
+            </h3>
+            <p>{{ row.getDescription()|slice(0, 105) }}</p>
+        </div>
+    </div>
+</article>

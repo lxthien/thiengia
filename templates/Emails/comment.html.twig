@@ -1,0 +1,10 @@
+<html>
+    <body>
+        <p>From: {{ name }}</p>
+        <p>Message Body: {{ body }}</p>
+        <p>This e-mail was sent from a comment form on [Xây Dựng Kim Anh]</p>
+        {% if gclid is defined and gclid is not empty %}
+        <p>Google Click ID (gclid): <strong>{{ gclid }}</strong></p>
+        {% endif %}
+    </body>
+</html>

@@ -1,0 +1,130 @@
+<aside class="col-lg-3 d-none hidden-xs hidden-sm" id="sidebar">
+	<div
+		class="sidebar">
+		{# Calculator Widget #}
+		<div class="ka-sidebar-widget ka-calc-widget">
+			{{ render(controller('App\\Controller\\NewsController::caculatorCostConstructionAction', {'type': 'sidebar'})) }}
+		</div>
+
+		{# === HOTLINE LIÊN HỆ === #}
+		<div class="ka-sidebar-widget ka-cta-block">
+			<div class="ka-cta-inner">
+				<div class="ka-cta-pattern"></div>
+				<div class="ka-cta-content">
+					<div class="ka-cta-icon-pulse">
+						<i class="fas fa-phone"></i>
+					</div>
+					<h3>TƯ VẤN MIỄN PHÍ</h3>
+					<p>Đội ngũ kỹ sư 24/7</p>
+					<a href="tel:{{ get_setting('contens_hotline_1')|replace({' ': '', '.': ''}) }}" class="ka-hotline-number">
+						<i class="fas fa-headset"></i>
+						<span>{{ get_setting('contens_hotline_1') }}</span>
+					</a>
+					<div class="ka-cta-divider">
+						<span>HOẶC</span>
+					</div>
+					<a href="{{ path('contact') }}" class="ka-btn-contact">
+						<i class="fas fa-envelope"></i>
+						GỬI YÊU CẦU BÁO GIÁ
+					</a>
+				</div>
+			</div>
+		</div>
+
+		{% if (post is not defined or post is empty or post.getTemplate() != '1_column') and category is defined and category is not empty and category.getId() != 1 %}
+
+			{# === DỊCH VỤ NỔI BẬT === #}
+			<div class="ka-sidebar-widget ka-services-block">
+				<div class="ka-widget-header">
+					<div class="ka-header-icon">
+						<i class="fas fa-hard-hat"></i>
+					</div>
+					<span>Dịch Vụ Xây Dựng</span>
+					<div class="ka-header-stripe"></div>
+				</div>
+				<div class="ka-widget-body">
+					<a href="{{ path('dynamic_post_page', {'slug': 'bao-gia-xay-nha-tron-goi'}) }}" class="ka-service-item ka-service-featured">
+						<div class="ka-service-icon-wrap">
+							<i class="fas fa-home"></i>
+							<span class="ka-icon-badge">★</span>
+						</div>
+						<div class="ka-service-content">
+							<h4>Xây Nhà Trọn Gói</h4>
+							<p>Từ móng đến hoàn thiện</p>
+						</div>
+						<div class="ka-arrow">
+							<i class="fas fa-angle-double-right"></i>
+						</div>
+					</a>
+					<a href="{{ path('dynamic_post_page', {'slug': 'bao-gia-xay-nha-phan-tho'}) }}" class="ka-service-item">
+						<div class="ka-service-icon-wrap">
+							<i class="fas fa-building"></i>
+						</div>
+						<div class="ka-service-content">
+							<h4>Xây Nhà Phần Thô</h4>
+							<p>Vật tư & Nhân công</p>
+						</div>
+						<div class="ka-arrow">
+							<i class="fas fa-angle-double-right"></i>
+						</div>
+					</a>
+					<a href="{{ path('dynamic_post_page', {'slug': 'bao-gia-thiet-ke-kien-truc'}) }}" class="ka-service-item">
+						<div class="ka-service-icon-wrap">
+							<i class="fas fa-drafting-compass"></i>
+						</div>
+						<div class="ka-service-content">
+							<h4>Thiết Kế Kiến Trúc</h4>
+							<p>Bản vẽ 3D chuyên nghiệp</p>
+						</div>
+						<div class="ka-arrow">
+							<i class="fas fa-angle-double-right"></i>
+						</div>
+					</a>
+					{# <a href="https://kientruckimanh.com/sua-nha-tron-goi" class="ka-service-item">
+										                        <div class="ka-service-icon-wrap">
+										                            <i class="fas fa-tools"></i>
+										                        </div>
+										                        <div class="ka-service-content">
+										                            <h4>Sửa Nhà Trọn Gói</h4>
+										                            <p>Cải tạo - Nâng cấp</p>
+										                        </div>
+										                        <div class="ka-arrow"><i class="fas fa-angle-double-right"></i></div>
+										                    </a> #}
+					{# <a href="https://www.xaydungkimanh.com/kien-truc/thiet-ke-noi-that" class="ka-service-item">
+										                        <div class="ka-service-icon-wrap">
+										                            <i class="fas fa-couch"></i>
+										                        </div>
+										                        <div class="ka-service-content">
+										                            <h4>Thiết Kế Nội Thất</h4>
+										                            <p>Sang trọng - Tiện nghi</p>
+										                        </div>
+										                        <div class="ka-arrow"><i class="fas fa-angle-double-right"></i></div>
+										                    </a> #}
+				</div>
+			</div>
+
+			{# === KHÁCH HÀNG ĐÁNH GIÁ === #}
+		{# <div class="ka-sidebar-widget ka-reviews-block">
+				                {{ include('news/prices.html.twig') }}
+				            </div> #}
+
+			{# === TIN CÙNG CHUYÊN MỤC === #}
+			{# {% if category.getShowPostRelated() %}
+						                <div class="ka-sidebar-widget ka-posts-block">
+						                    {{ render(controller('App:News:listNewsByCategorySidebar', {'categoryId': category.getId(), 'title': 'Tin cùng chuyên mục', 'postNumber': 25})) }}
+						                </div>
+						            {% endif %} #}
+
+			{# === CÁC MẪU NHÀ ĐẸP === #}
+			{# <div class="ka-sidebar-widget ka-posts-block">
+						                {{ render(controller('App:News:listNewsByCategorySidebar', {'categoryId': 2, 'title': 'Các mẫu nhà đẹp'})) }}
+						            </div> #}
+
+			{# === DỰ ÁN TIÊU BIỂU === #}
+			{# <div class="ka-sidebar-widget ka-posts-block">
+						                {{ render(controller('App:News:listNewsByCategorySidebar', {'categoryId': 8, 'title': 'Dự án tiêu biểu'})) }}
+						            </div> #}
+
+		{% endif %}
+	</div>
+</aside>

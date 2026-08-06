@@ -1,0 +1,204 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block body_id 'admin_content_decay_index' %}
+
+{% block main %}
+    <div class="content mt-3 content-decay-dashboard">
+        <div class="animated fadeIn">
+            <div class="row content-decay-summary">
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card dashboard-mini-card">
+                        <div class="card-body">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-alert text-danger border-danger"></i></div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Ưu tiên cao</div>
+                                    <div class="stat-digit">{{ summary.highRisk }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card dashboard-mini-card">
+                        <div class="card-body">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-pencil text-warning border-warning"></i></div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Nên cập nhật</div>
+                                    <div class="stat-digit">{{ summary.needsRefresh }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card dashboard-mini-card">
+                        <div class="card-body">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-dashboard text-primary border-primary"></i></div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Điểm decay TB</div>
+                                    <div class="stat-digit">{{ summary.averageDecayScore }}/100</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card dashboard-mini-card">
+                        <div class="card-body">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-files text-success border-success"></i></div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Bài trong report</div>
+                                    <div class="stat-digit">{{ summary.total }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <strong class="card-title">Content decay report</strong>
+                        </div>
+                        <div class="card-body">
+                            <form class="admin-list-filters content-decay-filters" method="get" action="{{ path('admin_content_decay_index') }}">
+                                <div class="content-decay-filter-grid">
+                                    <div class="content-decay-filter-search">
+                                        <input type="text" name="q" value="{{ filters.q }}" class="form-control" placeholder="Tìm theo tiêu đề, URL, mô tả">
+                                    </div>
+                                    <div class="content-decay-filter-select">
+                                        <select name="category" class="form-control">
+                                            <option value="">Tất cả danh mục</option>
+                                            {% for category in categories %}
+                                                <option value="{{ category.id }}" {{ filters.category == category.id ? 'selected' : '' }}>{{ category.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="content-decay-filter-select">
+                                        <select name="age" class="form-control">
+                                            <option value="0" {{ filters.age == 0 ? 'selected' : '' }}>Mọi thời gian</option>
+                                            <option value="90" {{ filters.age == 90 ? 'selected' : '' }}>Cũ hơn 90 ngày</option>
+                                            <option value="180" {{ filters.age == 180 ? 'selected' : '' }}>Cũ hơn 180 ngày</option>
+                                            <option value="365" {{ filters.age == 365 ? 'selected' : '' }}>Cũ hơn 365 ngày</option>
+                                        </select>
+                                    </div>
+                                    <div class="content-decay-filter-select">
+                                        <select name="seo" class="form-control">
+                                            <option value="0" {{ filters.seo == 0 ? 'selected' : '' }}>Mọi SEO score</option>
+                                            <option value="60" {{ filters.seo == 60 ? 'selected' : '' }}>SEO <= 60</option>
+                                            <option value="80" {{ filters.seo == 80 ? 'selected' : '' }}>SEO <= 80</option>
+                                            <option value="90" {{ filters.seo == 90 ? 'selected' : '' }}>SEO <= 90</option>
+                                        </select>
+                                    </div>
+                                    <div class="content-decay-filter-select">
+                                        <select name="sort" class="form-control">
+                                            <option value="decay_desc" {{ filters.sort == 'decay_desc' ? 'selected' : '' }}>Decay cao nhất</option>
+                                            <option value="updated_asc" {{ filters.sort == 'updated_asc' ? 'selected' : '' }}>Cập nhật cũ nhất</option>
+                                            <option value="age_desc" {{ filters.sort == 'age_desc' ? 'selected' : '' }}>Tuổi bài cao nhất</option>
+                                            <option value="views_asc" {{ filters.sort == 'views_asc' ? 'selected' : '' }}>View thấp nhất</option>
+                                            <option value="seo_asc" {{ filters.sort == 'seo_asc' ? 'selected' : '' }}>SEO thấp nhất</option>
+                                        </select>
+                                    </div>
+                                    <div class="content-decay-filter-index">
+                                        <select name="indexable" class="form-control">
+                                            <option value="1" {{ filters.indexable == '1' ? 'selected' : '' }}>Index</option>
+                                            <option value="0" {{ filters.indexable == '0' ? 'selected' : '' }}>Tất cả</option>
+                                        </select>
+                                    </div>
+                                    <div class="admin-filter-actions">
+                                        <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Lọc</button>
+                                        <a href="{{ path('admin_content_decay_index') }}" class="btn btn-link">Xóa lọc</a>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered admin-list-table content-decay-table mt-3">
+                                    <thead>
+                                        <tr>
+                                            <th class="content-decay-title-col">Bài viết</th>
+                                            <th class="text-center">Decay</th>
+                                            <th class="text-center">SEO Basic</th>
+                                            <th class="text-center">Views</th>
+                                            <th class="text-center">Cập nhật</th>
+                                            <th>Vấn đề</th>
+                                            <th class="text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in pagination %}
+                                            {% set post = item.post %}
+                                            {% set decayClass = item.decayScore >= 70 ? 'danger' : (item.decayScore >= 40 ? 'warning' : (item.decayScore >= 20 ? 'primary' : 'success')) %}
+                                            {% set seoClass = item.seo.score >= 90 ? 'success' : (item.seo.score >= 80 ? 'primary' : (item.seo.score >= 60 ? 'warning' : 'danger')) %}
+                                            <tr>
+                                                <td>
+                                                    <a href="{{ path('admin_news_edit', {id: post.id}) }}">{{ post.title }}</a>
+                                                    <small class="d-block text-muted">
+                                                        <a href="{{ path('news_show', {slug: post.url}) }}" target="_blank">{{ post.url }}.html</a>
+                                                    </small>
+                                                    <small class="d-block text-muted">
+                                                        {% for category in post.category %}
+                                                            {{ category.name }}{{ loop.last ? '' : ', ' }}
+                                                        {% else %}
+                                                            Chưa có danh mục
+                                                        {% endfor %}
+                                                    </small>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge badge-{{ decayClass }}">{{ item.decayScore }}/100</span>
+                                                    <small class="d-block text-muted">{{ item.decayStatus }}</small>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge badge-{{ seoClass }}">{{ item.seo.score }}/100</span>
+                                                    <small class="d-block text-muted">{{ item.seo.status }}</small>
+                                                </td>
+                                                <td class="text-center">{{ item.views|number_format(0, '.', ',') }}</td>
+                                                <td class="text-center">
+                                                    {{ post.updatedAt|localizeddate('medium', 'none', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY') }}
+                                                    <small class="d-block text-muted">{{ item.ageDays }} ngày</small>
+                                                </td>
+                                                <td>
+                                                    {% for reason in item.reasons|slice(0, 4) %}
+                                                        <span class="badge badge-danger" style="margin-bottom: 2px;">{{ reason }}</span>
+                                                    {% endfor %}
+                                                    {% for recommendation in item.recommendations|slice(0, 3) %}
+                                                        <span class="badge badge-warning" style="margin-bottom: 2px;">{{ recommendation }}</span>
+                                                    {% endfor %}
+                                                </td>
+                                                <td class="text-center">
+                                                    <a href="{{ path('admin_news_edit', {id: post.id}) }}" class="btn-sm" title="Edit">
+                                                        <i class="fa fa-edit" aria-hidden="true"></i>
+                                                    </a>
+                                                    <a href="{{ path('news_show', {slug: post.url}) }}" target="_blank" class="btn-sm" title="Preview">
+                                                        <i class="fa fa-external-link" aria-hidden="true"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="7" class="text-center text-muted">Không có bài nào khớp bộ lọc decay hiện tại.</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="admin-pagination mt-3">
+                                {{ knp_pagination_render(pagination, '@KnpPaginator/Pagination/twitter_bootstrap_v3_pagination.html.twig') }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

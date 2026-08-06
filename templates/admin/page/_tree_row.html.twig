@@ -1,0 +1,64 @@
+<tr>
+    <td>
+        <div class="images-container">
+            <img src="{{ (vich_uploader_asset(page, 'imageFile') ? vich_uploader_asset(page, 'imageFile') : asset('assets/images/no-image.png')) | imagine_filter('admin_thumb') }}" alt="{{ page.getTitle() }}" />
+        </div>
+    </td>
+    <td>
+        <span>
+            {% if level > 0 %}
+                <span class="text-muted">
+                    {% for i in 1..level %}------ {% endfor %}
+                </span>
+            {% endif %}
+            {% if page.getChildren().count() > 0 %}
+                <i class="fa fa-folder text-primary"></i>
+            {% else %}
+                <i class="fa fa-file-text text-gray"></i>
+            {% endif %}
+            <a class="btn-link" href="{{ path('admin_page_edit', {id: page.id}) }}">{{ page.getTitle() }}</a>
+
+            {% if page.getChildren().count() > 0 %}
+                <span class="badge badge-primary ml-1">Trang cha</span>
+            {% elseif page.getParent() %}
+                <span class="badge badge-info ml-1">Trang con</span>
+            {% else %}
+                <span class="badge badge-light ml-1">Độc lập</span>
+            {% endif %}
+
+            <small class="d-block text-muted" style="margin-left: {{ level > 0 ? (level * 28) : 0 }}px;">
+                URL: {{ page.getUrl() }}
+            </small>
+        </span>
+    </td>
+    <td>
+        <label class="switch switch-text switch-primary switch-pill mb-0">
+            <input
+                type="checkbox"
+                class="switch-input"
+                {{ page.getEnable() ? 'checked="true"' : '' }}
+                data-id="{{ page.getId() }}"
+                data-action="{{ path('admin_page_disable') }}"
+            >
+            <span data-on="On" data-off="Off" class="switch-label"></span>
+            <span class="switch-handle"></span>
+        </label>
+    </td>
+    <td>{{ page.getCreatedAt() | localizeddate('medium', 'none', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY') }}</td>
+    <td>{{ page.getUpdatedAt() | localizeddate('medium', 'none', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY') }}</td>
+    <td>
+        <div class="item-actions">
+            <a href="{{ path('admin_page_edit', {id: page.id}) }}" class="btn-sm">
+                <i class="fa fa-edit" aria-hidden="true"></i>
+            </a>
+            
+            {{ include('admin/page/_delete_form.html.twig', {news: page}, with_context = false) }}
+        </div>
+    </td>
+</tr>
+
+{% if render_children|default(true) %}
+    {% for child in page.getChildren() %}
+        {{ include('admin/page/_tree_row.html.twig', {'page': child, 'level': level + 1, 'render_children': true}, with_context = false) }}
+    {% endfor %}
+{% endif %}

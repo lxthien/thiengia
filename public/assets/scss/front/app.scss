@@ -1,0 +1,27 @@
+// setting the value of this variable to an empty data URL is the only working solution
+// to load the Bootswatch web fonts locally and avoid loading them from Google servers
+// see https://github.com/thomaspark/bootswatch/issues/55#issuecomment-298093182
+$web-font-path: 'data:text/css;base64,';
+
+@import "~bootswatch/flatly/variables";
+@import "global/bootstrap";
+
+@import '~jquery-bootstrap-scrolling-tabs/dist/jquery.scrolling-tabs.min.css';
+
+@import "global/fonts";
+@import "fontawesome/css/all.css";
+@import "global/color_variables";
+@import "global/base_elements";
+@import "global/error";
+@import "global/header";
+@import "global/menu";
+@import "global/footer";
+@import "global/hotline";
+
+.ka-page-detail {
+    margin-top: 40px;
+
+    @media only screen and (max-width: 768px) {
+        margin-top: 20px;
+    }
+}

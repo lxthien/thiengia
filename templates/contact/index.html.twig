@@ -1,0 +1,106 @@
+{% extends 'layout.html.twig' %}
+
+{% block stylesheets %}
+	<link href="{{ absolute_url(asset('build/css/contact.css')) }}" rel="preload stylesheet" as="style" onload="this.rel='stylesheet'">
+	<noscript><link rel="stylesheet" href="{{ absolute_url(asset('build/css/contact.css')) }}"></noscript>
+{% endblock %}
+
+{% block title %}
+	{% if post is not null %}
+		{{ post.getPageTitle() is not null ? post.getPageTitle() : post.getTitle() }}
+	{% else %}
+		{{ parent() }}
+	{% endif %}
+{% endblock %}
+{% block description %}
+	{% if post is not null %}
+		{{ post.getPageDescription() is not null ? post.getPageDescription() : post.getDescription() }}
+	{% else %}
+		{{ parent() }}
+	{% endif %}
+{% endblock %}
+{% block keyword %}
+	{% if post is not null %}
+		{{ post.getPageKeyword() }}
+	{% else %}
+		{{ parent() }}
+	{% endif %}
+{% endblock %}
+
+{% block body %}
+	<div class="container ka-contact-container ka-page-detail">
+		<div class="row">
+			<div class="col-xs-12 col-sm-12 col-md-9 ka-content-column ka-contact-main">
+				{{ include('news/components/breadcrumbs.html.twig') }}
+
+				<div class="ka-contact-info-block">
+					<h1 class="text-uppercase">{{ get_setting('contens_ten_day_du') }}</h1>
+					<ul>
+						<li>
+							<i class="fa fa-map-marker"></i>
+							<span>
+								<strong>VPGD:
+									{{ get_setting('contens_dia_chi') }}</strong>
+							</span>
+						</li>
+						<li>
+							<i class="fas fa-address-card"></i>
+							<span>
+								<strong>MST:
+									{{ get_setting('contens_mst') }}</strong>
+							</span>
+						</li>
+						<li>
+							<i class="fa fa-phone"></i>
+							<span>
+								<strong>
+									<a href="tel:{{ get_setting('contens_hotline_1')|replace({' ': '', '.': ''}) }}">{{ get_setting('contens_hotline_1') }}</a>
+									- KS .
+									{{ get_setting('contens_hotline_2') }}
+									–
+									{{ get_setting('contens_hotline_3') }}
+									- Mr Tuấn</a>
+							</strong>
+						</li>
+					</span>
+				</li>
+				<li>
+					<i class="fas fa-envelope"></i>
+					<span>
+						<strong>{{ get_setting('contens_email') }}</strong>
+					</span>
+				</li>
+				<li>
+					<i class="fab fa-internet-explorer"></i>
+					<span>
+						<strong>www.kientruckimanh.com</strong>
+					</span>
+				</li>
+			</ul>
+
+			<br>
+			<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3918.172689309072!2d106.62786421431773!3d10.874466660351096!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x317529fc088f21ef%3A0x83303dfe3b06e6c1!2zWMOCWSBE4buwTkcgS0lNIEFOSA!5e0!3m2!1sen!2s!4v1680400221718!5m2!1sen!2s" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+		</div>
+
+		{% for message in app.flashes('error') %}
+			<div class="alert alert-danger" role="alert">
+				{{ message }}
+			</div>
+		{% endfor %}
+		{% for message in app.flashes('notice') %}
+			<div class="alert alert-success" role="alert">
+				{{ message }}
+			</div>
+			<script>
+				window.dataLayer = window.dataLayer || [];
+window.dataLayer.push({'event': 'form_submit_baogia', 'form_location': window.location.pathname});
+			</script>
+		{% endfor %}
+
+		{{ form_start(form) }}
+		{{ form_widget(form) }}
+		{{ form_end(form) }}
+	</div>
+
+	{{ include('layout/sidebar.html.twig') }}
+</div></div>{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'layout.html.twig' %}
+
+{% block stylesheets %}
+	<link href="{{ absolute_url(asset('build/css/list.css')) }}" rel="preload stylesheet" as="style" onload="this.rel='stylesheet'">
+	<noscript><link rel="stylesheet" href="{{ absolute_url(asset('build/css/list.css')) }}"></noscript>
+{% endblock %}
+
+{% block title %}
+	{{ user.getName() ~ ' - Xây Dựng Kim Anh' ~ (pagination.currentPageNumber > 1 ? ' - Trang ' ~ pagination.currentPageNumber : '') }}
+{% endblock %}
+{% block description %}
+	{{ 'Danh sách các bài blog chuyên về lĩnh vực Xây Dựng, giúp bạn có thêm kỹ năng về xây dựng thành công.' ~ (pagination.currentPageNumber > 1 ? ' - Trang ' ~ pagination.currentPageNumber : '') }}
+{% endblock %}
+{% block keyword %}
+	{{ '' }}
+{% endblock %}
+
+{% block structuredOpenGraph %}
+	<meta property="og:type" content="object"/>
+	<meta property="og:title" content="{{ user.getName() ~ ' - Xây Dựng Kim Anh' ~ (pagination.currentPageNumber > 1 ? ' - Trang ' ~ pagination.currentPageNumber : '') }}"/>
+	<meta property="og:description" content="{{ 'Danh sách các bài blog chuyên về lĩnh vực Xây Dựng, giúp bạn có thêm kỹ năng về xây dựng thành công.' ~ (pagination.currentPageNumber > 1 ? ' - Trang ' ~ pagination.currentPageNumber : '') }}"/>
+	{% if pagination.currentPageNumber == 1 and pagination.pageCount > 1 %}
+		<link rel="next" href="{{ baseUrl ~ '/' ~ (pagination.currentPageNumber + 1) }}"/>
+	{% endif %}
+	{% if pagination.currentPageNumber > 1 and pagination.currentPageNumber < pagination.pageCount %}
+		{% if pagination.currentPageNumber - 1 == 1 %}
+			<link rel="prev" href="{{ baseUrl }}"/>
+		{% else %}
+			<link rel="prev" href="{{ baseUrl ~ '/' ~ (pagination.currentPageNumber - 1) }}"/>
+		{% endif %}
+		<link rel="next" href="{{ baseUrl ~ '/' ~ (pagination.currentPageNumber + 1) }}"/>
+	{% endif %}
+	{% if pagination.currentPageNumber == pagination.pageCount and pagination.pageCount > 1 %}
+		{% if pagination.currentPageNumber - 1 == 1 %}
+			<link rel="prev" href="{{ baseUrl }}"/>
+		{% else %}
+			<link rel="prev" href="{{ baseUrl ~ '/' ~ (pagination.currentPageNumber - 1) }}"/>
+		{% endif %}
+	{% endif %}
+{% endblock %}
+
+{% block robots %}
+	<meta name="robots" content="follow, noindex"/>
+{% endblock %}
+
+{% block body %}
+	{{ include('news/components/breadcrumbs.html.twig',
+        { type: 'category', title: user.getName(), description: 'Danh sách các bài blog chuyên về Xây Dựng, giúp bạn có thêm kỹ năng để xây dựng một cách thành công.' })
+    }}
+
+	<div class="container wrapper-container">
+		<div class="row ka-category-list">
+			<div
+				class="col-12 col-md-12 col-lg-12">
+				{# List item on this page #}
+				{% if pagination|length > 0  %}
+					{# Sort items #}
+					{% if get_setting('isShowSortOnCategory') %}
+						{{ include('news/components/sort.html.twig') }}
+					{% endif %}
+
+					<div class="ka-article-grid">
+						<div class="row">
+							{% for row in pagination %}
+								{{ include('news/components/itemsGrid.html.twig') }}
+							{% endfor %}
+						</div>
+					</div>
+
+					{# Pagination #}
+					{{ include('news/components/pagination.html.twig') }}
+				{% else %}
+					{{ include('news/components/noRecord.html.twig') }}
+				{% endif %}
+			</div>
+		</div>
+	</div>
+{% endblock %}

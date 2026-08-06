@@ -1,0 +1,175 @@
+{{ form_start(form, {attr: attr|default({})}) }}
+
+{% set _img = (form.vars.value and form.vars.value.images) ? form.vars.value.images : '' %}
+{% set _img_url = _img ? '/uploads/images/news/' ~ _img : '' %}
+{# _picker_url: only pre-populated when image was previously picked from Media Library.
+   Vich-uploaded images must NOT be sent as _media_picker_url or controller will call
+   setImages() every save, causing Vich/LiipImagine to clear the cache. #}
+{% set _picker_url = '' %}
+
+{# Render title, url, enable before image card #}
+{% for child in form %}
+    {% if child.vars.name in ['title', 'url', 'enable'] %}
+        {{ form_row(child) }}
+    {% endif %}
+{% endfor %}
+
+{# ── Image Manager Card ── #}
+<div class="image-manager-card"
+     data-media-picker-block
+     data-picker-id="newsPicker"
+     data-upload-path="/uploads/media/"
+     style="border:1px solid #e0e4ef;border-radius:6px;margin-bottom:20px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+
+    <div style="background:linear-gradient(135deg,#f7f9ff 0%,#eef1fb 100%);padding:10px 15px;border-bottom:1px solid #e0e4ef;display:flex;align-items:center;gap:8px;">
+        <i class="fa fa-image" style="color:#5b7aff;font-size:15px;"></i>
+        <strong style="font-size:13px;color:#3a3f5c;">Hình ảnh đại diện</strong>
+    </div>
+
+    <div style="padding:16px;">
+        <div class="row" style="margin:0;">
+
+            {# Left: Preview box #}
+            <div class="col-sm-4" style="padding-right:16px;">
+                <div style="border:2px dashed #d5d9ef;border-radius:6px;background:#f9faff;min-height:150px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+                    <img id="newsPicker_preview_img"
+                         src="{{ _img_url }}"
+                         alt="Preview"
+                         style="max-width:100%;max-height:190px;display:{{ _img_url ? 'block' : 'none' }};object-fit:cover;">
+                    <div id="newsPicker_placeholder"
+                         style="text-align:center;color:#b0b8d4;display:{{ _img_url ? 'none' : 'flex' }};flex-direction:column;align-items:center;gap:8px;padding:20px;">
+                        <i class="fa fa-image fa-3x"></i>
+                        <small style="font-size:11px;">Chưa có ảnh</small>
+                    </div>
+                    <button type="button"
+                            id="newsPicker_clear_btn"
+                            data-media-picker-clear data-picker-id="newsPicker"
+                            title="Bỏ chọn ảnh thư viện"
+                            style="position:absolute;top:5px;right:5px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;border:none;cursor:pointer;font-size:13px;line-height:22px;padding:0;display:{{ _img_url ? 'block' : 'none' }};">&times;</button>
+                </div>
+                {% if _img %}
+                    <p style="font-size:10px;color:#aaa;margin-top:5px;word-break:break-all;text-align:center;">{{ _img }}</p>
+                {% endif %}
+            </div>
+
+            {# Right: Options #}
+            <div class="col-sm-8" style="padding-left:8px;">
+
+                {# Option 1: Vich upload #}
+                <div style="background:#fff8f0;border:1px solid #ffe0b0;border-radius:5px;padding:11px 14px;margin-bottom:12px;">
+                    <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#b07020;margin-bottom:6px;display:block;">
+                        <i class="fa fa-upload"></i> Upload ảnh mới
+                    </label>
+                    {{ form_widget(form.imageFile) }}
+                    {{ form_errors(form.imageFile) }}
+                    <small style="color:#aaa;font-size:11px;margin-top:4px;display:block;">Upload ảnh mới sẽ thay thế ảnh hiện tại.</small>
+                </div>
+
+                {# Divider #}
+                <div style="position:relative;text-align:center;margin:10px 0;">
+                    <span style="background:#fff;padding:0 10px;font-size:11px;color:#b0b8d4;position:relative;z-index:1;">── hoặc ──</span>
+                    <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:#e8eaf6;z-index:0;"></div>
+                </div>
+
+                {# Option 2: Media Library #}
+                <div style="background:#f7f9ff;border:1px solid #d5d9ef;border-radius:5px;padding:11px 14px;">
+                    <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#5b7aff;margin-bottom:8px;display:block;">
+                        <i class="fa fa-th-large"></i> Chọn từ Media Library
+                    </label>
+                    <div class="input-group">
+                        <input type="text" id="newsPicker_display" class="form-control input-sm" readonly
+                               value="{{ _img_url }}"
+                               placeholder="Chưa chọn ảnh từ thư viện..."
+                               style="font-size:12px;background:#fff;color:#555;">
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-default btn-sm"
+                                    data-media-picker-open data-picker-id="newsPicker"
+                                    style="background:#5b7aff;color:#fff;border-color:#5b7aff;white-space:nowrap;">
+                                <i class="fa fa-image"></i> Chọn
+                            </button>
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Hidden POST param — handled by Controller, outside Vich mapping.
+   Value is intentionally blank for Vich-uploaded images (prevent unnecessary setImages() calls). #}
+<input type="hidden" id="newsPicker_url_input" name="_media_picker_url"
+       value="{{ _picker_url }}" data-picker-id="newsPicker">
+
+{# Media Picker Modal #}
+<div class="modal fade" id="newsPickerModal" tabindex="-1" role="dialog"
+     data-picker-url="{{ path('admin_media_picker') }}"
+     data-picker-id="newsPicker"
+     aria-labelledby="newsPickerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-media-picker-close data-picker-id="newsPicker">
+                    <span>&times;</span>
+                </button>
+                <h4 class="modal-title" id="newsPickerModalLabel">
+                    <i class="fa fa-image"></i> Chọn ảnh từ thư viện
+                </h4>
+            </div>
+            <div class="modal-body" id="newsPicker_body">
+                <div class="text-center text-muted" style="padding:30px;">
+                    <i class="fa fa-spinner fa-spin fa-2x"></i>
+                    <p class="mt-2">Đang tải thư viện...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <span id="newsPicker_selName" class="text-muted pull-left" style="font-size:13px;line-height:34px;"></span>
+                <button type="button" class="btn btn-default" data-media-picker-close data-picker-id="newsPicker">Hủy</button>
+                <button type="button" class="btn btn-primary" id="newsPicker_confirm" disabled
+                        data-media-picker-confirm data-picker-id="newsPicker">
+                    <i class="fa fa-check"></i> Chọn ảnh này
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Remaining fields — skip title/url/enable/imageFile and submit buttons #}
+{% for child in form %}
+    {% if child.vars.name not in ['title', 'url', 'enable', 'imageFile', 'save', 'saveAndCreateNew'] %}
+        {% if child.vars.name == 'contents' %}
+            <div class="cms-block-editor-layout">
+                {{ include('admin/content_block/_toolbar.html.twig', {
+                    target_editor: child.vars.id,
+                    current_id: form.vars.value.id|default(0),
+                }, with_context = false) }}
+                <div class="cms-block-editor-layout__field">
+                    {{ form_row(child) }}
+                </div>
+            </div>
+        {% else %}
+            {{ form_row(child) }}
+        {% endif %}
+    {% endif %}
+{% endfor %}
+
+{% if form.save is defined %}
+    {{ form_widget(form.save, {label: button_label|default('label.create_post'|trans), attr: {class: button_css|default("btn btn-primary")}}) }}
+{% else %}
+    <button type="submit" class="{{ button_css|default("btn btn-primary") }}">
+        <i class="fa fa-save" aria-hidden="true"></i> {{ button_label|default('label.create_post'|trans) }}
+    </button>
+{% endif %}
+
+{% if form.saveAndCreateNew is defined %}
+    {{ form_widget(form.saveAndCreateNew, {label: 'label.save_and_create_new', attr: {class: button_css|default("btn btn-primary")}}) }}
+{% endif %}
+
+{{ form_rest(form) }}
+
+{% if include_back_to_home_link|default(false) %}
+    <a href="{{ path('admin_news_index') }}" class="btn btn-link">
+        <i class="fa fa-list-alt" aria-hidden="true"></i> {{ 'action.back_to_list'|trans }}
+    </a>
+{% endif %}
+{{ form_end(form) }}

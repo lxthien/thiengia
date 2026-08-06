@@ -1,0 +1,31 @@
+{% if category != NULL %}
+	{% if relatedNews|length > 0 %}
+		<aside class="ka-related-posts-section">
+			<h3 class="ka-related-title">Có thể bạn quan tâm</h3>
+			<div class="row">
+				{% for row in relatedNews %}
+					{% set imagePath = (vich_uploader_asset(row, 'imageFile') ? vich_uploader_asset(row, 'imageFile') : asset('assets/images/no-image.png')) %}
+					{% set imagePathFilter = (vich_uploader_asset(row, 'imageFile') ? vich_uploader_asset(row, 'imageFile') : asset('assets/images/no-image.png')) | imagine_filter('news_554_400') %}
+
+					{% if convert_images.fileExists(imagePath) == false %}
+						{% set imagePath = imagePath | imagine_filter('news_554_400') %}
+					{% else %}
+						{% set imagePath = convert_images.webpConvert(imagePathFilter, '', true) %}
+					{% endif %}
+
+					<div class="col-xs-12 col-sm-4 col-md-3 ka-related-item">
+						<a href="{{ path('dynamic_post_page', {'slug': row.getUrl() }) }}" class="ka-related-link">
+							<div class="ka-related-thumb">
+								<img src="{{ imagePath != false ? asset(imagePath) : asset(imagePathFilter) }}" alt="{{ row.getTitle() }}" loading="lazy" width="277" height="200" class="img-responsive">
+							</div>
+							<div class="ka-related-content">
+								<h4 class="ka-related-post-title">{{ row.getTitle() }}</h4>
+							</div>
+						</a>
+					</div>
+				{% endfor %}
+			</div>
+		</aside>
+	{% endif %}
+{% endif %}
+<div class="clearfix"></div>

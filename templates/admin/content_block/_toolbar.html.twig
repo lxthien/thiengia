@@ -1,0 +1,92 @@
+<div class="cms-block-toolbar"
+     data-cms-block-toolbar
+     data-target-editor="{{ target_editor }}"
+     data-related-search-url="{{ path('admin_content_block_related_search') }}"
+     data-current-id="{{ current_id|default(0) }}">
+    <div class="cms-block-toolbar__heading">
+        <strong>Content blocks</strong>
+        <span>Chèn vào vị trí con trỏ</span>
+    </div>
+    <div class="cms-block-toolbar__actions">
+        <button type="button" class="cms-block-tool" data-cms-block-open="hero_section" title="Chèn Hero Section"><i class="fa fa-home"></i><span>Hero Section</span></button>
+        <button type="button" class="cms-block-tool" data-cms-block-open="faq" title="Chèn FAQ"><i class="fa fa-question-circle"></i><span>FAQ</span></button>
+        <button type="button" class="cms-block-tool" data-cms-block-open="cta" title="Chèn CTA"><i class="fa fa-bullhorn"></i><span>CTA</span></button>
+        <button type="button" class="cms-block-tool" data-cms-block-open="pricing" title="Chèn bảng giá"><i class="fa fa-table"></i><span>Bảng giá</span></button>
+        <button type="button" class="cms-block-tool" data-cms-block-open="gallery" title="Chèn gallery"><i class="fa fa-photo"></i><span>Gallery</span></button>
+        <button type="button" class="cms-block-tool" data-cms-block-open="related" title="Chèn bài liên quan"><i class="fa fa-link"></i><span>Liên quan</span></button>
+        <button type="button" class="cms-block-tool" data-cms-block-open="lead" title="Chèn form lead"><i class="fa fa-envelope"></i><span>Form lead</span></button>
+    </div>
+</div>
+
+<div class="modal fade cms-block-modal" tabindex="-1" role="dialog" aria-hidden="true" data-cms-block-modal>
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Đóng"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" data-cms-block-title>Chèn content block</h4>
+            </div>
+            <div class="modal-body">
+                <div data-cms-block-form>
+                    <div class="cms-block-form" data-cms-block-form-type="hero_section">
+                        <div class="form-group"><label>H1 – Tiêu đề chính</label><input class="form-control" name="heroSectionH1" type="text" placeholder="VD: Báo giá xây nhà trọn gói 2026"></div>
+                        <div class="form-group"><label>Dòng cam kết (subtext)</label><input class="form-control" name="heroSectionSubtext" type="text" placeholder="VD: Cam kết không phát sinh • Bảo hành 5 năm"></div>
+                        <div class="form-group">
+                            <label>Bullet points ưu điểm <small class="text-muted">(mỗi dòng một điểm)</small></label>
+                            <textarea class="form-control" name="heroSectionBullets" rows="4" placeholder="✓ Đơn giá từ 4.850.000đ/m² minh bạch&#10;✓ Báo giá chi tiết trong 24h&#10;✓ 500+ công trình bàn giao đúng tiến độ"></textarea>
+                        </div>
+                        <div class="form-group"><label>Nhãn nút CTA</label><input class="form-control" name="heroSectionCtaLabel" type="text" placeholder="VD: NHẬN BÁO GIÁ 24H"></div>
+                        <div class="form-group"><label>URL form / nút CTA</label><input class="form-control" name="heroSectionCtaUrl" type="text" placeholder="/lien-he/"></div>
+                        <div class="form-group"><label>Hotline (tap-to-call)</label><input class="form-control" name="heroSectionHotline" type="text" placeholder="0974.776.305"></div>
+                        <div class="form-group"><label>URL ảnh công trình thật</label><input class="form-control" name="heroSectionImage" type="text" placeholder="/uploads/cong-trinh.jpg"></div>
+                        <div class="form-group"><label>Alt ảnh</label><input class="form-control" name="heroSectionImageAlt" type="text" placeholder="Công trình thực tế"></div>
+                    </div>
+
+                    <div class="cms-block-form" data-cms-block-form-type="faq">
+                        <p class="help-block">Mỗi dòng: Câu hỏi | Câu trả lời</p>
+                        <textarea class="form-control" name="faqItems" rows="7"></textarea>
+                    </div>
+
+                    <div class="cms-block-form" data-cms-block-form-type="cta">
+                        <div class="form-group"><label>Tiêu đề</label><input class="form-control" name="ctaTitle" type="text"></div>
+                        <div class="form-group"><label>Mô tả</label><textarea class="form-control" name="ctaDescription" rows="3"></textarea></div>
+                        <div class="form-group"><label>Nhãn nút</label><input class="form-control" name="ctaButton" type="text"></div>
+                        <div class="form-group"><label>URL nút</label><input class="form-control" name="ctaUrl" type="text" placeholder="/lien-he/"></div>
+                    </div>
+
+                    <div class="cms-block-form" data-cms-block-form-type="pricing">
+                        <p class="help-block">Mỗi dòng: Hạng mục | Đơn giá | Ghi chú</p>
+                        <textarea class="form-control" name="pricingItems" rows="7"></textarea>
+                    </div>
+
+                    <div class="cms-block-form" data-cms-block-form-type="gallery">
+                        <p class="help-block">Mỗi dòng: URL ảnh | Alt text | Caption</p>
+                        <textarea class="form-control" name="galleryItems" rows="7"></textarea>
+                    </div>
+
+                    <div class="cms-block-form" data-cms-block-form-type="related">
+                        <div class="form-group">
+                            <label>Tìm bài viết hoặc trang</label>
+                            <input class="form-control" name="relatedSearch" type="text" placeholder="Nhập tiêu đề hoặc URL">
+                        </div>
+                        <div class="cms-related-results" data-cms-related-results></div>
+                        <input type="hidden" name="relatedSelectedItems" value="[]">
+                        <div class="cms-related-selected" data-cms-related-selected></div>
+                        <p class="help-block">Có thể nhập thêm thủ công: Tiêu đề | URL | Mô tả ngắn</p>
+                        <textarea class="form-control" name="relatedItems" rows="5"></textarea>
+                    </div>
+
+                    <div class="cms-block-form" data-cms-block-form-type="lead">
+                        <div class="form-group"><label>Tiêu đề</label><input class="form-control" name="leadTitle" type="text" value="Nhận tư vấn miễn phí"></div>
+                        <div class="form-group"><label>Mô tả</label><textarea class="form-control" name="leadDescription" rows="3"></textarea></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-default" data-cms-block-preview-toggle><i class="fa fa-eye"></i> Preview</button>
+                <button type="button" class="btn btn-primary" data-cms-block-insert><i class="fa fa-plus"></i> Chèn block</button>
+            </div>
+            <div class="cms-block-preview" data-cms-block-preview></div>
+        </div>
+    </div>
+</div>

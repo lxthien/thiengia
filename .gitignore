@@ -16,16 +16,35 @@
 !var/sessions/.gitkeep
 !var/SymfonyRequirements.php
 /vendor/
-/web/bundles/
-/web/build/fonts/glyphicons-*
-/web/build/images/glyphicons-*
-/web/uploads/ckfinder/
-/web/media/
-/web/build/
-/web/uploads/
-/web/BingSiteAuth.xml
-/web/google33e2b6000dc649d2.html
-/web/list-non-index.txt
-/web/ads.txt
+/public/bundles/
+/public/build/fonts/glyphicons-*
+/public/build/images/glyphicons-*
+/public/uploads/ckfinder/
+/public/media/
+/public/build/
+/public/uploads/
+/public/BingSiteAuth.xml
+/public/google33e2b6000dc649d2.html
+/public/list-non-index.txt
+/public/ads.txt
+/public/freessl/
+/scratch/
 *.sql
 *.webp
+*.md
+/public/d5f13f8cd9874038a98b04fc59fd3b9e.txt
+
+###> liip/imagine-bundle ###
+/public/media/cache/
+###< liip/imagine-bundle ###
+
+###> symfony/phpunit-bridge ###
+.phpunit
+.phpunit.result.cache
+/phpunit.xml
+###< symfony/phpunit-bridge ###
+
+###> symfony/dotenv ###
+.env.local
+.env.*.local
+###< symfony/dotenv ###

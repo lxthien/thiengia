@@ -1,0 +1,418 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}Quản lý Menu - {{ object.name }}{% endblock %}
+
+{% block main %}
+    <div class="container-fluid mt-3">
+        <div class="row align-items-center mb-4">
+            <div class="col-md-8">
+                <h1 class="h3 mb-0" style="color: var(--me-text);">
+                    <i class="fa fa-bars me-2"></i> Menu: <span id="menu-name-display">{{ object.name }}</span>
+                </h1>
+            </div>
+            <div class="col-md-4 text-right">
+                <a href="{{ path('admin_menu_index') }}" class="btn btn-secondary me-2">
+                    <i class="fa fa-arrow-left"></i> Trở về
+                </a>
+                <button type="submit" form="menu-settings-form" class="btn btn-primary">
+                    <i class="fa fa-cloud-upload"></i> Lưu cài đặt
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            {# ── LEFT PANEL ── #}
+            <div class="col-lg-4 col-md-5 mb-4">
+
+                {# Menu Settings Card #}
+                <div class="me-card me-card--settings">
+                    <div class="me-card-header" data-toggle-card="settings-body">
+                        <span><i class="fa fa-cog"></i> Cài đặt Menu</span>
+                        <i class="fa fa-chevron-down me-toggle-icon"></i>
+                    </div>
+                    <div class="me-card-body" id="settings-body">
+                        {{ form_start(form, {'attr': {'id': 'menu-settings-form', 'novalidate': 'novalidate'}}) }}
+                        <div class="me-form-group">
+                            <label>Tên menu</label>
+                            {{ form_widget(form.name, {'attr': {'class': 'me-input'}}) }}
+                        </div>
+                        <div class="me-form-group">
+                            <label>Mô tả</label>
+                            {{ form_widget(form.description, {'attr': {'class': 'me-input', 'rows': 2}}) }}
+                        </div>
+                        <div class="me-form-group me-form-group--check">
+                            {{ form_widget(form.enable, {'attr': {'class': 'me-checkbox', 'id': 'menu_enable'}}) }}
+                            <label for="menu_enable">Kích hoạt menu này</label>
+                        </div>
+                        <div class="me-form-group">
+                            <button type="submit" class="me-btn me-btn--primary me-btn--block">
+                                <i class="fa fa-save"></i> Lưu cài đặt
+                            </button>
+                        </div>
+                        {{ form_end(form) }}
+                        <form method="POST" action="{{ path('admin_menu_delete', {'id': object.id}) }}" onsubmit="return confirm('Xóa menu này và tất cả mục?');">
+                            <input type="hidden" name="token" value="{{ csrf_token('delete') }}" />
+                            <button type="submit" class="me-btn me-btn--danger me-btn--block">
+                                <i class="fa fa-trash"></i> Xóa Menu
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {# Custom Links Card #}
+                <div class="me-card">
+                    <div class="me-card-header" data-toggle-card="custom-link-body">
+                        <span><i class="fa fa-link"></i> Liên kết tùy chỉnh</span>
+                        <i class="fa fa-chevron-down me-toggle-icon"></i>
+                    </div>
+                    <div class="me-card-body" id="custom-link-body">
+                        <div class="me-form-group">
+                            <label for="cl-url">URL</label>
+                            <input type="text" id="cl-url" class="me-input" placeholder="https:// hoặc /đường-dẫn">
+                        </div>
+                        <div class="me-form-group">
+                            <label for="cl-title">Văn bản liên kết</label>
+                            <input type="text" id="cl-title" class="me-input" placeholder="Tên hiển thị">
+                        </div>
+                        <button type="button" class="me-btn me-btn--primary me-btn--block" onclick="MenuEditor.addCustomLink()">
+                            <i class="fa fa-plus"></i> Thêm vào Menu
+                        </button>
+                    </div>
+                </div>
+
+                {# Categories Card #}
+                {% if available_categories|length > 0 %}
+                <div class="me-card">
+                    <div class="me-card-header" data-toggle-card="categories-body">
+                        <span><i class="fa fa-folder"></i> Danh mục ({{ available_categories|length }})</span>
+                        <i class="fa fa-chevron-down me-toggle-icon"></i>
+                    </div>
+                    <div class="me-card-body" id="categories-body" style="display:none;">
+                        <div class="me-searchbox">
+                            <input type="text" class="me-input me-input--sm" placeholder="Tìm danh mục..." oninput="MenuEditor.filterList(this, 'cat-list')">
+                        </div>
+                        <div class="me-checklist" id="cat-list">
+                            {% for item in available_categories %}
+                            {% set is_added = item.id in used_category_ids %}
+                            <label class="me-check-item">
+                                <input type="checkbox" class="me-check-item-cb" data-id="{{ item.id }}" data-title="{{ item.name }}" data-type="category" {% if is_added %}disabled="disabled"{% endif %}>
+                                {{ item.name }}{% if is_added %} <small>(Đã thêm)</small>{% endif %}
+                            </label>
+                            {% endfor %}
+                        </div>
+                        <div class="me-checklist-actions">
+                            <button type="button" class="me-btn me-btn--sm" onclick="MenuEditor.selectAll('cat-list')">Chọn tất cả</button>
+                            <button type="button" class="me-btn me-btn--sm" onclick="MenuEditor.deselectAll('cat-list')">Bỏ chọn</button>
+                            <button type="button" class="me-btn me-btn--primary me-btn--sm" onclick="MenuEditor.addChecked('category', 'cat-list')">
+                                Thêm vào Menu
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {# Posts Card #}
+                {% if available_posts|length > 0 %}
+                <div class="me-card">
+                    <div class="me-card-header" data-toggle-card="posts-body">
+                        <span><i class="fa fa-newspaper-o"></i> Bài viết ({{ available_posts|length }})</span>
+                        <i class="fa fa-chevron-down me-toggle-icon"></i>
+                    </div>
+                    <div class="me-card-body" id="posts-body" style="display:none;">
+                        <div class="me-searchbox">
+                            <input type="text" class="me-input me-input--sm" placeholder="Tìm bài viết..." oninput="MenuEditor.filterList(this, 'posts-list')">
+                        </div>
+                        <div class="me-checklist" id="posts-list">
+                            {% for item in available_posts %}
+                            {% set is_added = item.id in used_post_ids %}
+                            <label class="me-check-item">
+                                <input type="checkbox" class="me-check-item-cb" data-id="{{ item.id }}" data-title="{{ item.title }}" data-type="news" {% if is_added %}disabled="disabled"{% endif %}>
+                                {{ item.title|slice(0,40) }}{% if item.title|length > 40 %}…{% endif %}{% if is_added %} <small>(Đã thêm)</small>{% endif %}
+                            </label>
+                            {% endfor %}
+                        </div>
+                        <div class="me-checklist-actions">
+                            <button type="button" class="me-btn me-btn--sm" onclick="MenuEditor.selectAll('posts-list')">Chọn tất cả</button>
+                            <button type="button" class="me-btn me-btn--sm" onclick="MenuEditor.deselectAll('posts-list')">Bỏ chọn</button>
+                            <button type="button" class="me-btn me-btn--primary me-btn--sm" onclick="MenuEditor.addChecked('news', 'posts-list')">
+                                Thêm vào Menu
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {# Pages Card #}
+                {% if available_pages|length > 0 %}
+                <div class="me-card">
+                    <div class="me-card-header" data-toggle-card="pages-body">
+                        <span><i class="fa fa-file-text-o"></i> Trang ({{ available_pages|length }})</span>
+                        <i class="fa fa-chevron-down me-toggle-icon"></i>
+                    </div>
+                    <div class="me-card-body" id="pages-body" style="display:none;">
+                        <div class="me-searchbox">
+                            <input type="text" class="me-input me-input--sm" placeholder="Tìm trang..." oninput="MenuEditor.filterList(this, 'pages-list')">
+                        </div>
+                        <div class="me-checklist" id="pages-list">
+                            {% for item in available_pages %}
+                            {% set is_added = item.id in used_page_ids %}
+                            <label class="me-check-item">
+                                <input type="checkbox" class="me-check-item-cb" data-id="{{ item.id }}" data-title="{{ item.title }}" data-type="page" {% if is_added %}disabled="disabled"{% endif %}>
+                                {{ item.title|slice(0,40) }}{% if item.title|length > 40 %}…{% endif %}{% if is_added %} <small>(Đã thêm)</small>{% endif %}
+                            </label>
+                            {% endfor %}
+                        </div>
+                        <div class="me-checklist-actions">
+                            <button type="button" class="me-btn me-btn--sm" onclick="MenuEditor.selectAll('pages-list')">Chọn tất cả</button>
+                            <button type="button" class="me-btn me-btn--sm" onclick="MenuEditor.deselectAll('pages-list')">Bỏ chọn</button>
+                            <button type="button" class="me-btn me-btn--primary me-btn--sm" onclick="MenuEditor.addChecked('page', 'pages-list')">
+                                Thêm vào Menu
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+
+            {# ── RIGHT PANEL ── #}
+            <div class="col-lg-8 col-md-7">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <div class="me-main-header">
+                    <h2><i class="fa fa-list-ul"></i> Cấu trúc Menu</h2>
+                    <div class="me-main-header-actions">
+                        <span class="me-save-status" id="save-status"></span>
+                        <button type="button" class="me-btn me-btn--outline me-btn--sm" onclick="MenuEditor.expandAll()">
+                            <i class="fa fa-expand"></i> Mở rộng tất cả
+                        </button>
+                        <button type="button" class="me-btn me-btn--outline me-btn--sm" onclick="MenuEditor.collapseAll()">
+                            <i class="fa fa-compress"></i> Thu gọn tất cả
+                        </button>
+                    </div>
+                </div>
+
+                <div class="me-nestable-help">
+                    <i class="fa fa-info-circle"></i>
+                    Kéo thả để sắp xếp thứ tự. Kéo sang phải để tạo menu con (submenu). Nhấn vào mục để chỉnh sửa.
+                </div>
+
+                {# Nestable menu items list #}
+                <div class="dd" id="nestable" data-menu-config="{{ {
+                    menuId: object.id,
+                    reorderUrl: path('admin_menu_reorder', {'id': object.id}),
+                    addItemUrl: path('admin_menu_add_content_item', {'menuId': object.id}),
+                    deleteUrlBase: path('admin_menu_item_delete', {'id': '__ID__'}),
+                    updateUrlBase: path('admin_menu_item_update', {'id': '__ID__'}),
+                    getUrlBase: path('admin_menu_item_get', {'id': '__ID__'}),
+                    csrfToken: csrf_token('delete')
+                }|json_encode|e('html_attr') }}">
+                    <ol class="dd-list" id="menu-items-root">
+                        {% if object.items|length > 0 %}
+                            {% for item in object.items %}
+                                {% if not item.parent %}
+                                    {{ _self.render_nestable_item(item) }}
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </ol>
+                </div>
+
+                {% if object.items|length == 0 %}
+                <div class="me-empty-state" id="empty-state">
+                    <div class="me-empty-state-icon">
+                        <i class="fa fa-bars"></i>
+                    </div>
+                    <p>Menu này chưa có mục nào.</p>
+                    <p class="me-empty-state-hint">Thêm mục từ bảng bên trái để bắt đầu.</p>
+                </div>
+                {% endif %}
+
+                <div class="me-main-footer">
+                    <button type="button" class="me-btn me-btn--primary" id="save-menu-order-button" onclick="saveMenuOrder()">
+                        <i class="fa fa-cloud-upload"></i> Lưu Menu
+                    </button>
+                    <a href="{{ path('admin_menu_index') }}" class="me-btn me-btn--outline">
+                        <i class="fa fa-times"></i> Hủy
+                    </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    {# ── ITEM EDIT PANEL (slide-in) ── #}
+    <div class="me-item-panel" id="item-edit-panel">
+        <div class="me-item-panel-header">
+            <span id="item-panel-title">Chỉnh sửa mục</span>
+            <button type="button" class="me-item-panel-close" onclick="MenuEditor.closeItemPanel()">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+        <div class="me-item-panel-body">
+            <div class="me-form-group">
+                <label>Tiêu đề hiển thị <span class="me-required">*</span></label>
+                <input type="text" id="ip-title" class="me-input" placeholder="Tên hiển thị trong menu">
+            </div>
+            <div class="me-form-group" id="ip-url-group">
+                <label>URL</label>
+                <input type="text" id="ip-url" class="me-input" placeholder="https:// hoặc /đường-dẫn">
+            </div>
+            <div class="me-form-group">
+                <label>Mở trong</label>
+                <select id="ip-target" class="me-input">
+                    <option value="_self">Cùng cửa sổ</option>
+                    <option value="_blank">Cửa sổ mới</option>
+                </select>
+            </div>
+            <div class="me-form-group">
+                <label>CSS Class</label>
+                <input type="text" id="ip-css" class="me-input" placeholder="vd: btn btn-primary">
+            </div>
+            <div class="me-form-group">
+                <label>Tiêu đề tooltip (SEO)</label>
+                <input type="text" id="ip-title-attr" class="me-input" placeholder="Hiển thị khi hover">
+            </div>
+            <div class="me-form-group me-form-group--check">
+                <input type="checkbox" id="ip-enable" class="me-checkbox">
+                <label for="ip-enable">Kích hoạt mục này</label>
+            </div>
+        </div>
+        <div class="me-item-panel-footer">
+            <button type="button" class="me-btn me-btn--primary" onclick="MenuEditor.saveItemPanel()">
+                <i class="fa fa-save"></i> Lưu thay đổi
+            </button>
+            <button type="button" class="me-btn me-btn--danger me-btn--sm" id="ip-delete-btn">
+                <i class="fa fa-trash"></i> Xóa mục
+            </button>
+            <button type="button" class="me-btn me-btn--outline" onclick="MenuEditor.closeItemPanel()">Hủy</button>
+        </div>
+    </div>
+    <div class="me-item-panel-overlay" id="panel-overlay" onclick="MenuEditor.closeItemPanel()"></div>
+
+    {# ── MACROS ── #}
+    {% macro render_nestable_item(item) %}
+    <li class="dd-item" data-id="{{ item.id }}"
+        data-title="{{ item.title|e('html_attr') }}"
+        data-url="{{ item.url|default('')|e('html_attr') }}"
+        data-type="{{ item.type }}"
+        data-target="{{ item.targetAttr|default('_self') }}"
+        data-css="{{ item.cssClass|default('') }}"
+        data-titleattr="{{ item.titleAttr|default('') }}"
+        data-enable="{{ item.enable ? '1' : '0' }}">
+        <div class="dd-handle">
+            <span class="dd-grip"><i class="fa fa-grip-vertical"></i></span>
+            <span class="dd-item-type-badge dd-type-{{ item.type }}">{{ item.type == 'url' ? 'URL' : (item.type == 'category' ? 'Cat' : (item.type == 'news' ? 'Post' : item.type|capitalize)) }}</span>
+            <span class="dd-item-label">
+                {{ item.title }}
+                {% if item.url %}<small>{{ item.url }}</small>{% endif %}
+            </span>
+            <span class="dd-item-badges">
+                {% if not item.enable %}<span class="dd-badge dd-badge--disabled">Tắt</span>{% endif %}
+                {% if item.children|length > 0 %}<span class="dd-badge dd-badge--children">{{ item.children|length }} con</span>{% endif %}
+            </span>
+        </div>
+        <div class="dd-item-actions">
+            <button type="button" class="dd-btn-edit" onclick="event.stopPropagation(); MenuEditor.openItemPanel({{ item.id }}, this)" title="Chỉnh sửa">
+                <i class="fa fa-pencil"></i> Sửa
+            </button>
+            <form method="POST" action="{{ path('admin_menu_item_delete', {'id': item.id}) }}" style="display:inline;" onsubmit="return confirm('Xóa mục này và tất cả mục con?');">
+                <input type="hidden" name="token" value="{{ csrf_token('delete') }}">
+                <button type="submit" class="dd-btn-delete" title="Xóa">
+                    <i class="fa fa-trash"></i>
+                </button>
+            </form>
+        </div>
+        {% if item.children|length > 0 %}
+        <ol class="dd-list">
+            {% for child in item.children %}
+                {{ _self.render_nestable_item(child) }}
+            {% endfor %}
+        </ol>
+        {% endif %}
+    </li>
+    {% endmacro %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('build/js/menu-editor.js') }}"></script>
+    <script>
+        function saveMenuOrder() {
+            var $ = window.jQuery;
+            if (!$) {
+                alert('Thiếu jQuery, không thể lưu menu.');
+                return;
+            }
+
+            function serializeList($list) {
+                var items = [];
+
+                $list.children('.dd-item').each(function() {
+                    var $item = $(this);
+                    var data = {
+                        id: $item.data('id')
+                    };
+
+                    var $childrenList = $item.children('.dd-list').first();
+                    if ($childrenList.length) {
+                        data.children = serializeList($childrenList);
+                    }
+
+                    items.push(data);
+                });
+
+                return items;
+            }
+
+            var items = serializeList($('#menu-items-root'));
+            var $status = $('#save-status');
+
+            $status
+                .removeClass('me-save-status--saved me-save-status--error')
+                .addClass('me-save-status--saving')
+                .text('Dang luu...');
+
+            $.ajax({
+                url: '{{ path('admin_menu_reorder', {'id': object.id}) }}',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({items: items}),
+                success: function(response) {
+                    if (response.success) {
+                        $status
+                            .removeClass('me-save-status--saving me-save-status--error')
+                            .addClass('me-save-status--saved')
+                            .text('Da luu');
+
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 500);
+                    } else {
+                        $status
+                            .removeClass('me-save-status--saving me-save-status--saved')
+                            .addClass('me-save-status--error')
+                            .text('Loi luu');
+
+                        alert(response.message || 'Khong the luu menu.');
+                    }
+                },
+                error: function(xhr) {
+                    $status
+                        .removeClass('me-save-status--saving me-save-status--saved')
+                        .addClass('me-save-status--error')
+                        .text('Loi luu');
+
+                    var message = 'Loi ket noi khi luu menu.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        message = xhr.responseJSON.message;
+                    } else if (xhr.responseText) {
+                        message = xhr.responseText;
+                    }
+
+                    alert(message);
+                }
+            });
+        }
+    </script>
+{% endblock %}

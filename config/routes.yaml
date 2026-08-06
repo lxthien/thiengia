@@ -1,0 +1,105 @@
+# These first lines load the all routes defined as @Route() annotations in any
+# controller defined inside the src/AppBundle/Controller/ directory. Controllers
+# are loaded recursively, so you can separate them into subdirectories.
+# If you don't like to add annotations in your applications, you can also define
+# the routes in YAML, XML or PHP files.
+# See https://symfony.com/doc/current/book/routing.html
+fos_user:
+    resource: "@FOSUserBundle/Resources/config/routing/all.xml"
+
+
+_liip_imagine:
+    resource: "@LiipImagineBundle/Resources/config/routing.yaml"
+
+app:
+    resource: '../src/Controller/'
+    type:     annotation
+    # prefix:   /{_locale}
+    # requirements:
+    #     _locale: '%app_locales%'
+    # defaults:
+    #     _locale: '%locale%'
+
+# These lines define a route using YAML configuration. The controller used by
+# the route (FrameworkBundle:Template:template) is a convenient shortcut when
+# the template can be rendered without executing any logic in your own controller.
+# See https://symfony.com/doc/current/cookbook/templating/render_without_controller.html
+
+homepage:
+    path: /
+    defaults:
+        _controller: App\Controller\HomepageController::indexAction
+
+handle_comment_form:
+    path: /comment
+    defaults:
+        _controller: App\Controller\NewsController::handleCommentFormAction
+
+# Dynamic routing for posts and pages (single level)
+# Pattern: /slug-post/ or /slug-page/
+dynamic_post_page:
+    path: /{slug}/
+    defaults:
+        _controller: App\Controller\NewsController::dynamicRouteAction
+        level1: null
+        level2: null
+        level3: null
+    requirements:
+        slug: '[-\w]+'
+
+# Dynamic routing for category with post/pagination (two levels)
+# Pattern: /category-level-1/slug-post/ or /category-level-1/2/ (pagination)
+dynamic_category_post:
+    path: /{level1}/{level2}/
+    defaults:
+        _controller: App\Controller\NewsController::dynamicRouteAction
+        slug: null
+        level3: null
+        page: 1
+    requirements:
+        level1: '[-\w]+'
+        level2: '[-\w]+'
+
+# Dynamic routing for category with post pagination (three levels)
+# Pattern: /category-level-1/category-level-2/slug-post/ or page number
+dynamic_category_level2_post:
+    path: /{level1}/{level2}/{level3}/
+    defaults:
+        _controller: App\Controller\NewsController::dynamicRouteAction
+        slug: null
+        page: 1
+    requirements:
+        level1: '[-\w]+'
+        level2: '[-\w]+'
+        level3: '[-\w]+'
+
+# Legacy category routes (for backward compatibility)
+news_category:
+    path: /{level1}/{page}
+    defaults:
+        page: 1
+        _controller: App\Controller\NewsController::listAction
+    requirements:
+        level1: '[-\w]+'
+        page: '\d+'
+
+list_category:
+    path: /{level1}/{level2}/{page}
+    defaults:
+        page: 1
+        _controller: App\Controller\NewsController::listAction
+    requirements:
+        level1: '[-\w]+'
+        level2: '[-\w]+'
+        page: '\d+'
+
+# Legacy news_show route - now aliased to dynamic_post_page for backward compatibility
+news_show:
+    path: /{slug}/
+    defaults:
+        _controller: App\Controller\NewsController::dynamicRouteAction
+        level1: null
+        level2: null
+        level3: null
+    requirements:
+        slug: '[^\n]++'

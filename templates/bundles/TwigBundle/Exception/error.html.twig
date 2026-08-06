@@ -1,0 +1,26 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Đã xảy ra lỗi - Xây Dựng Kim Anh{% endblock %}
+
+{% block robots %}
+<meta name="robots" content="nofollow, noindex" />
+{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-12 text-center">
+            <div class="error-container py-5">
+                <h1 class="display-1 text-danger font-weight-bold">{{ status_code|default('Error') }}</h1>
+                <h2 class="h3 mb-4">Rất tiếc, đã xảy ra lỗi không mong muốn.</h2>
+                <p class="lead text-muted mb-5">
+                    Máy chủ gặp sự cố khi xử lý yêu cầu của bạn. Vui lòng quay lại trang chủ hoặc liên hệ với chúng tôi nếu vấn đề tiếp tục xảy ra.
+                </p>
+                <div class="error-actions">
+                    <a href="{{ path('homepage') }}" class="btn btn-primary btn-lg px-5">Quay lại trang chủ</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

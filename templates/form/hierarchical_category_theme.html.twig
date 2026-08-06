@@ -1,0 +1,254 @@
+{# 
+    Hierarchical Category Tree Theme
+    
+    Targets ONLY the 'category' field of the 'news' form (NewsType).
+    Uses Symfony convention: _{formName}_{fieldName}_widget
+#}
+
+{% block _news_category_widget %}
+    <div class="category-tree-container">
+        <div class="form-group category-tree-wrapper">
+            {% for child in form %}
+                {% set parentId = child.vars.attr['data-parent-id']|default('') %}
+                {% set categoryId = child.vars.attr['data-category-id']|default(child.vars.value) %}
+                <div class="form-check category-checkbox-wrapper" data-category-id="{{ categoryId }}" data-parent-id="{{ parentId }}">
+                    <input type="checkbox"
+                        id="{{ child.vars.id }}"
+                        name="{{ child.vars.full_name }}"
+                        value="{{ child.vars.value }}"
+                        class="form-check-input category-checkbox"
+                        {% if child.vars.checked is defined and child.vars.checked %}checked="checked"{% endif %}
+                    />
+                    <label for="{{ child.vars.id }}" class="form-check-label category-label">
+                        {{ child.vars.label }}
+                    </label>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <style>
+        .category-tree-wrapper {
+            display: block;
+            margin: 15px 0;
+            overflow-y: auto;
+            border: 1px solid #e3e6f0;
+            border-radius: 4px;
+            padding: 15px;
+        }
+
+        .category-checkbox-wrapper {
+            display: flex !important;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background-color 0.15s;
+        }
+
+        .category-checkbox-wrapper:hover {
+            background-color: #f8f9fc;
+        }
+
+        .category-checkbox-wrapper .form-check-input {
+            margin-right: 10px;
+            margin-top: 0;
+            cursor: pointer;
+            min-width: 18px;
+        }
+
+        .category-checkbox-wrapper .category-label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        /* Primary Category radio styling */
+        .category-checkbox-wrapper .label-primary {
+            margin: 0 0 0 auto; /* Push to the right edge */
+            cursor: pointer;
+            color: #4e73df;
+            font-size: 0.9em;
+            font-weight: 500;
+            padding-left: 15px;
+        }
+
+        .category-checkbox-wrapper .label-primary input[type="radio"] {
+            margin-right: 5px;
+            vertical-align: middle;
+            margin-top: -2px;
+        }
+
+        /* Child categories: indented with tree connector */
+        .category-checkbox-wrapper.category-child {
+            padding-left: 10px;
+            border-left: 2px solid #e3e6f0;
+        }
+
+        .category-checkbox-wrapper.category-child .category-label {
+            font-weight: 400;
+        }
+
+        .category-checkbox-wrapper.category-child .category-label::before {
+            content: "├─ ";
+            color: #adb5bd;
+            margin-right: 5px;
+            font-size: 0.9em;
+        }
+
+        /* Parent category labels are bold */
+        .category-checkbox-wrapper.category-parent .category-label {
+            font-weight: 600;
+            color: #333;
+        }
+    </style>
+
+    <script>
+        (function() {
+            if (document.readyState !== 'loading') {
+                initCategoryHierarchy();
+                initPrimaryCategoryRadios();
+            } else {
+                document.addEventListener('DOMContentLoaded', function() {
+                    initCategoryHierarchy();
+                    initPrimaryCategoryRadios();
+                });
+            }
+
+            function initCategoryHierarchy() {
+                var container = document.querySelector('.category-tree-wrapper');
+                if (!container) return;
+
+                var wrappers = container.querySelectorAll('.category-checkbox-wrapper');
+                var categoryMap = {};
+                var parentIds = {};
+
+                // Build maps
+                wrappers.forEach(function(el) {
+                    var categoryId = el.getAttribute('data-category-id');
+                    var parentId = el.getAttribute('data-parent-id');
+                    categoryMap[categoryId] = el;
+
+                    if (parentId && parentId !== '') {
+                        parentIds[categoryId] = parentId;
+                    }
+                });
+
+                // Determine which IDs are parents
+                var isParent = {};
+                Object.keys(parentIds).forEach(function(childId) {
+                    isParent[parentIds[childId]] = true;
+                });
+
+                // Sort: parents first, then their children right after
+                var sorted = [];
+                var processed = {};
+
+                // First pass: add root categories (no parent) and their children
+                wrappers.forEach(function(el) {
+                    var categoryId = el.getAttribute('data-category-id');
+                    var parentId = el.getAttribute('data-parent-id');
+
+                    if (!parentId || parentId === '') {
+                        if (!processed[categoryId]) {
+                            if (isParent[categoryId]) {
+                                el.classList.add('category-parent');
+                            }
+                            sorted.push(el);
+                            processed[categoryId] = true;
+
+                            // Add all children of this parent immediately after
+                            wrappers.forEach(function(childEl) {
+                                var childCatId = childEl.getAttribute('data-category-id');
+                                var childParentId = childEl.getAttribute('data-parent-id');
+                                if (childParentId === categoryId && !processed[childCatId]) {
+                                    childEl.classList.add('category-child');
+                                    childEl.style.marginLeft = '30px';
+                                    sorted.push(childEl);
+                                    processed[childCatId] = true;
+                                }
+                            });
+                        }
+                    }
+                });
+
+                // Second pass: add any remaining items not yet processed
+                wrappers.forEach(function(el) {
+                    var categoryId = el.getAttribute('data-category-id');
+                    if (!processed[categoryId]) {
+                        el.classList.add('category-child');
+                        el.style.marginLeft = '30px';
+                        sorted.push(el);
+                        processed[categoryId] = true;
+                    }
+                });
+
+                // Re-append in sorted order
+                sorted.forEach(function(el) {
+                    container.appendChild(el);
+                });
+            }
+
+            function initPrimaryCategoryRadios() {
+                var primaryInput = document.getElementById('news_categoryPrimary');
+                var checkboxes = document.querySelectorAll('.category-checkbox');
+
+                function updatePrimaryRadios() {
+                    var primaryValue = primaryInput ? primaryInput.value : null;
+
+                    checkboxes.forEach(function(checkbox) {
+                        var wrapper = checkbox.closest('.category-checkbox-wrapper');
+                        var categoryId = wrapper.getAttribute('data-category-id');
+                        var existingRadioLabel = wrapper.querySelector('.label-primary');
+
+                        if (checkbox.checked) {
+                            // Checked: Ensure the primary radio exists
+                            if (!existingRadioLabel) {
+                                var radioLabel = document.createElement('label');
+                                radioLabel.className = 'label-primary';
+                                
+                                var radioInput = document.createElement('input');
+                                radioInput.type = 'radio';
+                                radioInput.name = 'categoryPrimaryRadio';
+                                radioInput.value = categoryId;
+                                
+                                // Selected if matches the hidden input value
+                                if (primaryValue == categoryId) {
+                                    radioInput.checked = true;
+                                }
+
+                                // Update hidden input when selected
+                                radioInput.addEventListener('change', function() {
+                                    if (this.checked && primaryInput) {
+                                        primaryInput.value = this.value;
+                                    }
+                                });
+
+                                radioLabel.appendChild(radioInput);
+                                radioLabel.appendChild(document.createTextNode(' Chọn làm danh mục chính'));
+                                wrapper.appendChild(radioLabel);
+                            }
+                        } else {
+                            // Unchecked: Remove the primary radio if it exists
+                            if (existingRadioLabel) {
+                                existingRadioLabel.remove();
+                                // Clear hidden input if the removed radio was the selected primary one
+                                if (primaryInput && primaryInput.value == categoryId) {
+                                    primaryInput.value = '';
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Initial setup on load
+                updatePrimaryRadios();
+
+                // Listen to checkbox change events
+                checkboxes.forEach(function(checkbox) {
+                    checkbox.addEventListener('change', updatePrimaryRadios);
+                });
+            }
+        })();
+    </script>
+{% endblock %}

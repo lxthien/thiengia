@@ -1,0 +1,68 @@
+<!-- Header -->
+<header class="ka-site-header">
+	<div class="ka-topbar d-none hidden-xs hidden-sm">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-6 ka-news-ticker">
+					{{ get_setting('marqueeHomepage')|raw }}
+				</div>
+				<div class="col-md-6 text-right ka-social-connect hidden-xs">
+					<div class="ka-social-wrapper">
+						<span>
+							<img src="{{ asset(convert_images.webpConvert2(asset('/assets/images/phone-icon.png'), '')) }}" alt="Hotline" width="14" height="14">
+							<a href="tel:{{ get_setting('contens_hotline_1')|replace({' ': '', '.': ''}) }}">{{ get_setting('contens_hotline_1') }}</a>
+						</span>
+						<span>
+							<img src="{{ asset(convert_images.webpConvert2(asset('/assets/images/email.png'), '')) }}" alt="Email" width="14" height="14">
+							<a href="mailto:{{ get_setting('contens_email') }}">{{ get_setting('contens_email') }}</a>
+						</span>
+						<a target="_blank" href="{{ get_setting('linkToFacebook') }}" rel="noopener"><img src="{{ asset(convert_images.webpConvert2(asset('/assets/images/facebook.png'), '')) }}" alt="Facebook" width="20" height="20"></a>
+						<a target="_blank" href="{{ get_setting('linkToInstagram') }}" rel="noopener"><img src="{{ asset(convert_images.webpConvert2(asset('/assets/images/instagram.png'), '')) }}" alt="Instagram" width="20" height="20"></a>
+						<a target="_blank" href="{{ get_setting('linkToTwitter') }}" rel="noopener"><img src="{{ asset(convert_images.webpConvert2(asset('/assets/images/twitter.png'), '')) }}" alt="Twitter" width="20" height="20"></a>
+						<a target="_blank" href="{{ get_setting('linkToYoutube') }}" rel="noopener"><img src="{{ asset(convert_images.webpConvert2(asset('/assets/images/youtube.png'), '')) }}" alt="Youtube" width="20" height="20"></a>
+						<a target="_blank" href="{{ get_setting('linkToLinkedin') }}" rel="noopener"><img src="{{ asset(convert_images.webpConvert2(asset('/assets/images/linkedin.png'), '')) }}" alt="Linkedin" width="20" height="20"></a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="ka-branding-area d-none hidden-xs hidden-sm">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-3" id="ka-logo-container">
+					<div id="ka-brand-logo">
+						<a href="{{ path('homepage') }}" title="{{ get_setting('siteName') }}">
+							<img src="{{ app.request.scheme ~ '://' ~ app.request.host ~ '/' ~ convert_images.webpConvert2(asset('/assets/images/logo.png'), '') }}" width="274" height="99" alt="{{ get_setting('siteName') }}" fetchpriority="high">
+						</a>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="ka-contact-info-top">
+						<div class="wp90">
+							<div class="ka-info-nd" id="output" data-typewriter="{{ get_setting('siteName') }}|{{ get_setting('contens_dia_chi') }}">
+								<p class="ka-tel text-uppercase" id="ka-header-company"></p>
+								<p class="text-uppercase" id="ka-header-address"></p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3">
+					<div class="ka-contact-info-top ka-hotline-top">
+						<div class="wp90 pull-right">
+							<div class="ka-info-nd">
+								<p class="ka-tel text-uppercase">
+									<a href="tel:{{ get_setting('contens_hotline_1')|replace({' ': '', '.': ''}) }}">
+										<i class="fas fa-mobile"></i>
+										{{ get_setting('contens_hotline_1') }}</a>
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<a class="hidden-sm hidden-md hidden-lg ka-mobile-logo" href="{{ path('homepage') }}" title="{{ get_setting('siteName') }}">
+		<img src="{{ app.request.scheme ~ '://' ~ app.request.host ~ '/' ~ convert_images.webpConvert2(asset('/assets/images/logo.png'), '') }}" alt="{{ get_setting('siteName') }}" width="274" height="99" fetchpriority="high">
+	</a>
+</header>

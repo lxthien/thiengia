@@ -1,0 +1,76 @@
+{% extends 'layout.html.twig' %}
+
+{% block stylesheets %}
+	<link href="{{ absolute_url(asset('build/css/list.css')) }}" rel="preload stylesheet" as="style" onload="this.rel='stylesheet'">
+	<noscript><link rel="stylesheet" href="{{ absolute_url(asset('build/css/list.css')) }}"></noscript>
+	<style>
+		mark {
+			background-color: #fff44f;
+			padding: 2px 4px;
+			border-radius: 3px;
+			font-weight: 500;
+		}
+	</style>
+{% endblock %}
+
+{% block title %}
+	{{ 'post.archives.title'|trans({'%title%': q, '%currentPage%': pagination.currentPageNumber, '%totalPage%': pagination.pageCount}) }}
+{% endblock %}
+
+{% block structuredOpenGraph %}
+	<meta property="og:type" content="object"/>
+	<meta property="og:title" content="{{ 'post.archives.title'|trans({'%title%': q, '%currentPage%': pagination.currentPageNumber, '%totalPage%': pagination.pageCount}) }}"/>
+	{% if pagination.currentPageNumber == 1 and pagination.pageCount > 1 %}
+		<link rel="next" href="{{ baseUrl ~ '&page=' ~ (pagination.currentPageNumber + 1) }}"/>
+	{% endif %}
+	{% if pagination.currentPageNumber > 1 and pagination.currentPageNumber < pagination.pageCount %}
+		<link rel="prev" href="{{ baseUrl ~ '&page=' ~ (pagination.currentPageNumber - 1) }}"/>
+		<link rel="next" href="{{ baseUrl ~ '&page=' ~ (pagination.currentPageNumber + 1) }}"/>
+	{% endif %}
+	{% if pagination.currentPageNumber == pagination.pageCount and pagination.pageCount > 1 %}
+		<link rel="prev" href="{{ baseUrl ~ '&page=' ~ (pagination.currentPageNumber - 1) }}"/>
+	{% endif %}
+{% endblock %}
+
+{% block robots %}
+	<meta name="robots" content="noindex, nofollow"/>
+{% endblock %}
+
+{% block canonical %}
+	<meta name="DC.identifier" content="{{ baseUrl }}">
+	<link rel="canonical" href="{{ baseUrl }}"/>
+{% endblock %}
+
+{% block body %}
+	{{ include('news/components/breadcrumbs.html.twig',
+        { type: 'category', title: 'Kết quả tìm kiếm cho từ khoá: "' ~ q ~ '"', description: 'Vui lòng tìm lại nếu không đúng kết quả cần tìm' })
+    }}
+
+	<div class="container wrapper-container">
+		<div class="row ka-category-list">
+			<div
+				class="col-12 col-md-12 col-lg-12">
+				{# List item on this page #}
+				{% if pagination|length > 0  %}
+					{# Sort items #}
+					{% if get_setting('isShowSortOnCategory') %}
+						{{ include('news/components/sort.html.twig') }}
+					{% endif %}
+
+					<div class="ka-article-grid">
+						<div class="row">
+							{% for row in pagination %}
+								{{ include('news/components/itemsGrid.html.twig') }}
+							{% endfor %}
+						</div>
+					</div>
+
+					{# Pagination #}
+					{{ include('news/components/pagination.html.twig') }}
+				{% else %}
+					{{ include('news/components/noRecord.html.twig') }}
+				{% endif %}
+			</div>
+		</div>
+	</div>
+{% endblock %}

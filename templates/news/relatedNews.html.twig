@@ -1,0 +1,29 @@
+<div class="list-group">
+    <div class="list-group-item list-group-item-action active text-uppercase">Tin cùng chủ đề</div>
+    <div class="post-bxslider-wrapper">
+        <div class="post-sidebar-bxslider">
+            {% for row in posts %}
+                {% set imagePath = (vich_uploader_asset(row, 'imageFile') ? vich_uploader_asset(row, 'imageFile') : asset('assets/images/no-image.png')) %}
+                {% set imagePathFilter = (vich_uploader_asset(row, 'imageFile') ? vich_uploader_asset(row, 'imageFile') : asset('assets/images/no-image.png')) | imagine_filter('news_70_65') %}
+                                        
+                {% if convert_images.fileExists(imagePath) == false %}
+                    {% set imagePath = imagePath | imagine_filter('news_70_65') %}
+                {% else %}
+                    {% set imagePath = convert_images.webpConvert(imagePathFilter, '', true) %}
+                {% endif %}
+
+                <div class="item">
+                    <a href="{{ path('news_show', {'slug': row.getUrl() }) }}" class="list-group-item td-list-group-item" title="{{ row.getTitle() }}">
+                        <img
+                            alt="{{ row.getTitle() }}"
+                            width="70"
+                            height="65"
+                            {{ loop.index != 1 ? 'loading="lazy"' : '' }}
+                            src="{{ imagePath != false ? absolute_url(imagePath) : absolute_url(imagePathFilter) }}" />
+                        <span>{{ row.getTitle() }}</span>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

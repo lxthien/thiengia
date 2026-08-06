@@ -1,0 +1,227 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}Cài đặt hệ thống{% endblock %}
+
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <div class="col-sm-4">
+            <div class="page-header float-left">
+                <div class="page-title">
+                    <h1>Cài đặt</h1>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-8">
+            <div class="page-header float-right">
+                <div class="page-title">
+                    <ol class="breadcrumb text-right">
+                        <li><a href="{{ path('admin_dashboard_index') }}">Dashboard</a></li>
+                        <li class="active">Cài đặt chung</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block main %}
+    <div class="content mt-3">
+        <div class="animated fadeIn">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <strong>Cài đặt hệ thống chung</strong>
+                        </div>
+                        <div class="card-body card-block">
+                            {{ form_start(form, {'attr': {'class': 'form-horizontal'}}) }}
+                            
+                            {# General settings #}
+                            <h4 class="mb-3">Trang chủ</h4>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.listPrices, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.listPrices, {'attr': {'class': 'form-control'}}) }}</div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.listCategoryOnHomepage, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.listCategoryOnHomepage, {'attr': {'class': 'form-control'}}) }}</div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.numberRecordOnPage, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.numberRecordOnPage, {'attr': {'class': 'form-control'}}) }}</div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.displayNameCommentAs, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.displayNameCommentAs, {'attr': {'class': 'form-control'}}) }}</div>
+                            </div>
+
+                            <hr>
+                            <h4 class="mb-3">Thông tin chung</h4>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.siteName, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.siteName, {'attr': {'class': 'form-control'}}) }}</div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.marqueeHomepage, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.marqueeHomepage, {'attr': {'class': 'form-control'}}) }}</div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.googleAnalytic, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.googleAnalytic, {'attr': {'class': 'form-control'}}) }}</div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.fbApp, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.fbApp, {'attr': {'class': 'form-control'}}) }}</div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.GTM, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.GTM, {'attr': {'class': 'form-control'}}) }}</div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.ga4MeasurementID, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.ga4MeasurementID, {'attr': {'class': 'form-control'}}) }}</div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.topKeyword, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.topKeyword, {'attr': {'class': 'form-control'}}) }}</div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.facebookMessenger, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.facebookMessenger, {'attr': {'class': 'form-control', 'rows': 4}}) }}</div>
+                            </div>
+
+                            <hr>
+                            <h4 class="mb-3">SEO & Analytics</h4>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.pageTitle, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.pageTitle, {'attr': {'class': 'form-control'}}) }}</div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.pageDescription, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.pageDescription, {'attr': {'class': 'form-control', 'rows': 4}}) }}</div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.pageKeyword, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.pageKeyword, {'attr': {'class': 'form-control'}}) }}</div>
+                            </div>
+
+                            <hr>
+                            <h4 class="mb-3">Liên hệ</h4>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.emailContact, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.emailContact, {'attr': {'class': 'form-control'}}) }}</div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.hotLine1, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.hotLine1, {'attr': {'class': 'form-control'}}) }}</div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.hotLine2, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.hotLine2, {'attr': {'class': 'form-control'}}) }}</div>
+                            </div>
+
+                            <hr>
+                            <h4 class="mb-3">Biến Nội Dung (Placeholders)</h4>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.contens_ten_cong_ty, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">
+                                    {{ form_widget(form.contens_ten_cong_ty, {'attr': {'class': 'form-control'}}) }}
+                                    <small class="form-text text-muted">Sử dụng trong bài viết: <code>[ten_cong_ty]</code></small>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.contens_ten_day_du, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">
+                                    {{ form_widget(form.contens_ten_day_du, {'attr': {'class': 'form-control'}}) }}
+                                    <small class="form-text text-muted">Sử dụng trong bài viết: <code>[ten_day_du]</code></small>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.contens_dia_chi, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">
+                                    {{ form_widget(form.contens_dia_chi, {'attr': {'class': 'form-control', 'rows': 2}}) }}
+                                    <small class="form-text text-muted">Sử dụng trong bài viết: <code>[dia_chi]</code></small>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.contens_hotline_1, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">
+                                    {{ form_widget(form.contens_hotline_1, {'attr': {'class': 'form-control'}}) }}
+                                    <small class="form-text text-muted">Sử dụng trong bài viết: <code>[hotline_1]</code></small>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.contens_hotline_2, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">
+                                    {{ form_widget(form.contens_hotline_2, {'attr': {'class': 'form-control'}}) }}
+                                    <small class="form-text text-muted">Sử dụng trong bài viết: <code>[hotline_2]</code></small>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.contens_hotline_3, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">
+                                    {{ form_widget(form.contens_hotline_3, {'attr': {'class': 'form-control'}}) }}
+                                    <small class="form-text text-muted">Sử dụng trong bài viết: <code>[hotline_3]</code></small>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.contens_email, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">
+                                    {{ form_widget(form.contens_email, {'attr': {'class': 'form-control'}}) }}
+                                    <small class="form-text text-muted">Sử dụng trong bài viết: <code>[email]</code></small>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.contens_mst, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">
+                                    {{ form_widget(form.contens_mst, {'attr': {'class': 'form-control'}}) }}
+                                    <small class="form-text text-muted">Sử dụng trong bài viết: <code>[mst]</code></small>
+                                </div>
+                            </div>
+                            
+                            <hr>
+                            <h4 class="mb-3">Mạng xã hội</h4>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.linkToFacebook, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.linkToFacebook, {'attr': {'class': 'form-control'}}) }}</div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.linkToGooglePlus, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.linkToGooglePlus, {'attr': {'class': 'form-control'}}) }}</div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.linkToTwitter, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.linkToTwitter, {'attr': {'class': 'form-control'}}) }}</div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.linkToYoutube, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.linkToYoutube, {'attr': {'class': 'form-control'}}) }}</div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.linkToLinkedin, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.linkToLinkedin, {'attr': {'class': 'form-control'}}) }}</div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3">{{ form_label(form.linkToInstagram, null, {'label_attr': {'class': 'form-control-label'}}) }}</div>
+                                <div class="col-12 col-md-9">{{ form_widget(form.linkToInstagram, {'attr': {'class': 'form-control'}}) }}</div>
+                            </div>
+
+                            <hr>
+                            <h4 class="mb-3">Khác</h4>
+                            <div>
+                                {{ form_rest(form) }}
+                            </div>
+                            
+                            <div class="card-footer text-right">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fa fa-dot-circle-o"></i> Lưu cấu hình
+                                </button>
+                            </div>
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

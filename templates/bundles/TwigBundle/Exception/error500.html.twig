@@ -1,0 +1,30 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Lỗi hệ thống (500) - Xây Dựng Kim Anh{% endblock %}
+
+{% block robots %}
+<meta name="robots" content="nofollow, noindex" />
+{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-12 text-center">
+            <div class="error-container py-5">
+                <div class="mb-4">
+                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 100px;"></i>
+                </div>
+                <h1 class="display-1 text-danger font-weight-bold">500</h1>
+                <h2 class="h3 mb-3">Lỗi máy chủ nội bộ</h2>
+                <p class="lead text-muted mb-5">
+                    Hệ thống đang gặp sự cố kỹ thuật. Đội ngũ kỹ sư của chúng tôi đã được thông báo và đang nỗ lực khắc phục. 
+                    Vui lòng thử lại sau ít phút.
+                </p>
+                <div class="error-actions">
+                    <a href="{{ path('homepage') }}" class="btn btn-primary btn-lg px-5">Quay lại trang chủ</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

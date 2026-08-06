@@ -1,0 +1,87 @@
+// ============================================
+// XÂY DỰNG KIM ANH - Modern Industrial Theme
+// ============================================
+
+// Base Colors
+$white: #ffffff;
+$gray94: #F9F9F9;
+$black: #000000;
+$mercury: #e2e2e2;
+$red: #FF0000;
+$chambray: #3C5A98;
+$mineShaft: #222222;
+$gallery: #ededed;
+$geyser: #DBE0E8;
+$killarney: #356649;
+$fadedJade: #3C746B;
+$rajah: #F5C168;
+
+// OLD Primary Colors (kept for reference)
+$selectiveYellow: #FFB600;
+$supernova: #FDC502;
+
+// ============================================
+// NEW Modern Industrial Color Palette
+// ============================================
+
+// Primary - Deep Navy (Trust, Professionalism)
+$primaryColor: #1a2744;
+$primaryColor2: #0d1b2a;
+$primaryDark: #0d1521;
+$primaryLight: #2d3e5a;
+
+// Secondary - Concrete Gray (Industrial, Solid)
+$secondaryColor: #374151;
+$secondaryLight: #6b7280;
+$secondaryDark: #1f2937;
+
+// Accent - Construction Orange (Energy, Action) - BOLDER
+$accentColor: #dc4c04;
+$accentLight: #ea6c10;
+$accentDark: #c03d00;
+
+// Accent 2 - Steel Blue (Reliability)
+$steelBlue: #3d5a80;
+$steelBlueDark: #293d52;
+
+// Neutral Colors
+$grayBg: #f5f7fa;
+$grayBorder: #d1d5db;
+$grayText: #4b5563;
+$grayDark: #1f2937;
+
+// Surface Colors
+$surfaceLight: #f8fafc;
+$surfaceMedium: #f1f5f9;
+$borderColor: #d1d5db;
+
+// Text Colors - DARKER for better readability
+$textPrimary: #000000;
+$textSecondary: #111827;
+$textMuted: #6b7280;
+
+// Success/Warning Colors
+$successColor: #059669;
+$warningColor: #d97706;
+
+// Gradient
+$gradientPrimary: linear-gradient(135deg, $primaryColor 0%, $steelBlue 100%);
+$gradientAccent: linear-gradient(135deg, $accentColor 0%, $accentLight 100%);
+$gradientDark: linear-gradient(180deg, $primaryDark 0%, $primaryColor 100%);
+
+// Shadow - STRONGER
+$shadowSm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+$shadowMd: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+$shadowLg: 0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.08);
+$shadowXl: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.08);
+
+// Border Radius
+$radiusSm: 4px;
+$radiusMd: 8px;
+$radiusLg: 12px;
+$radiusXl: 16px;
+
+// Transition
+$transitionFast: 0.15s ease-in-out;
+$transitionBase: 0.3s ease-in-out;
+$transitionSlow: 0.5s ease-in-out;

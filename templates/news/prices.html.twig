@@ -1,0 +1,26 @@
+{% set videos = [
+    {img: 'yt-5.jpg', yt: 'IjgudOegYDs', slug: 'gd-ba-nguyen-van-khanh-danh-gia-ve-xay-dung-kim-anh', alt: 'GĐ Bà Nguyễn Vân Khanh đánh giá về Xây Dựng Kim Anh'},
+    {img: 'yt-3.jpg', yt: 'CsMoN-G_QK8', slug: 'xay-nha-tron-goi-quan-binh-tan-cung-niem-hanh-phuc-cua-chu-dau-tu', alt: 'Gia Đình Bà Huỳnh Thị Kim Oanh đánh giá về công ty Xây Dựng Kim Anh'},
+    {img: 'yt-1.jpg', yt: '76AB9uOFBos', slug: 'khach-hang-chia-se-ve-xay-dung-kim-anh', alt: 'Bà La Hải Mân hạnh phúc chia sẻ về thương hiệu Xây Dựng Kim Anh'},
+    {img: 'yt-2.jpg', yt: 'qZHPIqGX7pA', slug: 'anh-tin-lac-long-quan-danh-gia-ve-cong-ty-xay-dung-kim-anh', alt: 'Anh Tín Lạc Long Quân đánh giá về công ty Xây Dựng Kim Anh'},
+    {img: 'yt-4.jpg', yt: 'Jw70fD5eZp4', slug: 'chi-ha-long-danh-gia-ve-cong-ty-xay-dung-kim-anh', alt: 'Chị Hà Huyện Bình chánh đánh giá về công ty Xây Dựng Kim Anh'}
+] %}
+{% set links = [
+    {slug: 'anh-gia-phuc-chia-se-trai-nghiem-xay-nha', text: 'Gia đình Anh Gia Phúc chia sẻ trải nghiệm xây nhà cùng Xây Dựng Kim Anh'},
+    {slug: 'anh-pham-van-quy-chia-se-ve-xay-dung-kim-anh', text: 'Anh Quý chia sẻ về dự án xây dựng nhà tại quận 8 của Xây Dựng Kim Anh'},
+    {slug: 'ban-giao-du-an-xay-nha-chi-lan-anh-nu-cuoi-chu-dau-tu', text: 'Bàn giao dự án xây nhà Chị Lan Anh, Quận Phú Nhuận'}
+] %}
+<div class="list-group">
+    <div class="list-group-item list-group-item-action active text-uppercase">Khách hàng đánh giá</div>
+    {% for v in videos %}
+        <div class="related-wrapper video-related">
+            <div class="youtube-video-place embed-responsive embed-responsive-4by3" data-yt-url="https://www.youtube.com/embed/{{ v.yt }}?rel=0&showinfo=0&autoplay=1">
+                <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{ asset(convert_images.webpConvert2(asset('/assets/images/' ~ v.img), '')) }}" width="277" height="208" class="play-youtube-video lazyload" alt="{{ v.alt }}">
+                <a href="{{ path('news_show', {'slug': v.slug}) }}" class="text-center">{{ v.alt }}</a>
+            </div>
+        </div>
+    {% endfor %}
+    {% for l in links %}
+        <div class="related-wrapper video-related"><div class="youtube-video-place embed-responsive embed-responsive-4by3"><a href="{{ path('news_show', {'slug': l.slug}) }}" class="text-center">{{ l.text }}</a></div></div>
+    {% endfor %}
+</div>

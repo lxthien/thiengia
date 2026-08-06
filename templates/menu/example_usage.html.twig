@@ -1,0 +1,269 @@
+{# Example of using Menu System in Frontend - Place in your base.html.twig or layout #}
+
+{# 
+    MENU RENDERING EXAMPLES WITH SEO BEST PRACTICES
+
+    1. BASIC NAVBAR (Bootstrap)
+    2. FOOTER MENU
+    3. BREADCRUMB (based on URL structure)
+    4. CUSTOM STYLING OPTIONS
+#}
+
+{# ==================== 1. MAIN NAVIGATION BAR ==================== #}
+
+{% set navbar_menu = get_menu('Main Menu') %}
+{% if navbar_menu %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="{{ path('homepage') }}">Website</a>
+            
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                {{ render_menu('Main Menu', {
+                    'ul_class': 'navbar-nav ml-auto',
+                    'li_class': 'nav-item',
+                    'a_class': 'nav-link',
+                    'sub_ul_class': 'dropdown-menu',
+                    'sub_li_class': 'dropdown-item',
+                    'active_class': 'active'
+                }) | raw }}
+            </div>
+        </div>
+    </nav>
+{% endif %}
+
+{# ==================== 2. FOOTER MENU ==================== #}
+
+{% set footer_menu = get_menu('Footer Menu') %}
+{% if footer_menu %}
+    <footer class="footer bg-dark text-light mt-5">
+        <div class="container py-4">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    {{ render_menu('Footer Menu', {
+                        'ul_class': 'list-unstyled',
+                        'li_class': '',
+                        'a_class': 'text-light',
+                        'active_class': ''
+                    }) | raw }}
+                </div>
+                
+                <div class="col-md-4">
+                    <h5>Support</h5>
+                    {{ render_menu('Support Menu', {
+                        'ul_class': 'list-unstyled',
+                        'li_class': '',
+                        'a_class': 'text-light',
+                        'active_class': ''
+                    }) | raw }}
+                </div>
+                
+                <div class="col-md-4">
+                    <h5>Company</h5>
+                    {{ render_menu('Company Menu', {
+                        'ul_class': 'list-unstyled',
+                        'li_class': '',
+                        'a_class': 'text-light',
+                        'active_class': ''
+                    }) | raw }}
+                </div>
+            </div>
+        </div>
+    </footer>
+{% endif %}
+
+{# ==================== 3. BREADCRUMB NAVIGATION ==================== #}
+
+{# This is typically built from URL structure and rendered manually #}
+{% if breadcrumbs is defined and breadcrumbs is not empty %}
+    <nav aria-label="breadcrumb" class="breadcrumb-container">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{{ path('homepage') }}">Home</a>
+            </li>
+            {% for breadcrumb in breadcrumbs %}
+                <li class="breadcrumb-item {% if loop.last %}active{% endif %}">
+                    {% if not loop.last %}
+                        <a href="{{ breadcrumb.url }}">{{ breadcrumb.title }}</a>
+                    {% else %}
+                        <span aria-current="page">{{ breadcrumb.title }}</span>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ol>
+    </nav>
+{% endif %}
+
+{# ==================== 4. SIDEBAR MENU (For Category/Product Navigation) ==================== #}
+
+{% set sidebar_menu = get_menu('Categories Menu') %}
+{% if sidebar_menu %}
+    <aside class="sidebar">
+        <div class="widget widget-menu">
+            <h3 class="widget-title">Categories</h3>
+            <nav class="widget-menu-nav">
+                {{ render_menu('Categories Menu', {
+                    'ul_class': 'widget-menu-list',
+                    'li_class': 'widget-menu-item',
+                    'a_class': 'widget-menu-link',
+                    'sub_ul_class': 'widget-menu-submenu',
+                    'sub_li_class': 'widget-submenu-item',
+                    'active_class': 'active'
+                }) | raw }}
+            </nav>
+        </div>
+    </aside>
+{% endif %}
+
+{# ==================== 5. STYLED EXAMPLE WITH META TAGS FOR SEO ==================== #}
+
+{% set header_menu = get_menu('Main Menu') %}
+{% if header_menu %}
+    {# Add meta tags for search engines #}
+    <meta name="description" content="Browse our main navigation menu">
+    <meta name="keywords" content="navigation, menu, categories">
+    
+    {# The navigation HTML with proper semantic markup for SEO #}
+    <nav role="navigation" 
+         aria-label="Main Navigation"
+         itemscope 
+         itemtype="https://schema.org/SiteNavigationElement">
+        
+        {{ render_menu('Main Menu', {
+            'ul_class': 'main-menu',
+            'li_class': 'menu-item',
+            'a_class': 'menu-link',
+            'sub_ul_class': 'submenu',
+            'sub_li_class': 'submenu-item'
+        }) | raw }}
+    </nav>
+{% endif %}
+
+{# ==================== STYLING GUIDE ==================== #}
+
+{# 
+    AVAILABLE OPTIONS:
+    
+    - ul_class: CSS class for the <ul> element
+    - li_class: CSS class for the <li> element
+    - a_class: CSS class for the <a> element
+    - sub_ul_class: CSS class for nested <ul> elements
+    - sub_li_class: CSS class for nested <li> elements
+    - active_class: CSS class added to active menu items
+    
+    SEO BEST PRACTICES IMPLEMENTED:
+    
+    1. ✅ Semantic HTML markup (<nav>, <ul>, <li>, <a>)
+    2. ✅ Proper hierarchy preserved (no skipped heading levels)
+    3. ✅ Title attributes added for tooltips and accessibility
+    4. ✅ Target attributes properly set (_self, _blank)
+    5. ✅ Aria labels for accessibility (aria-label, aria-haspopup)
+    6. ✅ Escaped content to prevent XSS attacks
+    7. ✅ Proper rel attributes (rel="noopener" for _blank links)
+    8. ✅ Schema.org markup ready (SiteNavigationElement)
+    9. ✅ CSS classes allow styling without modifying HTML
+    10. ✅ CSS class for active menu items for user context
+#}
+
+{# CSS STYLING EXAMPLE #}
+
+<style>
+    /* Main Navigation */
+    .navbar-nav {
+        display: flex;
+        list-style: none;
+        gap: 0;
+        padding: 0;
+        margin: 0;
+    }
+
+    .nav-item {
+        position: relative;
+    }
+
+    .nav-link {
+        display: block;
+        padding: 10px 15px;
+        color: #333;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .nav-link:hover {
+        color: #0056b3;
+    }
+
+    .nav-item.active > .nav-link {
+        color: #0056b3;
+        font-weight: bold;
+    }
+
+    /* Dropdowns */
+    .nav-item.dropdown:hover .dropdown-menu {
+        display: block;
+    }
+
+    .dropdown-menu {
+        display: none;
+        position: absolute;
+        background: white;
+        border: 1px solid #ddd;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        z-index: 100;
+        min-width: 200px;
+    }
+
+    .dropdown-item {
+        display: block;
+        padding: 10px 15px;
+        color: #333;
+        text-decoration: none;
+    }
+
+    .dropdown-item:hover {
+        background: #f5f5f5;
+        color: #0056b3;
+    }
+
+    /* Footer Menu */
+    .footer-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .footer-menu li {
+        margin-bottom: 5px;
+    }
+
+    .footer-menu a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .footer-menu a:hover {
+        text-decoration: underline;
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+        display: flex;
+        list-style: none;
+        padding: 10px 0;
+        margin: 0;
+        gap: 5px;
+    }
+
+    .breadcrumb-item::after {
+        content: '/';
+        margin: 0 5px;
+    }
+
+    .breadcrumb-item:last-child::after {
+        content: '';
+    }
+</style>

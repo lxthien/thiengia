@@ -1,0 +1,13 @@
+<div id="baogia" class="comment-form mt-3">
+    <div id="respond" class="comment-respond">
+        <h4 id="reply-title" class="comment-reply-title">Đăng ký ngay để nhận tư vấn, báo giá miễn phí</h4>
+        <p class="comment-response" id="comment-response"></p>
+        {{ form_start(form, {'attr': {'id': 'form-comment'}}) }}
+        {{ form_errors(form) }}
+        <div class="form-group">{{ form_label(form.content) }}{{ form_errors(form.content) }}{{ form_widget(form.content, {'attr': {'class': 'form-control'}}) }}</div>
+        <div class="form-group">{{ form_label(form.author) }}{{ form_errors(form.author) }}{{ form_widget(form.author, {'attr': {'class': 'form-control'}}) }}</div>
+        <div class="form-group">{{ form_label(form.phone) }}{{ form_errors(form.phone) }}{{ form_widget(form.phone, {'attr': {'class': 'form-control'}}) }}</div>
+        <div class="form-group">{{ form_widget(form.send, {'attr': {'class': 'btn btn-primary'}}) }}</div>
+        {{ form_end(form) }}
+    </div>
+</div>

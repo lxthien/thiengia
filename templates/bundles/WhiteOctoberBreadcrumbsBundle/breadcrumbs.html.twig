@@ -1,0 +1,48 @@
+{% if wo_breadcrumbs()|length %}
+    {# JSON-LD Schema for Breadcrumbs #}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {% for b in breadcrumbs %}
+            {
+                "@type": "ListItem",
+                "position": {{ loop.index }},
+                "name": {% if b.translate is defined and b.translate == true %}{{ b.text | trans(b.translationParameters, translation_domain, locale) | json_encode(constant('JSON_UNESCAPED_UNICODE')) | raw }}{% else %}{{ b.text | json_encode(constant('JSON_UNESCAPED_UNICODE')) | raw }}{% endif %}{% if b.url %},
+                "item": "https://kientruckimanh.com{{ b.url }}"{% endif %}
+
+            }{% if not loop.last %},{% endif %}
+
+            {% endfor %}
+        ]
+    }
+    </script>
+
+    {# Microdata Schema for Breadcrumbs #}
+    {%- spaceless -%}
+        <ol id="{{ listId }}" class="{{ listClass }}">
+            {% for b in breadcrumbs %}
+                <li{% if itemClass is defined and itemClass|length %} class="{{ itemClass }}"{% endif %}>
+                    {% if b.url and not loop.last %}
+                    <a href="{{ b.url }}" {% if linkRel is defined and linkRel|length %} rel="{{ linkRel }}"{% endif %}>
+                        {% endif %}
+                        <span>{% if b.translate is defined and b.translate == true %}{{- b.text | trans(b.translationParameters, translation_domain, locale) -}}{% else %}{{- b.text -}}{% endif %}</span>
+                        {% if b.url and not loop.last %}
+                    </a>
+                    {% endif %}
+
+                    {% if b.url and loop.last %}
+                        <meta href="https://kientruckimanh.com{{ b.url }}" />
+                    {% endif %}
+
+                    <meta index="{{ loop.index }}" />
+
+                    {% if separator is not null and not loop.last %}
+                        <span class='{{ separatorClass }}'>{{ separator }}</span>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ol>
+    {%- endspaceless -%}
+{% endif %}

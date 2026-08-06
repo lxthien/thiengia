@@ -1,0 +1,27 @@
+# LLM Information File
+# This file provides information about the kimanh website for LLM/AI systems
+
+Site Name: Kimanh
+Purpose: Construction and renovation services website
+Framework: Symfony 3.3
+Language: Vietnamese/English
+
+## Key Features
+- Blog/News system with categories
+- Dynamic routing for posts, pages, and categories
+- XML Sitemap generation
+- User authentication (FOSUserBundle)
+- Comment system
+- Rating system
+
+## Content Structure
+- Posts: Articles and news updates
+- Pages: Static pages like About, Terms, Privacy
+- Categories: Hierarchical category structure with parent-child support
+
+## Important URLs
+- Homepage: /
+- Sitemap: /sitemap.xml
+
+## Contact
+For inquiries, visit the website footer or contact page.

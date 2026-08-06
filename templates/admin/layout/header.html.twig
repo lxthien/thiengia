@@ -1,0 +1,44 @@
+<!-- Header-->
+<header id="header" class="header">
+    {% set notifications = admin_notifications() %}
+
+    <div class="header-menu">
+
+        <div class="col-sm-7">
+            <a id="menuToggle" class="menutoggle pull-left">
+                <i class="fa fa fa-tasks"></i>
+            </a>
+        </div>
+
+        <div class="col-sm-5">
+            <div class="dropdown for-notification float-right admin-notification-dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="notificationDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-feed-url="{{ path('admin_notifications_feed') }}">
+                    <i class="fa fa-bell"></i>
+                    <span class="count bg-danger{% if notifications.total == 0 %} d-none{% endif %}" data-notification-count>{{ notifications.total }}</span>
+                </button>
+
+                <div class="dropdown-menu notification-menu" aria-labelledby="notificationDropdown" data-notification-menu>
+                    {{ include('admin/layout/_notifications_menu.html.twig', {notifications: notifications}) }}
+                </div>
+            </div>
+
+            <div class="user-area dropdown float-right">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <img class="user-avatar rounded-circle" src="{{ asset('assets/sufeeadmin/images/admin.jpg') }}" alt="User Avatar">
+                </a>
+
+                <div class="user-menu dropdown-menu">
+                    <a class="nav-link" href="{{ path('admin_user_edit', {id: app.user.id}) }}">
+                        <i class="fa fa- user"></i>{{ app.user.name }}
+                    </a>
+                    <a class="nav-link" href="{{ path('fos_user_security_logout') }}">
+                        <i class="fa fa-power -off"></i>{{ 'menu.logout'|trans }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</header>
+<!-- /header -->
+<!-- Header-->

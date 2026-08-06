@@ -1,0 +1,69 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block body_id 'admin_user_new' %}
+
+{% block main %}
+    <div class="content mt-3">
+        <div class="animated fadeIn">
+            <div class="row">
+                <div class="col-md-8 offset-md-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <strong class="card-title">{{ 'Tạo người dùng mới' }}</strong>
+                        </div>
+                        <div class="card-body">
+                            {{ form_start(form) }}
+                                <div class="form-group">
+                                    {{ form_label(form.username) }}
+                                    {{ form_widget(form.username, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.username) }}
+                                </div>
+
+                                <div class="form-group">
+                                    {{ form_label(form.name) }}
+                                    {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.name) }}
+                                </div>
+
+                                <div class="form-group">
+                                    {{ form_label(form.email) }}
+                                    {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.email) }}
+                                </div>
+
+                                <div class="form-group">
+                                    {{ form_label(form.plainPassword) }}
+                                    {{ form_widget(form.plainPassword, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.plainPassword) }}
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="d-block mb-2">{{ 'Quyền'|trans }}</label>
+                                    {% for child in form.roles %}
+                                        <div class="form-check">
+                                            {{ form_widget(child, {'attr': {'class': 'form-check-input'}}) }}
+                                            {{ form_label(child, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                                        </div>
+                                    {% endfor %}
+                                    {{ form_errors(form.roles) }}
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="form-check">
+                                        {{ form_widget(form.enabled, {'attr': {'class': 'form-check-input'}}) }}
+                                        {{ form_label(form.enabled, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    {{ form_widget(form.save, {'attr': {'class': 'btn btn-success'}}) }}
+                                    <a href="{{ path('admin_user_index') }}" class="btn btn-secondary">{{ 'Huỷ' }}</a>
+                                </div>
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

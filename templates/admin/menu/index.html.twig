@@ -1,0 +1,81 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}Menu Management{% endblock %}
+
+{% block main %}
+<div class="container mt-4">
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <h1 class="h2 d-inline-block">Menu Management</h1>
+            <a href="{{ path('admin_menu_new') }}" class="btn btn-primary float-right">
+                <i class="fa fa-plus"></i> Add New Menu
+            </a>
+        </div>
+    </div>
+
+    {% if objects is empty %}
+        <div class="alert alert-info">
+            <i class="fa fa-info-circle"></i> No menus found. <a href="{{ path('admin_menu_new') }}">Create one</a>
+        </div>
+    {% else %}
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Items Count</th>
+                            <th>Status</th>
+                            <th>Updated</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for menu in objects %}
+                            <tr>
+                                <td>
+                                    <strong>{{ menu.name }}</strong>
+                                </td>
+                                <td>
+                                    {% if menu.description %}
+                                        <span title="{{ menu.description }}">{{ menu.description|slice(0, 50) }}{% if menu.description|length > 50 %}...{% endif %}</span>
+                                    {% else %}
+                                        <em class="text-muted">No description</em>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge badge-info">{{ menu.items|length }}</span>
+                                </td>
+                                <td>
+                                    {% if menu.enable %}
+                                        <span class="badge badge-success">Active</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        {{ menu.updatedAt|date('d/m/Y H:i') }}
+                                    </small>
+                                </td>
+                                <td>
+                                    <a href="{{ path('admin_menu_edit', {'id': menu.id}) }}" class="btn btn-sm btn-info" title="Edit">
+                                        <i class="fa fa-edit"></i>
+                                    </a>
+                                    <form method="POST" action="{{ path('admin_menu_delete', {'id': menu.id}) }}" style="display:inline-block;">
+                                        <input type="hidden" name="token" value="{{ csrf_token('delete') }}" />
+                                        <button class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');" title="Delete">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

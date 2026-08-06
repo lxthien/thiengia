@@ -1,0 +1,341 @@
+{% extends 'layout.html.twig' %}
+
+{% block stylesheets %}
+	<link href="{{ absolute_url(asset('build/css/homepage.css')) }}" rel="preload stylesheet" as="style" onload="this.rel='stylesheet'">
+	<noscript><link rel="stylesheet" href="{{ absolute_url(asset('build/css/homepage.css')) }}"></noscript>
+{% endblock %}
+
+{% block structuredOpenGraph %}
+	<meta property="og:type" content="website"/>
+	<meta property="og:title" content="{{ block('title') }}"/>
+	<meta property="og:description" content="{{ block('description') }}"/>
+	<meta property="og:image" content="{{ absolute_url(asset('assets/images/banner/xay-dung-kim-anh-5.jpg')) }}"/>
+	<meta property="og:image:width" content="1200"/>
+	<meta property="og:image:height" content="630"/>
+{% endblock %}
+
+{% block localBusiness %}
+	{{ get_setting('googleAnalytic')|raw }}
+{% endblock %}
+
+{% block body %}
+	<div class="wrapper-container">
+		<section class="ka-hero-cta-section">
+			<div class="container ka-hero-cta-container">
+				<div class="row">
+					<div class="col-md-10">
+						<div class="ka-hero-cta-text">BẠN ĐANG MUỐN THI CÔNG DỰ ÁN XÂY DỰNG? HÃY LIÊN HỆ NGAY ĐẾN CHÚNG TÔI ĐỂ ĐƯỢC TƯ VẤN MIỄN PHÍ!</div>
+					</div>
+					<div class="col-md-2 text-right">
+						<a href="tel:{{ get_setting('contens_hotline_1')|replace({' ': '', '.': ''}) }}">
+							<i class="fas fa-mobile-alt"></i>
+							{{ get_setting('contens_hotline_1') }}</a>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section class="ka-about-section">
+			<div class="ka-about-wrapper">
+				<div class="ka-about-content">
+					<div class="container">
+						<div class="row">
+							<div class="col-xs-12 col-sm-7 col-md-7 ka-about-content-left">
+								<div class="ka-about-inner">
+									<div class="ka-block-text">
+										<h1>CÔNG TY THIẾT KẾ - XÂY DỰNG KIM ANH</h1>
+										<h4>Chuyên tư vấn, thiết kế kiến trúc - nội thất, xây dựng công trình dân dụng và công nghiệp.</h4>
+										<ul>
+											<li>Là một doanh nghiệp hoạt động kinh doanh chuyên nghiệp trong lĩnh vực tư vấn - thiết kế kiến trúc - xây dựng. Được thành lập từ năm 2017 bởi đội ngũ Kiến trúc sư, Kỹ sư trẻ trung và tâm huyết với nghề, lấy sự hài lòng của khách hàng làm niềm vui cho mình.</li>
+											<li>Với bề dày kinh nghiệm và năng lực trong Thiết kế kiến trúc – Thi công xây dựng – Tư vấn giám sát qua nhiều công trình từ nhà ở dân dụng, văn phòng, nhà xưởng, khách sạn, Xây Dựng Kim Anh luôn để lại ấn tượng tốt đối với khách hàng. Với phương châm
+												<strong>"Uy tín là vàng"</strong>
+												chúng tôi luôn cố gắng hết sức mình để đem đến sự hài lòng cho khách hàng.</li>
+										</ul>
+										<div class="ka-article-overlay"></div>
+									</div>
+									<div class="ka-about-cta">
+										<a href="{{ path('dynamic_post_page', {'slug': 'gioi-thieu' }) }}">
+											<em>Xem tiếp ...</em>
+										</a>
+									</div>
+								</div>
+							</div>
+							<div class="col-xs-12 col-sm-5 col-md-5 ka-about-content-right">
+								<a class="ka-about-img-effect"><img alt="Xây Dựng Kim Anh" src="{{ asset('assets/images/banner/xay-dung-kim-anh-5.jpg') }}" class="img-responsive"></a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+
+		<section class="ka-pricing-section" id="dich-vu">
+			<div class="container">
+				<h2 class="text-center text-uppercase ka-section-heading">Dịch vụ nổi bật</h2>
+				<div class="row ka-pricing-grid">
+					{% for priceOnHomepage in blockPricesOnHomepage %}
+						{% set imagePath = (vich_uploader_asset(priceOnHomepage, 'imageFile') ? vich_uploader_asset(priceOnHomepage, 'imageFile') : asset('assets/images/no-image.png')) %}
+						{% set imagePathFilter = (vich_uploader_asset(priceOnHomepage, 'imageFile') ? vich_uploader_asset(priceOnHomepage, 'imageFile') : asset('assets/images/no-image.png')) | imagine_filter('news_218_218') %}
+						{% if convert_images.fileExists(imagePath) == false %}
+							{% set imagePath = imagePath | imagine_filter('news_218_218') %}
+						{% else %}
+							{% set imagePath = convert_images.webpConvert(imagePathFilter, '', true) %}
+						{% endif %}
+						<div class="col-md-3 col-sm-3">
+							<div class="ka-pricing-card">
+								<a href="{{ path('news_show', {'slug': priceOnHomepage.getUrl() }) }}" class="ka-pricing-img">
+									<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="{{ priceOnHomepage.getTitle() }}" class="img-responsive lazyload" data-src="{{ imagePath != false ? absolute_url(imagePath) : absolute_url(imagePathFilter) }}" width="218" height="218">
+								</a>
+								<div class="ka-pricing-title">
+									<a href="{{ path('news_show', {'slug': priceOnHomepage.getUrl() }) }}">{{ priceOnHomepage.getTitle() }}</a>
+								</div>
+							</div>
+						</div>
+					{% endfor %}
+				</div>
+			</div>
+		</section>
+
+		<section class="ka-why-us-section">
+			<div class="container">
+				<h2 class="text-center text-uppercase ka-section-heading">Tại sao khách hàng chọn chúng tôi</h2>
+				<div class="row">
+					<div class="col-md-4 col-sm-6">
+						<article class="ka-feature-card">
+							<span class="ka-feature-icon-box">
+								<i class="fa fa-globe"></i>
+							</span>
+							<div class="ka-feature-content">
+								<b class="ka-feature-title text-uppercase">Chất lượng hàng đầu</b>
+								<p>Kiểm soát vật tư nghiêm ngặt, thi công đúng kỹ thuật bản vẽ.</p>
+							</div>
+						</article>
+					</div>
+					<div class="col-md-4 col-sm-6">
+						<article class="ka-feature-card">
+							<span class="ka-feature-icon-box">
+								<i class="fa fa-balance-scale"></i>
+							</span>
+							<div class="ka-feature-content">
+								<b class="ka-feature-title text-uppercase">Thi công đúng tiến độ</b>
+								<p>Cam kết bàn giao công trình đúng thời hạn trong hợp đồng.</p>
+							</div>
+						</article>
+					</div>
+					<div class="col-md-4 col-sm-6">
+						<article class="ka-feature-card">
+							<span class="ka-feature-icon-box">
+								<i class="fas fa-users"></i>
+							</span>
+							<div class="ka-feature-content">
+								<b class="ka-feature-title text-uppercase">Báo giá minh bạch</b>
+								<p>Không phát sinh chi phí sau khi đã ký hợp đồng trọn gói.</p>
+							</div>
+						</article>
+					</div>
+					<div class="col-md-4 col-sm-6">
+						<article class="ka-feature-card">
+							<span class="ka-feature-icon-box">
+								<i class="fas fa-gem"></i>
+							</span>
+							<div class="ka-feature-content">
+								<b class="ka-feature-title text-uppercase">Đội ngũ chuyên nghiệp</b>
+								<p>Đội ngũ KS, KTS tận tâm, giải quyết các vấn đề cực lùi và tinh gọn.</p>
+							</div>
+						</article>
+					</div>
+					<div class="col-md-4 col-sm-6">
+						<article class="ka-feature-card">
+							<span class="ka-feature-icon-box">
+								<i class="fas fa-lightbulb"></i>
+							</span>
+							<div class="ka-feature-content">
+								<b class="ka-feature-title text-uppercase">Mẫu mã đa dạng</b>
+								<p>Liên tục cập nhật các xu hướng thiết kế mới mang dấu ấn riêng.</p>
+							</div>
+						</article>
+					</div>
+					<div class="col-md-4 col-sm-6">
+						<article class="ka-feature-card">
+							<span class="ka-feature-icon-box">
+								<i class="fa fa-bullhorn"></i>
+							</span>
+							<div class="ka-feature-content">
+								<b class="ka-feature-title text-uppercase">Sự hài lòng tuyệt đối</b>
+								<p>Mong muốn mang đến tổ ấm lâu dài cho mọi nhà.</p>
+							</div>
+						</article>
+					</div>
+				</div>
+			</div>
+
+			<div class="row ka-stats-row">
+				<div class="col-md-3 col-xs-6">
+					<div class="ka-stat-item">
+						<div class="ka-stat-number">10<span class="ka-stat-symbol">+</span>
+						</div>
+						<div class="ka-stat-label">Năm kinh nghiệm</div>
+					</div>
+				</div>
+				<div class="col-md-3 col-xs-6">
+					<div class="ka-stat-item">
+						<div class="ka-stat-number">500<span class="ka-stat-symbol">+</span>
+						</div>
+						<div class="ka-stat-label">Công trình hoàn thiện</div>
+					</div>
+				</div>
+				<div class="col-md-3 col-xs-6">
+					<div class="ka-stat-item">
+						<div class="ka-stat-number">100<span class="ka-stat-symbol">%</span>
+						</div>
+						<div class="ka-stat-label">Khách hàng hài lòng</div>
+					</div>
+				</div>
+				<div class="col-md-3 col-xs-6">
+					<div class="ka-stat-item">
+						<div class="ka-stat-number">50<span class="ka-stat-symbol">+</span>
+						</div>
+						<div class="ka-stat-label">Nhân sự chuyên nghiệp</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	{% for blockOnHomepage in blocksOnHomepage %}
+		{% if blockOnHomepage.category.getParentcat() == 'root' %}
+			{% set linkCat = path('dynamic_post_page', {'slug': blockOnHomepage.category.getUrl() }) %}
+		{% else %}
+			{% set linkCat = path('dynamic_category_post', {'level1': blockOnHomepage.category.getParentcat().getUrl(), 'level2': blockOnHomepage.category.getUrl() }) %}
+		{% endif %}
+		<section class="ka-category-block">
+			<div class="container">
+				<div class="ka-block-header">
+					<div class="text-uppercase ka-header-title">
+						<img alt="{{ blockOnHomepage.category.getName() }}" src="{{ asset('assets/images/icon-logo.png') }}" width="35" height="25">
+						<p class="ka-header-subtitle">{{ blockOnHomepage.title }}</p>
+						<i class="fa fa-angle-right"></i>
+						<h2>
+							<a href="{{ linkCat }}">{{ blockOnHomepage.category.getName() }}</a>
+						</h2>
+					</div>
+					<span class="ka-header-line"></span>
+					<p class="ka-header-desc">{{ blockOnHomepage.description }}</p>
+					{% if blockOnHomepage.listSubTabs|length > 0 %}
+						<ul class="nav nav-tabs ka-header-tabs" role="tablist">
+							{% for listSubTab in blockOnHomepage.listSubTabs %}
+								<li role="presentation" {{ loop.first ? ' class="active"' : '' }}>
+									<a href="#tab_{{ listSubTab.subCategory.getId() }}" role="tab" data-toggle="tab">{{ listSubTab.subCategory.getName() }}</a>
+								</li>
+							{% endfor %}
+						</ul>
+					{% endif %}
+				</div>
+				{% if blockOnHomepage.listSubTabs|length > 0 %}
+					<div class="tab-content">
+						{% for listSubTab in blockOnHomepage.listSubTabs %}
+							<div role="tabpanel" class="tab-pane{{ loop.first ? ' active' : '' }}" id="tab_{{ listSubTab.subCategory.getId() }}">
+								<div class="ka-article-grid">
+									<div class="row">
+										{% for row in listSubTab.posts %}
+											{% include 'news/components/itemsGridHomepage.html.twig' with {'category': listSubTab.subCategory} %}
+										{% endfor %}
+									</div>
+								</div>
+								<div class="ka-view-more text-center">
+									<a href="{{ path('dynamic_category_post', {'level1': blockOnHomepage.category.getUrl(), 'level2': listSubTab.subCategory.getUrl() }) }}">{{ listSubTab.subCategory.getName() }}</a>
+								</div>
+							</div>
+						{% endfor %}
+					</div>
+				{% else %}
+					<div class="ka-article-grid">
+						<div class="row">
+							{% for row in blockOnHomepage.posts %}
+								{% include 'news/components/itemsGridHomepage.html.twig' with {'category': blockOnHomepage.category} %}
+							{% endfor %}
+						</div>
+					</div>
+					<div class="ka-view-more text-center">
+						<a href="{{ linkCat }}">{{ blockOnHomepage.category.getName() }}</a>
+					</div>
+				{% endif %}
+			</div>
+		</section>
+	{% endfor %}
+
+	<section class="ka-testimonials-section">
+		<div class="container">
+			<h2 class="text-center text-uppercase ka-testimonials-heading">Khách hàng đánh giá</h2>
+			<div class="row ka-video-grid">
+				<div class="col-sm-3 col-xs-6 mb-15">
+					<a data-fancybox="gallery-yt" href="https://www.youtube.com/watch?v=76AB9uOFBos" class="ka-video-item">
+						<div class="ka-video-thumb">
+							<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{ asset(convert_images.webpConvert2(asset('/assets/images/yt-1.jpg'), '')) }}" class="lazyload" alt="Khách hàng chia sẻ về Xây Dựng Kim Anh" width="277" height="208">
+							<div class="ka-play-icon">
+								<i class="fas fa-play"></i>
+							</div>
+						</div>
+					</a>
+				</div>
+				<div class="col-sm-3 col-xs-6 mb-15">
+					<a data-fancybox="gallery-yt" href="https://www.youtube.com/watch?v=qZHPIqGX7pA" class="ka-video-item">
+						<div class="ka-video-thumb">
+							<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{ asset(convert_images.webpConvert2(asset('/assets/images/yt-2.jpg'), '')) }}" class="lazyload" alt="Ý kiến khách hàng về Xây Dựng Kim Anh" width="282" height="212">
+							<div class="ka-play-icon">
+								<i class="fas fa-play"></i>
+							</div>
+						</div>
+					</a>
+				</div>
+				<div class="col-sm-3 col-xs-6 mb-15">
+					<a data-fancybox="gallery-yt" href="https://www.youtube.com/watch?v=CsMoN-G_QK8" class="ka-video-item">
+						<div class="ka-video-thumb">
+							<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{ asset(convert_images.webpConvert2(asset('/assets/images/yt-3.jpg'), '')) }}" class="lazyload" alt="Xây Nhà Quận Bình Tân - Uy Tín" width="277" height="208">
+							<div class="ka-play-icon">
+								<i class="fas fa-play"></i>
+							</div>
+						</div>
+					</a>
+				</div>
+				<div class="col-sm-3 col-xs-6 mb-15">
+					<a data-fancybox="gallery-yt" href="https://www.youtube.com/watch?v=Jw70fD5eZp4" class="ka-video-item">
+						<div class="ka-video-thumb">
+							<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{ asset(convert_images.webpConvert2(asset('/assets/images/yt-4.jpg'), '')) }}" class="lazyload" alt="Ý kiến khách hàng về Kim Anh" width="277" height="208">
+							<div class="ka-play-icon">
+								<i class="fas fa-play"></i>
+							</div>
+						</div>
+					</a>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="ka-contact-form-section">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-8 col-md-offset-2">
+					<div class="ka-contact-form-wrapper">
+						<h2 class="text-center text-uppercase ka-section-heading">Nhận tư vấn miễn phí</h2>
+						<p class="text-center ka-section-desc">Chúng tôi sẽ liên hệ lại với bạn trong thời gian sớm nhất</p>
+
+						{{ form_start(form, {'attr': {'id': 'ka-homepage-contact-form', 'class': 'ka-ajax-form'}}) }}
+						<div class="row">
+							<div class="col-md-6">{{ form_row(form.name) }}</div>
+							<div class="col-md-6">{{ form_row(form.phone) }}</div>
+						</div>
+						{{ form_row(form.email) }}
+						{{ form_row(form.contents) }}
+						<div class="text-center form-submit-group">
+							{{ form_row(form.send) }}
+						</div>
+						{{ form_end(form) }}
+						<div id="ka-contact-form-message" style="display: none; margin-top: 15px;"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+</div>{% endblock %}

@@ -1,0 +1,29 @@
+<nav id="ka-main-nav">
+    <div class="ka-nav-wrapper">
+        <div class="container">
+            <nav class="ka-navbar navbar-default">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#ka-navbar-collapse" aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                </div>
+                <div class="collapse navbar-collapse" id="ka-navbar-collapse">
+                    {{ render_menu('Main Menu') | raw }}
+                    <form class="navbar-form navbar-right ka-search-form" action="{{ path('news_search') }}" method="get">
+                        <div class="form-group">
+                            <div class="ka-search-wrapper">
+                                <input name="q" type="text" class="form-control ka-search-input" placeholder="{{ 'search'|trans }}">
+                                <button type="submit" class="ka-search-btn" aria-label="{{ 'search'|trans }}">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </nav>
+        </div>
+    </div>
+</nav>

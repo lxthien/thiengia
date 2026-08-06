@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="vi-VN">
+    <head>
+        <title>{% block title %}{{ get_setting('pageTitle') }}{% endblock %}</title>
+        <meta name="description" content="{% block description %}{{ get_setting('pageDescription') }}{% endblock %}">
+        <meta name="keywords" content="{% block keyword %}{{ get_setting('pageKeyword') }}{% endblock %}">
+
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- dns prefetch -->
+        <meta http-equiv="x-dns-prefetch-control" content="on">
+        <link rel="preconnect" href="//facebook.com" crossorigin>
+        <link rel="dns-prefetch" href="//facebook.com">
+        <link rel="preconnect" href="//www.google-analytics.com" crossorigin>
+        <link rel="dns-prefetch" href="//www.google-analytics.com">
+        <link rel="preconnect" href="//www.youtube.com" crossorigin>
+        <link rel="dns-prefetch" href="//www.youtube.com">
+        <link rel="preconnect" href="//s7.addthis.com" crossorigin>
+        <link rel="dns-prefetch" href="//s7.addthis.com">
+        <link rel="preconnect" href="//fonts.gstatic.com" crossorigin>
+        <link rel="dns-prefetch" href="//fonts.gstatic.com" >
+        <link rel="preconnect" href="//cdnjs.cloudflare.com" crossorigin>
+        <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" >
+        <link rel="preconnect" href="//www.google.com" crossorigin>
+        <link rel="dns-prefetch" href="//www.google.com" >
+        <link rel="preconnect" href="//connect.facebook.net" crossorigin>
+        <link rel="dns-prefetch" href="//connect.facebook.net" >
+        <link rel="preconnect" href="//www.gstatic.com" crossorigin>
+        <link rel="dns-prefetch" href="//www.gstatic.com" >
+        <link rel="preconnect" href="//z.moatads.com" crossorigin>
+        <link rel="dns-prefetch" href="//z.moatads.com" >
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com" >
+        <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+        <link rel="dns-prefetch" href="https://fonts.gstatic.com" >
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="dns-prefetch" href="https://ka-f.fontawesome.com" >
+        <link rel="preconnect" href="https://ka-f.fontawesome.com" crossorigin>
+        <link rel="dns-prefetch" href="//www.googletagmanager.com" >
+        <link rel="dns-prefetch" href="//v1.addthisedge.com" >
+        <link rel="dns-prefetch" href="//m.addthis.com" >
+        <link rel="dns-prefetch" href="//www.facebook.com" >
+        <link rel="dns-prefetch" href="//graph.facebook.com" >
+        <link rel="dns-prefetch" href="//widgets.pinterest.com" >
+        <link rel="dns-prefetch" href="//api-public.addthis.com" >
+        <link rel="dns-prefetch" href="//scontent-ort2-2.xx.fbcdn.net" >
+        <link rel="dns-prefetch" href="//external-ort2-2.xx.fbcdn.net" >
+
+        <!-- https://realfavicongenerator.net -->
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
+        <link rel='icon' href='{{ asset('favicon.ico') }}' type='image/x-icon'/ >
+        <link rel="mask-icon" href="{{ asset('safari-pinned-tab.svg') }}" color="#5bbad5">
+        <meta name="msapplication-TileColor" content="#da532c">
+        <meta name="theme-color" content="#ffffff">
+        
+        {% block robots %}
+        <meta name="robots" content="index, follow" />
+        {% endblock %}
+        <meta name="revisit-after" content="1 days">
+        <meta name="google" content="notranslate" />
+        <meta http-equiv="content-language" content="vi">
+        <meta name="copyright" content="Xây Dựng Kim Anh [{{ get_setting('contens_email') }}]">
+        <meta name="DC.title" content="{{ block('title') }}">
+        <meta name="geo.region" content="VN" />
+        <meta name="geo.placename" content="{{ get_setting('contens_dia_chi') }}" />
+        <meta name="geo.position" content="10.904337632211163;106.65160263701388" />
+        <meta name="ICBM" content="10.904337632211163;106.65160263701388">
+        
+        {% block canonical %}
+            {% if app.request.attributes.get('_route') is not null %}
+                <meta name="DC.identifier" content="{{ url(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) }}">
+            {% endif %}
+
+            {% if app.request.attributes.get('_route') is not null %}
+            <link rel="canonical" href="{{ url(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) }}"/>
+            {% endif %}
+        {% endblock %}
+        
+        <!-- Open Graph data -->
+        <meta property="og:locale" content="vi_VN" />
+        {% block structuredOpenGraph %}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="{{ block('title') }}" />
+        <meta property="og:description" content="{{ block('description') }}" />
+        {% endblock %}
+        {% if app.request.attributes.get('_route') is not null %}
+            <meta property="og:url" content="{{ url(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) }}" />
+        {% endif %}
+        <meta property="og:site_name" content="{{ get_setting('siteName') }}" />
+        <meta property="fb:app_id" content="{{ get_setting('fbApp') }}" />
+        <!-- Open Graph data -->
+
+        <!-- Twitter Card data -->
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:site" content="@kientruckimanh">
+        <meta name="twitter:title" content="{{ block('title') }}">
+        <meta name="twitter:description" content="{{ block('description') }}">
+        <meta name="twitter:creator" content="@kientruckimanh">
+        {% block twitterImage %}
+        {% endblock %}
+        <!-- Twitter Card data -->
+
+        {% block localBusiness %}
+        {% endblock %}
+
+        {% block structuredWebSite %}
+        <script type="application/ld+json">
+            {
+                "@context": "http://schema.org",
+                "@graph": [
+                    {
+                        "@type": "Organization",
+                        "@id": "{{ absolute_url(path('homepage')) }}#organization",
+                        "url": "{{ absolute_url(path('homepage')) }}",
+                        "name": "Xây Dựng Kim Anh",
+                        "logo": {
+                            "@type": "ImageObject",
+                            "@id": "{{ app.request.scheme ~ '://' ~ app.request.host ~ '/' ~ convert_images.webpConvert2(asset('/assets/images/logo.png'), '') }}",
+                            "url": "{{ app.request.scheme ~ '://' ~ app.request.host ~ '/' ~ convert_images.webpConvert2(asset('/assets/images/logo.png'), '') }}",
+                            "width": "274",
+                            "height": "99"
+                        }
+                    },
+                    {
+                        "@context": "https://schema.org",
+                        "@type": "WebSite",
+                        "@id": "{{ absolute_url(path('homepage')) }}#website",
+                        "url": "{{ absolute_url(path('homepage')) }}",
+                        "name": "Xây Dựng Kim Anh",
+                        "alternateName": [
+                            "CÔNG TY THIẾT KẾ, XÂY DỰNG NHÀ PHỐ, SỬA CHỮA NHÀ",
+                            "Công ty Xây Dựng Kim Anh",
+                            "thiết kế nhà Xây dựng Kim Anh",
+                            "xây dựng nhà Xây dựng Kim Anh",
+                            "xây nhà trọn gói Xây dựng Kim Anh",
+                            "sửa chữa nhà Xây dựng Kim Anh",
+                            "dịch vụ sửa nhà Xây dựng Kim Anh",
+                            "sửa nhà trọn gói Xây dựng Kim Anh"
+                        ],
+                        "inLanguage": "vi-VN",
+                        "publisher": {
+                            "@type": "Organization",
+                            "@id": "{{ absolute_url(path('homepage')) }}#organization"
+                        },
+                        "potentialAction": {
+                            "@type": "SearchAction",
+                            "target": "{{ absolute_url(path('homepage')) }}search?q={search_term_string}",
+                            "query-input": "required name=search_term_string"
+                        }
+                    },
+                    {
+                        "@type": "Person",
+                        "url": "{{ absolute_url(path('author', {'slug': 'nguyenduytuan' })) }}",
+                        "@id": "{{ absolute_url(path('author', {'slug': 'nguyenduytuan' })) }}#Person",
+                        "name": "Nguyễn Duy Tuấn",
+                        "alternateName": [
+                            "Kimanh Kimanh"
+                        ],
+                        "familyName": "Nguyễn",
+                        "additionalName": "Duy",
+                        "givenName": "Tuấn",
+                        "mainentityofpage": "{{ absolute_url(path('author', {'slug': 'nguyenduytuan' })) }}",
+                        "birthDate": "1975-05-16",
+                        "description": "CEO Nguyễn Duy Tuấn là người lãnh đạo công ty Xây dựng Kim Anh, ông là người có chuyên môn cao trong lĩnh vực thiết kế, thi công xây dựng nhà ở, nhà công nghiệp.",
+                        "jobTitle": [
+                            "CEO",
+                            "Founder"
+                        ],
+                        "gender": "https://schema.org/Male",
+                        "height": "1m75",
+                        "email": "nguyenduytuan.xaydungkimanh@gmail.com",
+                        "image": "{{ absolute_url(asset('assets/images/nguyenduytuan.jpg')) }}",
+                        "sameAs": [
+                            "https://www.facebook.com/profile.php?id=100025112408398",
+                            "https://www.linkedin.com/in/nguyenduytuanxaydungkimanh/",
+                            "https://www.pinterest.com/nguyenduytuanxaydungkimanh/",
+                            "https://www.youtube.com/@nguyenduytuan75/about",
+                            "https://twitter.com/nguyenduytuan75"
+                        ],
+                        "contactPoint": {
+                            "@type": "ContactPoint",
+                            "telephone": "{{ get_setting('contens_hotline_1')|replace({' ': '', '.': ''}) }}",
+                            "email": "nguyenduytuan.xaydungkimanh@gmail.com",
+                            "availableLanguage": [
+                                "Vietnamese",
+                                "English"
+                            ]
+                        },
+                        "worksFor": {
+                            "@type": "Organization",
+                            "@id": "{{ absolute_url(path('homepage')) }}#organization"
+                        },
+                        "nationality": {
+                            "@type": "Country",
+                            "@id": "kg:/m/01crd5",
+                            "url": "https://vi.wikipedia.org/wiki/Việt_Nam",
+                            "name": "Việt Nam"
+                        },
+                        "address": {
+                            "@type": "PostalAddress",
+                            "streetAddress": "C40 - KDC Hiệp Thành, Nguyễn Thị Búp, Phường Hiệp Thành",
+                            "addressLocality": "Quận 12",
+                            "addressRegion": "Hồ Chí Minh",
+                            "postalCode": "700000",
+                            "addressCountry": "VN"
+                        },
+                        "birthPlace": {
+                            "@type": "Place",
+                            "url": "https://vi.wikipedia.org/wiki/%C4%90%E1%BB%93ng_Nai",
+                            "name": "Đồng Nai",
+                            "description": "Đồng Nai là một tỉnh thuộc vùng Đông Nam Bộ trên cơ sở hợp nhất 2 tỉnh cũ là Biên Hòa và Long Khánh, Việt Nam. Đây là tỉnh đông dân thứ 5 cả nước sau Thành phố Hồ Chí Minh, thành phố Hà Nội."
+                        },
+                        "knowsLanguage": [
+                            "English",
+                            "Vietnamese"
+                        ]
+                    }
+                ]
+            }
+        </script>
+        {% endblock %}
+
+        {% block blogPosting %}
+        {% endblock %}
+
+        {% block structuredReview %}
+        {% endblock %}
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => { /** init gtm after 3500 seconds - this could be adjusted */
+                setTimeout(initGTM, 3500);
+            });
+            document.addEventListener('scroll', initGTMOnEvent);
+            document.addEventListener('mousemove', initGTMOnEvent);
+            document.addEventListener('touchstart', initGTMOnEvent);
+
+            function initGTMOnEvent(event) {
+                initGTM();
+                event.currentTarget.removeEventListener(event.type, initGTMOnEvent); // remove the event listener that got triggered
+            }
+            
+            function initGTM() {
+                if (window.gtmDidInit) {
+                    return false;
+                }
+                window.gtmDidInit = true; // flag to ensure script does not get added to DOM more than once.
+                window.dataLayer = window.dataLayer || [];
+                const script = document.createElement('script');
+                script.type = 'text/javascript';
+                script.async = true;
+                // ensure PageViews is always tracked (on script load)
+                script.onload = () => {
+                    window.dataLayer.push({event: 'gtm.js', 'gtm.start': new Date().getTime(), 'gtm.uniqueEventId': 0});
+                };
+                script.src = 'https://www.googletagmanager.com/gtm.js?id={{ get_setting('GTM') }}';
+                document.head.appendChild(script);
+            }
+        </script>
+        <!-- End Google Tag Manager -->
+        <!-- Google Ads Tracking (gclid) -->
+        <script>
+            (function() {
+                function getURLParam(name) {
+                    var urlParams = new URLSearchParams(window.location.search);
+                    return urlParams.get(name);
+                }
+
+                function getCookie(name) {
+                    var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+                    return match ? match[2] : null;
+                }
+
+                var gclid = getURLParam('gclid');
+                if (gclid) {
+                    var expiry = new Date();
+                    expiry.setDate(expiry.getDate() + 90);
+                    document.cookie = "gclid=" + gclid + "; expires=" + expiry.toUTCString() + "; path=/; SameSite=Lax";
+                }
+
+                document.addEventListener('DOMContentLoaded', function() {
+                    var gclidValue = getCookie('gclid');
+                    if (gclidValue) {
+                        var inputs = document.querySelectorAll('input[type="hidden"]');
+                        inputs.forEach(function(input) {
+                            if (input.name && input.name.indexOf('[gclid]') !== -1) {
+                                input.value = gclidValue;
+                            }
+                        });
+                    }
+                });
+            })();
+        </script>
+        <link rel="preload" href="{{ absolute_url(asset('build/fonts/ieVl2ZhZI2eCN5jzbjEETS9weq8-19-7DRs5.woff2')) }}" crossorigin="anonymous" as="font" type="font/woff2">
+        <link rel="preload" href="{{ absolute_url(asset('build/fonts/ieVl2ZhZI2eCN5jzbjEETS9weq8-19a7DRs5.woff2')) }}" crossorigin="anonymous" as="font" type="font/woff2">
+        <link rel="preload" href="{{ absolute_url(asset('build/fonts/ieVl2ZhZI2eCN5jzbjEETS9weq8-19G7DRs5.woff2')) }}" crossorigin="anonymous" as="font" type="font/woff2">
+        <link rel="preload" href="{{ absolute_url(asset('build/fonts/ieVl2ZhZI2eCN5jzbjEETS9weq8-19K7DQ.woff2')) }}" crossorigin="anonymous" as="font" type="font/woff2">
+        <link rel="preload" href="{{ absolute_url(asset('build/fonts/ieVl2ZhZI2eCN5jzbjEETS9weq8-19y7DRs5.woff2')) }}" crossorigin="anonymous" as="font" type="font/woff2">
+        <link rel="preload" href="{{ absolute_url(asset('build/fonts/ieVl2ZhZI2eCN5jzbjEETS9weq8-1927DRs5.woff2')) }}" crossorigin="anonymous" as="font" type="font/woff2">
+        <link rel="preload" href="{{ absolute_url(asset('build/fonts/ieVl2ZhZI2eCN5jzbjEETS9weq8-1967DRs5.woff2')) }}" crossorigin="anonymous" as="font" type="font/woff2">
+        <link rel="preload" href="{{ absolute_url(asset('build/fonts/Roboto-Regular.woff2')) }}" crossorigin="anonymous" as="font" type="font/woff2">
+        <link rel="preload" href="{{ absolute_url(asset('build/fonts/Roboto-Medium.woff2')) }}" crossorigin="anonymous" as="font" type="font/woff2">
+        <link rel="preload" href="{{ absolute_url(asset('build/fonts/Roboto-Bold.woff2')) }}" crossorigin="anonymous" as="font" type="font/woff2">
+        <!-- Custom css -->
+        <style type="text/css">
+            {{ source('@web/css/first.css', ignore_missing = true) }}
+        </style>
+        <link href="{{ absolute_url(asset('build/css/app.css')) }}" rel="preload stylesheet" as="style" onload="this.rel='stylesheet'" >
+        <noscript><link rel="stylesheet" href="{{ absolute_url(asset('build/css/app.css')) }}" ></noscript>
+        {% block stylesheets %}
+        {% endblock %}
+    </head>
+    <body>
+        <!-- Google Tag Manager (noscript) -->
+        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ get_setting('GTM') }}"
+        height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+        <!-- End Google Tag Manager (noscript) -->
+
+        <div class="container-fluid wrapper">
+            {{ include('layout/header.html.twig') }}
+            {{ include('layout/menu.html.twig') }}
+            {{ include('layout/slide.html.twig') }}
+
+            <main>
+                {% block body %}{% endblock %}
+            </main>
+
+            {{ include('layout/footer.html.twig') }}
+            {{ include('layout/footer_UI.html.twig') }}
+            
+            {{ include('layout/contactbar.html.twig') }}
+            {% block contactHotline %}
+                {{ include('layout/hotline.html.twig') }}
+            {% endblock %}
+
+            {{ get_setting('facebookMessenger')|raw }}
+        </div>
+    </body>
+</html>

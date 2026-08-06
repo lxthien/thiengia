@@ -1,0 +1,21 @@
+<div class="rating-container">
+    {{ ratingValue|rating }}
+    <button type="button" id="rating">
+        <div>
+            {% if rating > 0 %}
+                <span>{{ rating }}</span> ({{ ratingPercent }}%) / <span>{{ ratingCount }}</span> votes
+            {% else %}
+                <span>đánh giá</span>
+            {% endif %}
+        </div>
+    </button>
+</div>
+
+<div style="display:none">
+    <div id="form-rating-container">
+        <form action="{{ path('rating') }}" id="form-rating-review" data-news-id="{{ post.getId() }}">
+            {{ form_widget(formRating.rating) }}
+        </form>
+        <p class="rating-message"></p>
+    </div>
+</div>

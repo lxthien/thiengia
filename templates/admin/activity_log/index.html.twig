@@ -1,0 +1,295 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block body_id 'admin-activity-log-index' %}
+
+{% block main %}
+    <div class="content mt-3">
+        <div class="animated fadeIn">
+            {# Page Header #}
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <h4 class="mb-0">
+                        <i class="fa fa-history text-primary"></i>
+                        Nhật ký hoạt động
+                        <span class="badge badge-primary ml-1">{{ total }}</span>
+                    </h4>
+                </div>
+            </div>
+
+            {# Filter Bar #}
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body py-3">
+                            <form method="GET" action="{{ path('admin_activity_log_index') }}" id="filter-form">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <div class="form-group mb-0">
+                                            <label class="small text-muted mb-1">Người dùng</label>
+                                            <select name="user" class="form-control form-control-sm">
+                                                <option value="">-- Tất cả --</option>
+                                                {% for user in users %}
+                                                    <option value="{{ user.id }}" {% if filters.userId == user.id %}selected{% endif %}>
+                                                        {{ user.username }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group mb-0">
+                                            <label class="small text-muted mb-1">Hành động</label>
+                                            <select name="action" class="form-control form-control-sm">
+                                                <option value="">-- Tất cả --</option>
+                                                <option value="create" {% if filters.action == 'create' %}selected{% endif %}>Tạo mới</option>
+                                                <option value="update" {% if filters.action == 'update' %}selected{% endif %}>Cập nhật</option>
+                                                <option value="delete" {% if filters.action == 'delete' %}selected{% endif %}>Xóa</option>
+                                                <option value="toggle" {% if filters.action == 'toggle' %}selected{% endif %}>Thay đổi trạng thái</option>
+                                                <option value="settings" {% if filters.action == 'settings' %}selected{% endif %}>Cài đặt</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group mb-0">
+                                            <label class="small text-muted mb-1">Đối tượng</label>
+                                            <select name="entity_type" class="form-control form-control-sm">
+                                                <option value="">-- Tất cả --</option>
+                                                <option value="news" {% if filters.entityType == 'news' %}selected{% endif %}>Bài viết</option>
+                                                <option value="page" {% if filters.entityType == 'page' %}selected{% endif %}>Trang</option>
+                                                <option value="user" {% if filters.entityType == 'user' %}selected{% endif %}>Người dùng</option>
+                                                <option value="category" {% if filters.entityType == 'category' %}selected{% endif %}>Danh mục</option>
+                                                <option value="comment" {% if filters.entityType == 'comment' %}selected{% endif %}>Bình luận</option>
+                                                <option value="banner" {% if filters.entityType == 'banner' %}selected{% endif %}>Banner</option>
+                                                <option value="menu" {% if filters.entityType == 'menu' %}selected{% endif %}>Menu</option>
+                                                <option value="tag" {% if filters.entityType == 'tag' %}selected{% endif %}>Tag</option>
+                                                <option value="settings" {% if filters.entityType == 'settings' %}selected{% endif %}>Cài đặt</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group mb-0">
+                                            <label class="small text-muted mb-1">Từ ngày</label>
+                                            <input type="date" name="date_from" class="form-control form-control-sm" value="{{ filters.dateFrom }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group mb-0">
+                                            <label class="small text-muted mb-1">Đến ngày</label>
+                                            <input type="date" name="date_to" class="form-control form-control-sm" value="{{ filters.dateTo }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group mb-0">
+                                            <label class="small text-muted mb-1">&nbsp;</label>
+                                            <div>
+                                                <button type="submit" class="btn btn-sm btn-primary">
+                                                    <i class="fa fa-search"></i> Lọc
+                                                </button>
+                                                <a href="{{ path('admin_activity_log_index') }}" class="btn btn-sm btn-secondary">
+                                                    <i class="fa fa-times"></i> Xóa lọc
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Activity Log Table #}
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped table-hover" id="activity-log-table">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th style="width: 15%;">Thời gian</th>
+                                            <th style="width: 12%;">Người dùng</th>
+                                            <th style="width: 12%;">Hành động</th>
+                                            <th style="width: 10%;">Đối tượng</th>
+                                            <th style="width: 25%;">Tên</th>
+                                            <th style="width: 16%;">Chi tiết</th>
+                                            <th style="width: 10%;">IP</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for log in logs %}
+                                        <tr class="activity-row activity-{{ log.action }}">
+                                            <td>
+                                                <small class="text-muted">
+                                                    <i class="fa fa-clock-o"></i>
+                                                    {{ log.createdAt|localizeddate('short', 'medium', null, 'Asia/Ho_Chi_Minh', 'dd/MM/yyyy HH:mm:ss') }}
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <strong>{{ log.username ?: 'Hệ thống' }}</strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge {{ log.actionBadgeClass }}">
+                                                    <i class="fa {{ log.actionIcon }}"></i>
+                                                    {{ log.actionLabel }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="entity-type-label">{{ log.entityTypeLabel }}</span>
+                                            </td>
+                                            <td>
+                                                {% if log.entityTitle %}
+                                                    <span title="{{ log.entityTitle }}">
+                                                        {{ log.entityTitle|length > 50 ? log.entityTitle|slice(0, 50) ~ '...' : log.entityTitle }}
+                                                    </span>
+                                                {% else %}
+                                                    <span class="text-muted">—</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if log.details %}
+                                                    {% if log.details|length > 60 or "\n" in log.details %}
+                                                        <div class="mt-1">
+                                                            <button type="button" class="btn btn-sm btn-outline-info" data-toggle="modal" data-target="#detailModal{{ log.id }}">
+                                                                <i class="fa fa-eye"></i> Xem chi tiết
+                                                            </button>
+                                                        </div>
+                                                    {% else %}
+                                                        <small class="text-muted" title="{{ log.details }}">
+                                                            {{ log.details }}
+                                                        </small>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="text-muted">—</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <small class="text-muted d-block">{{ log.ipAddress ?: '—' }}</small>
+                                                {% if log.userAgent %}
+                                                    <small class="text-muted" title="{{ log.userAgent }}"><i class="fa fa-globe"></i> {{ log.userAgent|slice(0, 20) }}...</small>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% else %}
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-4">
+                                                <i class="fa fa-inbox fa-2x mb-2 d-block"></i>
+                                                Không có dữ liệu nhật ký
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {# Pagination #}
+                            {% if pages > 1 %}
+                            <nav aria-label="Phân trang" class="mt-3">
+                                <ul class="pagination pagination-sm justify-content-center">
+                                    {# Previous #}
+                                    <li class="page-item {% if currentPage <= 1 %}disabled{% endif %}">
+                                        <a class="page-link" href="{{ path('admin_activity_log_index', filters|merge({page: currentPage - 1})) }}">
+                                            <i class="fa fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+
+                                    {# Page numbers #}
+                                    {% set startPage = max(1, currentPage - 3) %}
+                                    {% set endPage = min(pages, currentPage + 3) %}
+
+                                    {% if startPage > 1 %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ path('admin_activity_log_index', filters|merge({page: 1})) }}">1</a>
+                                        </li>
+                                        {% if startPage > 2 %}
+                                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                                        {% endif %}
+                                    {% endif %}
+
+                                    {% for p in startPage..endPage %}
+                                        <li class="page-item {% if p == currentPage %}active{% endif %}">
+                                            <a class="page-link" href="{{ path('admin_activity_log_index', filters|merge({page: p})) }}">{{ p }}</a>
+                                        </li>
+                                    {% endfor %}
+
+                                    {% if endPage < pages %}
+                                        {% if endPage < pages - 1 %}
+                                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                                        {% endif %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ path('admin_activity_log_index', filters|merge({page: pages})) }}">{{ pages }}</a>
+                                        </li>
+                                    {% endif %}
+
+                                    {# Next #}
+                                    <li class="page-item {% if currentPage >= pages %}disabled{% endif %}">
+                                        <a class="page-link" href="{{ path('admin_activity_log_index', filters|merge({page: currentPage + 1})) }}">
+                                            <i class="fa fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Render Modals at the bottom to avoid z-index overlay issues #}
+    {% for log in logs %}
+        {% if log.details and (log.details|length > 60 or "\n" in log.details) %}
+        <!-- Modal for Log {{ log.id }} -->
+        <div class="modal fade" id="detailModal{{ log.id }}" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Chi tiết thay đổi - {{ log.entityTitle ?: '—' }}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <pre style="white-space: pre-wrap; font-family: monospace; background: #f8f9fa; padding: 15px; border-radius: 4px;">{{ log.details }}</pre>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
+
+    <style>
+        .activity-row.activity-delete {
+            background-color: rgba(220, 53, 69, 0.03) !important;
+        }
+        .activity-row.activity-create {
+            background-color: rgba(40, 167, 69, 0.03) !important;
+        }
+        .entity-type-label {
+            font-size: 0.85em;
+            color: #555;
+            font-weight: 500;
+        }
+        .badge {
+            font-size: 0.78em;
+            padding: 4px 8px;
+        }
+        #activity-log-table th {
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+        #activity-log-table td {
+            vertical-align: middle;
+            font-size: 0.9em;
+        }
+        .pagination .page-link {
+            padding: 0.35rem 0.65rem;
+        }
+    </style>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}
+    {% if object.id %}
+        Edit Menu Item
+    {% else %}
+        Add Menu Item to {{ menu.name }}
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h1 class="h2 mb-4">
+                {% if object.id %}
+                    Edit Menu Item
+                {% else %}
+                    Add Menu Item
+                {% endif %}
+            </h1>
+
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <strong>Basic Information</strong>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        {{ form_label(form.title) }}
+                        {{ form_widget(form.title, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.title) }}
+                        <small class="form-text text-muted">The text displayed in the menu</small>
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.type) }}
+                        {{ form_widget(form.type, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.type) }}
+                        <small class="form-text text-muted">Choose the type of link</small>
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.url) }}
+                        {{ form_widget(form.url, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.url) }}
+                        <small class="form-text text-muted">Enter full URL for custom links or relative path</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header bg-success text-white">
+                    <strong>SEO & Styling</strong>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        {{ form_label(form.titleAttr) }}
+                        {{ form_widget(form.titleAttr, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.titleAttr) }}
+                        <small class="form-text text-muted">Displayed on hover, improves SEO and UX</small>
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.targetAttr) }}
+                        {{ form_widget(form.targetAttr, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.targetAttr) }}
+                        <small class="form-text text-muted">Controls how the link opens in browser</small>
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.cssClass) }}
+                        {{ form_widget(form.cssClass, {'attr': {'class': 'form-control', 'placeholder': 'e.g., btn btn-primary active'}}) }}
+                        {{ form_errors(form.cssClass) }}
+                        <small class="form-text text-muted">CSS classes for styling the menu item</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header bg-warning">
+                    <strong>Status</strong>
+                </div>
+                <div class="card-body">
+                    <div class="custom-control custom-checkbox">
+                        {{ form_widget(form.enable, {'attr': {'class': 'custom-control-input'}}) }}
+                        {{ form_label(form.enable, 'Enable this menu item', {'label_attr': {'class': 'custom-control-label'}}) }}
+                    </div>
+                    {{ form_errors(form.enable) }}
+                </div>
+            </div>
+
+            <div class="form-group mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-save"></i> 
+                    {% if object.id %}
+                        Update Item
+                    {% else %}
+                        Add Item
+                    {% endif %}
+                </button>
+                <a href="{{ path('admin_menu_edit', {'id': menu.id}) }}" class="btn btn-secondary">
+                    <i class="fa fa-times"></i> Cancel
+                </a>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+
+        <!-- Info Panel -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <strong>Menu Information</strong>
+                </div>
+                <div class="card-body">
+                    <p>
+                        <strong>Menu:</strong><br>
+                        {{ menu.name }}
+                    </p>
+                    {% if parent %}
+                        <p>
+                            <strong>Parent Item:</strong><br>
+                            {{ parent.title }}
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header bg-secondary text-white">
+                    <strong>Menu Types</strong>
+                </div>
+                <div class="card-body small">
+                    <p><strong>Custom URL:</strong> Any external or relative URL</p>
+                    <p><strong>News Article:</strong> Link to a news article</p>
+                    <p><strong>Category:</strong> Link to a news category</p>
+                    <p><strong>Page:</strong> Link to a custom page</p>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header bg-secondary text-white">
+                    <strong>SEO Tips</strong>
+                </div>
+                <div class="card-body small">
+                    <ul>
+                        <li>Use descriptive titles</li>
+                        <li>Add tooltip titles for hover text</li>
+                        <li>Use "_blank" only for external links</li>
+                        <li>Keep menu structure simple and logical</li>
+                        <li>Organize by category for better user experience</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

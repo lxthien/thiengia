@@ -1,0 +1,156 @@
+{% for block in blocks %}
+    {% set data = block.data|default({}) %}
+
+    {% if block.type == 'hero' %}
+        <section class="ka-builder-hero"{% if data.background_image|default('') %} style="background-image: url('{{ data.background_image|e('html_attr') }}')"{% endif %}>
+            <div class="ka-builder-hero__inner">
+                {% if data.eyebrow|default('') %}
+                    <span class="ka-builder-eyebrow">{{ data.eyebrow }}</span>
+                {% endif %}
+                {% if data.title|default('') %}
+                    <h2>{{ data.title }}</h2>
+                {% endif %}
+                {% if data.body|default('') %}
+                    <p>{{ data.body|nl2br }}</p>
+                {% endif %}
+                {% if data.button_text|default('') and data.button_url|default('') %}
+                    <a class="ka-builder-button" href="{{ data.button_url }}">{{ data.button_text }}</a>
+                {% endif %}
+            </div>
+        </section>
+    {% elseif block.type == 'image' %}
+        {% if data.url|default('') %}
+            <figure class="ka-builder-image"{% if data.width|default('') %} style="max-width: {{ data.width|e('html_attr') }}px"{% endif %}>
+                <img loading="lazy" src="{{ data.url }}" alt="{{ data.alt|default('') }}">
+                {% if data.caption|default('') %}
+                    <figcaption>{{ data.caption }}</figcaption>
+                {% endif %}
+            </figure>
+        {% endif %}
+    {% elseif block.type == 'gallery' %}
+        {% set items = data.items|default('')|split("\n") %}
+        <section class="ka-builder-gallery">
+            {% for rawItem in items %}
+                {% set item = rawItem|trim %}
+                {% if item %}
+                    {% set parts = item|split('|') %}
+                    {% set url = parts[0]|default('')|trim %}
+                    {% set alt = parts[1]|default('')|trim %}
+                    {% set caption = parts[2]|default('')|trim %}
+                    {% if url %}
+                        <figure class="ka-builder-gallery__item">
+                            <img loading="lazy" src="{{ url }}" alt="{{ alt }}">
+                            {% if caption %}
+                                <figcaption>{{ caption }}</figcaption>
+                            {% endif %}
+                        </figure>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        </section>
+    {% elseif block.type == 'faq' %}
+        {% set items = data.items|default('')|split("\n") %}
+        <section class="ka-builder-faq">
+            {% for rawItem in items %}
+                {% set item = rawItem|trim %}
+                {% if item %}
+                    {% set parts = item|split('|') %}
+                    {% set question = parts[0]|default('')|trim %}
+                    {% set answer = parts[1]|default('')|trim %}
+                    {% if question %}
+                        <details class="ka-builder-faq__item">
+                            <summary>{{ question }}</summary>
+                            <div class="ka-builder-faq__answer">
+                                <p>{{ answer|nl2br }}</p>
+                            </div>
+                        </details>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        </section>
+    {% elseif block.type == 'video' %}
+        {% if data.embed_url|default('') %}
+            <section class="ka-builder-video">
+                {% if data.title|default('') %}
+                    <h3>{{ data.title }}</h3>
+                {% endif %}
+                <div class="ka-builder-video__frame">
+                    <iframe src="{{ data.embed_url }}" allowfullscreen loading="lazy"></iframe>
+                </div>
+                {% if data.caption|default('') %}
+                    <p class="ka-builder-video__caption">{{ data.caption|nl2br }}</p>
+                {% endif %}
+            </section>
+        {% endif %}
+    {% elseif block.type == 'features' %}
+        {% set items = data.items|default('')|split("\n") %}
+        <section class="ka-builder-features">
+            {% if data.title|default('') %}
+                <h3>{{ data.title }}</h3>
+            {% endif %}
+            <div class="ka-builder-features__grid">
+                {% for rawItem in items %}
+                    {% set item = rawItem|trim %}
+                    {% if item %}
+                        {% set parts = item|split('|') %}
+                        {% set icon = parts[0]|default('')|trim %}
+                        {% set title = parts[1]|default('')|trim %}
+                        {% set body = parts[2]|default('')|trim %}
+                        <article class="ka-builder-features__item">
+                            {% if icon %}
+                                <div class="ka-builder-features__icon"><i class="{{ icon }}" aria-hidden="true"></i></div>
+                            {% endif %}
+                            {% if title %}
+                                <h4>{{ title }}</h4>
+                            {% endif %}
+                            {% if body %}
+                                <p>{{ body|nl2br }}</p>
+                            {% endif %}
+                        </article>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </section>
+    {% elseif block.type == 'contact_form' %}
+        <section class="ka-builder-contact-form">
+            {% if data.title|default('') %}
+                <h3>{{ data.title }}</h3>
+            {% endif %}
+            {% if data.body|default('') %}
+                <p>{{ data.body|nl2br }}</p>
+            {% endif %}
+            {% if data.hotline|default('') %}
+                <p><strong>{{ data.hotline }}</strong></p>
+            {% endif %}
+            {% if contactBlockForm is defined and contactBlockForm %}
+                <div class="ka-builder-contact-form__form">
+                    {{ form_start(contactBlockForm) }}
+                    {{ form_row(contactBlockForm.name) }}
+                    {{ form_row(contactBlockForm.phone) }}
+                    {{ form_row(contactBlockForm.email) }}
+                    {{ form_row(contactBlockForm.contents) }}
+                    {{ form_row(contactBlockForm.send) }}
+                    {{ form_end(contactBlockForm) }}
+                </div>
+            {% endif %}
+        </section>
+    {% elseif block.type == 'cta' %}
+        <section class="ka-builder-cta ka-builder-cta--{{ data.style|default('primary')|e('html_attr') }}">
+            {% if data.title|default('') %}
+                <h3>{{ data.title }}</h3>
+            {% endif %}
+            {% if data.body|default('') %}
+                <p>{{ data.body|nl2br }}</p>
+            {% endif %}
+            {% if data.button_text|default('') and data.button_url|default('') %}
+                <a class="ka-builder-button" href="{{ data.button_url }}">{{ data.button_text }}</a>
+            {% endif %}
+        </section>
+    {% elseif block.type == 'spacer' %}
+        <div class="ka-builder-spacer" style="height: {{ data.height|default('48')|e('html_attr') }}px"></div>
+    {% else %}
+        <section class="ka-builder-rich-text">
+            {{ data.html|default('')|raw }}
+        </section>
+    {% endif %}
+{% endfor %}

@@ -1,0 +1,170 @@
+{{ form_start(form, {attr: attr|default({})}) }}
+{{ form_row(form.parent) }}
+{{ form_row(form.title) }}
+{{ form_row(form.url) }}
+{{ form_row(form.enable) }}
+
+{% set _img = (form.vars.value and form.vars.value.images) ? form.vars.value.images : '' %}
+{% set _img_url = _img ? '/uploads/images/news/' ~ _img : '' %}
+{% set _picker_url = '' %}
+
+{# ── Image Manager Card ── #}
+<div class="image-manager-card" data-media-picker-block data-picker-id="pagePicker" data-upload-path="/uploads/media/" style="border:1px solid #e0e4ef;border-radius:6px;margin-bottom:20px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+
+	<div style="background:linear-gradient(135deg,#f7f9ff 0%,#eef1fb 100%);padding:10px 15px;border-bottom:1px solid #e0e4ef;display:flex;align-items:center;gap:8px;">
+		<i class="fa fa-image" style="color:#5b7aff;font-size:15px;"></i>
+		<strong style="font-size:13px;color:#3a3f5c;">Hình ảnh đại diện</strong>
+	</div>
+
+	<div style="padding:16px;">
+		<div class="row" style="margin:0;">
+
+			<div class="col-sm-4" style="padding-right:16px;">
+				<div style="border:2px dashed #d5d9ef;border-radius:6px;background:#f9faff;min-height:150px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+					<img id="pagePicker_preview_img" src="{{ _img_url }}" alt="Preview" style="max-width:100%;max-height:190px;display:{{ _img_url ? 'block' : 'none' }};object-fit:cover;">
+					<div id="pagePicker_placeholder" style="text-align:center;color:#b0b8d4;display:{{ _img_url ? 'none' : 'flex' }};flex-direction:column;align-items:center;gap:8px;padding:20px;">
+						<i class="fa fa-image fa-3x"></i>
+						<small style="font-size:11px;">Chưa có ảnh</small>
+					</div>
+					<button type="button" id="pagePicker_clear_btn" data-media-picker-clear data-picker-id="pagePicker" title="Bỏ chọn ảnh thư viện" style="position:absolute;top:5px;right:5px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;border:none;cursor:pointer;font-size:13px;line-height:22px;padding:0;display:{{ _img_url ? 'block' : 'none' }};">&times;</button>
+				</div>
+				{% if _img %}
+					<p style="font-size:10px;color:#aaa;margin-top:5px;word-break:break-all;text-align:center;">{{ _img }}</p>
+				{% endif %}
+			</div>
+
+			<div class="col-sm-8" style="padding-left:8px;">
+
+				<div style="background:#fff8f0;border:1px solid #ffe0b0;border-radius:5px;padding:11px 14px;margin-bottom:12px;">
+					<label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#b07020;margin-bottom:6px;display:block;">
+						<i class="fa fa-upload"></i>
+						Upload ảnh mới
+					</label>
+					{{ form_widget(form.imageFile) }}
+					{{ form_errors(form.imageFile) }}
+					<small style="color:#aaa;font-size:11px;margin-top:4px;display:block;">Upload ảnh mới sẽ thay thế ảnh hiện tại.</small>
+				</div>
+
+				<div style="position:relative;text-align:center;margin:10px 0;">
+					<span style="background:#fff;padding:0 10px;font-size:11px;color:#b0b8d4;position:relative;z-index:1;">── hoặc ──</span>
+					<div style="position:absolute;top:50%;left:0;right:0;height:1px;background:#e8eaf6;z-index:0;"></div>
+				</div>
+
+				<div style="background:#f7f9ff;border:1px solid #d5d9ef;border-radius:5px;padding:11px 14px;">
+					<label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#5b7aff;margin-bottom:8px;display:block;">
+						<i class="fa fa-th-large"></i>
+						Chọn từ Media Library
+					</label>
+					<div class="input-group">
+						<input type="text" id="pagePicker_display" class="form-control input-sm" readonly value="{{ _img_url }}" placeholder="Chưa chọn ảnh từ thư viện..." style="font-size:12px;background:#fff;color:#555;">
+						<span class="input-group-btn">
+							<button type="button" class="btn btn-default btn-sm" data-media-picker-open data-picker-id="pagePicker" style="background:#5b7aff;color:#fff;border-color:#5b7aff;white-space:nowrap;">
+								<i class="fa fa-image"></i>
+								Chọn
+							</button>
+						</span>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>
+
+<input type="hidden" id="pagePicker_url_input" name="_media_picker_url" value="{{ _picker_url }}" data-picker-id="pagePicker">
+
+<div class="modal fade" id="pagePickerModal" tabindex="-1" role="dialog" data-picker-url="{{ path('admin_media_picker') }}" data-picker-id="pagePicker" aria-labelledby="pagePickerModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-media-picker-close data-picker-id="pagePicker">
+					<span>&times;</span>
+				</button>
+				<h4 class="modal-title" id="pagePickerModalLabel">
+					<i class="fa fa-image"></i>
+					Chọn ảnh từ thư viện</h4>
+			</div>
+			<div class="modal-body" id="pagePicker_body">
+				<div class="text-center text-muted" style="padding:30px;">
+					<i class="fa fa-spinner fa-spin fa-2x"></i>
+					<p class="mt-2">Đang tải thư viện...</p>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<span id="pagePicker_selName" class="text-muted pull-left" style="font-size:13px;line-height:34px;"></span>
+				<button type="button" class="btn btn-default" data-media-picker-close data-picker-id="pagePicker">Hủy</button>
+				<button type="button" class="btn btn-primary" id="pagePicker_confirm" disabled data-media-picker-confirm data-picker-id="pagePicker">
+					<i class="fa fa-check"></i>
+					Chọn ảnh này
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+{{ form_row(form.description) }}
+<div class="page-builder-admin" data-page-builder>
+	<div class="page-builder-admin__toggle">
+		{{ form_row(form.pageBuilderEnabled) }}
+		{{ form_widget(form.pageBuilderData) }}
+	</div>
+
+	<div class="page-builder-admin__workspace" data-page-builder-workspace>
+		<div class="page-builder-admin__header">
+			<div>
+				<h4>Page Builder</h4>
+				<p>Tạo nội dung theo block và vẫn giữ HTML fallback cho hệ thống cũ.</p>
+			</div>
+			<button type="button" class="btn btn-outline-primary btn-sm" data-page-builder-add>
+				<i class="fa fa-plus" aria-hidden="true"></i>
+				Thêm block
+			</button>
+		</div>
+
+		<div class="page-builder-admin__empty alert alert-light" data-page-builder-empty>
+			Chưa có block nào. Bấm "Thêm block" để bắt đầu.
+		</div>
+
+		<div class="page-builder-admin__list" data-page-builder-list></div>
+	</div>
+</div>
+
+<div class="page-builder-legacy-field" data-page-builder-legacy>
+	<div class="cms-block-editor-layout">
+		{{ include('admin/content_block/_toolbar.html.twig', {
+                target_editor: form.contents.vars.id,
+                current_id: form.vars.value.id|default(0),
+            }, with_context = false) }}
+		<div class="cms-block-editor-layout__field">
+			{{ form_row(form.contents) }}
+		</div>
+	</div>
+</div>
+
+{{ form_row(form.pageTitle) }}
+{{ form_row(form.pageDescription) }}
+{{ form_row(form.pageKeyword) }}
+{{ form_row(form.robots) }}
+{{ form_row(form.postType) }}
+{{ form_row(form.breadcrumbTitle) }}
+{{ form_row(form.schemaMarkup) }}
+{{ form_row(form.template) }}
+{{ form_row(form.note) }}
+
+{% if form.save is defined %}
+	{{ form_widget(form.save, {label: 'action.create_post', attr: {class: 'btn btn-primary'}}) }}
+{% endif %}
+
+{% if form.saveAndCreateNew is defined %}
+	{{ form_widget(form.saveAndCreateNew, {label: 'label.save_and_create_new', attr: {class: 'btn btn-primary'}}) }}
+{% endif %}
+
+{{ form_rest(form) }}
+
+{% if include_back_to_home_link|default(false) %}
+	<a href="{{ path('admin_page_index') }}" class="btn btn-link">
+		<i class="fa fa-list-alt" aria-hidden="true"></i>
+		{{ 'action.back_to_list'|trans }}
+	</a>
+{% endif %}
+{{ form_end(form) }}

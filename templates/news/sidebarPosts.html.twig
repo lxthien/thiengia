@@ -1,0 +1,26 @@
+<div class="ka-sidebar-widget ka-posts-widget">
+    <div class="ka-widget-header">
+        <div class="ka-header-icon">
+            <i class="fas fa-newspaper"></i>
+        </div>
+        <span>{{ title }}</span>
+        <div class="ka-header-stripe"></div>
+    </div>
+    <div class="ka-widget-body">
+        <div class="ka-post-list">
+            {% for row in posts %}
+                {% set imagePath = vich_uploader_asset(row, 'imageFile') ?: asset('assets/images/no-image.png') %}
+                {% set imagePathFilter = (vich_uploader_asset(row, 'imageFile') ?: asset('assets/images/no-image.png'))|imagine_filter('news_70_65') %}
+                {% set imgSrc = convert_images.fileExists(imagePath) ? convert_images.webpConvert(imagePathFilter, '', true) : imagePath|imagine_filter('news_70_65') %}
+                <a href="{{ path('news_show', {'slug': row.getUrl()}) }}" class="ka-post-item" title="{{ row.getTitle() }}">
+                    <div class="ka-post-thumb">
+                        <img alt="{{ row.getTitle() }}" width="70" height="65" class="lazyload" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{ imgSrc ?: absolute_url(imagePathFilter) }}">
+                    </div>
+                    <div class="ka-post-info">
+                        <h5>{{ row.getTitle() }}</h5>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,94 @@
+﻿{#
+ # Reusable Media Picker block
+ #
+ # Parameters:
+ #   - current_image: string, full public URL of current image (optional)
+ #   - param_name:    string, POST parameter name to submit, e.g. '_media_picker_url' (required)
+ #   - upload_path:   string, URL prefix for Media Library files, e.g. '/uploads/media/' (required)
+ #   - picker_id:     string, unique ID prefix for this picker, e.g. 'newsPicker' (required)
+ #   - label:         string, label text (optional)
+ #   - help:          string, help text (optional)
+ #}
+
+{% set picker_label = label|default('Chọn ảnh từ Media Library') %}
+{% set _current_url = current_image|default('') %}
+{% set modal_id = picker_id ~ 'Modal' %}
+
+<div class="form-group media-picker-field"
+     data-media-picker-block
+     data-picker-id="{{ picker_id }}"
+     data-upload-path="{{ upload_path }}">
+
+    <label class="control-label">{{ picker_label }}</label>
+
+    {# Preview #}
+    <div id="{{ picker_id }}_preview_wrap"
+         style="margin-bottom:10px; position:relative; {% if _current_url %}display:inline-block;{% else %}display:none;{% endif %}">
+        <img id="{{ picker_id }}_preview_img"
+             src="{{ _current_url }}"
+             alt="Preview"
+             style="max-height:120px; max-width:240px; display:block; border:1px solid #ddd;">
+        <button type="button" id="{{ picker_id }}_clear" title="Xóa ảnh đã chọn"
+                data-media-picker-clear data-picker-id="{{ picker_id }}"
+                style="position:absolute;top:0;right:0;background:rgba(0,0,0,.55);color:#fff;border:none;padding:2px 8px;cursor:pointer;font-size:16px;">&times;</button>
+    </div>
+
+    {# Hidden POST param — NGOÀI Symfony form mapping, không qua Vich #}
+    <input type="hidden"
+           id="{{ picker_id }}_url_input"
+           name="{{ param_name }}"
+           value="{{ _current_url }}"
+           data-picker-id="{{ picker_id }}">
+
+    {# Display input + open button #}
+    <div class="input-group">
+        <input type="text" id="{{ picker_id }}_display" class="form-control" readonly
+               value="{{ _current_url }}"
+               placeholder="Chưa chọn ảnh từ thư viện...">
+        <span class="input-group-btn">
+            <button type="button" class="btn btn-default"
+                    data-media-picker-open data-picker-id="{{ picker_id }}">
+                <i class="fa fa-image"></i> Chọn từ Media
+            </button>
+        </span>
+    </div>
+    {% if help is defined %}
+        <p class="help-block">{{ help }}</p>
+    {% endif %}
+</div>
+
+{# ── Media Picker Modal ── #}
+<div class="modal fade" id="{{ modal_id }}" tabindex="-1" role="dialog"
+     aria-labelledby="{{ modal_id }}Label" aria-hidden="true"
+     data-picker-url="{{ path('admin_media_picker') }}"
+     data-picker-id="{{ picker_id }}">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" aria-label="Đóng"
+                        data-media-picker-close data-picker-id="{{ picker_id }}">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="{{ modal_id }}Label">
+                    <i class="fa fa-image"></i> Chọn ảnh từ thư viện
+                </h4>
+            </div>
+            <div class="modal-body" id="{{ picker_id }}_body">
+                <div class="text-center text-muted" style="padding:30px;">
+                    <i class="fa fa-spinner fa-spin fa-2x"></i>
+                    <p class="mt-2">Đang tải thư viện...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <span id="{{ picker_id }}_selName" class="text-muted pull-left"
+                      style="font-size:13px; line-height:34px;"></span>
+                <button type="button" class="btn btn-default"
+                        data-media-picker-close data-picker-id="{{ picker_id }}">Hủy</button>
+                <button type="button" class="btn btn-primary" id="{{ picker_id }}_confirm" disabled
+                        data-media-picker-confirm data-picker-id="{{ picker_id }}">
+                    <i class="fa fa-check"></i> Chọn ảnh này
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,40 @@
+<tr>
+    <td class="text-center">
+        {% if category.getThumbnail() %}
+            <img src="{{ category.getThumbnail() }}" alt="{{ category.getName() }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+        {% else %}
+            <div style="width: 50px; height: 50px; background: #f0f0f0; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; color: #aaa; margin: 0 auto;">
+                <i class="fa fa-image"></i>
+            </div>
+        {% endif %}
+    </td>
+    <td>
+        <span style="margin-left: {{ level * 30 }}px;">
+            {% if category.getChildren() and category.getChildren().count() > 0 %}
+                <i class="fa fa-folder text-primary"></i>
+            {% else %}
+                <i class="fa fa-file-text text-gray"></i>
+            {% endif %}
+            <a class="btn-link" href="{{ path('admin_news_list_by_category', {categoryId: category.id}) }}">{{ category.getName() }}</a>
+        </span>
+    </td>
+    <td>{{ category.getParentcat() != 'root' ? category.getParentcat() : '-' }}</td>
+    <td>{{ category.getUrl() }}</td>
+    <td>{{ category.getCreatedAt() | localizeddate('medium', 'none', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY') }}</td>
+    <td>{{ category.getUpdatedAt() | localizeddate('medium', 'none', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY') }}</td>
+    <td>
+        <div class="item-actions">
+            <a href="{{ path('admin_newscategory_edit', {id: category.id}) }}" class="btn-sm btn-edit">
+                <i class="fa fa-edit" aria-hidden="true"></i>
+            </a>
+
+            {{ include('admin/newscategory/_delete_form.html.twig', {category: category}, with_context = false) }}
+        </div>
+    </td>
+</tr>
+
+{% if category.getChildren() and category.getChildren().count() > 0 %}
+    {% for child in category.getChildren() %}
+        {{ include('admin/newscategory/_tree_row.html.twig', {'category': child, 'level': level + 1}, with_context = false) }}
+    {% endfor %}
+{% endif %}

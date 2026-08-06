@@ -1,0 +1,13 @@
+<div class="sort float-right">
+    <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            {{'Sort'|trans}}
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            {{ knp_pagination_sortable(pagination, 'Sort by ID'|trans, 'id') }}
+            {{ knp_pagination_sortable(pagination, 'Sort by Name'|trans, 'name') }}
+            {{ knp_pagination_sortable(pagination, 'Sort by Date'|trans, 'createdAt') }}
+        </div>
+    </div>
+</div>
+<div class="clearfix"></div>

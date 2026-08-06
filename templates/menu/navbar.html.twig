@@ -1,0 +1,21 @@
+{# Frontend Navigation Menu Template with SEO Support #}
+
+{# 
+    Usage in your base template:
+    {% include 'menu/navbar.html.twig' with {'menu_name': 'Main Menu'} %}
+    
+    Or with custom options:
+    {% include 'menu/navbar.html.twig' with {
+        'menu_name': 'Main Menu',
+        'ul_class': 'navbar-nav ml-auto',
+        'li_class': 'nav-item',
+        'a_class': 'nav-link',
+        'active_class': 'active'
+    } %}
+#}
+
+{% set menu = get_menu(menu_name) %}
+
+{% if menu %}
+    {{ render_menu(menu_name, options|default({})) | raw }}
+{% endif %}

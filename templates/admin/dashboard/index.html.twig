@@ -1,0 +1,564 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block body_id 'admin_dashboard_index' %}
+
+{% block main %}
+    <div class="content mt-3">
+        <div class="animated fadeIn">
+            
+            <!-- Quick Actions Row -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card border-0 bg-transparent">
+                        <div class="card-body p-0">
+                            <div class="d-flex flex-wrap justify-content-between gap-3">
+                                <a href="{{ path('admin_news_new') }}" class="btn btn-lg btn-primary shadow-sm flex-grow-1 mr-2 mb-2">
+                                    <i class="fa fa-plus-circle mr-2"></i> Viết bài mới
+                                </a>
+                                <a href="{{ path('admin_newscategory_index') }}" class="btn btn-lg btn-success shadow-sm flex-grow-1 mr-2 mb-2">
+                                    <i class="fa fa-folder-open mr-2"></i> Chuyên mục
+                                </a>
+                                <a href="{{ path('admin_media_index') }}" class="btn btn-lg btn-info shadow-sm flex-grow-1 mr-2 mb-2">
+                                    <i class="fa fa-image mr-2"></i> Thư viện ảnh
+                                </a>
+                                <a href="{{ path('admin_settings_global') }}" class="btn btn-lg btn-warning text-white shadow-sm flex-grow-1 mb-2">
+                                    <i class="fa fa-cog mr-2"></i> Cài đặt hệ thống
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Widgets Row -->
+            <div class="row">
+                <!-- Total Posts Widget -->
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card text-white bg-flat-color-1 shadow-sm border-0">
+                        <div class="card-body pb-0">
+                            <div class="stat-widget-content">
+                                <h4 class="mb-0">
+                                    <span class="count">{{ totalPosts }}</span>
+                                </h4>
+                                <p class="text-light">Bài viết</p>
+                            </div>
+                            <div class="icon-big text-right">
+                                <i class="fa fa-newspaper-o"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Comments Widget -->
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card text-white bg-flat-color-2 shadow-sm border-0">
+                        <div class="card-body pb-0">
+                            <div class="stat-widget-content">
+                                <h4 class="mb-0">
+                                    <span class="count">{{ totalComments }}</span>
+                                </h4>
+                                <p class="text-light">Bình luận</p>
+                            </div>
+                            <div class="icon-big text-right">
+                                <i class="fa fa-comments"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Views Widget -->
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card text-white bg-flat-color-3 shadow-sm border-0">
+                        <div class="card-body pb-0">
+                            <div class="stat-widget-content">
+                                <h4 class="mb-0">
+                                    <span class="count">{{ totalViews >= 1000 ? (totalViews / 1000)|round(1) ~ 'K' : totalViews }}</span>
+                                </h4>
+                                <p class="text-light">Tổng lượt xem</p>
+                            </div>
+                            <div class="icon-big text-right">
+                                <i class="fa fa-eye"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Users Widget -->
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card text-white bg-flat-color-4 shadow-sm border-0">
+                        <div class="card-body pb-0">
+                            <div class="stat-widget-content">
+                                <h4 class="mb-0">
+                                    <span class="count">{{ unreadContacts }}</span>
+                                </h4>
+                                <p class="text-light">Liên hệ chưa đọc</p>
+                            </div>
+                            <div class="icon-big text-right">
+                                <i class="fa fa-envelope-o"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Secondary Stats Row -->
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card bg-info text-white shadow-sm border-0 mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-white-50 small">Tổng Banner</div>
+                                    <div class="h3 mb-0">{{ totalBanners }}</div>
+                                </div>
+                                <i class="fa fa-picture-o fa-2x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-success text-white shadow-sm border-0 mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-white-50 small">Tổng Thẻ (Tags)</div>
+                                    <div class="h3 mb-0">{{ totalTags }}</div>
+                                </div>
+                                <i class="fa fa-tags fa-2x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-secondary text-white shadow-sm border-0 mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-white-50 small">Thành viên</div>
+                                    <div class="h3 mb-0">{{ totalUsers }}</div>
+                                </div>
+                                <i class="fa fa-users fa-2x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View Trends Chart -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white">
+                            <strong class="card-title text-primary"><i class="fa fa-line-chart"></i> Xu hướng lượt xem (30 ngày)</strong>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-wrapper">
+                                <canvas id="viewTrendsChart" style="height: 300px;"></canvas>
+                            </div>
+                            <div class="mt-3 text-center small text-muted">
+                                <i class="fa fa-info-circle"></i> Dữ liệu được cập nhật tự động sau mỗi lần đồng bộ lượt xem.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Items Row -->
+            <div class="row">
+                <!-- Recent Contacts -->
+                <div class="col-lg-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                            <strong class="card-title text-success"><i class="fa fa-envelope"></i> Liên hệ mới nhất</strong>
+                            <a href="{{ path('admin_contact_index') }}" class="btn btn-xs btn-outline-success">Xem tất cả</a>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-align-middle mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th>Người gửi</th>
+                                            <th>Ngày gửi</th>
+                                            <th>Trạng thái</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for contact in recentContacts %}
+                                        <tr>
+                                            <td>
+                                                <div class="font-weight-bold">{{ contact.name }}</div>
+                                                <small class="text-muted">{{ contact.phone }}</small>
+                                            </td>
+                                            <td><small>{{ contact.createdAt|localizeddate('short', 'short', null, 'Asia/Ho_Chi_Minh', 'd/m H:i') }}</small></td>
+                                            <td>
+                                                {% if contact.isRead %}
+                                                    <span class="badge badge-secondary">Đã đọc</span>
+                                                {% else %}
+                                                    <span class="badge badge-danger pulse">Mới</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% else %}
+                                        <tr>
+                                            <td colspan="3" class="text-center py-4 text-muted">Không có liên hệ nào</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comment Status -->
+                <div class="col-lg-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white">
+                            <strong class="card-title text-warning"><i class="fa fa-commenting"></i> Trạng thái bình luận</strong>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded text-center">
+                                        <div class="text-success h4 mb-0">{{ approvedComments }}</div>
+                                        <small class="text-muted">Đã duyệt</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded text-center">
+                                        <div class="text-warning h4 mb-0">{{ pendingComments }}</div>
+                                        <small class="text-muted">Đang chờ</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <table class="table table-sm mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Người dùng</th>
+                                        <th>Trạng thái</th>
+                                        <th>Ngày</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for comment in recentComments|slice(0, 4) %}
+                                    <tr>
+                                        <td>{{ comment.author|slice(0, 20) }}</td>
+                                        <td>
+                                            {% if comment.approved %}
+                                                <span class="badge badge-success">Duyệt</span>
+                                            {% else %}
+                                                <span class="badge badge-warning">Chờ</span>
+                                            {% endif %}
+                                        </td>
+                                        <td><small>{{ comment.createdAt|localizeddate('short', 'short', null, 'Asia/Ho_Chi_Minh', 'd/m H:i') }}</small></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Posts & System Info Row -->
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white">
+                            <strong class="card-title text-info"><i class="fa fa-trophy"></i> Bài viết xem nhiều nhất</strong>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-hover mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Tiêu đề</th>
+                                        <th>Lượt xem</th>
+                                        <th width="30%">Phổ biến</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% set maxViews = topPosts|length > 0 ? (topPosts|first).viewCounts : 1 %}
+                                    {% for post in topPosts %}
+                                    <tr>
+                                        <td>
+                                            <a href="{{ path(post.postType == 'page' ? 'admin_page_edit' : 'admin_news_edit', {id: post.id}) }}" class="text-dark">
+                                                {{ post.title|slice(0, 50) }}{{ post.title|length > 50 ? '...' : '' }}
+                                            </a>
+                                        </td>
+                                        <td><strong>{{ post.viewCounts }}</strong></td>
+                                        <td>
+                                            <div class="progress" style="height: 6px;">
+                                                <div class="progress-bar bg-info" role="progressbar" style="width: {{ (post.viewCounts / maxViews * 100)|round }}%"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white">
+                            <strong class="card-title"><i class="fa fa-server"></i> Hệ thống</strong>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>PHP Version</span>
+                                    <span class="badge badge-dark">{{ systemInfo.php_version }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Symfony</span>
+                                    <span class="badge badge-primary">{{ systemInfo.symfony_version }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Database</span>
+                                    <span class="badge badge-info">{{ systemInfo.db_driver|upper }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Server OS</span>
+                                    <span class="badge badge-secondary">{{ systemInfo.server_os }}</span>
+                                </li>
+                            </ul>
+                            <div class="p-3">
+                                <button onclick="window.location.reload()" class="btn btn-block btn-outline-primary btn-sm">
+                                    <i class="fa fa-refresh"></i> Làm mới Dashboard
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Posts -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                            <strong class="card-title text-primary"><i class="fa fa-pencil-square-o"></i> Bài viết mới nhất (7 ngày)</strong>
+                            <a href="{{ path('admin_news_index') }}" class="btn btn-sm btn-outline-primary">Tất cả bài viết</a>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="bg-light text-muted small text-uppercase">
+                                        <tr>
+                                            <th>Tiêu đề</th>
+                                            <th>Ngày tạo</th>
+                                            <th>Lượt xem</th>
+                                            <th class="text-right">Tác vụ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for post in recentPosts %}
+                                        <tr>
+                                            <td>
+                                                <a href="{{ path(post.postType == 'page' ? 'admin_page_edit' : 'admin_news_edit', {id: post.id}) }}" class="font-weight-bold text-dark">
+                                                    {{ post.title }}
+                                                </a>
+                                                <div class="small text-muted">{{ post.postType|capitalize }}</div>
+                                            </td>
+                                            <td>
+                                                <span class="text-muted"><i class="fa fa-calendar-o mr-1"></i> {{ post.createdAt|localizeddate('short', 'none', null, 'Asia/Ho_Chi_Minh', 'd/m/Y') }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-info px-2 py-1"><i class="fa fa-eye mr-1"></i> {{ post.viewCounts }}</span>
+                                            </td>
+                                            <td class="text-right">
+                                                <a href="{{ path(post.postType == 'page' ? 'admin_page_edit' : 'admin_news_edit', {id: post.id}) }}" class="btn btn-sm btn-primary rounded-circle" title="Chỉnh sửa">
+                                                    <i class="fa fa-edit"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% else %}
+                                        <tr>
+                                            <td colspan="4" class="text-center py-5 text-muted">
+                                                <i class="fa fa-folder-open-o fa-3x mb-3 d-block opacity-25"></i>
+                                                Không có bài viết mới trong 7 ngày qua
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity Log Widget -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                            <strong class="card-title"><i class="fa fa-history"></i> Nhật ký hoạt động gần đây</strong>
+                            <a href="{{ path('admin_activity_log_index') }}" class="btn btn-sm btn-link text-muted">Xem tất cả</a>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-striped mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th>Thời gian</th>
+                                            <th>Người dùng</th>
+                                            <th>Hành động</th>
+                                            <th>Đối tượng</th>
+                                            <th>Tên</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for log in recentActivities %}
+                                        <tr>
+                                            <td>
+                                                <small class="text-muted">
+                                                    {{ log.createdAt|localizeddate('short', 'short', null, 'Asia/Ho_Chi_Minh', 'dd/MM HH:mm') }}
+                                                </small>
+                                            </td>
+                                            <td><strong>{{ log.username ?: 'Hệ thống' }}</strong></td>
+                                            <td>
+                                                <span class="badge {{ log.actionBadgeClass }}">
+                                                    <i class="fa {{ log.actionIcon }}"></i>
+                                                    {{ log.actionLabel }}
+                                                </span>
+                                            </td>
+                                            <td>{{ log.entityTypeLabel }}</td>
+                                            <td>
+                                                {{ log.entityTitle ? (log.entityTitle|length > 45 ? log.entityTitle|slice(0, 45) ~ '...' : log.entityTitle) : '—' }}
+                                            </td>
+                                        </tr>
+                                        {% else %}
+                                        <tr>
+                                            <td colspan="5" class="text-center py-4 text-muted">Chưa có hoạt động nào</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script>
+        // View Trends Chart
+        var ctx = document.getElementById('viewTrendsChart');
+        if (ctx) {
+            var viewTrendsData = {{ viewTrends|json_encode|raw }};
+            var dates = Object.keys(viewTrendsData);
+            var views = Object.values(viewTrendsData);
+            
+            // Format labels to be more readable (DD/MM)
+            var labels = dates.map(function(dateStr) {
+                var d = new Date(dateStr);
+                return d.getDate() + '/' + (d.getMonth() + 1);
+            });
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Lượt xem theo ngày',
+                        data: views,
+                        borderColor: '#2196F3',
+                        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: '#2196F3',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            padding: 10,
+                            titleFont: { size: 14 },
+                            bodyFont: { size: 14 },
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.parsed.y + ' lượt xem';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0,0,0,0.05)'
+                            },
+                            ticks: {
+                                stepSize: 1,
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+
+    <style>
+        .stat-widget-content {
+            min-height: 70px;
+        }
+        .icon-big {
+            font-size: 50px;
+            opacity: 0.2;
+            position: absolute;
+            right: 15px;
+            bottom: 10px;
+        }
+        .pulse {
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+        }
+        .table-align-middle td {
+            vertical-align: middle;
+        }
+        .gap-3 {
+            gap: 1rem;
+        }
+        .btn-xs {
+            padding: .125rem .25rem;
+            font-size: .75rem;
+            line-height: 1.5;
+            border-radius: .15rem;
+        }
+        .card {
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+{% endblock %}

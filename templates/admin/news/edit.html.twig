@@ -1,0 +1,38 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block body_id 'admin_news_edit' %}
+
+{% block main %}
+    <div class="content mt-3">
+        <div class="animated fadeIn">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <strong class="card-title">{{ 'title.edit_news'|trans({'%id%': news.id}) }}</strong>
+                            <a class="pull-right" target="_blank" href="{{ path('news_show', {'slug': news.url, 'preview' : 'true', 'preview_id' : news.id }) }}">Xem trước</a>
+                        </div>
+                        <div class="card-body">
+                            <!-- SEO Checker -->
+                            {{ include('admin/components/seo-checker.html.twig') }}
+
+                            <!-- Credit Card -->
+                            <div id="pay-invoice">
+                                <div class="card-body">
+                                    {{ include('admin/news/_form.html.twig', {
+                                        form: form,
+                                        button_label: 'action.save'|trans,
+                                        include_back_to_home_link: true,
+                                    }, with_context = false) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- .card -->
+                </div>
+                <!--/.col-->
+            </div>
+        </div>
+        <!-- .animated -->
+    </div>
+{% endblock %}

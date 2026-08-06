@@ -1,0 +1,31 @@
+{
+    "name": "speed-up-website/freessl.tech-auto",
+    "description": "A PHP app/client for complete automation to issue/renew and install Let's Encrypt Free SSL certificate in cPanel shared hosting. This app/client also works on non-cPanel hosting except auto-installation.",
+    "type": "project",
+    "homepage": "https://freessl.tech",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Anindya Sundar Mandal",
+            "email": "anindya@SpeedUpWebsite.info",
+            "homepage": "https://SpeedUpWebsite.info",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "email": "support@freessl.tech",
+        "docs": "https://freessl.tech/documentation-free-ssl-certificate-automation"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "require": {
+    	"php": "^5.6 || ^7.0",
+    	"ircmaxell/password-compat": "^1.0",
+    	"indigophp/hash-compat": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "FreeSslDotTech\\FreeSSLAuto\\": "FreeSSLAuto/src/"
+        }
+    }
+}

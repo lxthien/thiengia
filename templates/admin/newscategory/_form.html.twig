@@ -1,0 +1,100 @@
+{{ form_start(form, {attr: attr|default({})}) }}
+    {{ form_errors(form) }}
+    {{ form_row(form.parentcat) }}
+    {{ form_row(form.name) }}
+    {{ form_row(form.url) }}
+    {{ form_row(form.description) }}
+    {{ form_row(form.content) }}
+    {{ form_row(form.showPostRelated) }}
+    {{ form_row(form.enable) }}
+    {{ form_row(form.sortBy) }}
+    {{ form_row(form.cardFormat) }}
+
+    {# ── Thumbnail ─────────────────────────────────────────── #}
+    <div class="form-group media-picker-field">
+        <label class="control-label">Ảnh đại diện danh mục</label>
+
+        {# Preview + clear #}
+        <div class="media-picker-preview-wrap" id="mediaPicker_preview_wrap"
+             style="margin-bottom:10px; position:relative; {% if form.vars.data and form.vars.data.thumbnail %}display:inline-block;{% else %}display:none;{% endif %}">
+            <img id="mediaPicker_preview_img"
+                 src="{{ form.vars.data and form.vars.data.thumbnail ? form.vars.data.thumbnail : '' }}"
+                 alt="Thumbnail preview">
+            <button type="button" id="mediaPicker_clear" title="Xóa ảnh">&times;</button>
+        </div>
+
+        {# Real hidden input Symfony maps to the entity field #}
+        {{ form_widget(form.thumbnail, {attr: {class: 'media-picker-input', style: 'display:none;'}}) }}
+
+        {# Display input + open button #}
+        <div class="input-group">
+            <input type="text" id="mediaPicker_display" class="form-control" readonly
+                   value="{{ form.vars.data and form.vars.data.thumbnail ? form.vars.data.thumbnail : '' }}"
+                   placeholder="Chưa chọn ảnh...">
+            <span class="input-group-btn">
+                <button type="button" class="btn btn-default" id="mediaPicker_open">
+                    <i class="fa fa-image"></i> Chọn từ Media
+                </button>
+            </span>
+        </div>
+        <p class="help-block">
+            Chọn ảnh từ thư viện media hoặc
+            <a href="{{ path('admin_media_index') }}" target="_blank">tải ảnh mới lên</a>.
+        </p>
+    </div>
+
+    {# ── Media Picker Modal (JS in admin.js reads data-picker-url) ── #}
+    <div class="modal fade" id="mediaPickerModal" tabindex="-1" role="dialog"
+         aria-labelledby="mediaPickerModalLabel" aria-hidden="true"
+         data-picker-url="{{ path('admin_media_picker') }}">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" id="mediaPicker_close" aria-label="Đóng">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="mediaPickerModalLabel">
+                        <i class="fa fa-image"></i> Chọn ảnh từ thư viện
+                    </h4>
+                </div>
+                <div class="modal-body" id="mediaPickerModalBody">
+                    <div class="text-center text-muted" style="padding:30px;">
+                        <i class="fa fa-spinner fa-spin fa-2x"></i>
+                        <p class="mt-2">Đang tải thư viện...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <span id="mediaPickerSelectedName" class="text-muted pull-left" style="font-size:13px; line-height:34px;"></span>
+                    <button type="button" class="btn btn-default" id="mediaPicker_cancel">Hủy</button>
+                    <button type="button" class="btn btn-primary" id="mediaPickerConfirm" disabled>
+                        <i class="fa fa-check"></i> Chọn ảnh này
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-title">
+        <h3>{{ 'label.seo'|trans }}</h3>
+    </div>
+    <hr>
+    {{ form_row(form.pageTitle) }}
+    {{ form_row(form.pageDescription) }}
+    {{ form_row(form.pageKeyword) }}
+    {{ form_row(form.robots) }}
+    {{ form_row(form.schemaMarkup) }}
+
+    <button type="submit" class="{{ button_css|default("btn btn-primary") }}">
+        <i class="fa fa-save" aria-hidden="true"></i> {{ button_label|default('label.create_post'|trans) }}
+    </button>
+
+    {% if form.saveAndCreateNew is defined %}
+        {{ form_widget(form.saveAndCreateNew, {label: 'label.save_and_create_new', attr: {class: 'btn btn-primary'}}) }}
+    {% endif %}
+
+    {% if include_back_to_home_link|default(false) %}
+        <a href="{{ path('admin_newscategory_index') }}" class="btn btn-link">
+            <i class="fa fa-list-alt" aria-hidden="true"></i> {{ 'action.back_to_list'|trans }}
+        </a>
+    {% endif %}
+{{ form_end(form) }}

@@ -1,0 +1,126 @@
+{# Frontend Macro for Advanced Menu Rendering with SEO #}
+
+{% macro menu_list(items, options, depth) %}
+    {% set ul_class = options.ul_class | default('navbar-nav') %}
+    {% set sub_ul_class = options.sub_ul_class | default('dropdown-menu') %}
+    {% set li_class = options.li_class | default('nav-item') %}
+    {% set sub_li_class = options.sub_li_class | default('dropdown-item') %}
+    {% set a_class = options.a_class | default('nav-link') %}
+    {% set active_class = options.active_class | default('active') %}
+
+    {% if items is not empty %}
+        {% set current_ul_class = depth > 0 ? sub_ul_class : ul_class %}
+        <ul class="{{ current_ul_class }}">
+            {% for item in items %}
+                {% set current_li_class = depth > 0 ? sub_li_class : li_class %}
+                {% set item_classes = [current_li_class] %}
+                
+                {% if item.class %}
+                    {% set item_classes = item_classes | merge([item.class]) %}
+                {% endif %}
+                
+                {% if item.children | length > 0 %}
+                    {% set item_classes = item_classes | merge(['dropdown']) %}
+                {% endif %}
+
+                <li class="{{ item_classes | join(' ') }}">
+                    <a href="{{ item.url | default('#') }}" class="{{ a_class }}"
+                       {% if item.title_attr %}title="{{ item.title_attr | escape }}"{% endif %}
+                       {% if item.target %}target="{{ item.target | escape }}"{% endif %}
+                       {% if item.children | length > 0 %}
+                           data-toggle="dropdown"
+                           aria-haspopup="true"
+                           aria-expanded="false"
+                       {% endif %}>
+                        {{ item.title | escape }}
+                        {% if item.children | length > 0 %}
+                            <span class="caret"></span>
+                        {% endif %}
+                    </a>
+
+                    {% if item.children | length > 0 %}
+                        {{ _self.menu_list(item.children, options, depth + 1) }}
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endmacro %}
+
+{# 
+    Usage:
+    {% set menu = get_menu('Main Menu') %}
+    {% if menu %}
+        {% set options = {
+            'ul_class': 'navbar-nav ml-auto',
+            'li_class': 'nav-item',
+            'a_class': 'nav-link',
+            'sub_ul_class': 'dropdown-menu',
+            'sub_li_class': 'dropdown-item',
+            'active_class': 'active'
+        } %}
+        {% import 'menu/macros.html.twig' as menu_macros %}
+        {{ menu_macros.menu_list(menu.items, options, 0) }}
+    {% endif %}
+#}
+
+{# Alternative: Simple menu list without Bootstrap #}
+
+{% macro simple_menu(items, depth) %}
+    {% if items is not empty %}
+        <ul class="menu-level-{{ depth }}">
+            {% for item in items %}
+                <li class="{% if item.class %}{{ item.class }} {% endif %}{% if item.children | length > 0 %}has-children{% endif %}">
+                    <a href="{{ item.url | default('#') }}"
+                       {% if item.title_attr %}title="{{ item.title_attr | escape }}"{% endif %}
+                       {% if item.target %}target="{{ item.target | escape }}" rel="noopener"{% endif %}>
+                        {{ item.title | escape }}
+                    </a>
+                    {% if item.children | length > 0 %}
+                        {{ _self.simple_menu(item.children, depth + 1) }}
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endmacro %}
+
+{# Breadcrumb menu rendering #}
+
+{% macro breadcrumb_menu(items) %}
+    {% if items is not empty %}
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                {% for item in items %}
+                    <li class="breadcrumb-item {% if loop.last %}active{% endif %}">
+                        {% if not loop.last %}
+                            <a href="{{ item.url | default('#') }} " {% if item.title_attr %}title="{{ item.title_attr | escape }}"{% endif %}>
+                                {{ item.title | escape }}
+                            </a>
+                        {% else %}
+                            {{ item.title | escape }}
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ol>
+        </nav>
+    {% endif %}
+{% endmacro %}
+
+{# Footer menu rendering (horizontal list) #}
+
+{% macro footer_menu(items) %}
+    {% if items is not empty %}
+        <ul class="footer-menu">
+            {% for item in items %}
+                <li>
+                    <a href="{{ item.url | default('#') }}"
+                       {% if item.title_attr %}title="{{ item.title_attr | escape }}"{% endif %}
+                       {% if item.target %}target="{{ item.target | escape }}" rel="noopener"{% endif %}>
+                        {{ item.title | escape }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endmacro %}

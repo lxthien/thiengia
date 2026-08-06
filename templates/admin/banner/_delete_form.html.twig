@@ -1,0 +1,8 @@
+{{ include('admin/common/_delete_post_confirmation.html.twig', { 'id': object.id }) }}
+
+<form action="{{ url('admin_banner_delete', {id: object.id}) }}" method="post" data-confirmation="true" id="delete-form">
+    <input type="hidden" name="token" value="{{ csrf_token('delete') }}" />
+    <button type="submit" data-toggle="modal" data-target="#confirmationModal{{object.id}}">
+        <i class="fa fa-trash" aria-hidden="true"></i>
+    </button>
+</form>

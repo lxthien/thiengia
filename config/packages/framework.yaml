@@ -1,0 +1,244 @@
+# Configuration for the Symfony framework features
+
+# These are the configuration parameters that define the application's behavior
+# and which are independent from the underlying technical infrastructure
+# See https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
+parameters:
+    # This parameter defines the codes of the locales (languages) enabled in the application
+    app_locales: vi|en
+    app.notifications.email_sender: anonymous@example.com
+    app.path.product_images: "/uploads/images/products"
+    app.path.news_images: "/uploads/images/news"
+    app.path.banner_images: "/uploads/images/banner"
+
+# Basic configuration for the Symfony framework features
+framework:
+    # The 'ide' option turns all of the file paths in an exception page
+    # into clickable links that open the given file using your favorite IDE.
+    # Supported values are 'phpstorm', 'sublime', 'textmate', 'macvim' and 'emacs'.
+    # When 'ide' is set to null the file is opened in your web browser.
+    # See https://symfony.com/doc/current/reference/configuration/framework.html#ide
+    ide: ~
+
+    # When using the HTTP Cache, ESI allows to render page fragments separately
+    # and with different cache configurations for each fragment
+    # https://symfony.com/doc/current/book/http_cache.html#edge-side-includes
+    esi:             { enabled: true }
+    translator:      { fallback: '%locale%' }
+    secret:          '%env(SYMFONY_SECRET)%'
+    # router:
+    #     resource: '../routes.yaml'
+    #     strict_requirements: ~
+    form:            ~
+    csrf_protection: ~
+    validation:      { enable_annotations: true }
+    templating:
+        engines: ['twig']
+    default_locale:  '%locale%'
+    trusted_hosts:   ~
+    session:
+        handler_id:  session.handler.native_file
+        save_path:   '%kernel.project_dir%/var/sessions/%kernel.environment%'
+    fragments:       ~
+    http_method_override: true
+    assets:
+        json_manifest_path: '%kernel.project_dir%/public/build/manifest.json'
+    php_errors:
+        log: true
+    cache:
+        default_doctrine_provider: 'app.doctrine_cache'
+        # this value is used as part of the "namespace" generated for the cache item keys
+        # to avoid collisions when multiple apps share the same cache backend (e.g. a Redis server)
+        # See https://symfony.com/doc/current/reference/configuration/framework.html#prefix-seed
+        prefix_seed: symfony-demo
+
+# Twig Configuration (used for rendering application templates)
+twig:
+    cache: false
+    debug: '%kernel.debug%'
+    strict_variables: '%kernel.debug%'
+    globals:
+        convert_images: '@App\Utils\ConvertImages'
+    form_themes:
+        - 'form/layout.html.twig'
+        - 'form/fields.html.twig'
+        - 'form/hierarchical_category_theme.html.twig'
+    paths:
+        'public/build': 'public'
+
+# Doctrine Configuration (used to access databases and manipulate their information)
+doctrine:
+    dbal:
+        # if you don't want to use SQLite, change the URL in parameters.yml or set the DATABASE_URL environment variable
+        url: '%env(DATABASE_URL)%'
+    orm:
+        auto_generate_proxy_classes: '%kernel.debug%'
+        auto_mapping: true
+
+# Swiftmailer Configuration (used to send emails)
+# instead of configuring the mailer credentials in this file, we pull
+# them from the app/config/parameters.yml file. The reason is that config.yml
+# stores options that change the application behavior and parameters.yml
+# stores options that change from one server to another
+#
+swiftmailer:
+    url : '%env(MAILER_URL)%'
+    spool: { type: memory }
+
+
+stof_doctrine_extensions:
+    orm:
+        default:
+            sluggable: true
+            timestampable: true
+
+# VichUploadBundle
+vich_uploader:
+    db_driver: orm
+    mappings:
+        product_images:
+            uri_prefix:         '%app.path.product_images%'
+            upload_destination: '%kernel.project_dir%/public/uploads/images/products'
+            namer: vich_uploader.namer_origname
+        news_images:
+            uri_prefix:         '%app.path.news_images%'
+            upload_destination: '%kernel.project_dir%/public/uploads/images/news'
+            namer: vich_uploader.namer_origname
+            delete_on_remove: true
+            delete_on_update: true
+        banner_images:
+            uri_prefix:         '%app.path.banner_images%'
+            upload_destination: '%kernel.project_dir%/public/uploads/images/banner'
+            namer: vich_uploader.namer_origname
+            delete_on_remove: true
+            delete_on_update: true
+
+
+# LiipImagineBundle
+# https://github.com/liip/LiipImagineBundle
+liip_imagine:
+    resolvers:
+        default:
+            web_path:
+                web_root: '%kernel.project_dir%/public'
+                cache_prefix: 'media/cache'
+
+    loaders:
+        default:
+            filesystem:
+                data_root: '%kernel.project_dir%/public/'
+
+    driver:               gd
+    cache:                default
+    data_loader:          default
+    default_image:        '%kernel.project_dir%/public/assets/images/no-image.png'
+    controller:
+        filter_action:         liip_imagine.controller:filterAction
+        filter_runtime_action: liip_imagine.controller:filterRuntimeAction
+
+    filter_sets:
+        cache: ~
+        user:
+            quality: 75
+            filters:
+                thumbnail: { size: [65, 65], mode: outbound }
+        admin_thumb:
+            quality: 75
+            filters:
+                thumbnail: { size: [50, 50], mode: outbound }
+        news_70_65:
+            quality: 75
+            filters:
+                thumbnail: { size: [70, 65], mode: outbound }
+        news_554_400:
+            quality: 75
+            filters:
+                thumbnail: { size: [554, 400], mode: outbound }
+        news_345_250:
+            quality: 75
+            filters:
+                thumbnail: { size: [345, 250], mode: outbound }
+        news_277_220:
+            quality: 75
+            filters:
+                thumbnail: { size: [277, 220], mode: outbound }
+        news_277_350:
+            quality: 75
+            filters:
+                thumbnail: { size: [277, 350], mode: outbound }
+        news_345_435:
+            quality: 75
+            filters:
+                thumbnail: { size: [345, 435], mode: outbound }
+        news_218_218:
+            quality: 75
+            filters:
+                thumbnail: { size: [218, 218], mode: outbound }
+        news_share_1200_630:
+            quality: 75
+            filters:
+                thumbnail: { size: [1200, 630], mode: outbound }
+        banner_768_400:
+            quality: 100
+            filters:
+                thumbnail: { size: [768, 400], mode: outbound }
+        banner_1500_550:
+            quality: 100
+            filters:
+                thumbnail: { size: [1500, 550], mode: outbound }
+
+# KnpPaginationBundle
+knp_paginator:
+    page_range: 5                       # number of links showed in the pagination menu (e.g: you have 10 pages, a page_range of 3, on the 5th page you'll see links to page 4, 5, 6)
+    default_options:                                 
+        page_name: page                 # page query parameter name
+        sort_field_name: sort           # sort field query parameter name
+        sort_direction_name: direction  # sort direction query parameter name
+        distinct: true                  # ensure distinct results, useful when ORM queries are using GROUP BY statements
+        filter_field_name: filterField  # filter field query parameter name
+        filter_value_name: filterValue  # filter value query parameter name
+    template:                                        
+        pagination: '@KnpPaginator/Pagination/sliding.html.twig'     # sliding pagination controls template                                    
+        sortable: '@KnpPaginator/Pagination/sortable_link.html.twig' # sort link template                                
+        filtration: '@KnpPaginator/Pagination/filtration.html.twig'  # filters template
+
+# KnpMenuBundle
+knp_menu:
+    # use "twig: false" to disable the Twig extension and the TwigRenderer
+    twig:
+        template: KnpMenuBundle::menu.html.twig
+    #  if true, enables the helper for PHP templates
+    templating: false
+    # the renderer to use, list is also available by default
+    default_renderer: twig
+
+# BreadcrumbsBundle
+white_october_breadcrumbs:
+    separator:          ''
+    viewTemplate:       '@WhiteOctoberBreadcrumbs/breadcrumbs.html.twig'
+
+# EWZRecaptchaBundle
+ewz_recaptcha:
+    public_key:  6LfF6jkUAAAAAEXwdFdSqBiu7S5EQ6EuDAf449uM
+    private_key: 6LfF6jkUAAAAAJzxFsfmh2Pt3MxuQT5MC62fzPiH
+    locale_key:  '%kernel.default_locale%'
+    locale_from_request: true
+
+# FriendSofBundle
+fos_user:
+    db_driver: orm
+    firewall_name: main
+    user_class: App\Entity\User
+    service:
+        mailer: fos_user.mailer.twig_swift
+    from_email:
+        address: "hotro.xaydungkimanh@gmail.com"
+        sender_name: "Xây Dựng Kim Anh"
+    registration:
+        form:
+            type: App\Form\RegistrationType
+        confirmation:
+            enabled: true
+    profile:
+        form:
+            type: App\Form\ProfileFormType

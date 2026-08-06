@@ -1,0 +1,97 @@
+{% if showSlide is defined %}
+	{% set slides = [
+        {img: 'xay-dung-kim-anh-1.jpg', alt: 'Xây Dựng Kim Anh', link1: path('contact'), link2: path('dynamic_post_page', {'slug': 'bao-gia-xay-nha-tron-goi'}), caption: 'Mang đến không gian sống hoàn hảo cho gia đình bạn với dịch vụ xây nhà trọn gói'},
+        {img: 'xuan-2023-3.jpg', alt: 'Công Ty Xây Dựng Kim Anh', link1: path('contact'), link2: null, caption: 'Kinh nghiệm 10+ năm trong lĩnh vực xây dựng dân dụng'},
+        {img: 'cong-ty-xay-dung-kim-anh.jpg', alt: 'Công ty xây dựng uy tín', link1: path('contact'), link2: null, caption: 'Đội ngũ kỹ sư, kiến trúc sư tận tâm và chuyên nghiệp'},
+        {img: 'xay-nha-tron-goi-tphcm.jpg', alt: 'Xây Dựng Kim Anh', link1: path('contact'), link2: null, caption: 'Cam kết chất lượng và tiến độ thi công đúng hạn'},
+        {img: 'banner-thi-cong-phan-tho.jpg', alt: 'Thi công xây dựng phần thô', link1: path('contact'), link2: null, caption: 'Giải pháp xây dựng tối ưu, tiết kiệm chi phí', eager: true},
+        {img: 'xay-dung-kim-anh-02.jpg', alt: 'Thương Hiệu Của Sự Bền Vững', link1: path('contact'), link2: null, caption: 'Thương hiệu của sự bền vững và tin cậy'}
+    ] %}
+
+	<section class="ka-main-slider" aria-label="Main Banner">
+		<div
+			id="kaMainCarousel" class="carousel slide ka-carousel" data-interval="5000" data-ride="carousel">
+			<!-- Indicators -->
+			<ol class="carousel-indicators ka-carousel-indicators">
+				{% for slide in slides %}
+					<li data-target="#kaMainCarousel" data-slide-to="{{ loop.index0 }}" {{ loop.first ? ' class="active"' : '' }}></li>
+				{% endfor %}
+			</ol>
+
+			<!-- Wrapper for slides -->
+			<div class="carousel-inner ka-carousel-inner">
+				{% for slide in slides %}
+					{% set basePath = '/assets/images/banner/' ~ slide.img %}
+					{% set imagePath = asset(basePath) %}
+					{% set imagePathFilter = asset(basePath)|imagine_filter('banner_1500_550') %}
+					{% set imagePathFilterMobile = asset(basePath)|imagine_filter('banner_768_400') %}
+
+					{% if convert_images.fileExists(imagePath) == false %}
+						{% set imgDesktop = imagePath|imagine_filter('banner_1500_550') %}
+						{% set imgMobile = imagePath|imagine_filter('banner_768_400') %}
+					{% else %}
+						{% set imgDesktop = convert_images.webpConvert(imagePathFilter, '', true) %}
+						{% set imgMobile = convert_images.webpConvert(imagePathFilterMobile, '', true) %}
+					{% endif %}
+
+					{% set srcDesktop = imgDesktop ? absolute_url(imgDesktop) : absolute_url(imagePathFilter) %}
+					{% set srcMobile = imgMobile ? absolute_url(imgMobile) : absolute_url(imagePathFilterMobile) %}
+
+					<div class="item ka-carousel-item{{ loop.first ? ' active' : '' }}">
+						{% if slide.link2 is not empty %}
+							<a href="{{ slide.link2 }}" class="ka-slide-link">
+							{% endif %}
+							<picture class="ka-slide-picture">
+								{% if slide.eager is defined and slide.eager %}
+									<source srcset="{{ srcMobile }}" media="(max-width: 799px)">
+									<source srcset="{{ srcDesktop }}" media="(min-width: 800px)">
+									<img src="{{ srcDesktop }}" alt="{{ slide.alt }}" class="ka-slide-img" fetchpriority="high">
+								{% else %}
+									<source data-srcset="{{ srcMobile }}" media="(max-width: 799px)">
+									<source data-srcset="{{ srcDesktop }}" media="(min-width: 800px)">
+									<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{ srcDesktop }}" alt="{{ slide.alt }}" class="ka-slide-img lazyload">
+								{% endif %}
+							</picture>
+							{% if slide.link2 %}
+							</a>
+						{% endif %}
+
+						{% if slide.caption %}
+							<div class="ka-carousel-caption">
+								<div class="container">
+									<div class="ka-caption-content">
+										<div class="ka-caption-title text-uppercase">Xây Dựng Kim Anh</div>
+										<div class="ka-caption-divider"></div>
+										<p class="ka-caption-text text-uppercase">{{ slide.caption }}</p>
+										<div class="ka-caption-actions">
+											{% if slide.link1 is not empty %}
+												<a href="{{ slide.link1 }}" class="ka-btn ka-btn-accent">Liên hệ ngay</a>
+											{% endif %}
+											{% if slide.link2 is not empty %}
+												<a href="{{ slide.link2 }}" class="ka-btn ka-btn-outline">Xem bảng giá</a>
+											{% endif %}
+										</div>
+									</div>
+								</div>
+							</div>
+						{% endif %}
+					</div>
+				{% endfor %}
+			</div>
+
+			<!-- Controls -->
+			<a class="left carousel-control ka-carousel-control prev" href="#kaMainCarousel" role="button" data-slide="prev">
+				<span class="ka-control-icon" aria-hidden="true">
+					<svg viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+				</span>
+				<span class="sr-only">Previous</span>
+			</a>
+			<a class="right carousel-control ka-carousel-control next" href="#kaMainCarousel" role="button" data-slide="next">
+				<span class="ka-control-icon" aria-hidden="true">
+					<svg viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+				</span>
+				<span class="sr-only">Next</span>
+			</a>
+		</div>
+	</section>
+{% endif %}

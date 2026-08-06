@@ -1,0 +1,70 @@
+<div class="notification-header">
+    <strong>Thông báo nội bộ</strong>
+    <span class="badge badge-danger">{{ notifications.total }}</span>
+</div>
+
+{% if notifications.total == 0 %}
+    <div class="notification-empty">
+        Không có thông báo mới.
+    </div>
+{% else %}
+    <div class="notification-section">
+        <div class="notification-section-title">
+            <a href="{{ path('admin_contact_index') }}">Liên hệ mới</a>
+            <span class="badge badge-info">{{ notifications.contacts.count }}</span>
+        </div>
+        {% if notifications.contacts.items is empty %}
+            <div class="notification-empty small">Không có yêu cầu liên hệ mới.</div>
+        {% else %}
+            {% for contact in notifications.contacts.items %}
+                <a class="dropdown-item media notification-item" href="{{ path('admin_contact_index') }}">
+                    <span class="notification-icon bg-info"><i class="fa fa-envelope"></i></span>
+                    <span class="media-body">
+                        <span class="notification-title">{{ contact.name }}</span>
+                        <span class="notification-meta">{{ contact.phone }} • {{ contact.createdAt|localizeddate('medium', 'short', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY HH:mm') }}</span>
+                    </span>
+                </a>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <div class="notification-section">
+        <div class="notification-section-title">
+            <a href="{{ path('admin_comment_index') }}">Bình luận chờ duyệt</a>
+            <span class="badge badge-warning">{{ notifications.comments.count }}</span>
+        </div>
+        {% if notifications.comments.items is empty %}
+            <div class="notification-empty small">Không có bình luận chờ duyệt.</div>
+        {% else %}
+            {% for comment in notifications.comments.items %}
+                <a class="dropdown-item media notification-item" href="{{ path('admin_comment_edit', {id: comment.id}) }}">
+                    <span class="notification-icon bg-warning"><i class="fa fa-comment"></i></span>
+                    <span class="media-body">
+                        <span class="notification-title">{{ comment.author }}</span>
+                        <span class="notification-meta">{{ comment.content|striptags|slice(0, 70) }}{% if comment.content|striptags|length > 70 %}...{% endif %}</span>
+                    </span>
+                </a>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <div class="notification-section">
+        <div class="notification-section-title">
+            <a href="{{ path('admin_user_index') }}">Người dùng mới</a>
+            <span class="badge badge-success">{{ notifications.users.count }}</span>
+        </div>
+        {% if notifications.users.items is empty %}
+            <div class="notification-empty small">Không có người dùng mới.</div>
+        {% else %}
+            {% for user in notifications.users.items %}
+                <a class="dropdown-item media notification-item" href="{{ path('admin_user_edit', {id: user.id}) }}">
+                    <span class="notification-icon bg-success"><i class="fa fa-user"></i></span>
+                    <span class="media-body">
+                        <span class="notification-title">{{ user.name }}</span>
+                        <span class="notification-meta">{{ user.email }} • {{ user.createdAt|localizeddate('medium', 'short', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY HH:mm') }}</span>
+                    </span>
+                </a>
+            {% endfor %}
+        {% endif %}
+    </div>
+{% endif %}

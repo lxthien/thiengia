@@ -1,0 +1,139 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block body_id 'admin-user-index' %}
+
+{% block main %}
+    <div class="content mt-3">
+        <div class="animated fadeIn">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card add">
+                        <div class="card-body">
+                            <div class="stat-widget-one">
+                                <a href="{{ path('admin_user_new') }}">
+                                    <div class="stat-icon dib">
+                                        <i class="ti-plus text-success border-success"></i>
+                                    </div>
+                                    <div class="stat-content dib">
+                                        <div class="stat-text text-success">{{ 'menu.add_new'|trans }}</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <strong class="card-title">{{ 'title.users_list'|trans }} <span class="badge badge-primary">{{ objects|length }}</span></strong>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 15%;">{{ 'label.username'|trans }}</th>
+                                            <th style="width: 20%;">{{ 'label.name'|trans }}</th>
+                                            <th style="width: 25%;">{{ 'label.email'|trans }}</th>
+                                            <th style="width: 15%;">{{ 'label.role'|trans }}</th>
+                                            <th style="width: 12%;">{{ 'Trạng thái' }}</th>
+                                            <th style="width: 13%; text-align: center;">{{ 'label.actions'|trans }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in objects %}
+                                        <tr>
+                                            <td>
+                                                <strong class="text-primary">{{ row.getUsername() }}</strong>
+                                            </td>
+                                            <td>
+                                                <span title="{{ row.getName() }}">{{ row.getName()|slice(0, 20) }}{{ row.getName()|length > 20 ? '...' : '' }}</span>
+                                            </td>
+                                            <td>
+                                                <span title="{{ row.getEmail() }}" style="font-size: 0.9em; color: #666;">
+                                                    {{ row.getEmail()|slice(0, 28) }}{{ row.getEmail()|length > 28 ? '...' : '' }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                                    {% for role in row.getRoles() %}
+                                                        {% if role == 'ROLE_ADMIN' %}
+                                                            <span class="badge badge-danger badge-sm">Admin</span>
+                                                        {% elseif role == 'ROLE_EDITOR' %}
+                                                            <span class="badge badge-warning badge-sm">Editor</span>
+                                                        {% elseif role == 'ROLE_AUTHOR' %}
+                                                            <span class="badge badge-info badge-sm">Author</span>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                {% if row.isEnabled() %}
+                                                    <span class="badge badge-success">Hoạt động</span>
+                                                {% else %}
+                                                    <span class="badge badge-secondary">Bị khoá</span>
+                                                {% endif %}
+                                            </td>
+                                            <td style="text-align: center;">
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <a href="{{ path('admin_user_edit', {id: row.id}) }}" class="btn btn-outline-primary" title="Chỉnh sửa" data-toggle="tooltip">
+                                                        <i class="fa fa-edit"></i>
+                                                    </a>
+                                                    
+                                                    <a href="{{ path('admin_user_change_password', {id: row.id}) }}" class="btn btn-outline-warning" title="Đổi mật khẩu" data-toggle="tooltip">
+                                                        <i class="fa fa-key"></i>
+                                                    </a>
+
+                                                    <form method="POST" action="{{ path('admin_user_toggle_status', {id: row.id}) }}" style="display: inline;">
+                                                        <input type="hidden" name="token" value="{{ csrf_token('toggle-status') }}">
+                                                        <button type="submit" class="btn btn-outline-{% if row.isEnabled() %}danger{% else %}success{% endif %}" title="{% if row.isEnabled() %}Khoá{% else %}Mở khoá{% endif %}" data-toggle="tooltip" onclick="return confirm('Bạn có chắc chắn?');">
+                                                            <i class="fa {% if row.isEnabled() %}fa-lock{% else %}fa-unlock{% endif %}"></i>
+                                                        </button>
+                                                    </form>
+
+                                                    {{ include('admin/user/_delete_form.html.twig', {user: row}, with_context = false) }}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .badge-sm {
+            padding: 0.35rem 0.65rem;
+            font-size: 0.75rem;
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        .btn-group-sm .btn {
+            padding: 0.375rem 0.5rem;
+            border: 1px solid #dee2e6;
+        }
+        
+        .btn-outline-primary:hover,
+        .btn-outline-warning:hover,
+        .btn-outline-danger:hover,
+        .btn-outline-success:hover {
+            background-color: transparent;
+        }
+        
+        .table-light th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+    </style>
+{% endblock %}

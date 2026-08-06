@@ -1,0 +1,637 @@
+<?xml version="1.0"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" target-language="en" datatype="plaintext" original="file.ext">
+        <body>
+            <trans-unit id="http_error.name">
+                <source>http_error.name</source>
+                <target>Ooops... Lỗi %status_code%</target>
+            </trans-unit>
+            <trans-unit id="http_error.description">
+                <source>http_error.description</source>
+                <target>There was an unknown error (HTTP %status_code%) that prevented to complete your request.</target>
+            </trans-unit>
+            <trans-unit id="http_error.suggestion">
+                <source>http_error.suggestion</source>
+                <target><![CDATA[Try loading this page again in some minutes or <a href="%url%">go back to the homepage</a>.]]></target>
+            </trans-unit>
+            <trans-unit id="http_error_403.description">
+                <source>http_error_403.description</source>
+                <target>You don't have permission to access to this resource.</target>
+            </trans-unit>
+            <trans-unit id="http_error_403.suggestion">
+                <source>http_error_403.suggestion</source>
+                <target>Ask your manager or system administrator to grant you access to this resource.</target>
+            </trans-unit>
+            <trans-unit id="http_error_404.description">
+                <source>http_error_404.description</source>
+                <target>Chúng tôi không thể tìm thấy trang bạn tìm kiếm</target>
+            </trans-unit>
+            <trans-unit id="http_error_404.suggestion">
+                <source>http_error_404.suggestion</source>
+                <target><![CDATA[Vui lòng kiểm tra lại URL hoặc đi đến <a href="%url%">trang chủ</a>.]]></target>
+            </trans-unit>
+            <trans-unit id="http_error_500.description">
+                <source>http_error_500.description</source>
+                <target>There was an internal server error.</target>
+            </trans-unit>
+            <trans-unit id="http_error_500.suggestion">
+                <source>http_error_500.suggestion</source>
+                <target><![CDATA[Try loading this page again in some minutes or <a href="%url%">go back to the homepage</a>.]]></target>
+            </trans-unit>
+
+            <!-- Title -->
+            <trans-unit id="title.homepage">
+                <source>title.homepage</source>
+                <target><![CDATA[Welcome to the <strong>Symfony Demo</strong> application]]></target>
+            </trans-unit>
+            <trans-unit id="title.source_code">
+                <source>title.source_code</source>
+                <target>Source code used to render this page</target>
+            </trans-unit>
+            <trans-unit id="title.controller_code">
+                <source>title.controller_code</source>
+                <target>Controller code</target>
+            </trans-unit>
+            <trans-unit id="title.twig_template_code">
+                <source>title.twig_template_code</source>
+                <target>Twig template code</target>
+            </trans-unit>
+            <trans-unit id="title.login">
+                <source>title.login</source>
+                <target>Secure Sign in</target>
+            </trans-unit>
+            <trans-unit id="title.post_list">
+                <source>title.post_list</source>
+                <target>Post List</target>
+            </trans-unit>
+            <trans-unit id="title.edit_post">
+                <source>title.edit_post</source>
+                <target>Edit post #%id%</target>
+            </trans-unit>
+            <trans-unit id="title.add_comment">
+                <source>title.add_comment</source>
+                <target>Add a comment</target>
+            </trans-unit>
+            <trans-unit id="title.comment_error">
+                <source>title.comment_error</source>
+                <target>There was an error publishing your comment</target>
+            </trans-unit>
+            <trans-unit id="title.page_list">
+                <source>title.page_list</source>
+                <target>All Pages</target>
+            </trans-unit>
+            <trans-unit id="title.page_new">
+                <source>title.page_new</source>
+                <target>Add New Page</target>
+            </trans-unit>
+
+            <!-- Action -->
+            <trans-unit id="action.show">
+                <source>action.show</source>
+                <target>Show</target>
+            </trans-unit>
+            <trans-unit id="action.show_post">
+                <source>action.show_post</source>
+                <target>Show post</target>
+            </trans-unit>
+            <trans-unit id="action.show_code">
+                <source>action.show_code</source>
+                <target>Show code</target>
+            </trans-unit>
+            <trans-unit id="action.edit">
+                <source>action.edit</source>
+                <target>Sửa</target>
+            </trans-unit>
+            <trans-unit id="action.edit_post">
+                <source>action.edit_post</source>
+                <target>Sửa bài viết</target>
+            </trans-unit>
+            <trans-unit id="action.save">
+                <source>action.save</source>
+                <target>Lưu thay đổi</target>
+            </trans-unit>
+            <trans-unit id="action.delete_post">
+                <source>action.delete_post</source>
+                <target>Xóa</target>
+            </trans-unit>
+            <trans-unit id="delete_post_modal.title">
+                <source>delete_post_modal.title</source>
+                <target>Bạn có muốn xóa bài viết này?</target>
+            </trans-unit>
+            <trans-unit id="delete_post_modal.body">
+                <source>delete_post_modal.body</source>
+                <target>Hành động này sẽ không thể lấy lại bài viết</target>
+            </trans-unit>
+            <trans-unit id="label.delete_post">
+                <source>label.delete_post</source>
+                <target>Xóa bài viết</target>
+            </trans-unit>
+            <trans-unit id="label.cancel">
+                <source>label.cancel</source>
+                <target>Không</target>
+            </trans-unit>
+            <trans-unit id="action.create_post">
+                <source>action.create_post</source>
+                <target>Tạo mới</target>
+            </trans-unit>
+            <trans-unit id="label.create_post">
+                <source>label.create_post</source>
+                <target>Create post</target>
+            </trans-unit>
+            <trans-unit id="label.save_and_create_new">
+                <source>label.save_and_create_new</source>
+                <target>Lưu và tạo mới</target>
+            </trans-unit>
+            <trans-unit id="action.back_to_list">
+                <source>action.back_to_list</source>
+                <target>Trở về danh sách</target>
+            </trans-unit>
+            <trans-unit id="action.publish_comment">
+                <source>action.publish_comment</source>
+                <target>Publish comment</target>
+            </trans-unit>
+            <trans-unit id="action.sign_in">
+                <source>action.sign_in</source>
+                <target>Sign in</target>
+            </trans-unit>
+            <trans-unit id="action.browse_app">
+                <source>action.browse_app</source>
+                <target>Browse application</target>
+            </trans-unit>
+            <trans-unit id="action.browse_admin">
+                <source>action.browse_admin</source>
+                <target>Browse backend</target>
+            </trans-unit>
+            <trans-unit id="action.created_successfully">
+                <source>action.created_successfully</source>
+                <target>Tạo mới thành công</target>
+            </trans-unit>
+            <trans-unit id="action.updated_successfully">
+                <source>action.updated_successfully</source>
+                <target>Cập nhật thành công</target>
+            </trans-unit>
+            <trans-unit id="action.deleted_successfully">
+                <source>action.deleted_successfully</source>
+                <target>Xóa thành công</target>
+            </trans-unit>
+
+            <!-- Label -->
+            <trans-unit id="label.author">
+                <source>label.author</source>
+                <target>Tên</target>
+            </trans-unit>
+            <trans-unit id="label.author_email">
+                <source>label.author_email</source>
+                <target>Email</target>
+            </trans-unit>
+            <trans-unit id="label.username">
+                <source>label.username</source>
+                <target>Username</target>
+            </trans-unit>
+            <trans-unit id="label.password">
+                <source>label.password</source>
+                <target>Password</target>
+            </trans-unit>
+            <trans-unit id="label.role">
+                <source>label.role</source>
+                <target>Role</target>
+            </trans-unit>
+            <trans-unit id="label.content">
+                <source>label.content</source>
+                <target>Nội dung</target>
+            </trans-unit>
+            <trans-unit id="label.summary">
+                <source>label.summary</source>
+                <target>Summary</target>
+            </trans-unit>
+            <trans-unit id="label.published_at">
+                <source>label.published_at</source>
+                <target>Published</target>
+            </trans-unit>
+            <trans-unit id="label.tags">
+                <source>label.tags</source>
+                <target>Tags</target>
+            </trans-unit>
+            <trans-unit id="label.actions">
+                <source>label.actions</source>
+                <target>Actions</target>
+            </trans-unit>
+            <trans-unit id="label.enable">
+                <source>label.enable</source>
+                <target>Hiển thị</target>
+            </trans-unit>
+            <trans-unit id="label.sortBy">
+                <source>label.sortBy</source>
+                <target>Sắp sếp theo</target>
+            </trans-unit>
+            <trans-unit id="label.ordering">
+                <source>label.ordering</source>
+                <target>Thứ tự</target>
+            </trans-unit>
+            <trans-unit id="label.default">
+                <source>label.default</source>
+                <target>Mặc định</target>
+            </trans-unit>
+            <trans-unit id="label.imageFile">
+                <source>label.imageFile</source>
+                <target>Hình đại diện</target>
+            </trans-unit>
+            <trans-unit id="label.title">
+                <source>label.title</source>
+                <target>Tiêu đề</target>
+            </trans-unit>
+            <trans-unit id="label.parent_page">
+                <source>label.parent_page</source>
+                <target>Trang cha</target>
+            </trans-unit>
+            <trans-unit id="label.name">
+                <source>label.name</source>
+                <target>Tên</target>
+            </trans-unit>
+            <trans-unit id="label.email">
+                <source>label.email</source>
+                <target>Email</target>
+            </trans-unit>
+            <trans-unit id="label.phone">
+                <source>label.phone</source>
+                <target>Điện thoại</target>
+            </trans-unit>
+            <trans-unit id="label.parentcat">
+                <source>label.parentcat</source>
+                <target>Danh mục cha</target>
+            </trans-unit>
+            <trans-unit id="label.url">
+                <source>label.url</source>
+                <target>URL</target>
+            </trans-unit>
+            <trans-unit id="label.description">
+                <source>label.description</source>
+                <target>Tóm tắt</target>
+            </trans-unit>
+            <trans-unit id="label.seo">
+                <source>label.seo</source>
+                <target>SEO</target>
+            </trans-unit>
+            <trans-unit id="label.approved">
+                <source>label.approved</source>
+                <target>Approved</target>
+            </trans-unit>
+            <trans-unit id="label.pageTitle">
+                <source>label.pageTitle</source>
+                <target>Page title</target>
+            </trans-unit>
+            <trans-unit id="label.pageDescription">
+                <source>label.pageDescription</source>
+                <target>Page description</target>
+            </trans-unit>
+            <trans-unit id="label.pageKeyword">
+                <source>label.pageKeyword</source>
+                <target>Page keyword</target>
+            </trans-unit>
+            <trans-unit id="label.relatedNews">
+                <source>label.relatedNews</source>
+                <target>Tin cùng chủ đề</target>
+            </trans-unit>
+            <trans-unit id="label.status">
+                <source>label.status</source>
+                <target>Status</target>
+            </trans-unit>
+
+            <!-- Categories -->
+            <trans-unit id="title.categories">
+                <source>title.categories</source>
+                <target>Danh mục</target>
+            </trans-unit>
+            <trans-unit id="newscategory.created_successfully">
+                <source>newscategory.created_successfully</source>
+                <target>News Category created successfully!</target>
+            </trans-unit>
+            <trans-unit id="title.newscategory_new">
+                <source>title.newscategory_new</source>
+                <target>News Category New</target>
+            </trans-unit>
+            <trans-unit id="action.create_newscategory">
+                <source>action.create_newscategory</source>
+                <target>Create News Category</target>
+            </trans-unit>
+            <trans-unit id="label.create_newscategory">
+                <source>label.create_newscategory</source>
+                <target>Create News Category</target>
+            </trans-unit>
+            <trans-unit id="title.edit_newscategory">
+                <source>title.edit_newscategory</source>
+                <target>Edit Category "%id%"</target>
+            </trans-unit>
+            <trans-unit id="newscategory.updated_successfully">
+                <source>newscategory.updated_successfully</source>
+                <target>News Category updated successfully!</target>
+            </trans-unit>
+            <trans-unit id="newscategory.deleted_successfully">
+                <source>newscategory.deleted_successfully</source>
+                <target>News Category deleted successfully!</target>
+            </trans-unit>
+
+            <!-- Posts -->
+            <trans-unit id="title.news_list">
+                <source>title.news_list</source>
+                <target>Danh sách bài viết</target>
+            </trans-unit>
+            <trans-unit id="lable.news.title">
+                <source>lable.news.title</source>
+                <target>Tiêu đề</target>
+            </trans-unit>
+            <trans-unit id="label.category">
+                <source>label.category</source>
+                <target>Danh mục</target>
+            </trans-unit>
+            <trans-unit id="row.no_posts_found">
+                <source>row.no_posts_found</source>
+                <target>Không tìm thấy bài viết</target>
+            </trans-unit>
+            <trans-unit id="title.news_new">
+                <source>title.news_new</source>
+                <target>Thêm mới bài viết</target>
+            </trans-unit>
+            <trans-unit id="label.images">
+                <source>label.images</source>
+                <target>Images</target>
+            </trans-unit>
+            <trans-unit id="label.contents">
+                <source>label.contents</source>
+                <target>Nội dung</target>
+            </trans-unit>
+            <trans-unit id="label.create_news">
+                <source>label.create_news</source>
+                <target>Tạo mới</target>
+            </trans-unit>
+            <trans-unit id="title.edit_news">
+                <source>title.edit_news</source>
+                <target>Sửa bài viết #%id%</target>
+            </trans-unit>
+            <trans-unit id="form.label.delete">
+                <source>form.label.delete</source>
+                <target>Xóa</target>
+            </trans-unit>
+
+            <!-- Comment -->
+            <trans-unit id="title.comment_list">
+                <source>title.comment_list</source>
+                <target>Comment List</target>
+            </trans-unit>
+            <trans-unit id="label.response.on.post">
+                <source>label.response.on.post</source>
+                <target>Response to</target>
+            </trans-unit>
+            <trans-unit id="action.admin_new">
+                <source>action.admin_new</source>
+                <target>Create</target>
+            </trans-unit>
+            <trans-unit id="title.comment_new">
+                <source>title.comment_new</source>
+                <target>Comment new</target>
+            </trans-unit>
+            <trans-unit id="title.edit_comment">
+                <source>title.edit_comment</source>
+                <target>Edit Comment #%id%</target>
+            </trans-unit>
+
+            <!-- Contact -->
+            <trans-unit id="contact.title.list">
+                <source>contact.title.list</source>
+                <target>Danh sách liên hệ</target>
+            </trans-unit>
+
+            <!-- Menu -->
+            <trans-unit id="menu.dashboard">
+                <source>menu.dashboard</source>
+                <target>Dashboard</target>
+            </trans-unit>
+            <trans-unit id="menu.news">
+                <source>menu.news</source>
+                <target>Bài viết</target>
+            </trans-unit>
+            <trans-unit id="menu.pages">
+                <source>menu.pages</source>
+                <target>Trang</target>
+            </trans-unit>
+            <trans-unit id="menu.page_list">
+                <source>menu.page_list</source>
+                <target>Danh sách trang</target>
+            </trans-unit>
+            <trans-unit id="menu.add_new">
+                <source>menu.add_new</source>
+                <target>Thêm mới</target>
+            </trans-unit>
+            <trans-unit id="menu.news_list">
+                <source>menu.news_list</source>
+                <target>Danh sách bài viết</target>
+            </trans-unit>
+            <trans-unit id="menu.category_list">
+                <source>menu.category_list</source>
+                <target>Danh mục</target>
+            </trans-unit>
+            <trans-unit id="menu.tags">
+                <source>menu.tags</source>
+                <target>Tags</target>
+            </trans-unit>
+            <trans-unit id="menu.comments">
+                <source>menu.comments</source>
+                <target>Bình luận</target>
+            </trans-unit>
+            <trans-unit id="menu.comment_list">
+                <source>menu.comment_list</source>
+                <target>Bình luận</target>
+            </trans-unit>
+            <trans-unit id="menu.banners">
+                <source>menu.banners</source>
+                <target>Banners</target>
+            </trans-unit>
+            <trans-unit id="menu.banner_list">
+                <source>menu.banner_list</source>
+                <target>All Banners</target>
+            </trans-unit>
+            <trans-unit id="menu.banner_category">
+                <source>menu.banner_category</source>
+                <target>Banner Category</target>
+            </trans-unit>
+            <trans-unit id="menu.contact">
+                <source>menu.contact</source>
+                <target>Liên hệ</target>
+            </trans-unit>
+            <trans-unit id="menu.users">
+                <source>menu.users</source>
+                <target>Users</target>
+            </trans-unit>
+            <trans-unit id="menu.users_list">
+                <source>menu.users_list</source>
+                <target>Danh sách thành viên</target>
+            </trans-unit>
+            <trans-unit id="title.users_list">
+                <source>title.users_list</source>
+                <target>Users</target>
+            </trans-unit>
+            <trans-unit id="menu.users_profile">
+                <source>menu.users_profile</source>
+                <target>Your profile</target>
+            </trans-unit>
+            <trans-unit id="menu.setting">
+                <source>menu.setting</source>
+                <target>Cài đặt</target>
+            </trans-unit>
+            <trans-unit id="menu.logout">
+                <source>menu.logout</source>
+                <target>Thoát</target>
+            </trans-unit>
+
+            <!-- Tag -->
+            <trans-unit id="title.edit_tag">
+                <source>title.edit_tag</source>
+                <target>Edit tag #%id%</target>
+            </trans-unit>
+            <trans-unit id="title.tag_list">
+                <source>title.tag_list</source>
+                <target>Tags</target>
+            </trans-unit>
+
+            <!-- Banner -->
+            <trans-unit id="title.banner_list">
+                <source>title.banner_list</source>
+                <target>All Banners</target>
+            </trans-unit>
+
+            <!-- Email -->
+            <trans-unit id="contact.email.title">
+                <source>contact.email.title</source>
+                <target>Email liên hệ từ website [%siteName%]</target>
+            </trans-unit>
+            <trans-unit id="comment.email.title">
+                <source>comment.email.title</source>
+                <target>Email thông báo từ website [%siteName%]</target>
+            </trans-unit>
+
+            <!-- Front page -->
+            <trans-unit id="home">
+                <source>home</source>
+                <target>Trang chủ</target>
+            </trans-unit>
+            <trans-unit id="aboutus">
+                <source>aboutus</source>
+                <target>Giới thiệu</target>
+            </trans-unit>
+            <trans-unit id="services">
+                <source>services</source>
+                <target>Dịch vụ</target>
+            </trans-unit>
+            <trans-unit id="construction">
+                <source>construction</source>
+                <target>Xây dựng</target>
+            </trans-unit>
+            <trans-unit id="fengshui">
+                <source>fengshui</source>
+                <target>Phong thủy xây dựng</target>
+            </trans-unit>
+            <trans-unit id="projects">
+                <source>projects</source>
+                <target>Dự án thi công</target>
+            </trans-unit>
+            <trans-unit id="cafe">
+                <source>cafe</source>
+                <target>Thiết kế thi công quán cafe</target>
+            </trans-unit>
+            <trans-unit id="advisory">
+                <source>advisory</source>
+                <target>Tư vấn</target>
+            </trans-unit>
+            <trans-unit id="contactus">
+                <source>contactus</source>
+                <target>Liên hệ</target>
+            </trans-unit>
+
+            <trans-unit id="post.tags">
+                <source>post.tags</source>
+                <target>Tags</target>
+            </trans-unit>
+            <trans-unit id="post.archives.title">
+                <source>post.archives.title</source>
+                <target>%title% - Trang %currentPage% của %totalPage% | Xây Dựng Kim Anh</target>
+            </trans-unit>
+            <trans-unit id="post.archives.description">
+                <source>post.archives.description</source>
+                <target>Tổng hợp thông tin về nội dung '%description%' - Trang %currentPage% của %totalPage%</target>
+            </trans-unit>
+
+            <trans-unit id="post.do_not_have_item_on_this_page">
+                <source>post.do_not_have_item_on_this_page</source>
+                <target>Chưa có bài viết trong danh mục này</target>
+            </trans-unit>
+
+            <trans-unit id="comments.count">
+                <source>comments.count</source>
+                <target>Có %count% bình luận</target>
+            </trans-unit>
+            <trans-unit id="comment.leave_your_comment_below">
+                <source>comment.leave_your_comment_below</source>
+                <target>Hãy để lại ý kiến của bạn bên dưới</target>
+            </trans-unit>
+            <trans-unit id="comment.reply">
+                <source>comment.reply</source>
+                <target>Trả lời</target>
+            </trans-unit>
+            <trans-unit id="comment.have_a_problem_on_your_request">
+                <source>comment.have_a_problem_on_your_request</source>
+                <target>Đã có lỗi xảy ra. Vui lòng kiểm tra lại nội dung bên dưới</target>
+            </trans-unit>
+            <trans-unit id="comment.thank_for_your_comment">
+                <source>comment.thank_for_your_comment</source>
+                <target>Cảm ơn ý kiến của bạn. Chúng tôi sẽ xem xét trước khi hiển thị bình luận của bạn trên trang này</target>
+            </trans-unit>
+
+            <trans-unit id="label.send">
+                <source>label.send</source>
+                <target>Gửi</target>
+            </trans-unit>
+            <trans-unit id="news.news_related">
+                <source>news.news_related</source>
+                <target>Tin liên quan</target>
+            </trans-unit>
+            <trans-unit id="view.details">
+                <source>view.details</source>
+                <target>Chi tiết »</target>
+            </trans-unit>
+            <trans-unit id="news.hot">
+                <source>news.hot</source>
+                <target>Tin nổi bật</target>
+            </trans-unit>
+            <trans-unit id="news.recent">
+                <source>news.recent</source>
+                <target>Tin mới nhất</target>
+            </trans-unit>
+
+            <trans-unit id="search">
+                <source>search</source>
+                <target>Tìm kiếm</target>
+            </trans-unit>
+            <trans-unit id="sidebar.fanpage">
+                <source>sidebar.fanpage</source>
+                <target>Fanpage</target>
+            </trans-unit>
+
+            <trans-unit id="contact.message.success">
+                <source>contact.message.success</source>
+                <target>Cảm ơn đã liên hệ đến công ty. Chúng tôi sẽ sớm phản hồi lại thông tin của bạn</target>
+            </trans-unit>
+            <trans-unit id="contact.message.error">
+                <source>contact.message.error</source>
+                <target>Đã có lỗi xảy ra. Vui lòng thử lại sau</target>
+            </trans-unit>
+            <trans-unit id="vich_uploader.form_label.delete_confirm">
+                <source>vich_uploader.form_label.delete_confirm</source>
+                <target>Xóa hình ảnh</target>
+            </trans-unit>
+            <trans-unit id="vich_uploader.link.download">
+                <source>vich_uploader.link.download</source>
+                <target>Tải về</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

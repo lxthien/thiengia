@@ -1,0 +1,138 @@
+{{ form_start(form) }}
+<div class="row costs">
+    <div class="col-md-12">
+        <h5 class="mb-3">1. Thông tin cơ bản</h5>
+        <div class="row">
+            <div class="col-12 col-sm-6 col-md-4">
+                <div class="form-group">
+                    {{ form_label(form.type) }}
+                    {{ form_errors(form.type) }}
+                    {{ form_widget(form.type, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4">
+                <div class="form-group">
+                    {{ form_label(form.method) }}
+                    {{ form_errors(form.method) }}
+                    {{ form_widget(form.method, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4">
+                <div class="form-group">
+                    {{ form_label(form.muc_dau_tu) }}
+                    {{ form_errors(form.muc_dau_tu) }}
+                    {{ form_widget(form.muc_dau_tu, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4">
+                <div class="form-group">
+                    {{ form_label(form.wide) }}
+                    {{ form_errors(form.wide) }}
+                    {{ form_widget(form.wide, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4">
+                <div class="form-group">
+                    {{ form_label(form.long) }}
+                    {{ form_errors(form.long) }}
+                    {{ form_widget(form.long, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4">
+                <div class="form-group">
+                    {{ form_label(form.floor) }}
+                    {{ form_errors(form.floor) }}
+                    {{ form_widget(form.floor, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+        </div>
+
+        <h5 class="mb-3 mt-3">2. Thông tin kết cấu</h5>
+        <div class="row">
+            <div class="col-12 col-sm-6 col-md-6">
+                <div class="form-group">
+                    {{ form_label(form.mong) }}
+                    {{ form_errors(form.mong) }}
+                    {{ form_widget(form.mong, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-6">
+                <div class="form-group">
+                    {{ form_label(form.mai) }}
+                    {{ form_errors(form.mai) }}
+                    {{ form_widget(form.mai, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+        </div>
+
+        <h5 class="mb-3 mt-3">3. Thông tin công năng phụ trợ</h5>
+        <div class="row">
+            <div class="col-12 col-sm-6 col-md-4">
+                <div class="form-group">
+                    {{ form_label(form.lung) }}
+                    {{ form_errors(form.lung) }}
+                    {{ form_widget(form.lung, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4">
+                <div class="form-group">
+                    {{ form_label(form.tum) }}
+                    {{ form_errors(form.tum) }}
+                    {{ form_widget(form.tum, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4">
+                <div class="form-group">
+                    {{ form_label(form.san_thuong) }}
+                    {{ form_errors(form.san_thuong) }}
+                    {{ form_widget(form.san_thuong, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4">
+                <div class="form-group">
+                    {{ form_label(form.ban_cong) }}
+                    {{ form_errors(form.ban_cong) }}
+                    {{ form_widget(form.ban_cong, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4">
+                <div class="form-group">
+                    {{ form_label(form.tang_ham) }}
+                    {{ form_errors(form.tang_ham) }}
+                    {{ form_widget(form.tang_ham, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-4">
+                <div class="form-group">
+                    {{ form_label(form.san_vuon) }}
+                    {{ form_errors(form.san_vuon) }}
+                    {{ form_widget(form.san_vuon, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+        </div>
+
+        <h5 class="mb-3 mt-3">4. Điều kiện thi công</h5>
+        <div class="row">
+            <div class="col-12 col-sm-6 col-md-6">
+                <div class="form-group">
+                    {{ form_label(form.mat_tien) }}
+                    {{ form_errors(form.mat_tien) }}
+                    {{ form_widget(form.mat_tien, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-6">
+                <div class="form-group">
+                    {{ form_label(form.hem) }}
+                    {{ form_errors(form.hem) }}
+                    {{ form_widget(form.hem, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-md-12 text-center mt-4">
+            {{ form_widget(form.caculator, {'attr': {'class': 'btn btn-primary'}}) }}
+            {{ form_widget(form.reset, {'attr': {'class': 'btn btn-default'}}) }}
+        </div>
+    </div>
+</div>
+{{ form_end(form) }}

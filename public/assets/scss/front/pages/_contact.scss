@@ -1,0 +1,147 @@
+/* Contact Page - Modern Industrial Theme
+------------------------------------------------------------------------- */
+.ka-contact-container {
+    .ka-contact-main {
+        .ka-contact-info-block {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: $surfaceLight;
+            border-radius: $radiusMd;
+            border-left: 4px solid $accentColor;
+
+            h1 {
+                font-size: 28px;
+                color: $primaryColor;
+                margin-bottom: 20px;
+            }
+
+            ul {
+                padding-left: 0;
+                margin-bottom: 0;
+
+                li {
+                    list-style-type: none;
+                    padding: 8px 0;
+                    font-size: 15px;
+
+                    i {
+                        color: $accentColor;
+                        width: 25px;
+                        margin-right: 10px;
+                    }
+                }
+            }
+        }
+
+        #form {
+            padding: 30px;
+            background: $white;
+            border-radius: $radiusMd;
+            box-shadow: $shadowMd;
+
+            .form-group {
+                margin-bottom: 18px;
+
+                label {
+                    color: $primaryColor;
+                    font-weight: 600;
+                    margin-bottom: 6px;
+                    font-size: 14px;
+                    display: block;
+                }
+
+                .form-control,
+                input {
+                    border: 1px solid $borderColor;
+                    height: 42px;
+                    padding: 8px 14px;
+                    border-radius: $radiusSm;
+                    transition: $transitionFast;
+                    font-size: 14px;
+                    background: $white;
+
+                    &:focus {
+                        border-color: $accentColor;
+                        box-shadow: 0 0 0 3px rgba($accentColor, 0.1);
+                        outline: none;
+                    }
+
+                    &::placeholder {
+                        color: $textMuted;
+                        font-size: 13px;
+                    }
+                }
+
+                textarea.form-control {
+                    height: 100px;
+                    resize: vertical;
+                    line-height: 1.5;
+                }
+
+                button.btn {
+                    background: $gradientAccent;
+                    border: none;
+                    padding: 12px 35px;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    border-radius: $radiusSm;
+                    transition: $transitionFast;
+                    font-size: 14px;
+                    color: $white;
+
+                    &:hover {
+                        transform: translateY(-2px);
+                        box-shadow: $shadowMd;
+                    }
+                }
+            }
+        }
+    }
+
+    #sidebar {
+        form {
+            >.row {
+                padding: 20px;
+            }
+
+            button {
+                border: none;
+                border-radius: $radiusSm;
+                padding: 12px 20px;
+                font-weight: 700;
+                font-size: 14px;
+                cursor: pointer;
+                transition: $transitionFast;
+                margin-top: 8px;
+                margin-right: 8px;
+
+                &[type="submit"],
+                &.btn-primary {
+                    background: $gradientAccent;
+                    color: $white;
+                    box-shadow: 0 4px 12px rgba($accentColor, 0.3);
+
+                    &:hover,
+                    &:focus {
+                        transform: translateY(-2px);
+                        box-shadow: 0 6px 16px rgba($accentColor, 0.4);
+                    }
+                }
+
+                &[type="reset"],
+                &.btn-secondary {
+                    background: $surfaceLight;
+                    color: $textSecondary;
+                    border: 2px solid $borderColor;
+
+                    &:hover,
+                    &:focus {
+                        background: $borderColor;
+                        color: $textPrimary;
+                    }
+                }
+            }
+        }
+    }
+}
