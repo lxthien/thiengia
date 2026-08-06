@@ -1,194 +1,156 @@
 {% extends 'layout.html.twig' %}
 
+{% set coverSrc = vich_uploader_asset(post, 'imageFile')
+    ? vich_uploader_asset(post, 'imageFile')
+    : asset('assets/images/no-image.png') %}
+
+{% block title %}{{ post.pageTitle ?: post.title }} | {{ v3.company.shortName }}{% endblock %}
+{% block description %}{{ post.pageDescription ?: post.description }}{% endblock %}
+
 {% block stylesheets %}
-    <link href="{{ absolute_url(asset('build/css/news.css')) }}" rel="preload stylesheet" as="style" onload="this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="{{ absolute_url(asset('build/css/news.css')) }}"></noscript>
+    <link rel="stylesheet" href="{{ asset('build/css/v3-news.css') }}">
 {% endblock %}
 
-{% set year = "now"|date('Y') %}
-{% set pageTitle = (post.getPageTitle() ?: post.getTitle())|replace({'%YEAR%': year}) %}
-{% set pageDesc = (post.getPageDescription() ?: post.getDescription())|replace({'%YEAR%': year}) %}
-{% set postUrl = absolute_url(path('news_show', {'slug': post.getUrl()})) %}
-{% set homeUrl = absolute_url(path('homepage')) %}
-{% set authorUrl = absolute_url(path('author', {'slug': 'nguyenduytuan'})) %}
-
-{% set imagePath = vich_uploader_asset(post, 'imageFile') ?: absolute_url(asset('assets/images/no-image.png')) %}
-{% set imagePathFilter = (vich_uploader_asset(post, 'imageFile') ?: absolute_url(asset('assets/images/no-image.png')))|imagine_filter('news_share_1200_630') %}
-{% set userPath = asset('/assets/images/user.png')|imagine_filter('user') %}
-{% set keywords = post.getPageKeyword() ? post.getPageKeyword()|split(',') : null %}
-{% if not convert_images.fileExists(imagePath) %}
-    {% set imagePath = imagePath|imagine_filter('news_share_1200_630') %}
-{% else %}
-    {% set imagePath = convert_images.webpConvert(imagePathFilter, '', true) %}
-{% endif %}
-
-{% block title %}{{ pageTitle }}{% endblock %}
-{% block description %}{{ pageDesc }}{% endblock %}
-{% block keyword %}{{ post.getPageKeyword() }}{% endblock %}
-
-{% block structuredOpenGraph %}
+{% block openGraph %}
     <meta property="og:type" content="article">
-    <meta property="og:title" content="{{ pageTitle }}">
-    <meta property="og:description" content="{{ pageDesc }}">
-    <meta property="article:author" content="{{ post.getAuthor().getName() }}">
-    <meta property="article:published_time" content="{{ post.getCreatedAt()|date("Y-m-d h:m:s") }}+07:00">
-    <meta property="article:modified_time" content="{{ post.getUpdatedAt()|date("Y-m-d h:m:s") }}+07:00">
-    <meta property="og:image" content="{{ absolute_url(imagePathFilter) }}">
-    <meta property="og:image:alt" content="{{ post.getTitle() }}">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-{% endblock %}
-
-{% block twitterImage %}<meta property="twitter:image" content="{{ absolute_url(imagePathFilter) }}">
-{% endblock %}
-
-{% block structuredReview %}
-    {% if ratingCount > 0 %}
-        <script type="application/ld+json">{"@context":"https://schema.org/","@type":"CreativeWorkSeries","name":"{{ post.getTitle() }}","aggregateRating":{"@type":"AggregateRating","ratingValue":"{{ rating }}","ratingCount":"{{ ratingCount }}","bestRating":"5","worstRating":"1"}}</script>
+    <meta property="og:title" content="{{ block('title') }}">
+    <meta property="og:description" content="{{ block('description') }}">
+    <meta property="og:image" content="{{ absolute_url(coverSrc) }}">
+    <meta property="article:published_time" content="{{ post.createdAt|date('Y-m-d') }}">
+    {% if post.updatedAt %}
+        <meta property="article:modified_time" content="{{ post.updatedAt|date('Y-m-d') }}">
+    {% endif %}
+    {% if post.category %}
+        <meta property="article:section" content="{{ post.category.name }}">
     {% endif %}
 {% endblock %}
 
-{% block robots %}
-    <meta name="robots" content="{{ urlParameters ? 'follow, noindex' : (post.getRobots() ?: 'index, follow') }}">
-{% endblock %}
-
-{% block contactHotline %}
-    {% if post.getContactHotline() is empty %}
-        <div class="hotline">
-            <div class="inner">
-                <a href="tel:{{ get_setting('contens_hotline_1')|replace({' ': '', '.': ''}) }}">
-                    <div class="phonering-alo-ph-img-circle"></div>{{ get_setting('contens_hotline_1') }}</a>
-            </div>
-        </div>
-    {% else %}
-        {{ post.getContactHotline()|raw }}
-    {% endif %}
-{% endblock %}
-
-{% block blogPosting %}
-    {% if post.getSchemaMarkup() %}
-        {{ post.getSchemaMarkup()|raw }}
-    {% else %}
-        <script type="application/ld+json">
-        {
-            "@context": "https://schema.org/",
-            "@type": "WebPage",
-            "@id": "{{ postUrl }}#webpage",
-            "url": "{{ postUrl }}",
-            "name": "{{ pageTitle }}",
-            "datePublished": "{{ post.getCreatedAt()|date('Y-m-d h:m:s') }}+07:00",
-            "dateModified": "{{ post.getUpdatedAt()|date('Y-m-d h:m:s') }}+07:00",
-            "isPartOf": {
-                "@id": "{{ homeUrl }}#website"
-            },
-            "primaryImageOfPage": {
-                "@id": "{{ absolute_url(imagePathFilter) }}"
-            },
-            "description": "{{ pageDesc }}",
-            "breadcrumb": "{{ postUrl }}#breadcrumb",
-            "inLanguage": "vi-VN"
+{% block jsonld %}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "mainEntityOfPage": {{ app.request.uri|json_encode|raw }},
+        "headline": {{ post.title|json_encode|raw }},
+        "description": {{ (post.description ?: '')|json_encode|raw }},
+        "image": {{ absolute_url(coverSrc)|json_encode|raw }},
+        "datePublished": {{ post.createdAt|date('Y-m-d')|json_encode|raw }},
+        {% if post.updatedAt %}"dateModified": {{ post.updatedAt|date('Y-m-d')|json_encode|raw }},{% endif %}
+        "inLanguage": "vi",
+        {% if post.category %}"articleSection": {{ post.category.name|json_encode|raw }},{% endif %}
+        "author": {
+            "@type": "Person",
+            "name": {{ (post.author ? post.author.username : v3.company.authorName)|json_encode|raw }}
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": {{ v3.company.legalName|json_encode|raw }}
         }
-        </script>
-        <script type="application/ld+json">
-        {
-            "@context": "https://schema.org/",
-            "@type": "BlogPosting",
-            "@id": "{{ postUrl }}#BlogPosting",
-            "mainEntityOfPage": {
-                "@id": "{{ postUrl }}#webpage"
-            },
-            "isFamilyFriendly": true,
-            "isAccessibleForFree": true,
-            "headline": "{{ post.getTitle() }}",
-            "name": "{{ pageTitle }}",
-            "description": "{{ pageDesc }}",
-            "datePublished": "{{ post.getCreatedAt()|date('Y-m-d h:m:s') }}+07:00",
-            "dateModified": "{{ post.getUpdatedAt()|date('Y-m-d h:m:s') }}+07:00",
-            "articleSection": "{{ category.getName() }}",
-            "accessMode": ["textual"],
-            "author": {
-                "@type": "Person",
-                "@id": "{{ authorUrl }}#Person",
-                "name": "Nguyễn Duy Tuấn",
-                "url": "{{ authorUrl }}",
-                "image": {
-                    "@type": "ImageObject",
-                    {% set webpUserPath = convert_images.webpConvert(userPath, '', true) %}
-                    "@id": "{{ absolute_url(webpUserPath ? asset(webpUserPath) : userPath) }}",
-                    "url": "{{ absolute_url(webpUserPath ? asset(webpUserPath) : userPath) }}",
-                    "height": "65",
-                    "width": "65"
-                }
-            },
-            "publisher": {
-                "@type": "Organization",
-                "@id": "{{ homeUrl }}#organization"
-            },
-            "image": {
-                "@type": "ImageObject",
-                "@id": "{{ absolute_url(imagePathFilter) }}#image",
-                "url": "{{ absolute_url(imagePathFilter) }}",
-                "height": "630",
-                "width": "1200"
-            },
-            "url": "{{ postUrl }}",
-            "wordCount": "{{ wordCount }}",
-            "acquireLicensePage": "{{ absolute_url(path('news_show', {'slug': 'chinh-sach-bao-mat-thong-tin'})) }}",
-            "copyrightHolder": {
-                "@id": "{{ homeUrl }}#organization"
-            },
-            "accountablePerson": {
-                "@id": "{{ authorUrl }}#Person"
-            },
-            "creator": {
-                "@id": "{{ authorUrl }}#Person"
-            },
-            "sourceOrganization": {
-                "@id": "{{ homeUrl }}#organization"
-            },
-            "inLanguage": "vi-VN",
-            "commentCount": "{{ comments|length }}",
-            "isPartOf": {
-                "@id": "{{ postUrl }}#webpage"
-            }
-            {% if keywords %}
-            ,"keywords": [
-                {% for keyword in keywords %}"{{ keyword|trim }}"
-                    {% if not loop.last %},
-                    {% endif %}
-                {% endfor %}]
-            {% endif %}
-        }
-        </script>
-    {% endif %}
+    }
+    </script>
 {% endblock %}
 
 {% block body %}
-    <div class="container wrapper-container ka-page-detail">
-        <div class="row">
-            <div class="col-lg-9 ka-content-column">
-                {{ include('news/components/breadcrumbs.html.twig') }}
-                <article id="post-{{ post.getId() }}" class="ka-article-wrapper">
-                    <h1 class="ka-article-title">{{ post.getTitle() }}</h1>
-                    <p class="ka-article-meta">Cập nhật ngày:
-                        {{ post.getUpdatedAt()|date('d/m/Y') }}
-                        bởi
-                        <a href="{{ path('dynamic_post_page', {'slug': 'nguyenduytuan'}) }}" target="_blank" class="last-modified-author">Nguyễn Duy Tuấn</a>
-                    </p>
-                    <div class="ka-article-body">{{ contentsLazy|raw }}</div>
-                    {{ include('news/components/tags.html.twig') }}
-                    <div class="ka-article-interactions">
-                        {{ include('news/rating/rating.html.twig') }}
+
+    {# ============ BANNER BÀI VIẾT ============ #}
+    <header class="page-hero !pb-32" aria-label="Thông tin bài viết">
+        <div class="container max-w-7xl relative">
+            {{ include('v3/components/_breadcrumb.html.twig', {
+                items: [
+                    { label: 'Trang chủ', path: path('homepage') },
+                    { label: 'Cẩm nang xây dựng', path: path('news_category', { level1: v3.newsCategorySlug }) },
+                    { label: post.breadcrumbTitle ?: post.title }
+                ]
+            }) }}
+
+            {% if post.category|length %}
+                <p class="sec-label sec-label--light mt-8 fade">{{ post.category|first.name }}</p>
+            {% endif %}
+
+            <h1 class="page-hero-title mt-5 max-w-4xl fade">{{ post.title }}</h1>
+
+            <p class="post-meta mt-8 fade">
+                <span>Bởi <strong>{{ post.author ? post.author.username : v3.company.authorName }}</strong></span>
+                <time datetime="{{ post.createdAt|date('Y-m-d') }}">{{ post.createdAt|date('d/m/Y') }}</time>
+                {% if readingMinutes|default(0) %}
+                    <span>{{ readingMinutes }} phút đọc</span>
+                {% endif %}
+            </p>
+        </div>
+    </header>
+
+    {# Ảnh đại diện kéo đè lên mép banner #}
+    <div class="container max-w-7xl post-cover">
+        <figure class="fade">
+            <img src="{{ coverSrc }}" alt="{{ post.title }}" fetchpriority="high" decoding="async">
+        </figure>
+    </div>
+
+    {# ============ NỘI DUNG ============ #}
+    <div class="container max-w-7xl py-16 lg:py-20">
+        <div class="grid lg:grid-cols-[1fr_340px] gap-16 items-start">
+
+            <article class="max-w-3xl">
+                {# Nội dung từ CKEditor #}
+                <div class="post-content">{{ post.contents|raw }}</div>
+
+                {% if post.tags|default([])|length %}
+                    <nav class="post-tags mt-12" aria-label="Thẻ bài viết">
+                        {% for tag in post.tags %}
+                            <a href="{{ path('news_category', { level1: v3.newsCategorySlug }) }}">{{ tag.name }}</a>
+                        {% endfor %}
+                    </nav>
+                {% endif %}
+
+                <aside class="author-box mt-12">
+                    <img src="{{ asset(v3.company.authorAvatar) }}" alt="Chân dung {{ v3.company.authorName }}" loading="lazy" decoding="async">
+                    <div>
+                        <p class="author-label">Tác giả</p>
+                        <p class="author-name">{{ post.author ? post.author.username : v3.company.authorName }}</p>
+                        <p class="author-bio">{{ v3.company.authorBio }}</p>
                     </div>
-                    {{ include('news/components/author.html.twig') }}
+                </aside>
+            </article>
 
-                    {{ include('news/components/related.html.twig') }}
+            {# Sidebar dính #}
+            <aside class="lg:sticky lg:top-28 space-y-8" aria-label="Thanh bên bài viết">
+                {# Mục lục tự sinh từ h2 trong nội dung (xem js/v3/modules/toc.js) #}
+                <nav class="toc" data-toc aria-label="Mục lục bài viết">
+                    <p class="toc-title">Mục lục</p>
+                    <ol></ol>
+                </nav>
 
-                    {{ include('news/comments/list.html.twig') }}
-                    {{ include('news/comments/form.html.twig') }}
-                </article>
-            </div>
-            {{ include('layout/sidebar.html.twig') }}
+                <div class="post-cta-card">
+                    <p class="post-cta-title">Nhận dự toán <em>miễn phí</em> cho ngôi nhà của bạn</p>
+                    <p class="post-cta-note">Kiến trúc sư trưởng lập bảng bóc tách chi tiết trong 48 giờ.</p>
+                    <a href="{{ path('contact') }}" class="btn2">Đặt lịch tư vấn</a>
+                    <a href="tel:{{ v3.company.phoneRaw }}" class="post-cta-phone">{{ v3.company.phone }}</a>
+                </div>
+            </aside>
         </div>
     </div>
+
+    {# ============ BÀI LIÊN QUAN ============ #}
+    {% if relatedPosts|default([])|length %}
+        <section class="commits py-20 lg:py-24" aria-labelledby="lien-quan-h">
+            <div class="container max-w-7xl">
+                <div class="flex flex-wrap items-end justify-between gap-6">
+                    <div>
+                        <p class="sec-label fade">Đọc tiếp</p>
+                        <h2 id="lien-quan-h" class="h-display text-3xl lg:text-4xl mt-5 fade">Bài viết <em>liên quan</em></h2>
+                    </div>
+                    <a href="{{ path('news_category', { level1: v3.newsCategorySlug }) }}" class="btn2 btn2--dark !py-3 !px-5 fade">Xem tất cả</a>
+                </div>
+
+                <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-x-8 gap-y-12 mt-12">
+                    {% for related in relatedPosts %}
+                        {{ include('v3/components/_post_card.html.twig', { post: related, headingLevel: 'h3' }) }}
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
+    {{ include('v3/components/_newsletter.html.twig') }}
+
 {% endblock %}

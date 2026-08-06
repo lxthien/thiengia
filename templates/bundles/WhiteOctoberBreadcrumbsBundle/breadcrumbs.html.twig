@@ -20,7 +20,7 @@
     </script>
 
     {# Microdata Schema for Breadcrumbs #}
-    {%- spaceless -%}
+    {%- apply spaceless -%}
         <ol id="{{ listId }}" class="{{ listClass }}">
             {% for b in breadcrumbs %}
                 <li{% if itemClass is defined and itemClass|length %} class="{{ itemClass }}"{% endif %}>
@@ -44,5 +44,5 @@
                 </li>
             {% endfor %}
         </ol>
-    {%- endspaceless -%}
+    {%- endapply -%}
 {% endif %}

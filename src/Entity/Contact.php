@@ -2,91 +2,48 @@
 
 namespace App\Entity;
 
+use App\Repository\ContactRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 
-
-/**
- * Contact
- *
- * @ORM\Table(name="contact", options={"collate"="utf8_general_ci"})
- * @ORM\Entity(repositoryClass="App\Repository\ContactRepository")
- */
+#[ORM\Table(name: 'contact', options: ['collate' => 'utf8_general_ci'])]
+#[ORM\Entity(repositoryClass: ContactRepository::class)]
 class Contact
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: Types::INTEGER)]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private $id;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="name", type="string", length=255)
-     */
+    #[ORM\Column(name: 'name', type: Types::STRING, length: 255)]
     private $name;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="title", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'title', type: Types::STRING, length: 255, nullable: true)]
     private $title;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="phone", type="string", length=255)
-     */
+    #[ORM\Column(name: 'phone', type: Types::STRING, length: 255)]
     private $phone;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="email", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'email', type: Types::STRING, length: 255, nullable: true)]
     private $email;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="contents", type="text")
-     */
+    #[ORM\Column(name: 'contents', type: Types::TEXT)]
     private $contents;
 
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="createdAt", type="datetime")
-     */
+    #[Gedmo\Timestampable(on: 'create')]
+    #[ORM\Column(name: 'createdAt', type: Types::DATETIME_MUTABLE)]
     private $createdAt;
 
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updatedAt", type="datetime")
-     */
+    #[Gedmo\Timestampable(on: 'update')]
+    #[ORM\Column(name: 'updatedAt', type: Types::DATETIME_MUTABLE)]
     private $updatedAt;
 
-    /**
-     * @var bool
-     *
-     * @ORM\Column(name="isRead", type="boolean", options={"default": true})
-     */
+    #[ORM\Column(name: 'isRead', type: Types::BOOLEAN, options: ['default' => true])]
     private $isRead = false;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="gclid", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'gclid', type: Types::STRING, length: 255, nullable: true)]
     private $gclid;
 
 

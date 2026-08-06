@@ -1,0 +1,43 @@
+@use "../tokens" as *;
+
+.pagination-v3 {
+  ul {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  a,
+  span {
+    display: grid;
+    place-items: center;
+    min-width: 46px;
+    height: 46px;
+    padding: 0 0.75rem;
+    border: 1px solid $line;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: $text;
+    transition: all $dur $ease;
+  }
+
+  a:hover {
+    border-color: $accent;
+    background: $accent;
+    color: $white;
+  }
+
+  [aria-current="page"] {
+    background: $primary;
+    border-color: $primary;
+    color: $white;
+  }
+
+  .pagination-ellipsis {
+    border: none;
+    color: $mut;
+  }
+}

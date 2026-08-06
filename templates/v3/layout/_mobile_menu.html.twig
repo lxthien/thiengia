@@ -1,0 +1,32 @@
+<div class="hd-menu" id="v3-menu" role="dialog" aria-modal="true" aria-label="Menu di động" aria-hidden="true">
+    <button class="hd-menu-close" aria-label="Đóng menu">✕</button>
+
+    <nav aria-label="Menu di động">
+        <ul>
+            <li>
+                <a href="{{ path('homepage') }}#gioi-thieu" class="hd-menu-link">Giới thiệu</a>
+                <ul class="hd-menu-sub">
+                    {% for item in v3.menu.about %}
+                        <li><a href="{{ path('homepage') }}{{ item.anchor }}">{{ item.label }}</a></li>
+                    {% endfor %}
+                </ul>
+            </li>
+            <li>
+                <a href="{{ path('homepage') }}#dich-vu" class="hd-menu-link">Dịch vụ</a>
+                <ul class="hd-menu-sub">
+                    {% for item in v3.menu.services %}
+                        <li><a href="{{ path('homepage') }}#dich-vu">{{ item }}</a></li>
+                    {% endfor %}
+                </ul>
+            </li>
+            <li><a href="{{ path('homepage') }}#cong-trinh" class="hd-menu-link">Công trình</a></li>
+            <li><a href="{{ path('news_category', { level1: v3.newsCategorySlug }) }}" class="hd-menu-link">Cẩm nang</a></li>
+            <li><a href="{{ path('contact') }}" class="hd-menu-link">Liên hệ</a></li>
+        </ul>
+    </nav>
+
+    <p class="mt-8 text-white/60 text-sm">
+        Hotline 24/7 —
+        <a href="tel:{{ v3.company.phoneRaw }}" style="color: {{ v3.colors.accent }}" class="font-bold">{{ v3.company.phone }}</a>
+    </p>
+</div>

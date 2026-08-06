@@ -1,0 +1,15 @@
+// ============================================================
+// Entry CHUNG cho mọi trang v3 (build/css/v3-app.css)
+// Nạp cùng public/assets/css/v3/tailwind.css — xem webpack.config.js
+// ============================================================
+
+@use "global/base";
+@use "global/buttons";
+@use "global/header";
+@use "global/dropdown";
+@use "global/menu";
+@use "global/footer";
+@use "global/breadcrumbs";
+
+@use "component/seal";
+@use "component/float-contact";

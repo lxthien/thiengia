@@ -2,22 +2,20 @@
 
 namespace App\Controller\Admin;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
  * Media Library Management Controller
- *
- * @Route("/admin/media")
- * @Security("has_role('ROLE_ADMIN')")
  */
-class MediaController extends Controller
+#[Route('/admin/media')]
+#[IsGranted('ROLE_ADMIN')]
+class MediaController extends AbstractController
 {
     private $uploadDir = 'uploads/media/';
     private $maxFileSize = 10485760; // 10MB
@@ -25,10 +23,8 @@ class MediaController extends Controller
 
     /**
      * Display media library
-     *
-     * @Route("/", name="admin_media_index")
-     * @Method("GET")
      */
+    #[Route('/', name: 'admin_media_index', methods: ['GET'])]
     public function indexAction(Request $request)
     {
         $page = $request->query->get('page', 1);
@@ -69,10 +65,8 @@ class MediaController extends Controller
 
     /**
      * Media picker — AJAX endpoint for selecting images in forms
-     *
-     * @Route("/picker", name="admin_media_picker")
-     * @Method("GET")
      */
+    #[Route('/picker', name: 'admin_media_picker', methods: ['GET'])]
     public function pickerAction(Request $request)
     {
         $uploadDirPath = $this->getParameter('kernel.project_dir') . '/public/' . $this->uploadDir;
@@ -97,10 +91,8 @@ class MediaController extends Controller
 
     /**
      * Upload media file
-     *
-     * @Route("/upload", name="admin_media_upload")
-     * @Method("POST")
      */
+    #[Route('/upload', name: 'admin_media_upload', methods: ['POST'])]
     public function uploadAction(Request $request)
     {
         if (!$request->isXmlHttpRequest()) {
@@ -169,10 +161,8 @@ class MediaController extends Controller
 
     /**
      * Delete media file
-     *
-     * @Route("/{filename}/delete", name="admin_media_delete", requirements={"filename"=".+"})
-     * @Method("POST")
      */
+    #[Route('/{filename}/delete', name: 'admin_media_delete', requirements: ['filename' => '.+'], methods: ['POST'])]
     public function deleteAction(Request $request, $filename)
     {
         if (!$this->isCsrfTokenValid('delete-media', $request->request->get('token'))) {
@@ -199,10 +189,8 @@ class MediaController extends Controller
 
     /**
      * Move media file to another folder
-     *
-     * @Route("/{filename}/move", name="admin_media_move", requirements={"filename"=".+"})
-     * @Method("POST")
      */
+    #[Route('/{filename}/move', name: 'admin_media_move', requirements: ['filename' => '.+'], methods: ['POST'])]
     public function moveAction(Request $request, $filename)
     {
         if (!$this->isCsrfTokenValid('delete-media', $request->request->get('token'))) {
@@ -273,10 +261,8 @@ class MediaController extends Controller
 
     /**
      * Crop image
-     *
-     * @Route("/{filename}/crop", name="admin_media_crop", requirements={"filename"=".+"})
-     * @Method("POST")
      */
+    #[Route('/{filename}/crop', name: 'admin_media_crop', requirements: ['filename' => '.+'], methods: ['POST'])]
     public function cropAction(Request $request, $filename)
     {
         $uploadDirPath = $this->getParameter('kernel.project_dir') . '/public/' . $this->uploadDir;
@@ -311,10 +297,8 @@ class MediaController extends Controller
 
     /**
      * Resize image
-     *
-     * @Route("/{filename}/resize", name="admin_media_resize", requirements={"filename"=".+"})
-     * @Method("POST")
      */
+    #[Route('/{filename}/resize', name: 'admin_media_resize', requirements: ['filename' => '.+'], methods: ['POST'])]
     public function resizeAction(Request $request, $filename)
     {
         $uploadDirPath = $this->getParameter('kernel.project_dir') . '/public/' . $this->uploadDir;

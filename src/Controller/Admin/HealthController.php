@@ -3,21 +3,15 @@
 namespace App\Controller\Admin;
 
 use App\Health\HealthAuditManager;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-/**
- * @Route("/admin/health")
- * @Security("has_role('ROLE_ADMIN')")
- */
-class HealthController extends Controller
+#[Route('/admin/health')]
+#[IsGranted('ROLE_ADMIN')]
+class HealthController extends AbstractController
 {
-    /**
-     * @Route("/", name="admin_health_index")
-     * @Method("GET")
-     */
+    #[Route('/', name: 'admin_health_index', methods: ['GET'])]
     public function indexAction(HealthAuditManager $healthAudit)
     {
         return $this->render('admin/health/index.html.twig', [

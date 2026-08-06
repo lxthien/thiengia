@@ -50,7 +50,7 @@ class ActivityLogService
             if ($token && is_object($token->getUser())) {
                 $user = $token->getUser();
                 $log->setUser($user);
-                $log->setUsername($user->getUsername());
+                $log->setUsername($user->getUserIdentifier());
             }
 
             // Get IP address and User Agent

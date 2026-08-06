@@ -1,0 +1,21 @@
+{#
+    Banner trang trong.
+    Tham số:
+      breadcrumb (array)  — truyền cho _breadcrumb
+      title (string|html) — tiêu đề, cho phép <em> để nhấn
+      description (string, tuỳ chọn)
+      extraClass (string, tuỳ chọn)
+#}
+<section class="page-hero {{ extraClass|default('') }}">
+    <div class="container max-w-7xl relative">
+        {% if breadcrumb is defined %}
+            {{ include('v3/components/_breadcrumb.html.twig', { items: breadcrumb }) }}
+        {% endif %}
+
+        <h1 class="page-hero-title mt-7 fade">{{ title|raw }}</h1>
+
+        {% if description is defined and description %}
+            <p class="page-hero-desc fade">{{ description }}</p>
+        {% endif %}
+    </div>
+</section>

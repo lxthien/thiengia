@@ -2,13 +2,20 @@
 
 namespace App\Repository;
 
-use Doctrine\ORM\EntityRepository;
+use App\Entity\ActivityLog;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * ActivityLogRepository
  */
-class ActivityLogRepository extends EntityRepository
+class ActivityLogRepository extends ServiceEntityRepository
 {
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, ActivityLog::class);
+    }
+
     /**
      * Find recent activity logs
      *

@@ -24,19 +24,17 @@ framework:
     # and with different cache configurations for each fragment
     # https://symfony.com/doc/current/book/http_cache.html#edge-side-includes
     esi:             { enabled: true }
-    translator:      { fallback: '%locale%' }
+    translator:      { fallbacks: ['%locale%'] }
     secret:          '%env(SYMFONY_SECRET)%'
-    # router:
-    #     resource: '../routes.yaml'
-    #     strict_requirements: ~
+    router:
+        utf8: true
     form:            ~
     csrf_protection: ~
     validation:      { enable_annotations: true }
-    templating:
-        engines: ['twig']
     default_locale:  '%locale%'
     trusted_hosts:   ~
     session:
+        storage_factory_id: session.storage.factory.native
         handler_id:  session.handler.native_file
         save_path:   '%kernel.project_dir%/var/sessions/%kernel.environment%'
     fragments:       ~
@@ -74,17 +72,6 @@ doctrine:
     orm:
         auto_generate_proxy_classes: '%kernel.debug%'
         auto_mapping: true
-
-# Swiftmailer Configuration (used to send emails)
-# instead of configuring the mailer credentials in this file, we pull
-# them from the app/config/parameters.yml file. The reason is that config.yml
-# stores options that change the application behavior and parameters.yml
-# stores options that change from one server to another
-#
-swiftmailer:
-    url : '%env(MAILER_URL)%'
-    spool: { type: memory }
-
 
 stof_doctrine_extensions:
     orm:
@@ -223,22 +210,3 @@ ewz_recaptcha:
     private_key: 6LfF6jkUAAAAAJzxFsfmh2Pt3MxuQT5MC62fzPiH
     locale_key:  '%kernel.default_locale%'
     locale_from_request: true
-
-# FriendSofBundle
-fos_user:
-    db_driver: orm
-    firewall_name: main
-    user_class: App\Entity\User
-    service:
-        mailer: fos_user.mailer.twig_swift
-    from_email:
-        address: "hotro.xaydungkimanh@gmail.com"
-        sender_name: "Xây Dựng Kim Anh"
-    registration:
-        form:
-            type: App\Form\RegistrationType
-        confirmation:
-            enabled: true
-    profile:
-        form:
-            type: App\Form\ProfileFormType

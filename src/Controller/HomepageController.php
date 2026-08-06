@@ -15,14 +15,17 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use App\Service\ActivityLogService;
 use App\Service\SettingsManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 class HomepageController extends AbstractController
 {
     private $settingsManager;
+    private $em;
 
-    public function __construct(SettingsManager $settingsManager)
+    public function __construct(SettingsManager $settingsManager, EntityManagerInterface $em)
     {
         $this->settingsManager = $settingsManager;
+        $this->em = $em;
     }
 
     public function indexAction(Request $request)
@@ -36,8 +39,7 @@ class HomepageController extends AbstractController
             $listPricesArray = explode(',', $listPrices);
             if (is_array($listPricesArray) && count($listPricesArray) > 0) {
                 for ($i = 0; $i < count($listPricesArray); $i++) {
-                    $post = $this->getDoctrine()
-                                ->getRepository(News::class)
+                    $post = $this->em->getRepository(News::class)
                                 ->find($listPricesArray[$i]);
                     if ($post) {
                         $blockPricesOnHomepage[] = $post;
@@ -52,8 +54,7 @@ class HomepageController extends AbstractController
             if (is_array($listCategoriesOnHomepage)) {
                 for ($i = 0; $i < count($listCategoriesOnHomepage); $i++) {
                     $blockOnHomepage = [];
-                    $category = $this->getDoctrine()
-                                    ->getRepository(NewsCategory::class)
+                    $category = $this->em->getRepository(NewsCategory::class)
                                     ->find($listCategoriesOnHomepage[$i]["id"]);
 
                     if ($category) {
@@ -62,14 +63,12 @@ class HomepageController extends AbstractController
 
                         if (!empty($listSubIds)) {
                             for ($j = 0; $j < count($listSubIds); $j++) {
-                                $subCat = $this->getDoctrine()
-                                        ->getRepository(NewsCategory::class)
+                                $subCat = $this->em->getRepository(NewsCategory::class)
                                         ->find($listSubIds[$j]);
 
                                 $posts = [];
                                 if ($subCat) {
-                                    $posts = $this->getDoctrine()
-                                        ->getRepository(News::class)
+                                    $posts = $this->em->getRepository(News::class)
                                         ->createQueryBuilder('n')
                                         ->leftJoin('n.category', 't')
                                         ->where('t.id =:subCat')
@@ -84,8 +83,7 @@ class HomepageController extends AbstractController
                                 $listSubTabs[] = (object) array('subCategory' => $subCat, 'posts' => $posts);
                             }
                         } else {
-                            $posts = $this->getDoctrine()
-                                ->getRepository(News::class)
+                            $posts = $this->em->getRepository(News::class)
                                 ->createQueryBuilder('n')
                                 ->leftJoin('n.category', 't')
                                 ->where('t.id =:subCat')

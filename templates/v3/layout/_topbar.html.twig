@@ -1,0 +1,14 @@
+<div class="tb hidden lg:block">
+    <address class="container max-w-7xl flex items-center justify-between not-italic">
+        <p class="flex items-center gap-2">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/>
+            </svg>
+            {{ v3.company.address }}
+        </p>
+        <div class="flex items-center gap-7">
+            <a href="mailto:{{ v3.company.email }}">{{ v3.company.email }}</a>
+            <p><time>{{ v3.company.workingHours }}</time></p>
+        </div>
+    </address>
+</div>

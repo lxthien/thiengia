@@ -13,12 +13,14 @@
                         <div class="comment-container">{{ comment.getContent()|raw }}</div>
                         <a class="comment-reply-link" href="#" data-post-id="{{ comment.getId() }}">{{ 'comment.reply'|trans }}</a>
                         <ul class="media-list">
-                            {% for reply in comments if reply.getCommentId is same as(comment.getId()) %}
+                            {% for reply in comments %}
+                                {% if reply.getCommentId is same as(comment.getId()) %}
                                 {% set replyAuthor = reply.getAuthor() is same as('Webmaster') ? get_setting('displayNameCommentAs')|raw : reply.getAuthor() %}
                                 <li class="media">
                                     <div class="media-left"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{ userImg }}" alt="{{ replyAuthor }}" width="65" height="65" class="media-object lazyload"></div>
                                     <div class="media-body"><b class="mt-0">{{ replyAuthor }}</b><div class="comment-container">{{ reply.getContent()|raw }}</div></div>
                                 </li>
+                                {% endif %}
                             {% endfor %}
                         </ul>
                     </div>

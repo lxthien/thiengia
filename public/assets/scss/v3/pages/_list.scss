@@ -1,0 +1,58 @@
+@use "../tokens" as *;
+
+// Bộ lọc chuyên mục trên trang danh mục
+.cat-filter {
+  border-bottom: 1px solid $line;
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 2.25rem;
+  }
+
+  a {
+    position: relative;
+    display: inline-block;
+    padding: 1.4rem 0;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba($text, 0.55);
+    transition: color $dur $ease;
+
+    &::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -1px;
+      width: 100%;
+      height: 2px;
+      background: $primary;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform $dur $ease;
+    }
+
+    &:hover {
+      color: $accent;
+    }
+
+    &[aria-current="true"] {
+      color: $primary;
+
+      &::after {
+        transform: scaleX(1);
+      }
+    }
+  }
+}
+
+// Thông báo khi chuyên mục chưa có bài
+.list-empty {
+  padding: 4rem 0;
+  text-align: center;
+  font-family: $f-display;
+  font-size: 1.25rem;
+  color: $mut;
+}

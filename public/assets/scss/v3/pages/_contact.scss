@@ -1,0 +1,152 @@
+@use "../tokens" as *;
+
+.contact-v3 {
+  // Form tư vấn — card trắng, viền trên đỏ gạch
+  .contact-form {
+    background: $white;
+    border: 1px solid $line;
+    border-top: 4px solid $primary;
+    box-shadow: 0 40px 80px rgba($dark, 0.08);
+    padding: 2.75rem;
+
+    @media (max-width: 640px) {
+      padding: 1.75rem;
+    }
+
+    .contact-form-title {
+      font-family: $f-display;
+      font-weight: 600;
+      font-size: 1.6rem;
+      color: $text;
+
+      em {
+        font-style: italic;
+        color: $primary;
+      }
+    }
+
+    .contact-form-note {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 300;
+      color: $mut;
+    }
+  }
+
+  .form-field {
+    label {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: $text;
+      margin-bottom: 0.6rem;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      background: $base;
+      border: 1px solid transparent;
+      border-bottom: 1px solid rgba($text, 0.22);
+      padding: 0.9rem 1.1rem;
+      font-family: $f-body;
+      font-size: 0.95rem;
+      font-weight: 300;
+      color: $text;
+      outline: none;
+      transition: border-color $dur $ease;
+
+      &::placeholder {
+        color: rgba($text, 0.35);
+      }
+
+      &:focus {
+        border-bottom-color: $accent;
+      }
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    // Thông báo lỗi từ Symfony Form
+    .form-error {
+      margin-top: 0.4rem;
+      font-size: 0.78rem;
+      color: $primary;
+    }
+  }
+
+  // Khối thông tin liên hệ
+  .contact-info-item {
+    display: flex;
+    gap: 1.25rem;
+    padding: 1.4rem 0;
+    border-bottom: 1px solid $line;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .contact-icon {
+      width: 50px;
+      height: 50px;
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+      background: $tint;
+      color: $accent;
+      transition: all $dur $ease;
+    }
+
+    .contact-label {
+      font-size: 0.66rem;
+      font-weight: 600;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: $mut;
+    }
+
+    .contact-value {
+      margin-top: 0.35rem;
+      font-family: $f-display;
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: $text;
+      line-height: 1.55;
+
+      a {
+        transition: color $dur $ease;
+
+        &:hover {
+          color: $accent;
+        }
+      }
+    }
+
+    &:hover .contact-icon {
+      background: $primary;
+      color: $white;
+    }
+  }
+
+  // Bản đồ — xám khi nghỉ, lên màu khi rê chuột
+  .contact-map {
+    height: 440px;
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      filter: grayscale(1) sepia(0.15) contrast(1.05);
+      transition: filter $dur $ease;
+    }
+
+    &:hover iframe {
+      filter: none;
+    }
+  }
+}

@@ -3,116 +3,67 @@
 namespace App\Entity;
 
 use App\Entity\News;
+use App\Repository\CommentRepository;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 use EWZ\Bundle\RecaptchaBundle\Validator\Constraints as Recaptcha;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\CommentRepository")
- * @ORM\Table(name="comment", options={"collate"="utf8_general_ci"})
- */
-
+#[ORM\Entity(repositoryClass: CommentRepository::class)]
+#[ORM\Table(name: 'comment', options: ['collate' => 'utf8_general_ci'])]
 class Comment
 {
-    /**
-     * @var int
-     *
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: Types::INTEGER)]
     private $id;
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="comment_id", type="integer", nullable=true)
-     */
+    #[ORM\Column(name: 'comment_id', type: Types::INTEGER, nullable: true)]
     private $comment_id;
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="news_id", type="integer", nullable=false)
-     * @Assert\NotBlank(message="news.blank")
-     */
+    #[ORM\Column(name: 'news_id', type: Types::INTEGER, nullable: false)]
+    #[Assert\NotBlank(message: 'news.blank')]
     private $news_id;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="text")
-     * @Assert\NotBlank(message="content.blank")
-     * @Assert\Length(
-     *     min=5,
-     *     minMessage="content.too_short",
-     *     max=10000,
-     *     maxMessage="content.too_long"
-     * )
-     */
+    #[ORM\Column(type: Types::TEXT)]
+    #[Assert\NotBlank(message: 'content.blank')]
+    #[Assert\Length(
+        min: 5,
+        minMessage: 'content.too_short',
+        max: 10000,
+        maxMessage: 'content.too_long'
+    )]
     private $content;
 
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="approved", type="boolean")
-     */
+    #[ORM\Column(name: 'approved', type: Types::BOOLEAN)]
     private $approved = false;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="email", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'email', type: Types::TEXT, nullable: true)]
     private $email;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="phone", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'phone', type: Types::TEXT, nullable: true)]
     private $phone;
 
-    /**
-     * @var string
-     *
-     * @Assert\NotBlank()
-     * @ORM\Column(name="author", type="text")
-     */
+    #[Assert\NotBlank]
+    #[ORM\Column(name: 'author', type: Types::TEXT)]
     private $author;
 
-    /**
-     * @var string
-     *
-     * @Assert\NotBlank()
-     * @ORM\Column(name="ip", type="text")
-     */
+    #[Assert\NotBlank]
+    #[ORM\Column(name: 'ip', type: Types::TEXT)]
     private $ip;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="gclid", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'gclid', type: Types::STRING, length: 255, nullable: true)]
     private $gclid;
 
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="createdAt", type="datetime") 
-     */
+    #[Gedmo\Timestampable(on: 'create')]
+    #[ORM\Column(name: 'createdAt', type: Types::DATETIME_MUTABLE)]
     private $createdAt;
 
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updatedAt", type="datetime")
-     */
+    #[Gedmo\Timestampable(on: 'update')]
+    #[ORM\Column(name: 'updatedAt', type: Types::DATETIME_MUTABLE)]
     private $updatedAt;
 
     public $recaptcha;
@@ -122,9 +73,7 @@ class Comment
         $this->createdAt = new \DateTime();
     }
 
-    /**
-     * @Assert\IsTrue(message="comment.is_spam")
-     */
+    #[Assert\IsTrue(message: 'comment.is_spam')]
     public function isLegitComment()
     {
         $containsInvalidCharacters = false !== mb_strpos($this->content, '@');

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Đăng nhập - Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex" />
+
+    <link rel="stylesheet" href="{{ asset('assets/sufeeadmin/assets/css/normalize.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/sufeeadmin/assets/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/sufeeadmin/assets/css/font-awesome.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/sufeeadmin/assets/scss/style.css') }}">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800' rel='stylesheet' type='text/css'>
+
+    <style>
+        body {
+            background: #1a2226;
+        }
+        .login-content {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-box {
+            width: 400px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+        .login-title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .login-title h1 {
+            font-size: 24px;
+            color: #1a2226;
+            margin-bottom: 5px;
+        }
+        .login-title p {
+            color: #999;
+            font-size: 14px;
+        }
+        .login-form .form-group {
+            margin-bottom: 20px;
+        }
+        .login-form label {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        .login-form .form-control {
+            height: 45px;
+            border-radius: 3px;
+        }
+        .login-form .btn-primary {
+            width: 100%;
+            height: 45px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 3px;
+            background: #1a2226;
+            border-color: #1a2226;
+        }
+        .login-form .btn-primary:hover {
+            background: #2c3e50;
+            border-color: #2c3e50;
+        }
+        .login-form .custom-control-label {
+            font-weight: 400;
+            color: #666;
+        }
+        .flash-error {
+            color: #dc3545;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 10px 15px;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-content">
+        <div class="login-box">
+            <div class="login-title">
+                <h1><i class="fa fa-lock"></i> Đăng nhập</h1>
+                <p>Hệ thống quản trị Kim Anh</p>
+            </div>
+
+            {% if app.session.flashbag.peekAll|length > 0 %}
+                {% for type, messages in app.session.flashbag.all() %}
+                    {% for message in messages %}
+                        <div class="flash-{{ type }}">{{ message|trans }}</div>
+                    {% endfor %}
+                {% endfor %}
+            {% endif %}
+
+            {% if error is defined and error %}
+                <div class="flash-error">
+                    {{ error.messageKey|trans(error.messageData, 'security') }}
+                </div>
+            {% endif %}
+
+            <form class="login-form" action="{{ path('app_login') }}" method="post">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}" />
+
+                <div class="form-group">
+                    <label for="username"><i class="fa fa-user"></i> Tên đăng nhập</label>
+                    <input type="text" class="form-control" id="username" name="_username" value="{{ last_username|default('') }}" required autofocus placeholder="Nhập tên đăng nhập">
+                </div>
+
+                <div class="form-group">
+                    <label for="password"><i class="fa fa-key"></i> Mật khẩu</label>
+                    <input type="password" class="form-control" id="password" name="_password" required placeholder="Nhập mật khẩu">
+                </div>
+
+                <div class="form-group">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="remember_me" name="_remember_me" value="on">
+                        <label class="custom-control-label" for="remember_me">Ghi nhớ đăng nhập</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-sign-in"></i> Đăng nhập
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ asset('assets/sufeeadmin/assets/js/vendor/jquery-2.1.4.min.js') }}"></script>
+    <script src="{{ asset('assets/sufeeadmin/assets/js/plugins.js') }}"></script>
+</body>
+</html>

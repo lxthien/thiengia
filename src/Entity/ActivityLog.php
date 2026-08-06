@@ -2,20 +2,20 @@
 
 namespace App\Entity;
 
+use App\Repository\ActivityLogRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * ActivityLog - Nhật ký hoạt động hệ thống
- *
- * @ORM\Table(name="activity_log", indexes={
- *     @ORM\Index(name="idx_activity_log_user", columns={"user_id"}),
- *     @ORM\Index(name="idx_activity_log_action", columns={"action"}),
- *     @ORM\Index(name="idx_activity_log_entity", columns={"entityType"}),
- *     @ORM\Index(name="idx_activity_log_created", columns={"createdAt"})
- * })
- * @ORM\Entity(repositoryClass="App\Repository\ActivityLogRepository")
  */
+#[ORM\Table(name: 'activity_log')]
+#[ORM\Index(name: 'idx_activity_log_user', columns: ['user_id'])]
+#[ORM\Index(name: 'idx_activity_log_action', columns: ['action'])]
+#[ORM\Index(name: 'idx_activity_log_entity', columns: ['entityType'])]
+#[ORM\Index(name: 'idx_activity_log_created', columns: ['createdAt'])]
+#[ORM\Entity(repositoryClass: ActivityLogRepository::class)]
 class ActivityLog
 {
     // Action constants
@@ -39,85 +39,44 @@ class ActivityLog
     const ENTITY_TAG = 'tag';
     const ENTITY_SETTINGS = 'settings';
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: Types::INTEGER)]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private $id;
 
     /**
      * @var User
-     *
-     * @ORM\ManyToOne(targetEntity="App\Entity\User")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      */
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private $user;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="username", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'username', type: Types::STRING, length: 255, nullable: true)]
     private $username;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="action", type="string", length=20)
-     */
+    #[ORM\Column(name: 'action', type: Types::STRING, length: 20)]
     private $action;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="entityType", type="string", length=50)
-     */
+    #[ORM\Column(name: 'entityType', type: Types::STRING, length: 50)]
     private $entityType;
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="entityId", type="integer", nullable=true)
-     */
+    #[ORM\Column(name: 'entityId', type: Types::INTEGER, nullable: true)]
     private $entityId;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="entityTitle", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'entityTitle', type: Types::STRING, length: 255, nullable: true)]
     private $entityTitle;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="details", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'details', type: Types::TEXT, nullable: true)]
     private $details;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="ipAddress", type="string", length=45, nullable=true)
-     */
+    #[ORM\Column(name: 'ipAddress', type: Types::STRING, length: 45, nullable: true)]
     private $ipAddress;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="userAgent", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'userAgent', type: Types::STRING, length: 255, nullable: true)]
     private $userAgent;
 
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="createdAt", type="datetime")
-     */
+    #[Gedmo\Timestampable(on: 'create')]
+    #[ORM\Column(name: 'createdAt', type: Types::DATETIME_MUTABLE)]
     private $createdAt;
 
     // ----- Getters & Setters -----

@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Repository\MenuItemRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -9,10 +11,9 @@ use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * MenuItem
- *
- * @ORM\Table(name="menu_item", options={"collate"="utf8_general_ci"})
- * @ORM\Entity(repositoryClass="App\Repository\MenuItemRepository")
  */
+#[ORM\Table(name: 'menu_item', options: ['collate' => 'utf8_general_ci'])]
+#[ORM\Entity(repositoryClass: MenuItemRepository::class)]
 class MenuItem
 {
     const TYPE_URL = 'url';
@@ -20,130 +21,78 @@ class MenuItem
     const TYPE_CATEGORY = 'category';
     const TYPE_PAGE = 'page';
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: Types::INTEGER)]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private $id;
 
     /**
      * @var Menu
-     *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Menu", inversedBy="items")
-     * @ORM\JoinColumn(name="menu_id", referencedColumnName="id", nullable=false, onDelete="CASCADE")
      */
+    #[ORM\ManyToOne(targetEntity: Menu::class, inversedBy: 'items')]
+    #[ORM\JoinColumn(name: 'menu_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private $menu;
 
     /**
      * @var MenuItem
-     *
-     * @ORM\ManyToOne(targetEntity="App\Entity\MenuItem", inversedBy="children")
-     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", nullable=true, onDelete="CASCADE")
      */
+    #[ORM\ManyToOne(targetEntity: MenuItem::class, inversedBy: 'children')]
+    #[ORM\JoinColumn(name: 'parent_id', referencedColumnName: 'id', nullable: true, onDelete: 'CASCADE')]
     private $parent;
 
     /**
      * @var ArrayCollection
-     *
-     * @ORM\OneToMany(targetEntity="App\Entity\MenuItem", mappedBy="parent", cascade={"all"}, orphanRemoval=true)
-     * @ORM\OrderBy({"position" = "ASC", "id" = "ASC"})
      */
+    #[ORM\OneToMany(targetEntity: MenuItem::class, mappedBy: 'parent', cascade: ['all'], orphanRemoval: true)]
+    #[ORM\OrderBy(['position' => 'ASC', 'id' => 'ASC'])]
     private $children;
 
-    /**
-     * @var string
-     *
-     * @Assert\NotBlank(message="title.blank")
-     * @Assert\Length(
-     *      min = 2,
-     *      max = 255,
-     *      minMessage = "Your title must be at least {{ limit }} characters long",
-     *      maxMessage = "Your title cannot be longer than {{ limit }} characters"
-     * )
-     * @ORM\Column(name="title", type="string", length=255)
-     */
+    #[Assert\NotBlank(message: 'title.blank')]
+    #[Assert\Length(
+        min: 2,
+        max: 255,
+        minMessage: 'Your title must be at least {{ limit }} characters long',
+        maxMessage: 'Your title cannot be longer than {{ limit }} characters'
+    )]
+    #[ORM\Column(name: 'title', type: Types::STRING, length: 255)]
     private $title;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="type", type="string", length=50)
-     */
+    #[ORM\Column(name: 'type', type: Types::STRING, length: 50)]
     private $type;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="url", type="string", length=500, nullable=true)
-     */
+    #[ORM\Column(name: 'url', type: Types::STRING, length: 500, nullable: true)]
     private $url;
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="target_id", type="integer", nullable=true)
-     */
+    #[ORM\Column(name: 'target_id', type: Types::INTEGER, nullable: true)]
     private $targetId;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="target_type", type="string", length=50, nullable=true)
-     */
+    #[ORM\Column(name: 'target_type', type: Types::STRING, length: 50, nullable: true)]
     private $targetType;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="css_class", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'css_class', type: Types::STRING, length: 255, nullable: true)]
     private $cssClass;
 
     /**
      * @var string (For SEO: e.g., '_blank', '_self')
-     *
-     * @ORM\Column(name="target_attr", type="string", length=20, nullable=true)
      */
+    #[ORM\Column(name: 'target_attr', type: Types::STRING, length: 20, nullable: true)]
     private $targetAttr = '_self';
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="title_attr", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'title_attr', type: Types::STRING, length: 255, nullable: true)]
     private $titleAttr;
 
-    /**
-     * @var integer
-     *
-     * @ORM\Column(name="position", type="integer", options={"default"=0})
-     */
+    #[ORM\Column(name: 'position', type: Types::INTEGER, options: ['default' => 0])]
     private $position = 0;
 
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="enable", type="boolean", options={"default"=true})
-     */
+    #[ORM\Column(name: 'enable', type: Types::BOOLEAN, options: ['default' => true])]
     private $enable = true;
 
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="createdAt", type="datetime")
-     */
+    #[Gedmo\Timestampable(on: 'create')]
+    #[ORM\Column(name: 'createdAt', type: Types::DATETIME_MUTABLE)]
     private $createdAt;
 
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updatedAt", type="datetime")
-     */
+    #[Gedmo\Timestampable(on: 'update')]
+    #[ORM\Column(name: 'updatedAt', type: Types::DATETIME_MUTABLE)]
     private $updatedAt;
 
     public function __construct()

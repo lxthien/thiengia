@@ -16,32 +16,33 @@ use App\Entity\NewsCategory;
 use App\Form\NewsCategoryType;
 use App\Service\ActivityLogService;
 use App\Utils\Slugger;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
  * Controller used to manage post category contents in the backend.
- *
- * @Route("/admin/newscategory")
- * @Security("has_role('ROLE_ADMIN')")
  */
-
-class NewsCategoryController extends Controller
+#[Route('/admin/newscategory')]
+#[IsGranted('ROLE_ADMIN')]
+class NewsCategoryController extends AbstractController
 {
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly ActivityLogService $activityLogService,
+    ) {
+    }
+
     /**
      * Lists all NewsCategory entities.
-     *
-     * @Route("/", name="admin_newscategory_index")
-     * @Method("GET")
      */
+    #[Route('/', name: 'admin_newscategory_index', methods: ['GET'])]
     public function indexAction()
     {
-        $em = $this->getDoctrine()->getManager();
-        $categories = $em->getRepository(NewsCategory::class)->findBy(['parentcat' => null]);
+        $categories = $this->em->getRepository(NewsCategory::class)->findBy(['parentcat' => null]);
 
         return $this->render('admin/newscategory/index.html.twig', [
             'objects' => $categories
@@ -50,10 +51,8 @@ class NewsCategoryController extends Controller
 
     /**
      * Creates a new NewsCategory entity.
-     *
-     * @Route("/new", name="admin_newscategory_new")
-     * @Method({"GET", "POST"})
      */
+    #[Route('/new', name: 'admin_newscategory_new', methods: ['GET', 'POST'])]
     public function newAction(Request $request, Slugger $slugger)
     {
         $category = new NewsCategory();
@@ -67,12 +66,11 @@ class NewsCategoryController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($category);
-            $em->flush();
+            $this->em->persist($category);
+            $this->em->flush();
 
             // Activity Log
-            $this->get(ActivityLogService::class)->log(
+            $this->activityLogService->log(
                 ActivityLog::ACTION_CREATE,
                 ActivityLog::ENTITY_CATEGORY,
                 $category->getId(),
@@ -96,10 +94,8 @@ class NewsCategoryController extends Controller
 
     /**
      * Displays a form to edit an existing NewsCategory entity.
-     *
-     * @Route("/{id}/edit", requirements={"id": "\d+"}, name="admin_newscategory_edit")
-     * @Method({"GET", "POST"})
      */
+    #[Route('/{id}/edit', requirements: ['id' => '\d+'], name: 'admin_newscategory_edit', methods: ['GET', 'POST'])]
     public function editAction(Request $request, NewsCategory $category, Slugger $slugger)
     {
         $form = $this->createForm(NewsCategoryType::class, $category);
@@ -107,12 +103,12 @@ class NewsCategoryController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Capture changes before flush
-            $diffDetails = $this->get(ActivityLogService::class)->getEntityDiff($category);
-            
-            $this->getDoctrine()->getManager()->flush();
+            $diffDetails = $this->activityLogService->getEntityDiff($category);
+
+            $this->em->flush();
 
             // Activity Log
-            $this->get(ActivityLogService::class)->log(
+            $this->activityLogService->log(
                 ActivityLog::ACTION_UPDATE,
                 ActivityLog::ENTITY_CATEGORY,
                 $category->getId(),
@@ -132,9 +128,8 @@ class NewsCategoryController extends Controller
 
     /**
      * Deletes a NewsCategory entity.
-     *
-     * @Route("/{id}/delete", methods={"POST"}, name="admin_newscategory_delete")
      */
+    #[Route('/{id}/delete', name: 'admin_newscategory_delete', methods: ['POST'])]
     public function deleteAction(Request $request, NewsCategory $category)
     {
         if (!$this->isCsrfTokenValid('delete', $request->request->get('token'))) {
@@ -144,12 +139,11 @@ class NewsCategoryController extends Controller
         $catName = $category->getName();
         $catId = $category->getId();
 
-        $em = $this->getDoctrine()->getManager();
-        $em->remove($category);
-        $em->flush();
+        $this->em->remove($category);
+        $this->em->flush();
 
         // Activity Log
-        $this->get(ActivityLogService::class)->log(
+        $this->activityLogService->log(
             ActivityLog::ACTION_DELETE,
             ActivityLog::ENTITY_CATEGORY,
             $catId,

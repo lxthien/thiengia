@@ -24,7 +24,7 @@ class LoginListener
                 ActivityLog::ACTION_LOGIN,
                 ActivityLog::ENTITY_USER,
                 $user->getId(),
-                $user->getUsername(),
+                $user->getUserIdentifier(),
                 'Đăng nhập vào hệ thống'
             );
         }

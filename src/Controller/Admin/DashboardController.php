@@ -19,56 +19,56 @@ use App\Entity\Contact;
 use App\Entity\Banner;
 use App\Entity\Tag;
 use App\Entity\DailyStats;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
  * Dashboard Controller
- * 
- * @Route("/admin")
- * @Route("/admin/dashboard")
- * @Security("has_role('ROLE_ADMIN')")
  */
-
-class DashboardController extends Controller
+#[Route('/admin')]
+#[IsGranted('ROLE_ADMIN')]
+class DashboardController extends AbstractController
 {
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+    ) {
+    }
+
     /**
      * Display dashboard with statistics
-     * 
-     * @Route("/", name="admin_dashboard_index")
-     * @Method("GET")
      */
+    #[Route('/', name: 'admin_dashboard_index', methods: ['GET'])]
     public function indexAction()
     {
-        $em = $this->getDoctrine()->getManager();
-        
+        $em = $this->em;
+
         // Total counts
         $totalPosts = $em->getRepository(News::class)->createQueryBuilder('n')
             ->select('COUNT(n.id)')
             ->getQuery()
             ->getSingleScalarResult();
-            
+
         $totalComments = $em->getRepository(Comment::class)->createQueryBuilder('c')
             ->select('COUNT(c.id)')
             ->getQuery()
             ->getSingleScalarResult();
-            
+
         $totalUsers = $em->getRepository(User::class)->createQueryBuilder('u')
             ->select('COUNT(u.id)')
             ->getQuery()
             ->getSingleScalarResult();
-        
+
         // Total views
         $viewsData = $em->getRepository(News::class)->createQueryBuilder('n')
             ->select('SUM(n.viewCounts) as totalViews')
             ->getQuery()
             ->getOneOrNullResult();
         $totalViews = $viewsData['totalViews'] ?? 0;
-        
+
         // Recent posts (last 7 days)
         $recentPosts = $em->getRepository(News::class)->createQueryBuilder('n')
             ->select('n.id, n.title, n.postType, n.createdAt, n.viewCounts')
@@ -78,7 +78,7 @@ class DashboardController extends Controller
             ->setMaxResults(10)
             ->getQuery()
             ->getResult();
-        
+
         // Recent comments
         $recentComments = $em->getRepository(Comment::class)->createQueryBuilder('c')
             ->select('c.id, c.author, c.createdAt, c.approved, c.news_id')
@@ -86,10 +86,10 @@ class DashboardController extends Controller
             ->setMaxResults(8)
             ->getQuery()
             ->getResult();
-        
+
         // View trends - last 30 days
         $viewTrends = $this->getViewTrendsByDate();
-        
+
         // Approved vs Pending comments
         $approvedComments = $em->getRepository(Comment::class)->createQueryBuilder('c')
             ->select('COUNT(c.id)')
@@ -97,9 +97,9 @@ class DashboardController extends Controller
             ->setParameter('approved', true)
             ->getQuery()
             ->getSingleScalarResult();
-            
+
         $pendingComments = $totalComments - $approvedComments;
-        
+
         // Top 5 posts by views
         $topPosts = $em->getRepository(News::class)->createQueryBuilder('n')
             ->select('n.id, n.title, n.postType, n.viewCounts')
@@ -137,12 +137,12 @@ class DashboardController extends Controller
             'php_version' => PHP_VERSION,
             'symfony_version' => \Symfony\Component\HttpKernel\Kernel::VERSION,
             'server_os' => PHP_OS,
-            'db_driver' => $em->getConnection()->getDriver()->getName(),
+            'db_driver' => (new \ReflectionClass($em->getConnection()->getDatabasePlatform()))->getShortName(),
         ];
 
         // Recent activity logs
         $recentActivities = $em->getRepository(ActivityLog::class)->findRecentLogs(10);
-        
+
         return $this->render('admin/dashboard/index.html.twig', [
             'totalPosts' => $totalPosts,
             'totalComments' => $totalComments,
@@ -163,10 +163,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    /**
-     * @Route("/notifications/feed", name="admin_notifications_feed")
-     * @Method("GET")
-     */
+    #[Route('/notifications/feed', name: 'admin_notifications_feed', methods: ['GET'])]
     public function notificationsFeedAction()
     {
         $notifications = $this->buildAdminNotifications();
@@ -178,21 +175,20 @@ class DashboardController extends Controller
             ]),
         ]);
     }
-    
+
     /**
      * Get view trends for last 30 days
      */
     private function getViewTrendsByDate()
     {
-        $em = $this->getDoctrine()->getManager();
-        return $em->getRepository(DailyStats::class)->getTrends(30);
+        return $this->em->getRepository(DailyStats::class)->getTrends(30);
     }
 
     private function buildAdminNotifications()
     {
-        $contactRepository = $this->getDoctrine()->getRepository(Contact::class);
-        $commentRepository = $this->getDoctrine()->getRepository(Comment::class);
-        $userRepository = $this->getDoctrine()->getRepository(User::class);
+        $contactRepository = $this->em->getRepository(Contact::class);
+        $commentRepository = $this->em->getRepository(Comment::class);
+        $userRepository = $this->em->getRepository(User::class);
 
         $contactCount = $contactRepository->countUnread();
         $commentCount = $commentRepository->countPending();

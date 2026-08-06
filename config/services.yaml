@@ -30,10 +30,6 @@ services:
             $doctrine: '@doctrine'
             $authorizationChecker: '@security.authorization_checker'
 
-    App\EventListener\CommentNotificationSubscriber:
-        arguments:
-            $sender: '%app.notifications.email_sender%'
-
     # App\EventListener\RedirectToPreferredLocaleSubscriber:
     #     arguments:
     #         $locales: '%app_locales%'
@@ -41,16 +37,6 @@ services:
 
     App\Utils\Slugger:
         public: true
-
-    app.form.registration:
-        class: App\Form\RegistrationType
-        tags:
-            - { name: form.type, alias: app_user_registration }
-
-    app.form.profile:
-        class: App\Form\ProfileFormType
-        tags:
-            - { name: form.type, alias: app_user_profile }
 
     convertImages:
         alias: App\Utils\ConvertImages
@@ -80,6 +66,10 @@ services:
     App\Service\ViewCountLogger:
         arguments:
             $logDir: '%kernel.logs_dir%'
+
+    App\Command\SyncViewCountsCommand:
+        arguments:
+            $logsDir: '%kernel.logs_dir%'
 
     App\EventListener\LoginListener:
         arguments:

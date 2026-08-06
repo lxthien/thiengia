@@ -5,25 +5,26 @@ namespace App\Controller\Admin;
 use App\Entity\News;
 use App\Entity\NewsCategory;
 use App\Seo\ContentDecayReporter;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-/**
- * @Route("/admin/content-decay")
- * @Security("has_role('ROLE_ADMIN')")
- */
-class ContentDecayController extends Controller
+#[Route('/admin/content-decay')]
+#[IsGranted('ROLE_ADMIN')]
+class ContentDecayController extends AbstractController
 {
-    /**
-     * @Route("/", name="admin_content_decay_index")
-     * @Method("GET")
-     */
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly PaginatorInterface $paginator,
+    ) {
+    }
+
+    #[Route('/', name: 'admin_content_decay_index', methods: ['GET'])]
     public function indexAction(Request $request, ContentDecayReporter $reporter)
     {
-        $em = $this->getDoctrine()->getManager();
         $filters = [
             'q' => trim((string) $request->query->get('q')),
             'category' => $request->query->get('category', ''),
@@ -33,7 +34,7 @@ class ContentDecayController extends Controller
             'sort' => $request->query->get('sort', 'decay_desc'),
         ];
 
-        $qb = $em->getRepository(News::class)->createQueryBuilder('n')
+        $qb = $this->em->getRepository(News::class)->createQueryBuilder('n')
             ->leftJoin('n.category', 'c')
             ->addSelect('c')
             ->where('n.postType = :postType')
@@ -76,13 +77,13 @@ class ContentDecayController extends Controller
 
         $this->sortItems($items, $filters['sort']);
 
-        $pagination = $this->get('knp_paginator')->paginate(
+        $pagination = $this->paginator->paginate(
             $items,
             $request->query->getInt('page', 1),
             30
         );
 
-        $categories = $em->getRepository(NewsCategory::class)->findBy([], ['name' => 'ASC']);
+        $categories = $this->em->getRepository(NewsCategory::class)->findBy([], ['name' => 'ASC']);
 
         return $this->render('admin/content_decay/index.html.twig', [
             'pagination' => $pagination,

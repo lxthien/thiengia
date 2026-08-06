@@ -2,28 +2,35 @@
 
 namespace App\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
+use App\Service\SettingsManager;
 
 use App\Entity\User;
 use App\Entity\News;
 
-class ProfileController extends Controller
+class ProfileController extends AbstractController
 {
-    /**
-     * @Route("/author/{slug}/{page}",
-     *      name="author",
-     *      requirements={
-     *          "slug": "[-\w]+",
-     *          "page": "\d+"
-     *      }))
-     */
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly PaginatorInterface $paginator,
+        private readonly SettingsManager $settingsManager,
+    ) {
+    }
+
+    #[Route(
+        '/author/{slug}/{page}',
+        name: 'author',
+        requirements: ['slug' => '[-\w]+', 'page' => '\d+']
+    )]
     public function indexAction($slug, $page = 1)
     {
-        $user = $this->getDoctrine()
+        $user = $this->em
             ->getRepository(User::class)
             ->findOneBy(
                 array('username' => $slug)
@@ -33,7 +40,7 @@ class ProfileController extends Controller
             return $this->redirectToRoute('homepage', [], 302);
         }
 
-        $posts = $this->getDoctrine()
+        $posts = $this->em
             ->getRepository(News::class)
             ->createQueryBuilder('n')
             ->where('n.author = :author')
@@ -45,11 +52,10 @@ class ProfileController extends Controller
             ->orderBy('n.createdAt', 'DESC')
             ->getQuery()->getResult();
 
-        $paginator  = $this->get('knp_paginator');
-        $pagination = $paginator->paginate(
+        $pagination = $this->paginator->paginate(
             $posts,
             $page,
-            $this->get('settings_manager')->get('numberRecordOnPage') ?: 10
+            $this->settingsManager->get('numberRecordOnPage') ?: 10
         );
 
         return $this->render('user/list.html.twig', [

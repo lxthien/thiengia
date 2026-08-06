@@ -6,10 +6,8 @@ use App\Entity\ActivityLog;
 use App\Entity\User;
 use App\Service\ActivityLogService;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -17,27 +15,32 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * User Management Controller
- * 
- * @Route("/admin/user")
- * @Security("has_role('ROLE_ADMIN')")
  */
-
-class UserController extends Controller
+#[Route('/admin/user')]
+#[IsGranted('ROLE_ADMIN')]
+class UserController extends AbstractController
 {
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly ActivityLogService $activityLogService,
+        private readonly UserPasswordHasherInterface $passwordHasher,
+    ) {
+    }
+
     /**
      * Lists all users entities.
-     *
-     * @Route("/", name="admin_user_index")
-     * @Method("GET")
      */
+    #[Route('/', name: 'admin_user_index', methods: ['GET'])]
     public function indexAction()
     {
-        $em = $this->getDoctrine()->getManager();
-        $userRepository = $em->getRepository(User::class);
+        $userRepository = $this->em->getRepository(User::class);
         $userRepository->markAllRegistrationNotificationsAsRead();
         $users = $userRepository->findBy([], ['createdAt' => 'DESC', 'id' => 'DESC']);
 
@@ -46,10 +49,8 @@ class UserController extends Controller
 
     /**
      * Display a form to create a new user
-     *
-     * @Route("/new", name="admin_user_new")
-     * @Method({"GET", "POST"})
      */
+    #[Route('/new', name: 'admin_user_new', methods: ['GET', 'POST'])]
     public function newAction(Request $request)
     {
         $user = new User();
@@ -57,23 +58,19 @@ class UserController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            
-            // Encode password
-            $encoder = $this->container->get('security.password_encoder');
-            $encoded = $encoder->encodePassword($user, $user->getPlainPassword());
+            $encoded = $this->passwordHasher->hashPassword($user, $user->getPlainPassword());
             $user->setPassword($encoded);
             $user->setAdminNotificationRead(true);
-            
-            $em->persist($user);
-            $em->flush();
+
+            $this->em->persist($user);
+            $this->em->flush();
 
             // Activity Log
-            $this->get(ActivityLogService::class)->log(
+            $this->activityLogService->log(
                 ActivityLog::ACTION_CREATE,
                 ActivityLog::ENTITY_USER,
                 $user->getId(),
-                $user->getUsername(),
+                $user->getUserIdentifier(),
                 'Vai trò: ' . implode(', ', $user->getRoles())
             );
 
@@ -89,36 +86,31 @@ class UserController extends Controller
 
     /**
      * Display a form to edit an existing user
-     *
-     * @Route("/{id}/edit", name="admin_user_edit")
-     * @Method({"GET", "POST"})
      */
+    #[Route('/{id}/edit', name: 'admin_user_edit', methods: ['GET', 'POST'])]
     public function editAction(Request $request, User $user)
     {
         $form = $this->createUserForm($user, false);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            
             // Update password if provided
             if (!empty($user->getPlainPassword())) {
-                $encoder = $this->container->get('security.password_encoder');
-                $encoded = $encoder->encodePassword($user, $user->getPlainPassword());
+                $encoded = $this->passwordHasher->hashPassword($user, $user->getPlainPassword());
                 $user->setPassword($encoded);
             }
-            
+
             // Capture changes before flush
-            $diffDetails = $this->get(\App\Service\ActivityLogService::class)->getEntityDiff($user);
-            
-            $em->flush();
+            $diffDetails = $this->activityLogService->getEntityDiff($user);
+
+            $this->em->flush();
 
             // Activity Log
-            $this->get(\App\Service\ActivityLogService::class)->log(
-                \App\Entity\ActivityLog::ACTION_UPDATE,
-                \App\Entity\ActivityLog::ENTITY_USER,
+            $this->activityLogService->log(
+                ActivityLog::ACTION_UPDATE,
+                ActivityLog::ENTITY_USER,
                 $user->getId(),
-                $user->getUsername(),
+                $user->getUserIdentifier(),
                 $diffDetails
             );
 
@@ -134,10 +126,8 @@ class UserController extends Controller
 
     /**
      * Delete a user
-     *
-     * @Route("/{id}/delete", name="admin_user_delete")
-     * @Method("POST")
      */
+    #[Route('/{id}/delete', name: 'admin_user_delete', methods: ['POST'])]
     public function deleteAction(Request $request, User $user)
     {
         // Prevent deleting current user
@@ -150,15 +140,14 @@ class UserController extends Controller
             return $this->redirectToRoute('admin_user_index');
         }
 
-        $username = $user->getUsername();
+        $username = $user->getUserIdentifier();
         $userId = $user->getId();
 
-        $em = $this->getDoctrine()->getManager();
-        $em->remove($user);
-        $em->flush();
+        $this->em->remove($user);
+        $this->em->flush();
 
         // Activity Log
-        $this->get(ActivityLogService::class)->log(
+        $this->activityLogService->log(
             ActivityLog::ACTION_DELETE,
             ActivityLog::ENTITY_USER,
             $userId,
@@ -171,10 +160,8 @@ class UserController extends Controller
 
     /**
      * Toggle user enabled/disabled status (Lock/Unlock account)
-     *
-     * @Route("/{id}/toggle-status", name="admin_user_toggle_status")
-     * @Method("POST")
      */
+    #[Route('/{id}/toggle-status', name: 'admin_user_toggle_status', methods: ['POST'])]
     public function toggleStatusAction(Request $request, User $user)
     {
         if (!$this->isCsrfTokenValid('toggle-status', $request->request->get('token'))) {
@@ -187,18 +174,17 @@ class UserController extends Controller
             return $this->redirectToRoute('admin_user_index');
         }
 
-        $em = $this->getDoctrine()->getManager();
         $user->setEnabled(!$user->isEnabled());
-        $em->flush();
+        $this->em->flush();
 
         $status = $user->isEnabled() ? 'mở khoá' : 'khoá';
 
         // Activity Log
-        $this->get(ActivityLogService::class)->log(
+        $this->activityLogService->log(
             ActivityLog::ACTION_TOGGLE,
             ActivityLog::ENTITY_USER,
             $user->getId(),
-            $user->getUsername(),
+            $user->getUserIdentifier(),
             'Tài khoản đã được ' . $status
         );
 
@@ -208,10 +194,8 @@ class UserController extends Controller
 
     /**
      * Change user password
-     *
-     * @Route("/{id}/change-password", name="admin_user_change_password")
-     * @Method({"GET", "POST"})
      */
+    #[Route('/{id}/change-password', name: 'admin_user_change_password', methods: ['GET', 'POST'])]
     public function changePasswordAction(Request $request, User $user)
     {
         $form = $this->createFormBuilder(null, ['csrf_protection' => false])
@@ -247,18 +231,16 @@ class UserController extends Controller
                 return $this->redirectToRoute('admin_user_change_password', ['id' => $user->getId()]);
             }
 
-            $em = $this->getDoctrine()->getManager();
-            $encoder = $this->container->get('security.password_encoder');
-            $encoded = $encoder->encodePassword($user, $plainPassword);
+            $encoded = $this->passwordHasher->hashPassword($user, $plainPassword);
             $user->setPassword($encoded);
-            $em->flush();
+            $this->em->flush();
 
             // Activity Log
-            $this->get(ActivityLogService::class)->log(
+            $this->activityLogService->log(
                 ActivityLog::ACTION_UPDATE,
                 ActivityLog::ENTITY_USER,
                 $user->getId(),
-                $user->getUsername(),
+                $user->getUserIdentifier(),
                 'Đổi mật khẩu'
             );
 

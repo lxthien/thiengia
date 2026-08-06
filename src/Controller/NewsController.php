@@ -2,8 +2,7 @@
 
 namespace App\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -16,7 +15,15 @@ use Symfony\Component\Form\Extension\Core\Type\ButtonType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+
+use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
+use WhiteOctober\BreadcrumbsBundle\Model\Breadcrumbs;
+use App\Service\SettingsManager;
 
 use App\Entity\NewsCategory;
 use App\Entity\News;
@@ -32,7 +39,7 @@ use EWZ\Bundle\RecaptchaBundle\Validator\Constraints\IsTrue as RecaptchaTrue;
 
 use App\Utils\ConvertImages;
 
-class NewsController extends Controller
+class NewsController extends AbstractController
 {
     /**
      * @var UploaderHelper
@@ -43,13 +50,19 @@ class NewsController extends Controller
     private $viewCountLogger;
     private $pageBuilderService;
 
-    /**
-     * Constructs a new instance of UploaderExtension.
-     *
-     * @param UploaderHelper $helper
-     */
-    public function __construct(UploaderHelper $helper, ConvertImages $convertImages, \App\Service\ContentFormatter $contentFormatter, \App\Service\ViewCountLogger $viewCountLogger, PageBuilderService $pageBuilderService)
-    {
+    public function __construct(
+        UploaderHelper $helper,
+        ConvertImages $convertImages,
+        \App\Service\ContentFormatter $contentFormatter,
+        \App\Service\ViewCountLogger $viewCountLogger,
+        PageBuilderService $pageBuilderService,
+        private readonly EntityManagerInterface $em,
+        private readonly PaginatorInterface $paginator,
+        private readonly TranslatorInterface $translator,
+        private readonly Breadcrumbs $breadcrumbs,
+        private readonly SettingsManager $settingsManager,
+        private readonly FormFactoryInterface $formFactory,
+    ) {
         $this->helper = $helper;
         $this->convertImages = $convertImages;
         $this->contentFormatter = $contentFormatter;
@@ -112,12 +125,10 @@ class NewsController extends Controller
     {
         // First, try to find it as a post/page
         if ($request->query->get('preview') === false || $request->query->get('preview_id') === null) {
-            $post = $this->getDoctrine()
-                ->getRepository(News::class)
+            $post = $this->em->getRepository(News::class)
                 ->findOneBy(['url' => $slug, 'enable' => 1]);
         } else {
-            $post = $this->getDoctrine()
-                ->getRepository(News::class)
+            $post = $this->em->getRepository(News::class)
                 ->find($request->query->get('preview_id'));
         }
 
@@ -127,8 +138,7 @@ class NewsController extends Controller
         }
 
         // Try to find it as a category
-        $category = $this->getDoctrine()
-            ->getRepository(NewsCategory::class)
+        $category = $this->em->getRepository(NewsCategory::class)
             ->findOneBy(['url' => $slug, 'enable' => 1]);
 
         if ($category) {
@@ -158,8 +168,7 @@ class NewsController extends Controller
     private function handleTwoSegments($level1, $level2, Request $request)
     {
         // First, try to find level1 as a category (parent)
-        $parentCategory = $this->getDoctrine()
-            ->getRepository(NewsCategory::class)
+        $parentCategory = $this->em->getRepository(NewsCategory::class)
             ->findOneBy(['url' => $level1, 'enable' => 1]);
 
         if (!$parentCategory) {
@@ -167,8 +176,7 @@ class NewsController extends Controller
         }
 
         // Now check if level2 is a child category
-        $childCategory = $this->getDoctrine()
-            ->getRepository(NewsCategory::class)
+        $childCategory = $this->em->getRepository(NewsCategory::class)
             ->findOneBy(['url' => $level2, 'parentcat' => $parentCategory->getId(), 'enable' => 1]);
 
         if ($childCategory) {
@@ -177,8 +185,7 @@ class NewsController extends Controller
         }
 
         // Check if level2 is a post in this category
-        $post = $this->getDoctrine()
-            ->getRepository(News::class)
+        $post = $this->em->getRepository(News::class)
             ->findOneBy(['url' => $level2, 'enable' => 1]);
 
         if ($post) {
@@ -208,8 +215,7 @@ class NewsController extends Controller
     private function handleThreeSegments($level1, $level2, $level3, Request $request)
     {
         // Find parent category
-        $parentCategory = $this->getDoctrine()
-            ->getRepository(NewsCategory::class)
+        $parentCategory = $this->em->getRepository(NewsCategory::class)
             ->findOneBy(['url' => $level1, 'enable' => 1]);
 
         if (!$parentCategory) {
@@ -217,8 +223,7 @@ class NewsController extends Controller
         }
 
         // Find child category
-        $childCategory = $this->getDoctrine()
-            ->getRepository(NewsCategory::class)
+        $childCategory = $this->em->getRepository(NewsCategory::class)
             ->findOneBy(['url' => $level2, 'parentcat' => $parentCategory->getId(), 'enable' => 1]);
 
         if (!$childCategory) {
@@ -226,8 +231,7 @@ class NewsController extends Controller
         }
 
         // Find post by slug
-        $post = $this->getDoctrine()
-            ->getRepository(News::class)
+        $post = $this->em->getRepository(News::class)
             ->findOneBy(['url' => $level3, 'enable' => 1]);
 
         if ($post) {
@@ -243,8 +247,7 @@ class NewsController extends Controller
         }
 
         // Check if level3 is another category (for nesting support)
-        $nextChildCategory = $this->getDoctrine()
-            ->getRepository(NewsCategory::class)
+        $nextChildCategory = $this->em->getRepository(NewsCategory::class)
             ->findOneBy(['url' => $level3, 'parentcat' => $childCategory->getId(), 'enable' => 1]);
 
         if ($nextChildCategory) {
@@ -268,8 +271,7 @@ class NewsController extends Controller
             $page = 1;
         }
 
-        $category = $this->getDoctrine()
-            ->getRepository(NewsCategory::class)
+        $category = $this->em->getRepository(NewsCategory::class)
             ->findOneBy(array('url' => $level1, 'enable' => 1));
 
         if (!$category) {
@@ -282,8 +284,7 @@ class NewsController extends Controller
         }
 
         if (!empty($level2)) {
-            $subCategory = $this->getDoctrine()
-                ->getRepository(NewsCategory::class)
+            $subCategory = $this->em->getRepository(NewsCategory::class)
                 ->findOneBy(array('url' => $level2, 'enable' => 1));
 
             if (!$subCategory) {
@@ -319,8 +320,7 @@ class NewsController extends Controller
             // Get all post for this category and sub category
             $listCategoriesIds[] = $category->getId();
 
-            $allSubCategories = $this->getDoctrine()
-                ->getRepository(NewsCategory::class)
+            $allSubCategories = $this->em->getRepository(NewsCategory::class)
                 ->getSubCategories($category->getId());
 
             foreach ($allSubCategories as $value) {
@@ -329,31 +329,27 @@ class NewsController extends Controller
             }
 
             if ($category->getContent() == NULL) {
-                $news = $this->getDoctrine()
-                    ->getRepository(News::class)
+                $news = $this->em->getRepository(News::class)
                     ->getNewsByCategories($listCategoriesIds, $orderingKey[0], $orderingData[$orderingKey[0]]);
             } else {
-                $news = $this->getDoctrine()
-                    ->getRepository(News::class)
+                $news = $this->em->getRepository(News::class)
                     ->getNewsByCategory($category->getId(), $orderingKey[0], $orderingData[$orderingKey[0]], 8);
             }
         } else {
             if ($subCategory->getContent() == NULL) {
-                $news = $this->getDoctrine()
-                    ->getRepository(News::class)
+                $news = $this->em->getRepository(News::class)
                     ->getNewsByCategory($subCategory->getId(), $orderingKey[0], $orderingData[$orderingKey[0]]);
             } else {
-                $news = $this->getDoctrine()
-                    ->getRepository(News::class)
+                $news = $this->em->getRepository(News::class)
                     ->getNewsByCategory($subCategory->getId(), $orderingKey[0], $orderingData[$orderingKey[0]], 12);
             }
         }
 
-        $paginator = $this->get('knp_paginator');
+        $paginator = $this->paginator;
         $pagination = $paginator->paginate(
             $news,
             $page,
-            $this->get('settings_manager')->get('numberRecordOnPage') ?: 10
+            $this->settingsManager->get('numberRecordOnPage') ?: 10
         );
 
         return $this->render('news/list.html.twig', [
@@ -379,9 +375,9 @@ class NewsController extends Controller
             if (!$this->isGranted('ROLE_ADMIN')) {
                 throw $this->createAccessDeniedException("Bạn không có quyền xem bản nháp.");
             }
-            $post = $this->getDoctrine()->getRepository(News::class)->find($request->query->get('preview_id'));
+            $post = $this->em->getRepository(News::class)->find($request->query->get('preview_id'));
         } else {
-            $post = $this->getDoctrine()->getRepository(News::class)->findOneBy(['url' => $slug, 'enable' => 1]);
+            $post = $this->em->getRepository(News::class)->findOneBy(['url' => $slug, 'enable' => 1]);
         }
 
         if (!$post) {
@@ -413,13 +409,13 @@ class NewsController extends Controller
         $categoryPrimaryId = $post->getCategoryPrimary() ?: (!$post->getCategory()->isEmpty() ? $post->getCategory()[0]->getId() : null);
 
         if ($categoryPrimaryId) {
-            $category = $this->getDoctrine()->getRepository(NewsCategory::class)->find($categoryPrimaryId);
+            $category = $this->em->getRepository(NewsCategory::class)->find($categoryPrimaryId);
             if ($category) {
                 // Optimize sorting logic
                 $ordering = json_decode($category->getSortBy() ?: '{"createdAt":"DESC"}', true);
                 $sortKey = key($ordering);
                 
-                $relatedNews = $this->getDoctrine()->getRepository(News::class)
+                $relatedNews = $this->em->getRepository(News::class)
                     ->getRelatedNews($categoryPrimaryId, $post->getId(), $post->getPostType(), $sortKey, $ordering[$sortKey], 12);
                 
                 // Build category URL
@@ -435,8 +431,8 @@ class NewsController extends Controller
         }
 
         // 5. Thu thập dữ liệu khác
-        $comments = $this->getDoctrine()->getRepository(Comment::class)->getApprovedCommentsForNews($post->getId());
-        $rating = $this->getDoctrine()->getRepository(Rating::class)->getAverageRatingForNews($post->getId());
+        $comments = $this->em->getRepository(Comment::class)->getApprovedCommentsForNews($post->getId());
+        $rating = $this->em->getRepository(Rating::class)->getAverageRatingForNews($post->getId());
         $pageBuilderBlocks = [];
         $contentsLazy = $this->contentFormatter->lazyloadContent($post);
 
@@ -499,17 +495,10 @@ class NewsController extends Controller
 
 
 
-    /**
-     * @Route("/tag/{slug}",
-     *      name="tags",
-     *      requirements={
-     *          "slug": "[^\n]+"
-     *      }))
-     */
+    #[Route('/tag/{slug}', name: 'tags', requirements: ['slug' => '[^\n]+'])]
     public function tagAction($slug, Request $request)
     {
-        $tag = $this->getDoctrine()
-            ->getRepository(Tag::class)
+        $tag = $this->em->getRepository(Tag::class)
             ->findOneBy(
                 array('url' => $slug)
             );
@@ -519,18 +508,17 @@ class NewsController extends Controller
         }
 
         // Get the list post related to tag
-        $posts = $this->getDoctrine()
-            ->getRepository(News::class)
+        $posts = $this->em->getRepository(News::class)
             ->getNewsByTag($tag->getId(), null);
 
-        $paginator = $this->get('knp_paginator');
+        $paginator = $this->paginator;
         $pagination = $paginator->paginate(
             $posts,
             !empty($request->query->get('page')) ? $request->query->get('page') : 1,
             40
         );
 
-        $breadcrumbs = $this->get("white_october_breadcrumbs");
+        $breadcrumbs = $this->breadcrumbs;
         $breadcrumbs->addItem("home", $this->generateUrl("homepage"));
         $breadcrumbs->addItem($tag->getName());
 
@@ -547,8 +535,7 @@ class NewsController extends Controller
      */
     public function recentNewsAction()
     {
-        $posts = $this->getDoctrine()
-            ->getRepository(News::class)
+        $posts = $this->em->getRepository(News::class)
             ->findBy(
                 array('postType' => 'post', 'enable' => 1),
                 array('createdAt' => 'DESC'),
@@ -574,8 +561,7 @@ class NewsController extends Controller
      */
     public function hotNewsAction()
     {
-        $posts = $this->getDoctrine()
-            ->getRepository(News::class)
+        $posts = $this->em->getRepository(News::class)
             ->findBy(
                 array('postType' => 'post', 'enable' => 1),
                 array('viewCounts' => 'DESC'),
@@ -607,8 +593,7 @@ class NewsController extends Controller
             $listPosts = explode(',', $relatedNews);
 
             for ($i = 0; $i < count($listPosts); $i++) {
-                $post = $this->getDoctrine()
-                    ->getRepository(News::class)
+                $post = $this->em->getRepository(News::class)
                     ->find($listPosts[$i]);
                 if ($post) {
                     $sidebarPostsArray[] = $post;
@@ -632,8 +617,7 @@ class NewsController extends Controller
                 $listPosts = explode(',', $sidebarPostsObject->IDs);
 
                 for ($i = 0; $i < count($listPosts); $i++) {
-                    $post = $this->getDoctrine()
-                        ->getRepository(News::class)
+                    $post = $this->em->getRepository(News::class)
                         ->find($listPosts[$i]);
                     if ($post) {
                         $sidebarPostsArray[] = $post;
@@ -654,13 +638,11 @@ class NewsController extends Controller
      */
     public function listNewsByCategoryAction($categoryId)
     {
-        $category = $this->getDoctrine()
-            ->getRepository(NewsCategory::class)
+        $category = $this->em->getRepository(NewsCategory::class)
             ->find($categoryId);
 
         $listCategoriesIds = array($category->getId());
-        $allSubCategories = $this->getDoctrine()
-            ->getRepository(NewsCategory::class)
+        $allSubCategories = $this->em->getRepository(NewsCategory::class)
             ->createQueryBuilder('c')
             ->where('c.parentcat = (:parentcat)')
             ->setParameter('parentcat', $category->getId())
@@ -670,8 +652,7 @@ class NewsController extends Controller
             $listCategoriesIds[] = $value->getId();
         }
 
-        $posts = $this->getDoctrine()
-            ->getRepository(News::class)
+        $posts = $this->em->getRepository(News::class)
             ->createQueryBuilder('n')
             ->innerJoin('n.category', 't')
             ->where('t.id IN (:listCategoriesIds)')
@@ -690,13 +671,11 @@ class NewsController extends Controller
 
     public function listNewsByCategorySidebarAction($categoryId, $title, $postNumber = 10)
     {
-        $category = $this->getDoctrine()
-            ->getRepository(NewsCategory::class)
+        $category = $this->em->getRepository(NewsCategory::class)
             ->find($categoryId);
 
         $listCategoriesIds = array($category->getId());
-        $allSubCategories = $this->getDoctrine()
-            ->getRepository(NewsCategory::class)
+        $allSubCategories = $this->em->getRepository(NewsCategory::class)
             ->createQueryBuilder('c')
             ->where('c.parentcat = (:parentcat)')
             ->setParameter('parentcat', $category->getId())
@@ -706,8 +685,7 @@ class NewsController extends Controller
             $listCategoriesIds[] = $value->getId();
         }
 
-        $posts = $this->getDoctrine()
-            ->getRepository(News::class)
+        $posts = $this->em->getRepository(News::class)
             ->createQueryBuilder('n')
             ->innerJoin('n.category', 't')
             ->where('t.id IN (:listCategoriesIds)')
@@ -726,13 +704,12 @@ class NewsController extends Controller
     }
 
     /**
-     * @Route("/rating", name="rating")
-     * 
      * @return JSON
      */
+    #[Route('/rating', name: 'rating')]
     public function ratingAction(Request $request)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $rating = new Rating();
         $rating->setNewsId($request->request->get('newsId'));
@@ -753,10 +730,9 @@ class NewsController extends Controller
     }
 
     /**
-     * @Route("/search", name="news_search")
-     * 
      * @return News
      */
+    #[Route('/search', name: 'news_search')]
     public function handleSearchFormAction(Request $request)
     {
         $page = !empty($request->query->get('page')) ? $request->query->get('page') : 1;
@@ -785,8 +761,7 @@ class NewsController extends Controller
         $searchTerm = $request->query->get('q');
         $searchPattern = '%' . $searchTerm . '%';
 
-        $query = $this->getDoctrine()
-            ->getRepository(News::class)
+        $query = $this->em->getRepository(News::class)
             ->createQueryBuilder('p')
             ->where('p.title LIKE :q 
                     OR p.description LIKE :q 
@@ -809,14 +784,14 @@ class NewsController extends Controller
             $highlightedResults[] = $result;
         }
 
-        $paginator = $this->get('knp_paginator');
+        $paginator = $this->paginator;
         $pagination = $paginator->paginate(
             $highlightedResults,
             $page,
-            $this->get('settings_manager')->get('numberRecordOnPage') ?: 10
+            $this->settingsManager->get('numberRecordOnPage') ?: 10
         );
 
-        $breadcrumbs = $this->get("white_october_breadcrumbs");
+        $breadcrumbs = $this->breadcrumbs;
         $breadcrumbs->addItem("home", $this->generateUrl("homepage"));
         $breadcrumbs->addItem('search');
         $breadcrumbs->addItem(ucfirst($searchTerm));
@@ -881,7 +856,7 @@ class NewsController extends Controller
      * 
      * @return JSON
      **/
-    public function handleCommentFormAction(Request $request, \Swift_Mailer $mailer)
+    public function handleCommentFormAction(Request $request)
     {
         if (!$request->isXmlHttpRequest()) {
             return new Response(
@@ -908,37 +883,16 @@ class NewsController extends Controller
             $form->handleRequest($request);
 
             if ($form->isValid()) {
-                $em = $this->getDoctrine()->getManager();
+                $em = $this->em;
                 $em->persist($comment);
                 $em->flush();
 
                 if (null !== $comment->getId()) {
-                    /*
-                    $message = (new \Swift_Message())
-                        ->setSubject($this->get('translator')->trans('comment.email.title', ['%siteName%' => $this->get('settings_manager')->get('siteName')]))
-                        ->setFrom(['hotro.xaydungkimanh@gmail.com' => $this->get('settings_manager')->get('siteName')])
-                        ->setTo($this->get('settings_manager')->get('emailContact'))
-                        ->setBody(
-                            $this->renderView(
-                                'Emails/comment.html.twig',
-                                array(
-                                    'name' => $request->request->get('form')['author'],
-                                    'body' => $request->request->get('form')['content'],
-                                    'gclid' => $comment->getGclid()
-                                )
-                            ),
-                            'text/html'
-                        )
-                    ;
-
-                    $mailer->send($message);
-                    */
-
                     return new Response(
                         json_encode(
                             array(
                                 'status' => 'success',
-                                'message' => '<div class="alert alert-success" role="alert">' . $this->get('translator')->trans('comment.thank_for_your_comment') . '</div>'
+                                'message' => '<div class="alert alert-success" role="alert">' . $this->translator->trans('comment.thank_for_your_comment') . '</div>'
                             )
                         )
                     );
@@ -947,7 +901,7 @@ class NewsController extends Controller
                         json_encode(
                             array(
                                 'status' => 'error',
-                                'message' => '<div class="alert alert-warning" role="alert">' . $this->get('translator')->trans('comment.have_a_problem_on_your_request') . '</div>'
+                                'message' => '<div class="alert alert-warning" role="alert">' . $this->translator->trans('comment.have_a_problem_on_your_request') . '</div>'
                             )
                         )
                     );
@@ -957,7 +911,7 @@ class NewsController extends Controller
                     json_encode(
                         array(
                             'status' => 'error',
-                            'message' => '<div class="alert alert-warning" role="alert">' . $this->get('translator')->trans('comment.have_a_problem_on_your_request') . '</div>'
+                            'message' => '<div class="alert alert-warning" role="alert">' . $this->translator->trans('comment.have_a_problem_on_your_request') . '</div>'
                         )
                     )
                 );
@@ -973,7 +927,7 @@ class NewsController extends Controller
     private function buildBreadcrums($category = null, $post = null, $page = null, $categoryPrimary = null)
     {
         // Init october breadcrum
-        $breadcrumbs = $this->get("white_october_breadcrumbs");
+        $breadcrumbs = $this->breadcrumbs;
 
         // Add home item into first breadcrum.
         $breadcrumbs->addItem("home", $this->generateUrl("homepage"));
@@ -1039,8 +993,7 @@ class NewsController extends Controller
             if (!$categoryPrimary) {
                 $categoryPrimary = $post->getCategoryPrimary();
                 if ($categoryPrimary > 0) {
-                    $category = $this->getDoctrine()
-                        ->getRepository(NewsCategory::class)
+                    $category = $this->em->getRepository(NewsCategory::class)
                         ->find($categoryPrimary);
                 } else {
                     if (!$post->getCategory()->isEmpty()) {
@@ -1048,8 +1001,7 @@ class NewsController extends Controller
                     }
                 }
             } else {
-                $category = $this->getDoctrine()
-                    ->getRepository(NewsCategory::class)
+                $category = $this->em->getRepository(NewsCategory::class)
                     ->find($categoryPrimary);
             }
 
@@ -1075,7 +1027,7 @@ class NewsController extends Controller
     {
         $contact = new Contact();
 
-        return $this->get('form.factory')->createNamedBuilder('page_builder_contact', FormType::class, $contact, [
+        return $this->formFactory->createNamedBuilder('page_builder_contact', FormType::class, $contact, [
             'action' => $this->generateUrl('page_builder_contact_submit'),
             'method' => 'POST',
         ])
@@ -1094,13 +1046,10 @@ class NewsController extends Controller
             ->getForm();
     }
 
-        /**
-     * @Route("/chi-phi-xay-dung/", name="caculator_cost_construction")
-     * 
-     */
+    #[Route('/chi-phi-xay-dung/', name: 'caculator_cost_construction')]
     public function caculatorCostConstructionAction($type = null, Request $request)
     {
-        $settingsManager = $this->get('settings_manager');
+        $settingsManager = $this->settingsManager;
 
         $form = $this->createFormBuilder(null, array(
             'csrf_protection' => false,
@@ -1406,12 +1355,11 @@ class NewsController extends Controller
             );
         }
 
-        $breadcrumbs = $this->get("white_october_breadcrumbs");
+        $breadcrumbs = $this->breadcrumbs;
         $breadcrumbs->addItem("home", $this->generateUrl("homepage"));
         $breadcrumbs->addItem('Dự toán chi phí xây dựng');
 
-        $post = $this->getDoctrine()
-            ->getRepository(News::class)
+        $post = $this->em->getRepository(News::class)
             ->findOneBy(
                 array('url' => 'chi-phi-xay-dung')
             );

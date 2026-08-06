@@ -7,33 +7,34 @@ use App\Entity\News;
 use App\Form\PageType;
 use App\Service\ActivityLogService;
 use App\Utils\Slugger;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
  * Controller used to manage page contents in the backend.
- *
- * @Route("/admin/page")
- * @Security("has_role('ROLE_ADMIN')")
  */
-
-class PageController extends Controller
+#[Route('/admin/page')]
+#[IsGranted('ROLE_ADMIN')]
+class PageController extends AbstractController
 {
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly ActivityLogService $activityLogService,
+    ) {
+    }
+
     /**
      * Lists all News entities.
-     *
-     * @Route("/", name="admin_page_index")
-     * @Method("GET")
      */
+    #[Route('/', name: 'admin_page_index', methods: ['GET'])]
     public function indexAction(Request $request)
     {
-        $em = $this->getDoctrine()->getManager();
-        $repository = $em->getRepository(News::class);
+        $repository = $this->em->getRepository(News::class);
         $searchQuery = trim((string) $request->query->get('q', ''));
 
         if ($searchQuery !== '') {
@@ -57,10 +58,8 @@ class PageController extends Controller
 
     /**
      * Creates a new News entity.
-     *
-     * @Route("/new", name="admin_page_new")
-     * @Method({"GET", "POST"})
      */
+    #[Route('/new', name: 'admin_page_new', methods: ['GET', 'POST'])]
     public function newAction(Request $request, Slugger $slugger)
     {
         $news = new News();
@@ -78,8 +77,7 @@ class PageController extends Controller
                 // Handle Media Picker selection (bypasses Vich to avoid path conflicts)
                 $this->applyMediaPickerUrl($request, $news);
 
-                $em = $this->getDoctrine()->getManager();
-                $unitOfWork = $em->getUnitOfWork();
+                $unitOfWork = $this->em->getUnitOfWork();
                 $originalData = $unitOfWork->getOriginalEntityData($news);
 
                 // Update createdAt if enable changed from false to true
@@ -87,11 +85,11 @@ class PageController extends Controller
                     $news->setCreatedAt(new \DateTime());
                 }
 
-                $em->persist($news);
-                $em->flush();
+                $this->em->persist($news);
+                $this->em->flush();
 
                 // Activity Log
-                $this->get(ActivityLogService::class)->log(
+                $this->activityLogService->log(
                     ActivityLog::ACTION_CREATE,
                     ActivityLog::ENTITY_PAGE,
                     $news->getId(),
@@ -128,10 +126,8 @@ class PageController extends Controller
 
     /**
      * Displays a form to edit an existing News entity.
-     *
-     * @Route("/{id}/edit", requirements={"id": "\d+"}, name="admin_page_edit")
-     * @Method({"GET", "POST"})
      */
+    #[Route('/{id}/edit', requirements: ['id' => '\d+'], name: 'admin_page_edit', methods: ['GET', 'POST'])]
     public function editAction(Request $request, News $news, Slugger $slugger)
     {
         $form = $this->createForm(PageType::class, $news)
@@ -143,8 +139,7 @@ class PageController extends Controller
                 // Handle Media Picker selection (bypasses Vich to avoid path conflicts)
                 $this->applyMediaPickerUrl($request, $news);
 
-                $em = $this->getDoctrine()->getManager();
-                $unitOfWork = $em->getUnitOfWork();
+                $unitOfWork = $this->em->getUnitOfWork();
                 $originalData = $unitOfWork->getOriginalEntityData($news);
 
                 // Update createdAt if enable changed from false to true
@@ -171,12 +166,12 @@ class PageController extends Controller
                 }
 
                 // Capture changes before flush
-                $diffDetails = $this->get(ActivityLogService::class)->getEntityDiff($news);
+                $diffDetails = $this->activityLogService->getEntityDiff($news);
 
-                $em->flush();
+                $this->em->flush();
 
                 // Activity Log
-                $this->get(ActivityLogService::class)->log(
+                $this->activityLogService->log(
                     ActivityLog::ACTION_UPDATE,
                     ActivityLog::ENTITY_PAGE,
                     $news->getId(),
@@ -222,9 +217,8 @@ class PageController extends Controller
 
     /**
      * Deletes a News entity.
-     *
-     * @Route("/{id}/delete", methods={"POST"}, name="admin_page_delete")
      */
+    #[Route('/{id}/delete', name: 'admin_page_delete', methods: ['POST'])]
     public function deleteAction(Request $request, $id, News $page)
     {
         if (!$this->isCsrfTokenValid('delete', $request->request->get('token'))) {
@@ -234,12 +228,11 @@ class PageController extends Controller
         $pageTitle = $page->getTitle();
         $pageId = $page->getId();
 
-        $em = $this->getDoctrine()->getManager();
-        $em->remove($page);
-        $em->flush();
+        $this->em->remove($page);
+        $this->em->flush();
 
         // Activity Log
-        $this->get(ActivityLogService::class)->log(
+        $this->activityLogService->log(
             ActivityLog::ACTION_DELETE,
             ActivityLog::ENTITY_PAGE,
             $pageId,
@@ -251,22 +244,18 @@ class PageController extends Controller
         return $this->redirectToRoute('admin_page_index');
     }
 
-    /**
-     * @Route("/disable", name="admin_page_disable")
-     * @Method("POST")
-     */
+    #[Route('/disable', name: 'admin_page_disable', methods: ['POST'])]
     public function disableAction(Request $request)
     {
-        $em = $this->getDoctrine()->getManager();
-        $page = $this->getDoctrine()->getRepository(News::class)->find($request->request->get('newsId'));
+        $page = $this->em->getRepository(News::class)->find($request->request->get('newsId'));
 
         if ($page && $page->getPostType() === 'page') {
             $page->setEnable((bool) $request->request->get('enable'));
-            $em->persist($page);
-            $em->flush();
+            $this->em->persist($page);
+            $this->em->flush();
 
             // Activity Log
-            $this->get(ActivityLogService::class)->log(
+            $this->activityLogService->log(
                 ActivityLog::ACTION_TOGGLE,
                 ActivityLog::ENTITY_PAGE,
                 $page->getId(),

@@ -1,0 +1,17 @@
+{#
+    Breadcrumb.
+    Tham số: items = [{ label, path (tuỳ chọn) }] — phần tử cuối là trang hiện tại.
+#}
+<nav class="breadcrumb-v3" aria-label="Breadcrumb">
+    <ol>
+        {% for item in items %}
+            <li>
+                {% if item.path is defined and not loop.last %}
+                    <a href="{{ item.path }}">{{ item.label }}</a>
+                {% else %}
+                    <span aria-current="page">{{ item.label }}</span>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ol>
+</nav>

@@ -1,0 +1,163 @@
+# ============================================================
+# Cấu hình theme v3 (Thiện Gia)
+# Toàn bộ nội dung tĩnh + thông tin công ty nằm ở đây để đổi
+# thương hiệu chỉ sửa một chỗ. Template dùng qua biến global `v3`.
+#
+# Copy file này vào config/packages/ của dự án.
+# ============================================================
+twig:
+    globals:
+        v3:
+            # Slug chuyên mục dùng cho link "Cẩm nang" trên menu/footer.
+            # Đổi cho khớp NewsCategory.url thật trong DB.
+            newsCategorySlug: 'tin-tuc'
+
+            colors:
+                primary: '#b5462e'   # đỏ gạch — logo, CTA, heading nhấn
+                accent:  '#e07b39'   # cam đất — hover, icon, badge
+                gold:    '#c9a227'   # vàng đồng — viền, huy hiệu
+
+            company:
+                legalName:     'CÔNG TY TNHH XÂY DỰNG THIỆN GIA'
+                shortName:     'Xây Dựng Thiện Gia'
+                shortNameOnly: 'Thiện Gia'
+                nameFirst:     'THIỆN'
+                nameLast:      'GIA'
+                nameSub:       'XÂY DỰNG'
+                slogan:        'Xây tổ ấm bằng cái tâm'
+                taxCode:       '0312345678'
+
+                phone:    '0901 234 567'
+                phoneRaw: '+84901234567'
+                zalo:     'https://zalo.me/0901234567'
+                email:    'contact@xaydungthiengia.vn'
+
+                street:   '123 Nguyễn Văn Linh'
+                district: 'Quận 7'
+                city:     'TP. Hồ Chí Minh'
+                address:  '123 Nguyễn Văn Linh, Quận 7, TP. Hồ Chí Minh'
+                workingHours: 'Thứ 2 — Thứ 7: 8:00 — 17:30'
+
+                projectsCount: '500+'
+                description: 'Công ty TNHH Xây Dựng Thiện Gia — xây nhà trọn gói, xây biệt thự, sửa nhà tại TP.HCM. Hơn 10 năm, 500+ công trình, bảo hành kết cấu 10 năm.'
+                heroIntro: 'Hơn 10 năm, Thiện Gia xây tổ ấm cho hàng trăm gia đình Việt: đúng bản vẽ, đúng tiến độ, đúng ngân sách đã ký — bảo hành kết cấu 10 năm bằng văn bản.'
+                footerIntro: 'Xây tổ ấm bằng cái tâm — xây nhà trọn gói, xây biệt thự, sửa nhà tại TP.HCM và các tỉnh lân cận từ 2015.'
+
+                authorName:   'KTS. Nguyễn Thiện Gia'
+                authorAvatar: 'assets/images/v3/author.jpg'
+                authorBio:    'Nhà sáng lập & CEO Xây Dựng Thiện Gia. Hơn 10 năm thiết kế và thi công biệt thự, nhà phố cho các gia đình tại TP.HCM và các tỉnh phía Nam.'
+
+            menu:
+                about:
+                    - { label: 'Về Thiện Gia',            anchor: '#gioi-thieu' }
+                    - { label: '6 cam kết bằng văn bản',  anchor: '#cam-ket' }
+                    - { label: 'Quy trình làm việc',      anchor: '#quy-trinh' }
+                    - { label: 'Hình ảnh hoạt động',      anchor: '#hoat-dong' }
+                services:
+                    - 'Xây nhà trọn gói'
+                    - 'Xây nhà phần thô'
+                    - 'Xây biệt thự'
+                    - 'Sửa nhà trọn gói'
+                    - 'Thiết kế kiến trúc'
+
+            heroSlides:
+                - { image: 'assets/images/v3/hero-1.jpg', alt: 'Biệt thự hiện đại do Xây Dựng Thiện Gia thi công' }
+                - { image: 'assets/images/v3/hero-2.jpg', alt: 'Biệt thự sân vườn Thiện Gia bàn giao tại Long An' }
+                - { image: 'assets/images/v3/hero-3.jpg', alt: 'Nhà phố cao cấp Thiện Gia hoàn thiện tại TP.HCM' }
+                - { image: 'assets/images/v3/hero-4.jpg', alt: 'Villa nghỉ dưỡng có hồ bơi do Thiện Gia xây dựng' }
+
+            heroPoints:
+                - 'Không phát sinh ngoài hợp đồng'
+                - 'Kỹ sư giám sát riêng, báo cáo ảnh hằng tuần'
+                - 'Vật tư chính hãng, ghi rõ mã trong hợp đồng'
+
+            figures:
+                - { value: 10,  unit: '+', label: 'Năm kinh nghiệm' }
+                - { value: 500, unit: '+', label: 'Công trình bàn giao' }
+                - { value: 98,  unit: '%', label: 'Khách hàng hài lòng' }
+                - { value: 10,  unit: '+', label: 'Kiến trúc sư & kỹ sư' }
+
+            # icon = phần bên trong <svg> (có thể nhiều hình), render bằng |raw
+            commitments:
+                - name: 'Đúng tiến độ'
+                  desc: 'Trễ hẹn bàn giao — Thiện Gia chịu phạt theo hợp đồng, không lý do.'
+                  icon: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'
+                - name: 'Đúng ngân sách'
+                  desc: 'Con số ký hợp đồng là con số cuối — không phát sinh giữa chừng.'
+                  icon: '<path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'
+                - name: 'Vật tư chính hãng'
+                  desc: 'Thương hiệu, mã vật tư ghi rõ trong phụ lục — nghiệm thu đối chiếu từng đợt.'
+                  icon: '<rect width="20" height="20" x="2" y="2" rx="3"/><path d="M20 7h-9m9 10h-9M5 7h.01M5 17h.01"/>'
+                - name: 'Kỹ sư giám sát riêng'
+                  desc: 'Giám sát độc lập với đội thi công, báo cáo ảnh cho gia chủ hằng tuần.'
+                  icon: '<path d="M2 21a8 8 0 0 1 13.29-6"/><circle cx="10" cy="8" r="5"/><path d="m16 19 2 2 4-4"/>'
+                - name: 'Bảo hành 10 năm'
+                  desc: 'Kết cấu 10 năm, hoàn thiện 2 năm — cam kết bằng văn bản kèm hợp đồng.'
+                  icon: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>'
+                - name: 'Hợp đồng minh bạch'
+                  desc: 'Dự toán bóc tách từng hạng mục — phụ lục vật tư dày hơn hợp đồng chính.'
+                  icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>'
+
+            about:
+                image: 'assets/images/v3/about.jpg'
+                imageAlt: 'Biệt thự sân vườn do Thiện Gia thi công'
+                lead: 'Từ 2015, Thiện Gia đồng hành cùng hàng trăm gia đình Việt trong việc quan trọng nhất đời người: xây ngôi nhà của mình. Cái tâm của người làm nghề nằm ở chỗ từng đồng ngân sách được dùng đúng chỗ, từng cam kết được giữ đúng lời.'
+                checks:
+                    - { title: 'Đội ngũ chính quy', text: 'kiến trúc sư và kỹ sư có chứng chỉ hành nghề, thợ gắn bó trên 5 năm' }
+                    - { title: 'Pháp lý trọn gói',  text: 'lo từ giấy phép xây dựng đến hồ sơ hoàn công' }
+                    - { title: 'Xưởng nội thất riêng', text: 'chủ động chất lượng và tiến độ đồ gỗ, không phụ thuộc bên thứ ba' }
+
+            services:
+                - { name: 'Xây nhà trọn gói', image: 'assets/images/v3/svc-1.jpg', desc: 'Chìa khóa trao tay từ thiết kế, xin phép đến hoàn thiện. Đơn giá từ 7,5 triệu/m².' }
+                - { name: 'Xây nhà phần thô', image: 'assets/images/v3/svc-2.jpg', desc: 'Kết cấu chuẩn kỹ thuật + nhân công hoàn thiện. Đơn giá từ 3,8 triệu/m².' }
+                - { name: 'Xây biệt thự',     image: 'assets/images/v3/svc-3.jpg', desc: 'Biệt thự phố, sân vườn, nghỉ dưỡng — hồ bơi, tầng hầm, smarthome.' }
+                - { name: 'Sửa nhà trọn gói', image: 'assets/images/v3/svc-4.jpg', desc: 'Cải tạo, nâng tầng, thay đổi công năng — khảo sát miễn phí tại nhà.' }
+
+            # Tạm đặt ở config; khi có entity Project thì chuyển sang controller.
+            works:
+                - { name: 'Biệt thự anh Minh — Thảo Điền',      spec: 'Đất 10×20m · 3 tầng · Trọn gói 850 m² sàn',      image: 'assets/images/v3/work-1.jpg' }
+                - { name: 'Nhà phố chị Hương — Quận 7',         spec: 'Mặt tiền 5m · 4 tầng · Xây trọn gói',            image: 'assets/images/v3/work-2.jpg' }
+                - { name: 'Biệt thự vườn chú Tám — Long An',    spec: 'Đất 500 m² · 2 tầng · Sân vườn + hồ cá koi',     image: 'assets/images/v3/work-3.jpg' }
+                - { name: 'Villa anh Toàn — Hồ Tràm',           spec: '1.100 m² · Hồ bơi vô cực · Hoàn thiện 2025',     image: 'assets/images/v3/work-4.jpg' }
+                - { name: 'Dinh thự cô Lan — Quận 2',           spec: '1.200 m² sàn · Tân cổ điển · Nội thất gỗ óc chó', image: 'assets/images/v3/work-5.jpg' }
+                - { name: 'Sửa nhà anh Cường — Quận 12',        spec: 'Nâng 1 tầng · Thay công năng · 45 ngày bàn giao', image: 'assets/images/v3/work-6.jpg' }
+                - { name: 'Nhà phố anh Đủ — Bình Tân',          spec: 'Mặt tiền 5m · 3 tầng · Trọn gói vật tư khá',     image: 'assets/images/v3/work-7.jpg' }
+                - { name: 'Nhà anh Toàn — TP Thủ Đức',          spec: '3 tầng 1 tum · Smarthome · Hoàn thiện 2026',     image: 'assets/images/v3/work-8.jpg' }
+
+            testimonials:
+                - name: 'Anh Minh'
+                  role: 'Chủ nhân biệt thự Thảo Điền'
+                  avatar: 'assets/images/v3/avatar-1.jpg'
+                  text: 'Thiện Gia không chỉ xây ngôi nhà — họ thấu hiểu cách gia đình tôi muốn sống. Từng đường phào chỉ, từng vân đá đều được chăm chút như chính họ là chủ nhân. Đây là quyết định đúng đắn nhất của tôi.'
+                - name: 'Chú Tám'
+                  role: 'Biệt thự vườn Long An'
+                  avatar: 'assets/images/v3/avatar-2.jpg'
+                  text: 'Tôi lo nhất là phát sinh, vậy mà đến ngày nhận nhà con số vẫn đúng từng đồng như bảng dự toán. Thợ làm việc có tâm, chiều nào cũng dọn công trường sạch sẽ rồi mới về.'
+                - name: 'Chị Hương'
+                  role: 'Nhà phố Quận 7'
+                  avatar: 'assets/images/v3/avatar-3.jpg'
+                  text: 'Cả quá trình xây tôi đi công tác nước ngoài, mỗi tuần đều nhận báo cáo ảnh chi tiết từng hạng mục. Về đến nơi nhận nhà đúng hẹn, không phải sửa lại bất cứ thứ gì.'
+                - name: 'Cô Lan'
+                  role: 'Dinh thự Quận 2'
+                  avatar: 'assets/images/v3/avatar-4.jpg'
+                  text: 'Nội thất gỗ óc chó làm tại xưởng của Thiện Gia đẹp hơn cả bản vẽ 3D. Sau hai năm ở, chỉ cần gọi một cuộc là đội bảo hành có mặt — đúng như cam kết trong hợp đồng.'
+
+            steps:
+                - { name: 'Khảo sát hiện trạng',   desc: 'Đo đạc thực địa, kiểm tra địa chất, quy hoạch và hiện trạng công trình lân cận — miễn phí.' }
+                - { name: 'Tư vấn & dự toán',      desc: 'Tư vấn phương án phù hợp ngân sách, lập dự toán sơ bộ theo nhu cầu thực tế của gia đình.' }
+                - { name: 'Thiết kế',              desc: 'Concept 3D chỉnh đến khi ưng ý — hồ sơ kỹ thuật đủ chi tiết để thi công không phát sinh.' }
+                - { name: 'Ký kết hợp đồng',       desc: 'Dự toán bóc tách từng hạng mục, phụ lục ghi rõ mã vật tư — con số ký là con số cuối.' }
+                - { name: 'Xin giấy phép pháp lý', desc: 'Thiện Gia thay gia chủ lo trọn hồ sơ xin phép xây dựng và các thủ tục pháp lý liên quan.' }
+                - { name: 'Thi công phần thô',     desc: 'Móng, khung kết cấu, tường bao, mái — kỹ sư giám sát riêng, nghiệm thu từng giai đoạn.' }
+                - { name: 'Thi công hoàn thiện',   desc: 'Ốp lát, sơn nước, trần, cửa, cơ điện, nội thất — đối chiếu vật tư đúng phụ lục hợp đồng.' }
+                - { name: 'Bàn giao & bảo hành',   desc: 'Hồ sơ hoàn công đầy đủ — bảo hành kết cấu 10 năm, hoàn thiện 2 năm bằng văn bản.' }
+
+            gallery:
+                - { image: 'assets/images/v3/act-1.jpg', short: 'Lễ ký kết hợp đồng cùng gia đình anh Minh', caption: 'Lễ ký kết hợp đồng xây nhà trọn gói cùng gia đình anh Minh — Thảo Điền' }
+                - { image: 'assets/images/v3/act-2.jpg', short: 'Lễ khởi công biệt thự vườn — Long An',      caption: 'Lễ khởi công biệt thự vườn chú Tám — Long An, tháng 3/2026' }
+                - { image: 'assets/images/v3/act-3.jpg', short: 'Kỹ sư giám sát thi công phần thô',          caption: 'Đội ngũ kỹ sư Thiện Gia giám sát thi công phần thô' }
+                - { image: 'assets/images/v3/act-4.jpg', short: 'Nghiệm thu bản vẽ cùng gia chủ',            caption: 'Nghiệm thu bản vẽ hoàn công cùng gia chủ trước khi bàn giao' }
+                - { image: 'assets/images/v3/act-5.jpg', short: 'Họp bóc tách dự toán cùng khách hàng',      caption: 'Họp dự toán — bóc tách khối lượng từng hạng mục trước khi ký hợp đồng' }
+                - { image: 'assets/images/v3/act-6.jpg', short: 'Bàn giao chìa khóa — đúng hẹn',             caption: 'Bàn giao chìa khóa biệt thự sân vườn hoàn thiện — đúng hẹn, đúng ngân sách' }
+
+            ctaImage: 'assets/images/v3/cta.jpg'

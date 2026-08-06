@@ -10,34 +10,35 @@ use App\Form\NewsCategoryType;
 use App\Form\NewsType;
 use App\Service\ActivityLogService;
 use App\Utils\Slugger;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
  * Controller used to manage post contents in the backend.
- *
- * @Route("/admin/news")
- * @Security("has_role('ROLE_ADMIN')")
  */
-
-class NewsController extends Controller
+#[Route('/admin/news')]
+#[IsGranted('ROLE_ADMIN')]
+class NewsController extends AbstractController
 {
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly ActivityLogService $activityLogService,
+    ) {
+    }
+
     /**
      * Lists all News entities.
-     *
-     * @Route("/", name="admin_news_index")
-     * @Method("GET")
      */
+    #[Route('/', name: 'admin_news_index', methods: ['GET'])]
     public function indexAction(Request $request)
     {
-        $em = $this->getDoctrine()->getManager();
-        $repository = $em->getRepository(News::class);
+        $repository = $this->em->getRepository(News::class);
         $searchQuery = trim((string) $request->query->get('q', ''));
 
         if ($searchQuery !== '') {
@@ -54,14 +55,11 @@ class NewsController extends Controller
 
     /**
      * Lists all News entities by category.
-     *
-     * @Route("/list/{categoryId}", name="admin_news_list_by_category")
-     * @Method("GET")
      */
+    #[Route('/list/{categoryId}', name: 'admin_news_list_by_category', methods: ['GET'])]
     public function listAction(Request $request, $categoryId)
     {
-        $em = $this->getDoctrine()->getManager();
-        $repository = $em->getRepository(News::class);
+        $repository = $this->em->getRepository(News::class);
         $searchQuery = trim((string) $request->query->get('q', ''));
 
         if ($searchQuery !== '') {
@@ -86,9 +84,8 @@ class NewsController extends Controller
 
     /**
      * Searches published posts and pages for the CKEditor content block tool.
-     *
-     * @Route("/content-block/related-search", name="admin_content_block_related_search", methods={"GET"})
      */
+    #[Route('/content-block/related-search', name: 'admin_content_block_related_search', methods: ['GET'])]
     public function relatedSearchAction(Request $request)
     {
         $query = trim((string) $request->query->get('q', ''));
@@ -98,7 +95,7 @@ class NewsController extends Controller
             return new JsonResponse(['items' => []]);
         }
 
-        $items = $this->getDoctrine()->getRepository(News::class)
+        $items = $this->em->getRepository(News::class)
             ->createQueryBuilder('n')
             ->where('n.enable = :enabled')
             ->andWhere('n.id != :currentId')
@@ -125,10 +122,8 @@ class NewsController extends Controller
 
     /**
      * Creates a new News entity.
-     *
-     * @Route("/new", name="admin_news_new")
-     * @Method({"GET", "POST"})
      */
+    #[Route('/new', name: 'admin_news_new', methods: ['GET', 'POST'])]
     public function newAction(Request $request, Slugger $slugger)
     {
         $news = new News();
@@ -144,17 +139,15 @@ class NewsController extends Controller
                 // Handle Media Picker selection (bypasses Vich to avoid path conflicts)
                 $this->applyMediaPickerUrl($request, $news);
 
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($news);
-                $em->flush();
+                $this->em->persist($news);
+                $this->em->flush();
 
                 // Update Ordering for post
                 $news->setOrdering( $news->getId() );
-                $em = $this->getDoctrine()->getManager();
-                $em->flush();
+                $this->em->flush();
 
                 // Activity Log
-                $this->get(ActivityLogService::class)->log(
+                $this->activityLogService->log(
                     ActivityLog::ACTION_CREATE,
                     ActivityLog::ENTITY_NEWS,
                     $news->getId(),
@@ -196,10 +189,8 @@ class NewsController extends Controller
 
     /**
      * Displays a form to edit an existing News entity.
-     *
-     * @Route("/{id}/edit", requirements={"id": "\d+"}, name="admin_news_edit")
-     * @Method({"GET", "POST"})
      */
+    #[Route('/{id}/edit', requirements: ['id' => '\d+'], name: 'admin_news_edit', methods: ['GET', 'POST'])]
     public function editAction(Request $request, News $news, Slugger $slugger)
     {
         $form = $this->createForm(NewsType::class, $news);
@@ -210,8 +201,7 @@ class NewsController extends Controller
                 // Handle Media Picker selection (bypasses Vich to avoid path conflicts)
                 $this->applyMediaPickerUrl($request, $news);
 
-                $em = $this->getDoctrine()->getManager();
-                $unitOfWork = $em->getUnitOfWork();
+                $unitOfWork = $this->em->getUnitOfWork();
                 $originalData = $unitOfWork->getOriginalEntityData($news);
 
                 // Update createdAt if enable changed from false to true
@@ -238,12 +228,12 @@ class NewsController extends Controller
                 }
 
                 // Capture changes before flush
-                $diffDetails = $this->get(ActivityLogService::class)->getEntityDiff($news);
+                $diffDetails = $this->activityLogService->getEntityDiff($news);
 
-                $em->flush();
+                $this->em->flush();
 
                 // Activity Log
-                $this->get(ActivityLogService::class)->log(
+                $this->activityLogService->log(
                     ActivityLog::ACTION_UPDATE,
                     ActivityLog::ENTITY_NEWS,
                     $news->getId(),
@@ -289,9 +279,8 @@ class NewsController extends Controller
 
     /**
      * Deletes a News entity.
-     *
-     * @Route("/{id}/delete", methods={"POST"}, name="admin_news_delete")
      */
+    #[Route('/{id}/delete', methods: ['POST'], name: 'admin_news_delete')]
     public function deleteAction(Request $request, $id, News $news)
     {
         if (!$this->isCsrfTokenValid('delete', $request->request->get('token'))) {
@@ -303,12 +292,11 @@ class NewsController extends Controller
 
         $news->getTags()->clear();
 
-        $em = $this->getDoctrine()->getManager();
-        $em->remove($news);
-        $em->flush();
+        $this->em->remove($news);
+        $this->em->flush();
 
         // Activity Log
-        $this->get(ActivityLogService::class)->log(
+        $this->activityLogService->log(
             ActivityLog::ACTION_DELETE,
             ActivityLog::ENTITY_NEWS,
             $newsId,
@@ -320,25 +308,21 @@ class NewsController extends Controller
         return $this->redirectToRoute('admin_news_index');
     }
 
-    /**
-     * @Route("/disable", name="admin_news_disable")
-     */
+    #[Route('/disable', name: 'admin_news_disable')]
     public function disableAction(Request $request)
     {
-        $em = $this->getDoctrine()->getManager();
-        
-        $news = $this->getDoctrine()->getRepository(News::class)->find($request->request->get('newsId'));
-        
+        $news = $this->em->getRepository(News::class)->find($request->request->get('newsId'));
+
         if ($news) {
             $news->setEnable($request->request->get('enable'));
         }
 
-        $em->persist($news);
+        $this->em->persist($news);
 
-        $em->flush();
+        $this->em->flush();
 
         // Activity Log
-        $this->get(ActivityLogService::class)->log(
+        $this->activityLogService->log(
             ActivityLog::ACTION_TOGGLE,
             ActivityLog::ENTITY_NEWS,
             $news->getId(),

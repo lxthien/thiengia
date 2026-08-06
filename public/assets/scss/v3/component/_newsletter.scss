@@ -1,0 +1,52 @@
+@use "../tokens" as *;
+
+.newsletter {
+  background: $brown;
+  color: $white;
+
+  .newsletter-title {
+    font-family: $f-display;
+    font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+    font-weight: 600;
+
+    em {
+      font-style: italic;
+      color: $accent;
+    }
+  }
+
+  .newsletter-note {
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 300;
+    color: rgba($white, 0.6);
+  }
+
+  .newsletter-form {
+    display: flex;
+    max-width: 30rem;
+    width: 100%;
+
+    input {
+      flex: 1;
+      min-width: 0;
+      background: rgba($white, 0.08);
+      border: 1px solid rgba($white, 0.2);
+      border-right: none;
+      padding: 0.95rem 1.25rem;
+      font-size: 0.9rem;
+      font-weight: 300;
+      color: $white;
+      outline: none;
+      transition: border-color $dur $ease;
+
+      &::placeholder {
+        color: rgba($white, 0.45);
+      }
+
+      &:focus {
+        border-color: $accent;
+      }
+    }
+  }
+}

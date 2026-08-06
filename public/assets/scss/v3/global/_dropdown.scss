@@ -1,0 +1,69 @@
+@use "../tokens" as *;
+
+// Dropdown desktop — mở bằng hover và bàn phím (:focus-within), không cần JS
+.hd-drop {
+  position: relative;
+
+  .hd-caret {
+    display: inline-block;
+    margin-left: 0.4rem;
+    vertical-align: 1px;
+    transition: transform $dur $ease;
+  }
+
+  .hd-drop-menu {
+    position: absolute;
+    top: calc(100% + 1.3rem);
+    left: 50%;
+    min-width: 260px;
+    padding: 0.6rem 0;
+    background: $white;
+    border-top: 3px solid $primary;
+    box-shadow: 0 28px 56px rgba($dark, 0.16);
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, 10px);
+    transition: all $dur $ease;
+
+    // Cầu nối vô hình để rê chuột xuống panel không bị đóng
+    &::before {
+      content: "";
+      position: absolute;
+      top: -1.4rem;
+      left: 0;
+      right: 0;
+      height: 1.4rem;
+    }
+
+    a {
+      display: block;
+      padding: 0.7rem 1.5rem;
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      color: rgba($text, 0.8);
+      transition: all $dur $ease;
+
+      &:hover,
+      &:focus-visible {
+        background: $tint;
+        color: $accent;
+        padding-left: 1.9rem;
+      }
+    }
+  }
+
+  &:hover,
+  &:focus-within {
+    .hd-caret {
+      transform: rotate(180deg);
+    }
+
+    .hd-drop-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, 0);
+    }
+  }
+}

@@ -2,79 +2,52 @@
 
 namespace App\Entity;
 
+use App\Repository\MenuRepository;
 use App\Utils\Slugger;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * Menu
- *
- * @ORM\Table(name="menu", options={"collate"="utf8_general_ci"})
- * @ORM\Entity(repositoryClass="App\Repository\MenuRepository")
- */
+#[ORM\Table(name: 'menu', options: ['collate' => 'utf8_general_ci'])]
+#[ORM\Entity(repositoryClass: MenuRepository::class)]
 class Menu
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: Types::INTEGER)]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private $id;
 
-    /**
-     * @var string
-     *
-     * @Assert\NotBlank(message="name.blank")
-     * @Assert\Length(
-     *      min = 2,
-     *      max = 255,
-     *      minMessage = "Your name must be at least {{ limit }} characters long",
-     *      maxMessage = "Your name cannot be longer than {{ limit }} characters"
-     * )
-     * @ORM\Column(name="name", type="string", length=255, unique=true)
-     */
+    #[Assert\NotBlank(message: 'name.blank')]
+    #[Assert\Length(
+        min: 2,
+        max: 255,
+        minMessage: 'Your name must be at least {{ limit }} characters long',
+        maxMessage: 'Your name cannot be longer than {{ limit }} characters'
+    )]
+    #[ORM\Column(name: 'name', type: Types::STRING, length: 255, unique: true)]
     private $name;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="description", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'description', type: Types::TEXT, nullable: true)]
     private $description;
 
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="enable", type="boolean", options={"default"=true})
-     */
+    #[ORM\Column(name: 'enable', type: Types::BOOLEAN, options: ['default' => true])]
     private $enable = true;
 
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="createdAt", type="datetime")
-     */
+    #[Gedmo\Timestampable(on: 'create')]
+    #[ORM\Column(name: 'createdAt', type: Types::DATETIME_MUTABLE)]
     private $createdAt;
 
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updatedAt", type="datetime")
-     */
+    #[Gedmo\Timestampable(on: 'update')]
+    #[ORM\Column(name: 'updatedAt', type: Types::DATETIME_MUTABLE)]
     private $updatedAt;
 
     /**
      * @var ArrayCollection
-     *
-     * @ORM\OneToMany(targetEntity="App\Entity\MenuItem", mappedBy="menu", cascade={"all"}, orphanRemoval=true)
-     * @ORM\OrderBy({"position" = "ASC", "id" = "ASC"})
      */
+    #[ORM\OneToMany(targetEntity: MenuItem::class, mappedBy: 'menu', cascade: ['all'], orphanRemoval: true)]
+    #[ORM\OrderBy(['position' => 'ASC', 'id' => 'ASC'])]
     private $items;
 
     public function __construct()

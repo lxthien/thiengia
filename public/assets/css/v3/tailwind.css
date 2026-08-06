@@ -1,0 +1,7 @@
+/* Tailwind cho theme v3.
+   Nạp TRƯỚC app.scss (xem thứ tự trong addStyleEntry của webpack.config.js)
+   để SCSS component có thể ghi đè utility khi cần.
+   Preflight đã tắt trong tailwind.config.js — reset nằm ở global/_base.scss. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

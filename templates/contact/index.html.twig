@@ -1,106 +1,155 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Liên hệ — Đặt lịch tư vấn miễn phí | {{ v3.company.shortName }}{% endblock %}
+{% block description %}Liên hệ {{ v3.company.shortName }}: hotline {{ v3.company.phone }}, email {{ v3.company.email }}. Đặt lịch khảo sát và tư vấn xây nhà trọn gói miễn phí.{% endblock %}
+
 {% block stylesheets %}
-	<link href="{{ absolute_url(asset('build/css/contact.css')) }}" rel="preload stylesheet" as="style" onload="this.rel='stylesheet'">
-	<noscript><link rel="stylesheet" href="{{ absolute_url(asset('build/css/contact.css')) }}"></noscript>
+    <link rel="stylesheet" href="{{ asset('build/css/v3-contact.css') }}">
 {% endblock %}
 
-{% block title %}
-	{% if post is not null %}
-		{{ post.getPageTitle() is not null ? post.getPageTitle() : post.getTitle() }}
-	{% else %}
-		{{ parent() }}
-	{% endif %}
-{% endblock %}
-{% block description %}
-	{% if post is not null %}
-		{{ post.getPageDescription() is not null ? post.getPageDescription() : post.getDescription() }}
-	{% else %}
-		{{ parent() }}
-	{% endif %}
-{% endblock %}
-{% block keyword %}
-	{% if post is not null %}
-		{{ post.getPageKeyword() }}
-	{% else %}
-		{{ parent() }}
-	{% endif %}
+{% block jsonld %}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "ContactPage",
+        "url": {{ app.request.uri|json_encode|raw }},
+        "mainEntity": {
+            "@type": "GeneralContractor",
+            "name": {{ v3.company.legalName|json_encode|raw }},
+            "slogan": {{ v3.company.slogan|json_encode|raw }},
+            "telephone": {{ v3.company.phoneRaw|json_encode|raw }},
+            "email": {{ v3.company.email|json_encode|raw }},
+            "address": {
+                "@type": "PostalAddress",
+                "streetAddress": {{ v3.company.street|json_encode|raw }},
+                "addressLocality": {{ v3.company.district|json_encode|raw }},
+                "addressRegion": {{ v3.company.city|json_encode|raw }},
+                "addressCountry": "VN"
+            }
+        }
+    }
+    </script>
 {% endblock %}
 
 {% block body %}
-	<div class="container ka-contact-container ka-page-detail">
-		<div class="row">
-			<div class="col-xs-12 col-sm-12 col-md-9 ka-content-column ka-contact-main">
-				{{ include('news/components/breadcrumbs.html.twig') }}
 
-				<div class="ka-contact-info-block">
-					<h1 class="text-uppercase">{{ get_setting('contens_ten_day_du') }}</h1>
-					<ul>
-						<li>
-							<i class="fa fa-map-marker"></i>
-							<span>
-								<strong>VPGD:
-									{{ get_setting('contens_dia_chi') }}</strong>
-							</span>
-						</li>
-						<li>
-							<i class="fas fa-address-card"></i>
-							<span>
-								<strong>MST:
-									{{ get_setting('contens_mst') }}</strong>
-							</span>
-						</li>
-						<li>
-							<i class="fa fa-phone"></i>
-							<span>
-								<strong>
-									<a href="tel:{{ get_setting('contens_hotline_1')|replace({' ': '', '.': ''}) }}">{{ get_setting('contens_hotline_1') }}</a>
-									- KS .
-									{{ get_setting('contens_hotline_2') }}
-									–
-									{{ get_setting('contens_hotline_3') }}
-									- Mr Tuấn</a>
-							</strong>
-						</li>
-					</span>
-				</li>
-				<li>
-					<i class="fas fa-envelope"></i>
-					<span>
-						<strong>{{ get_setting('contens_email') }}</strong>
-					</span>
-				</li>
-				<li>
-					<i class="fab fa-internet-explorer"></i>
-					<span>
-						<strong>www.kientruckimanh.com</strong>
-					</span>
-				</li>
-			</ul>
+    {{ include('v3/components/_page_hero.html.twig', {
+        breadcrumb: [
+            { label: 'Trang chủ', path: path('homepage') },
+            { label: 'Liên hệ' }
+        ],
+        title: 'Liên hệ <em>' ~ v3.company.shortNameOnly ~ '</em>',
+        description: 'Mỗi tổ ấm đều bắt đầu từ một cuộc trò chuyện. Gọi hotline, ghé văn phòng hoặc để lại thông tin — kiến trúc sư trưởng sẽ phản hồi trong 30 phút giờ làm việc.'
+    }) }}
 
-			<br>
-			<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3918.172689309072!2d106.62786421431773!3d10.874466660351096!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x317529fc088f21ef%3A0x83303dfe3b06e6c1!2zWMOCWSBE4buwTkcgS0lNIEFOSA!5e0!3m2!1sen!2s!4v1680400221718!5m2!1sen!2s" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-		</div>
+    <section id="dat-lich" class="contact-v3 py-20 lg:py-28" aria-labelledby="lien-he-h">
+        <div class="container max-w-7xl grid lg:grid-cols-2 gap-16 items-start">
 
-		{% for message in app.flashes('error') %}
-			<div class="alert alert-danger" role="alert">
-				{{ message }}
-			</div>
-		{% endfor %}
-		{% for message in app.flashes('notice') %}
-			<div class="alert alert-success" role="alert">
-				{{ message }}
-			</div>
-			<script>
-				window.dataLayer = window.dataLayer || [];
-window.dataLayer.push({'event': 'form_submit_baogia', 'form_location': window.location.pathname});
-			</script>
-		{% endfor %}
+            <div>
+                <p class="sec-label fade">Thông tin liên hệ</p>
+                <h2 id="lien-he-h" class="h-display text-3xl lg:text-4xl mt-5 fade">
+                    Cùng trò chuyện về <em>ngôi nhà</em> của bạn
+                </h2>
+                <p class="about2-lead max-w-lg fade">
+                    Đội ngũ kiến trúc sư trưởng của {{ v3.company.shortNameOnly }} sẽ trực tiếp khảo sát, tư vấn
+                    phương án phù hợp ngân sách và lập dự toán sơ bộ — hoàn toàn miễn phí, không ràng buộc.
+                </p>
 
-		{{ form_start(form) }}
-		{{ form_widget(form) }}
-		{{ form_end(form) }}
-	</div>
+                <address class="mt-10 not-italic fade">
+                    <div class="contact-info-item">
+                        <span class="contact-icon" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                        </span>
+                        <div>
+                            <p class="contact-label">Trụ sở chính</p>
+                            <p class="contact-value">{{ v3.company.address }}</p>
+                        </div>
+                    </div>
 
-	{{ include('layout/sidebar.html.twig') }}
-</div></div>{% endblock %}
+                    <div class="contact-info-item">
+                        <span class="contact-icon" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        </span>
+                        <div>
+                            <p class="contact-label">Hotline 24/7</p>
+                            <p class="contact-value"><a href="tel:{{ v3.company.phoneRaw }}">{{ v3.company.phone }}</a></p>
+                        </div>
+                    </div>
+
+                    <div class="contact-info-item">
+                        <span class="contact-icon" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                        </span>
+                        <div>
+                            <p class="contact-label">Email</p>
+                            <p class="contact-value"><a href="mailto:{{ v3.company.email }}">{{ v3.company.email }}</a></p>
+                        </div>
+                    </div>
+
+                    <div class="contact-info-item">
+                        <span class="contact-icon" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </span>
+                        <div>
+                            <p class="contact-label">Giờ làm việc</p>
+                            <p class="contact-value"><time>{{ v3.company.workingHours }}</time></p>
+                        </div>
+                    </div>
+                </address>
+            </div>
+
+            {#
+                Form tĩnh — bước "form" (Symfony Form + validation + mail) chưa làm.
+                Khi làm: thay khối này bằng {{ form_start(form) }} … {{ form_end(form) }}
+                và giữ nguyên class .contact-form / .form-field.
+            #}
+            <form class="contact-form fade" method="post" action="{{ path('contact') }}" data-quote>
+                <h3 class="contact-form-title">Đăng ký tư vấn <em>miễn phí</em></h3>
+                <p class="contact-form-note">Chúng tôi sẽ liên hệ trong vòng 30 phút (giờ làm việc).</p>
+
+                <div class="grid sm:grid-cols-2 gap-6 mt-8">
+                    <div class="form-field">
+                        <label for="f-name">Họ và tên</label>
+                        <input id="f-name" name="hoten" type="text" placeholder="Nguyễn Văn A" autocomplete="name" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="f-phone">Số điện thoại</label>
+                        <input id="f-phone" name="sodienthoai" type="tel" placeholder="09xx xxx xxx" autocomplete="tel" required>
+                    </div>
+                </div>
+
+                <div class="form-field mt-6">
+                    <label for="f-service">Nhu cầu của bạn</label>
+                    <select id="f-service" name="nhucau">
+                        {% for item in v3.menu.services %}
+                            <option>{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-field mt-6">
+                    <label for="f-message">Mô tả ngắn về dự án</label>
+                    <textarea id="f-message" name="mota" rows="4" placeholder="Diện tích đất, khu vực, phong cách yêu thích..."></textarea>
+                </div>
+
+                <button type="submit" class="btn2 w-full mt-8">
+                    Gửi yêu cầu tư vấn
+                    <svg class="btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+            </form>
+        </div>
+    </section>
+
+    {# ============ BẢN ĐỒ ============ #}
+    <section class="contact-v3" aria-label="Bản đồ trụ sở">
+        <div class="contact-map">
+            <iframe
+                src="https://www.google.com/maps?q={{ v3.company.address|url_encode }}&z=15&output=embed"
+                title="Bản đồ trụ sở {{ v3.company.shortName }} — {{ v3.company.address }}"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                allowfullscreen></iframe>
+        </div>
+    </section>
+
+{% endblock %}

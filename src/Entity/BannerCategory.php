@@ -4,57 +4,36 @@ namespace App\Entity;
 
 use App\Utils\Slugger;
 
+use App\Repository\BannerCategoryRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\BannerCategoryRepository")
- * @ORM\Table(name="bannercategory")
- */
-
+#[ORM\Entity(repositoryClass: BannerCategoryRepository::class)]
+#[ORM\Table(name: 'bannercategory')]
 class BannerCategory
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: Types::INTEGER)]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private $id;
 
-    /**
-     * @var string
-     *
-     * @Assert\NotBlank(message="name.blank")
-     * @ORM\Column(name="name", type="string", length=255)
-     */
+    #[Assert\NotBlank(message: 'name.blank')]
+    #[ORM\Column(name: 'name', type: Types::STRING, length: 255)]
     private $name;
 
-    /**
-     * @var string
-     *
-     * @Assert\NotBlank(message="url.blank")
-     * @ORM\Column(name="url", type="string", length=255, unique=true)
-     */
+    #[Assert\NotBlank(message: 'url.blank')]
+    #[ORM\Column(name: 'url', type: Types::STRING, length: 255, unique: true)]
     private $url;
 
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="createdAt", type="datetime") 
-     */
+    #[Gedmo\Timestampable(on: 'create')]
+    #[ORM\Column(name: 'createdAt', type: Types::DATETIME_MUTABLE)]
     private $createdAt;
 
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updatedAt", type="datetime")
-     */
+    #[Gedmo\Timestampable(on: 'update')]
+    #[ORM\Column(name: 'updatedAt', type: Types::DATETIME_MUTABLE)]
     private $updatedAt;
 
     public function __toString()

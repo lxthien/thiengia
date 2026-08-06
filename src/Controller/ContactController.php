@@ -2,10 +2,10 @@
 
 namespace App\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Routing\Annotation\Route;
 
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -15,18 +15,33 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use App\Entity\Contact;
 use App\Entity\News;
+use App\Service\SettingsManager;
+use WhiteOctober\BreadcrumbsBundle\Model\Breadcrumbs;
 
-class ContactController extends Controller
+class ContactController extends AbstractController
 {
-    /**
-     * @Route("lien-he/", name="contact")
-     */
-    public function indexAction(Request $request, \Swift_Mailer $mailer)
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly TranslatorInterface $translator,
+        private readonly SettingsManager $settingsManager,
+        private readonly Breadcrumbs $breadcrumbs,
+        private readonly FormFactoryInterface $formFactory,
+    ) {
+    }
+
+    #[Route('lien-he/', name: 'contact')]
+    public function indexAction(Request $request)
     {
         $contact = new Contact();
-        
+
         $form = $this->createFormBuilder($contact)
             ->add('name', TextType::class, array('label' => 'Họ và tên *'))
             ->add('phone', TextType::class, array('label' => 'Số điện thoại *'))
@@ -43,14 +58,13 @@ class ContactController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($contact);
-            $em->flush();
-            
+            $this->em->persist($contact);
+            $this->em->flush();
+
             if (null === $contact->getId()) {
                 $this->addFlash(
                     'error',
-                    $this->get('translator')->trans('contact.message.error')
+                    $this->translator->trans('contact.message.error')
                 );
 
                 return $this->render('contact/index.html.twig', [
@@ -59,41 +73,17 @@ class ContactController extends Controller
             } else {
                 $this->addFlash(
                     'notice',
-                    $this->get('translator')->trans('contact.message.success')
+                    $this->translator->trans('contact.message.success')
                 );
-
-                /*
-                $message = (new \Swift_Message())
-                        ->setSubject($this->get('translator')->trans('contact.email.title', ['%siteName%' => $this->get('settings_manager')->get('siteName')]))
-                        ->setFrom(['hotro.xaydungminhduy@gmail.com' => $this->get('settings_manager')->get('siteName')])
-                        ->setTo($this->get('settings_manager')->get('emailContact'))
-                        ->setBody(
-                            $this->renderView(
-                                'Emails/contact.html.twig',
-                                array(
-                                    'name' => $form->get('name')->getData(),
-                                    'phone' => $form->get('phone')->getData(),
-                                    'email' => $form->get('email')->getData(),
-                                    'body' => $form->get('contents')->getData(),
-                                    'gclid' => $contact->getGclid()
-                                )
-                            ),
-                            'text/html'
-                        )
-                    ;
-
-                $mailer->send($message);
-                */
 
                 return $this->redirectToRoute('contact');
             }
         }
 
-        $breadcrumbs = $this->get("white_october_breadcrumbs");
-        $breadcrumbs->addItem("home", $this->generateUrl("homepage"));
-        $breadcrumbs->addItem('contactus');
+        $this->breadcrumbs->addItem("home", $this->generateUrl("homepage"));
+        $this->breadcrumbs->addItem('contactus');
 
-        $post = $this->getDoctrine()
+        $post = $this->em
             ->getRepository(News::class)
             ->findOneBy(
                 array('url' => 'lien-he')
@@ -105,13 +95,11 @@ class ContactController extends Controller
         ]);
     }
 
-    /**
-     * @Route("lien-he-ajax/", name="contact_ajax")
-     */
-    public function ajaxAction(Request $request, \Swift_Mailer $mailer)
+    #[Route('lien-he-ajax/', name: 'contact_ajax')]
+    public function ajaxAction(Request $request)
     {
         $contact = new Contact();
-        
+
         $form = $this->createFormBuilder($contact)
             ->add('name', TextType::class, array('label' => 'label.author'))
             ->add('email', EmailType::class, array('label' => 'label.author_email'))
@@ -126,36 +114,13 @@ class ContactController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($contact);
-            $em->flush();
-            
+            $this->em->persist($contact);
+            $this->em->flush();
+
             if (null === $contact->getId()) {
-                return new JsonResponse(['success' => false, 'message' => $this->get('translator')->trans('contact.message.error')]);
+                return new JsonResponse(['success' => false, 'message' => $this->translator->trans('contact.message.error')]);
             } else {
-                /*
-                $message = (new \Swift_Message())
-                        ->setSubject($this->get('translator')->trans('contact.email.title', ['%siteName%' => $this->get('settings_manager')->get('siteName')]))
-                        ->setFrom(['hotro.xaydungminhduy@gmail.com' => $this->get('settings_manager')->get('siteName')])
-                        ->setTo($this->get('settings_manager')->get('emailContact'))
-                        ->setBody(
-                            $this->renderView(
-                                'Emails/contact.html.twig',
-                                array(
-                                    'name' => $form->get('name')->getData(),
-                                    'phone' => $form->get('phone')->getData(),
-                                    'email' => $form->get('email')->getData(),
-                                    'body' => $form->get('contents')->getData(),
-                                    'gclid' => $contact->getGclid()
-                                )
-                            ),
-                            'text/html'
-                        );
-
-                $mailer->send($message);
-                */
-
-                return new JsonResponse(['success' => true, 'message' => $this->get('translator')->trans('contact.message.success')]);
+                return new JsonResponse(['success' => true, 'message' => $this->translator->trans('contact.message.success')]);
             }
         }
 
@@ -167,14 +132,12 @@ class ContactController extends Controller
         return new JsonResponse(['success' => false, 'message' => implode(', ', $errors) ?: 'Form không hợp lệ. Vui lòng kiểm tra lại.']);
     }
 
-    /**
-     * @Route("page-builder-contact/", name="page_builder_contact_submit", methods={"POST"})
-     */
-    public function pageBuilderSubmitAction(Request $request, \Swift_Mailer $mailer)
+    #[Route('page-builder-contact/', name: 'page_builder_contact_submit', methods: ['POST'])]
+    public function pageBuilderSubmitAction(Request $request, MailerInterface $mailer)
     {
         $contact = new Contact();
 
-        $form = $this->get('form.factory')->createNamedBuilder('page_builder_contact', FormType::class, $contact, [
+        $form = $this->formFactory->createNamedBuilder('page_builder_contact', FormType::class, $contact, [
                 'action' => $this->generateUrl('page_builder_contact_submit'),
                 'method' => 'POST',
             ])
@@ -199,21 +162,20 @@ class ContactController extends Controller
             return new RedirectResponse($redirectUrl);
         }
 
-        $em = $this->getDoctrine()->getManager();
-        $em->persist($contact);
-        $em->flush();
+        $this->em->persist($contact);
+        $this->em->flush();
 
         if (null === $contact->getId()) {
-            $this->addFlash('error', $this->get('translator')->trans('contact.message.error'));
+            $this->addFlash('error', $this->translator->trans('contact.message.error'));
 
             return new RedirectResponse($redirectUrl);
         }
 
-        $message = (new \Swift_Message())
-            ->setSubject($this->get('translator')->trans('contact.email.title', ['%siteName%' => $this->get('settings_manager')->get('siteName')]))
-            ->setFrom(['hotro.xaydungminhduy@gmail.com' => $this->get('settings_manager')->get('siteName')])
-            ->setTo($this->get('settings_manager')->get('emailContact'))
-            ->setBody(
+        $email = (new Email())
+            ->subject($this->translator->trans('contact.email.title', ['%siteName%' => $this->settingsManager->get('siteName')]))
+            ->from(new Address('hotro.xaydungminhduy@gmail.com', $this->settingsManager->get('siteName')))
+            ->to($this->settingsManager->get('emailContact'))
+            ->html(
                 $this->renderView(
                     'Emails/contact.html.twig',
                     array(
@@ -223,13 +185,12 @@ class ContactController extends Controller
                         'body' => $form->get('contents')->getData(),
                         'gclid' => $contact->getGclid()
                     )
-                ),
-                'text/html'
+                )
             );
 
-        $mailer->send($message);
+        $mailer->send($email);
 
-        $this->addFlash('notice', $this->get('translator')->trans('contact.message.success'));
+        $this->addFlash('notice', $this->translator->trans('contact.message.success'));
 
         return new RedirectResponse($redirectUrl);
     }

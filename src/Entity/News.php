@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Repository\NewsRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\HttpFoundation\File\File;
@@ -14,256 +16,147 @@ use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * News
- *
- * @ORM\Table(name="news", options={"charset"="utf8mb4", "collate"="utf8mb4_unicode_ci"})
- * @ORM\Entity(repositoryClass="App\Repository\NewsRepository")
- * @UniqueEntity("url")
- * @Vich\Uploadable
  */
+#[ORM\Table(name: 'news', options: ['charset' => 'utf8mb4', 'collate' => 'utf8mb4_unicode_ci'])]
+#[ORM\Entity(repositoryClass: NewsRepository::class)]
+#[UniqueEntity('url')]
+#[Vich\Uploadable]
 class News
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: Types::INTEGER)]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private $id;
 
     /**
-     * @var App\Entity\NewsCategory;
-     *
-     * @ORM\ManyToMany(targetEntity="App\Entity\NewsCategory", inversedBy="news")
-     * @ORM\JoinTable(
-     *  name="news_newscategory",
-     *  joinColumns={
-     *      @ORM\JoinColumn(name="news_id", referencedColumnName="id")
-     *  },
-     *  inverseJoinColumns={
-     *      @ORM\JoinColumn(name="newscategory_id", referencedColumnName="id")
-     *  }
-     * )
+     * @var NewsCategory
      */
+    #[ORM\ManyToMany(targetEntity: NewsCategory::class, inversedBy: 'news')]
+    #[ORM\JoinTable(name: 'news_newscategory')]
+    #[ORM\JoinColumn(name: 'news_id', referencedColumnName: 'id')]
+    #[ORM\InverseJoinColumn(name: 'newscategory_id', referencedColumnName: 'id')]
     private $category;
 
-    /**
-     * @var string
-     *
-     * @Assert\NotBlank()
-     * @Assert\Length(
-     *      min = 10,
-     *      max = 255,
-     *      minMessage = "Your title must be at least {{ limit }} characters long",
-     *      maxMessage = "Your title cannot be longer than {{ limit }} characters"
-     * )
-     * @ORM\Column(name="title", type="string", length=255)
-     */
+    #[Assert\NotBlank]
+    #[Assert\Length(
+        min: 10,
+        max: 255,
+        minMessage: 'Your title must be at least {{ limit }} characters long',
+        maxMessage: 'Your title cannot be longer than {{ limit }} characters'
+    )]
+    #[ORM\Column(name: 'title', type: Types::STRING, length: 255)]
     private $title;
 
-    /**
-     * @var string
-     *
-     * @Assert\NotBlank()
-     * @ORM\Column(name="url", type="string", length=255, unique=true)
-     */
+    #[Assert\NotBlank]
+    #[ORM\Column(name: 'url', type: Types::STRING, length: 255, unique: true)]
     private $url;
 
-    /**
-     * @var string
-     *
-     * @Assert\NotBlank()
-     * @ORM\Column(name="description", type="text")
-     */
+    #[Assert\NotBlank]
+    #[ORM\Column(name: 'description', type: Types::TEXT)]
     private $description;
 
     /**
      * @var text
-     *
-     * @Assert\NotBlank()
-     * @ORM\Column(name="contents", type="text", columnDefinition="LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL")
      */
+    #[Assert\NotBlank]
+    #[ORM\Column(name: 'contents', type: Types::TEXT, columnDefinition: 'LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL')]
     private $contents;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="images", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'images', type: Types::STRING, length: 255, nullable: true)]
     private $images;
 
     /**
-     * @Vich\UploadableField(mapping="news_images", fileNameProperty="images")
      * @var File
      */
+    #[Vich\UploadableField(mapping: 'news_images', fileNameProperty: 'images')]
     private $imageFile;
 
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="enable", type="boolean")
-     */
+    #[ORM\Column(name: 'enable', type: Types::BOOLEAN)]
     private $enable = true;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="postType", type="string", length=255)
-     */
+    #[ORM\Column(name: 'postType', type: Types::STRING, length: 255)]
     private $postType = 'post';
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="pageTitle", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'pageTitle', type: Types::STRING, length: 255, nullable: true)]
     private $pageTitle = null;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="pageDescription", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'pageDescription', type: Types::TEXT, nullable: true)]
     private $pageDescription = null;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="pageKeyword", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'pageKeyword', type: Types::STRING, length: 255, nullable: true)]
     private $pageKeyword = null;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="breadcrumbTitle", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'breadcrumbTitle', type: Types::STRING, length: 255, nullable: true)]
     private $breadcrumbTitle = null;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="relatedNews", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'relatedNews', type: Types::STRING, length: 255, nullable: true)]
     private $relatedNews = null;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="contactHotline", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'contactHotline', type: Types::TEXT, nullable: true)]
     private $contactHotline = null;
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="viewCounts", type="integer")
-     */
+    #[ORM\Column(name: 'viewCounts', type: Types::INTEGER)]
     private $viewCounts = 0;
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="ordering", type="integer", nullable=true)
-     */
+    #[ORM\Column(name: 'ordering', type: Types::INTEGER, nullable: true)]
     private $ordering = null;
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="categoryPrimary", type="integer")
-     */
+    #[ORM\Column(name: 'categoryPrimary', type: Types::INTEGER)]
     private $categoryPrimary = 0;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="schemaMarkup", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'schemaMarkup', type: Types::TEXT, nullable: true)]
     private $schemaMarkup = null;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="note", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'note', type: Types::TEXT, nullable: true)]
     private $note = null;
 
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="createdAt", type="datetime") 
-     */
+    #[Gedmo\Timestampable(on: 'create')]
+    #[ORM\Column(name: 'createdAt', type: Types::DATETIME_MUTABLE)]
     private $createdAt;
 
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updatedAt", type="datetime")
-     */
+    #[Gedmo\Timestampable(on: 'update')]
+    #[ORM\Column(name: 'updatedAt', type: Types::DATETIME_MUTABLE)]
     private $updatedAt;
 
     /**
      * @var User
-     *
-     * @ORM\ManyToOne(targetEntity="App\Entity\User")
-     * @ORM\JoinColumn(nullable=false)
      */
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: false)]
     private $author;
 
     /**
      * @var News
-     *
-     * @ORM\ManyToOne(targetEntity="App\Entity\News", inversedBy="children")
-     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", nullable=true)
      */
+    #[ORM\ManyToOne(targetEntity: News::class, inversedBy: 'children')]
+    #[ORM\JoinColumn(name: 'parent_id', referencedColumnName: 'id', nullable: true)]
     private $parent;
 
     /**
      * @var News[]|ArrayCollection
-     *
-     * @ORM\OneToMany(targetEntity="App\Entity\News", mappedBy="parent")
-     * @ORM\OrderBy({"title": "ASC"})
      */
+    #[ORM\OneToMany(targetEntity: News::class, mappedBy: 'parent')]
+    #[ORM\OrderBy(['title' => 'ASC'])]
     private $children;
 
     /**
      * @var Tag[]|ArrayCollection
-     *
-     * @ORM\ManyToMany(targetEntity="App\Entity\Tag", inversedBy="news", cascade={"persist"})
-     * @ORM\OrderBy({"name": "ASC"})
-     * @Assert\Count(max="10", maxMessage="news.too_many_tags")
      */
+    #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy: 'news', cascade: ['persist'])]
+    #[ORM\OrderBy(['name' => 'ASC'])]
+    #[Assert\Count(max: 10, maxMessage: 'news.too_many_tags')]
     private $tags;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="robots", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'robots', type: Types::STRING, length: 255, nullable: true)]
     private $robots = null;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="template", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'template', type: Types::STRING, length: 255, nullable: true)]
     private $template = null;
 
-    /**
-     * @var bool
-     *
-     * @ORM\Column(name="pageBuilderEnabled", type="boolean", options={"default" : 0})
-     */
+    #[ORM\Column(name: 'pageBuilderEnabled', type: Types::BOOLEAN, options: ['default' => 0])]
     private $pageBuilderEnabled = false;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="pageBuilderData", type="text", nullable=true, columnDefinition="LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL")
-     */
+    #[ORM\Column(name: 'pageBuilderData', type: Types::TEXT, nullable: true, columnDefinition: 'LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL')]
     private $pageBuilderData = null;
 
     public function __toString()

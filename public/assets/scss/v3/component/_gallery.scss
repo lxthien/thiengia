@@ -1,0 +1,158 @@
+@use "../tokens" as *;
+
+// Slider "Hình ảnh hoạt động" + popup phóng to
+.gallery {
+  background: $sand;
+
+  .gallery-track {
+    display: flex;
+    gap: 1.25rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding-bottom: 0.75rem;
+    -webkit-overflow-scrolling: touch;
+
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba($text, 0.2);
+      border-radius: 2px;
+    }
+  }
+
+  .gallery-item {
+    flex: 0 0 min(78vw, 380px);
+    scroll-snap-align: start;
+    cursor: zoom-in;
+    background: $white;
+    overflow: hidden;
+    border: 1px solid $line;
+    text-align: left;
+    transition: all $dur $ease;
+
+    figure {
+      overflow: hidden;
+
+      img {
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        object-fit: cover;
+        transition: transform 1.4s $ease;
+      }
+    }
+
+    figcaption {
+      padding: 0.9rem 1.1rem 1rem;
+      font-family: $f-display;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: $text;
+    }
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 36px rgba($dark, 0.12);
+
+      img {
+        transform: scale(1.05);
+      }
+    }
+  }
+
+  .gallery-nav {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    background: $white;
+    border: 1px solid $line;
+    color: $text;
+    transition: all $dur $ease;
+
+    &:hover {
+      background: $accent;
+      border-color: $accent;
+      color: $white;
+    }
+  }
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba($dark, 0.93);
+  opacity: 0;
+  visibility: hidden;
+  transition: all $dur $ease;
+
+  &.is-open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .lightbox-body {
+    max-width: min(92vw, 1000px);
+  }
+
+  img {
+    max-width: 100%;
+    max-height: 76vh;
+    object-fit: contain;
+  }
+
+  .lightbox-caption {
+    margin-top: 1rem;
+    text-align: center;
+    color: rgba($white, 0.85);
+    font-family: $f-display;
+    font-size: 1.05rem;
+  }
+
+  .lightbox-close {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.5rem;
+    width: 48px;
+    height: 48px;
+    font-size: 1.6rem;
+    color: $white;
+
+    &:hover {
+      color: $accent;
+    }
+  }
+
+  .lightbox-prev,
+  .lightbox-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: grid;
+    place-items: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 9999px;
+    background: rgba($white, 0.12);
+    color: $white;
+    transition: background $dur $ease;
+
+    &:hover {
+      background: $accent;
+    }
+  }
+
+  .lightbox-prev {
+    left: 1rem;
+  }
+
+  .lightbox-next {
+    right: 1rem;
+  }
+}

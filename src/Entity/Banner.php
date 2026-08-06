@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Repository\BannerRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\HttpFoundation\File\File;
@@ -10,81 +12,47 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * Banner
- *
- * @ORM\Table(name="banner")
- * @ORM\Entity(repositoryClass="App\Repository\BannerRepository")
- * @Vich\Uploadable
- */
-
+#[ORM\Table(name: 'banner')]
+#[ORM\Entity(repositoryClass: BannerRepository::class)]
+#[Vich\Uploadable]
 class Banner
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: Types::INTEGER)]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private $id;
 
     /**
-     * @var App\Entity\BannerCategory;
-     *
-     * @ORM\ManyToOne(targetEntity="App\Entity\BannerCategory", inversedBy="bannercategory")
-     * @ORM\JoinColumn(name="bannercategory_id", referencedColumnName="id")
+     * @var BannerCategory
      */
+    #[ORM\ManyToOne(targetEntity: BannerCategory::class)]
+    #[ORM\JoinColumn(name: 'bannercategory_id', referencedColumnName: 'id')]
     private $bannercategory;
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="position", type="integer", nullable=true)
-     */
+    #[ORM\Column(name: 'position', type: Types::INTEGER, nullable: true)]
     private $position;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="name", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'name', type: Types::STRING, length: 255, nullable: true)]
     private $name;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="url", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'url', type: Types::STRING, length: 255, nullable: true)]
     private $url;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="urlImage", type="string", length=255)
-     */
+    #[ORM\Column(name: 'urlImage', type: Types::STRING, length: 255)]
     private $urlImage;
 
     /**
-     * @Vich\UploadableField(mapping="banner_images", fileNameProperty="urlImage")
      * @var File
      */
+    #[Vich\UploadableField(mapping: 'banner_images', fileNameProperty: 'urlImage')]
     private $imageFile;
 
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="createdAt", type="datetime") 
-     */
+    #[Gedmo\Timestampable(on: 'create')]
+    #[ORM\Column(name: 'createdAt', type: Types::DATETIME_MUTABLE)]
     private $createdAt;
 
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updatedAt", type="datetime")
-     */
+    #[Gedmo\Timestampable(on: 'update')]
+    #[ORM\Column(name: 'updatedAt', type: Types::DATETIME_MUTABLE)]
     private $updatedAt;
 
     public function __construct()

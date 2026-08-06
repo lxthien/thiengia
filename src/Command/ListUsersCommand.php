@@ -19,6 +19,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 
 /**
  * A console command that lists all the existing users.
@@ -40,7 +42,7 @@ class ListUsersCommand extends Command
     private $mailer;
     private $emailSender;
 
-    public function __construct(EntityManagerInterface $em, \Swift_Mailer $mailer, $emailSender)
+    public function __construct(EntityManagerInterface $em, MailerInterface $mailer, $emailSender)
     {
         parent::__construct();
 
@@ -96,7 +98,7 @@ HELP
         $usersAsPlainArrays = array_map(function (User $user) {
             return [
                 $user->getId(),
-                $user->getFullName(),
+                $user->getName(),
                 $user->getUsername(),
                 $user->getEmail(),
                 implode(', ', $user->getRoles()),
@@ -122,6 +124,8 @@ HELP
         if (null !== $email = $input->getOption('send-to')) {
             $this->sendReport($usersAsATable, $email);
         }
+
+        return Command::SUCCESS;
     }
 
     /**
@@ -132,14 +136,14 @@ HELP
      */
     private function sendReport($contents, $recipient)
     {
-        // See https://symfony.com/doc/current/cookbook/email/email.html
-        $message = $this->mailer->createMessage()
-            ->setSubject(sprintf('app:list-users report (%s)', date('Y-m-d H:i:s')))
-            ->setFrom($this->emailSender)
-            ->setTo($recipient)
-            ->setBody($contents, 'text/plain')
+        // See https://symfony.com/doc/current/mailer.html
+        $email = (new Email())
+            ->subject(sprintf('app:list-users report (%s)', date('Y-m-d H:i:s')))
+            ->from($this->emailSender)
+            ->to($recipient)
+            ->text($contents)
         ;
 
-        $this->mailer->send($message);
+        $this->mailer->send($email);
     }
 }

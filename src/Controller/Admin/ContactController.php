@@ -12,30 +12,31 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Contact;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
  * Controller used to manage blog contents in the backend.
- *
- * @Route("/admin/contact")
- * @Security("has_role('ROLE_ADMIN')")
  */
-
-class ContactController extends Controller
+#[Route('/admin/contact')]
+#[IsGranted('ROLE_ADMIN')]
+class ContactController extends AbstractController
 {
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+    ) {
+    }
+
     /**
      * Lists all Contact entities.
-     *
-     * @Route("/", name="admin_contact_index")
-     * @Method("GET")
      */
+    #[Route('/', name: 'admin_contact_index', methods: ['GET'])]
     public function indexAction()
     {
-        $contactRepository = $this->getDoctrine()->getRepository(Contact::class);
+        $contactRepository = $this->em->getRepository(Contact::class);
         $contactRepository->markAllAsRead();
 
         $contacts = $contactRepository->findBy(
@@ -50,19 +51,16 @@ class ContactController extends Controller
 
     /**
      * Deletes a Contact entity.
-     *
-     * @Route("/{id}/delete", name="admin_contact_delete")
-     * @Method("POST")
      */
+    #[Route('/{id}/delete', name: 'admin_contact_delete', methods: ['POST'])]
     public function deleteAction(Request $request, Contact $contact)
     {
         if (!$this->isCsrfTokenValid('delete', $request->request->get('token'))) {
             return $this->redirectToRoute('admin_contact_index');
         }
 
-        $em = $this->getDoctrine()->getManager();
-        $em->remove($contact);
-        $em->flush();
+        $this->em->remove($contact);
+        $this->em->flush();
 
         $this->addFlash('success', 'action.deleted_successfully');
 

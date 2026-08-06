@@ -1,0 +1,113 @@
+@use "../tokens" as *;
+
+// Thẻ bài viết — KHÔNG có hàng meta (bỏ theo yêu cầu),
+// dùng chung cho trang danh mục và khối "bài liên quan"
+.post-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: transparent;
+
+  .post-card-media {
+    display: block;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 1.4s $ease;
+    }
+  }
+
+  .post-card-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 1.5rem 0 0;
+  }
+
+  // Nhãn chuyên mục kèm tam giác vàng đồng
+  .post-card-category {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: $primary;
+
+    &::before {
+      content: "";
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-bottom: 8px solid $gold;
+    }
+  }
+
+  .post-card-title {
+    margin-top: 0.85rem;
+    font-family: $f-display;
+    font-size: 1.2rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: $text;
+
+    a {
+      transition: color $dur $ease;
+
+      &:hover {
+        color: $accent;
+      }
+    }
+  }
+
+  .post-card-excerpt {
+    margin-top: 0.75rem;
+    font-size: 0.88rem;
+    font-weight: 300;
+    line-height: 1.8;
+    color: $mut;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &:hover .post-card-media img {
+    transform: scale(1.06);
+  }
+}
+
+// Bài nổi bật — mở đầu kiểu tạp chí
+.post-card--featured {
+  display: grid;
+  align-items: center;
+  gap: 2.5rem;
+
+  @media (min-width: 1024px) {
+    grid-template-columns: 7fr 5fr;
+  }
+
+  .post-card-media {
+    aspect-ratio: 16 / 10;
+  }
+
+  .post-card-body {
+    padding: 0;
+  }
+
+  .post-card-title {
+    font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+    line-height: 1.3;
+  }
+
+  .post-card-excerpt {
+    font-size: 0.98rem;
+    -webkit-line-clamp: 4;
+  }
+}

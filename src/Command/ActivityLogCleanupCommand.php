@@ -2,14 +2,20 @@
 
 namespace App\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class ActivityLogCleanupCommand extends ContainerAwareCommand
+class ActivityLogCleanupCommand extends Command
 {
+    public function __construct(private readonly EntityManagerInterface $em)
+    {
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this
@@ -26,19 +32,20 @@ class ActivityLogCleanupCommand extends ContainerAwareCommand
 
         if ($months < 1) {
             $io->error('Months must be at least 1.');
-            return;
+
+            return Command::FAILURE;
         }
 
         $date = new \DateTime();
         $date->modify("-{$months} months");
 
-        $em = $this->getContainer()->get('doctrine.orm.entity_manager');
-        
-        $query = $em->createQuery('DELETE FROM App\Entity\ActivityLog l WHERE l.createdAt < :date')
+        $query = $this->em->createQuery('DELETE FROM App\Entity\ActivityLog l WHERE l.createdAt < :date')
             ->setParameter('date', $date);
 
         $deletedCount = $query->execute();
 
         $io->success("Successfully deleted {$deletedCount} old activity logs (older than {$months} months).");
+
+        return Command::SUCCESS;
     }
 }

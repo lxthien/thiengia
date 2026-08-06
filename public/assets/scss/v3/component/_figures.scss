@@ -1,0 +1,33 @@
+@use "../tokens" as *;
+
+// Dải số liệu — serif, huy hiệu vàng đồng
+.figures {
+  background: $brown;
+  color: $white;
+
+  .figure {
+    padding: 2.1rem 0;
+    text-align: center;
+
+    .figure-value {
+      font-family: $f-display;
+      font-weight: 600;
+      font-size: clamp(1.9rem, 3.2vw, 2.8rem);
+
+      sup {
+        color: $gold;
+        font-size: 0.55em;
+        margin-left: 2px;
+      }
+    }
+
+    .figure-label {
+      margin-top: 0.4rem;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba($white, 0.62);
+    }
+  }
+}

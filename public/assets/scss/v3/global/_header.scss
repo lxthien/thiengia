@@ -1,0 +1,169 @@
+@use "../tokens" as *;
+
+// Topbar nâu than
+.tb {
+  height: 34px;
+  background: $dark;
+  color: rgba($white, 0.72);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+
+  > * {
+    height: 100%;
+  }
+
+  a {
+    transition: color $dur $ease;
+
+    &:hover {
+      color: $accent;
+    }
+  }
+}
+
+.hd {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  height: $hd-h;
+  display: flex;
+  align-items: center;
+  background: rgba($base, 0.96);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid $line;
+  transition: box-shadow $dur $ease;
+
+  &.is-scrolled {
+    box-shadow: 0 8px 30px rgba($dark, 0.08);
+  }
+}
+
+.hd-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  color: $text;
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  .hd-logo-name {
+    font-family: $f-body;
+    font-weight: 800;
+    font-size: 1.3rem;
+    line-height: 1;
+    letter-spacing: 0.04em;
+
+    span {
+      color: $primary;
+    }
+  }
+
+  .hd-logo-sub {
+    display: block;
+    margin-top: 0.3rem;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.42em;
+    color: $primary;
+  }
+}
+
+// Nav: underline trượt
+.hd-link {
+  position: relative;
+  padding: 0.5rem 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgba($text, 0.85);
+  transition: color $dur $ease;
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+    background: $primary;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform $dur $ease;
+  }
+
+  &:hover {
+    color: $accent;
+  }
+
+  &:hover,
+  &.is-active {
+    &::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+  }
+
+  &.is-active {
+    color: $primary;
+  }
+}
+
+.hd-hotline {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: $text;
+
+  .hd-hotline-icon {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 9999px;
+    background: $tint;
+    color: $accent;
+  }
+
+  .hd-hotline-label {
+    display: block;
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: $mut;
+    white-space: nowrap;
+  }
+
+  .hd-hotline-number {
+    font-family: $f-display;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: $primary;
+    white-space: nowrap;
+  }
+}
+
+.hd-toggle {
+  width: 44px;
+  height: 44px;
+  padding: 0 9px;
+
+  span {
+    display: block;
+    height: 2px;
+    background: $text;
+    transition: width $dur $ease;
+
+    &:nth-child(2) {
+      width: 65%;
+    }
+  }
+
+  &:hover span:nth-child(2) {
+    width: 100%;
+  }
+}

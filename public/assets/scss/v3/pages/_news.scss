@@ -1,0 +1,392 @@
+@use "../tokens" as *;
+
+// Hàng thông tin dưới tiêu đề bài viết
+.post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 2rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba($white, 0.6);
+
+  strong {
+    color: $white;
+    font-weight: 600;
+  }
+}
+
+// Ảnh đại diện kéo đè lên mép banner
+.post-cover {
+  margin-top: -5rem;
+  position: relative;
+  z-index: 10;
+
+  img {
+    width: 100%;
+    aspect-ratio: 2 / 1;
+    object-fit: cover;
+  }
+}
+
+// Nội dung dài — style cho HTML sinh từ CKEditor
+.post-content {
+  font-size: 1.0625rem;
+  font-weight: 300;
+  line-height: 1.95;
+  color: rgba($text, 0.85);
+
+  > * + * {
+    margin-top: 1.4rem;
+  }
+
+  h2 {
+    font-family: $f-display;
+    font-size: 1.8rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: $text;
+    margin-top: 3.25rem;
+    scroll-margin-top: calc(#{$hd-h} + 1.5rem);
+  }
+
+  h3 {
+    font-family: $f-display;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: $text;
+    margin-top: 2.25rem;
+  }
+
+  a {
+    color: $primary;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color $dur $ease;
+
+    &:hover {
+      color: $accent;
+    }
+  }
+
+  strong {
+    font-weight: 600;
+    color: $text;
+  }
+
+  // Bullet tam giác vàng đồng
+  ul {
+    padding-left: 0;
+
+    li {
+      position: relative;
+      padding-left: 1.6rem;
+      margin-top: 0.7rem;
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0.72em;
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-bottom: 8px solid $gold;
+      }
+    }
+  }
+
+  ol {
+    counter-reset: post-ol;
+    padding-left: 0;
+
+    li {
+      position: relative;
+      padding-left: 2.4rem;
+      margin-top: 0.9rem;
+      counter-increment: post-ol;
+
+      &::before {
+        content: counter(post-ol, decimal-leading-zero);
+        position: absolute;
+        left: 0;
+        top: 0.15em;
+        font-family: $f-display;
+        font-weight: 600;
+        color: $primary;
+      }
+    }
+  }
+
+  blockquote {
+    margin: 2.75rem 0;
+    padding: 0 0 0 2rem;
+    border-left: 3px solid $primary;
+    font-family: $f-display;
+    font-size: 1.4rem;
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1.6;
+    color: $text;
+  }
+
+  figure {
+    margin: 2.75rem 0;
+
+    img {
+      width: 100%;
+      height: auto;
+    }
+
+    figcaption {
+      margin-top: 0.9rem;
+      font-size: 0.8rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      color: $mut;
+      text-align: center;
+    }
+  }
+
+  table {
+    width: 100%;
+    margin: 2.25rem 0;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+
+    th {
+      background: $brown;
+      color: $white;
+      font-weight: 600;
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-align: left;
+      padding: 0.9rem 1.1rem;
+    }
+
+    td {
+      padding: 0.9rem 1.1rem;
+      border-bottom: 1px solid $line;
+      vertical-align: top;
+      font-weight: 400;
+    }
+
+    tbody tr:nth-child(even) {
+      background: rgba($sand, 0.45);
+    }
+
+    td strong {
+      white-space: nowrap;
+    }
+  }
+
+  .callout {
+    margin: 2.25rem 0;
+    padding: 1.5rem 1.75rem;
+    background: $tint;
+    border-left: 3px solid $gold;
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: $text;
+
+    strong {
+      color: $primary;
+    }
+  }
+}
+
+// Mục lục dính bên phải
+.toc {
+  border: 1px solid $line;
+  background: $white;
+  padding: 1.75rem;
+
+  .toc-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: $primary;
+    margin-bottom: 1.1rem;
+
+    &::before {
+      content: "";
+      width: 1.75rem;
+      height: 1px;
+      background: $primary;
+    }
+  }
+
+  ol {
+    counter-reset: toc;
+  }
+
+  li {
+    counter-increment: toc;
+
+    & + li {
+      border-top: 1px solid rgba($text, 0.08);
+    }
+  }
+
+  a {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.7rem 0;
+    font-size: 0.88rem;
+    font-weight: 400;
+    color: rgba($text, 0.75);
+    transition: color $dur $ease;
+
+    &::before {
+      content: counter(toc, decimal-leading-zero);
+      font-family: $f-display;
+      font-weight: 600;
+      color: rgba($text, 0.3);
+      transition: color $dur $ease;
+    }
+
+    &:hover {
+      color: $accent;
+    }
+
+    &[aria-current="true"] {
+      color: $primary;
+      font-weight: 500;
+
+      &::before {
+        color: $primary;
+      }
+    }
+  }
+}
+
+// Card tư vấn dưới mục lục
+.post-cta-card {
+  background: $dark;
+  color: $white;
+  padding: 2rem 1.75rem;
+  text-align: center;
+  border-top: 4px solid $primary;
+
+  .post-cta-title {
+    font-family: $f-display;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.4;
+
+    em {
+      font-style: italic;
+      color: $accent;
+    }
+  }
+
+  .post-cta-note {
+    margin-top: 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 300;
+    color: rgba($white, 0.6);
+  }
+
+  .btn2 {
+    width: 100%;
+    margin-top: 1.5rem;
+  }
+
+  .post-cta-phone {
+    display: inline-block;
+    margin-top: 1.25rem;
+    font-family: $f-display;
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: $accent;
+    transition: color $dur $ease;
+
+    &:hover {
+      color: $white;
+    }
+  }
+}
+
+// Thẻ tag
+.post-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+
+  a {
+    padding: 0.5rem 1rem;
+    border: 1px solid $line;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: $text;
+    transition: all $dur $ease;
+
+    &:hover {
+      background: $accent;
+      border-color: $accent;
+      color: $white;
+    }
+  }
+}
+
+// Hộp tác giả
+.author-box {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  padding: 2rem 0;
+  border-top: 1px solid $line;
+  border-bottom: 1px solid $line;
+
+  img {
+    width: 72px;
+    height: 72px;
+    border-radius: 9999px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .author-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-size: 0.64rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: $primary;
+
+    &::before {
+      content: "";
+      width: 1.5rem;
+      height: 1px;
+      background: $primary;
+    }
+  }
+
+  .author-name {
+    margin-top: 0.4rem;
+    font-family: $f-display;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: $text;
+  }
+
+  .author-bio {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 300;
+    line-height: 1.75;
+    color: $mut;
+  }
+}

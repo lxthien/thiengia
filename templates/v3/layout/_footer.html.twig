@@ -1,0 +1,41 @@
+<footer class="ft pt-16">
+    <div class="container max-w-7xl grid gap-10 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1.2fr] pb-14">
+        <div>
+            {{ include('v3/components/_logo.html.twig', { onDark: true }) }}
+            <p class="mt-5 max-w-sm leading-relaxed">{{ v3.company.footerIntro }}</p>
+            <p class="ft-legal">{{ v3.company.legalName }} · MST: {{ v3.company.taxCode }}</p>
+        </div>
+
+        <nav aria-label="Dịch vụ">
+            <h4 class="ft-head">Dịch vụ</h4>
+            {% for item in v3.menu.services %}
+                <a href="{{ path('homepage') }}#dich-vu" class="ft-link">{{ item }}</a>
+            {% endfor %}
+        </nav>
+
+        <nav aria-label="Công ty">
+            <h4 class="ft-head">Công ty</h4>
+            <a href="{{ path('homepage') }}#gioi-thieu" class="ft-link">Giới thiệu</a>
+            <a href="{{ path('homepage') }}#cong-trinh" class="ft-link">Công trình thực tế</a>
+            <a href="{{ path('news_category', { level1: v3.newsCategorySlug }) }}" class="ft-link">Cẩm nang xây dựng</a>
+            <a href="{{ path('contact') }}" class="ft-link">Liên hệ</a>
+        </nav>
+
+        <div>
+            <h4 class="ft-head">Liên hệ</h4>
+            <address class="not-italic space-y-2">
+                <p>{{ v3.company.address }}</p>
+                <p>Hotline: <a href="tel:{{ v3.company.phoneRaw }}" class="font-bold text-white">{{ v3.company.phone }}</a></p>
+                <p><a href="mailto:{{ v3.company.email }}">{{ v3.company.email }}</a></p>
+                <p><time>{{ v3.company.workingHours }}</time></p>
+            </address>
+        </div>
+    </div>
+
+    <div class="ft-bottom">
+        <div class="container max-w-7xl flex flex-wrap items-center justify-between gap-3 py-5">
+            <p>© {{ "now"|date("Y") }} {{ v3.company.legalName|capitalize }}. Bảo lưu mọi quyền.</p>
+            <p>{{ v3.company.slogan }}</p>
+        </div>
+    </div>
+</footer>

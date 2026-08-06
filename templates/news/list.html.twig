@@ -1,133 +1,66 @@
 {% extends 'layout.html.twig' %}
 
+{#
+    NewsController::listAction truyền: baseUrl, category, listCategories,
+    pagination (KnpPaginator) — KHÔNG phải posts/currentPage/totalPages.
+#}
+{% set pageTitle = category ? category.name : 'Cẩm nang xây dựng' %}
+
+{% block title %}{{ category and category.pageTitle ? category.pageTitle : pageTitle }} | {{ v3.company.shortName }}{% endblock %}
+{% block description %}{{ category and category.pageDescription ? category.pageDescription : v3.company.description }}{% endblock %}
+
 {% block stylesheets %}
-    <link href="{{ absolute_url(asset('build/css/list.css')) }}" rel="preload stylesheet" as="style" onload="this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="{{ absolute_url(asset('build/css/list.css')) }}"></noscript>
-{% endblock %}
-
-{% set pageTitle = category.getPageTitle() ?: category.getName() %}
-{% set pageDesc = category.getPageDescription() ?: category.getName() %}
-
-{% block title %}
-    {{ pageTitle }}
-{% endblock %}
-{% block description %}
-    {{ pageDesc }}
-{% endblock %}
-{% block keyword %}
-    {{ category.getPageKeyword() }}
-{% endblock %}
-
-{% block structuredOpenGraph %}
-    {% if not category.getIsPage() %}
-        <meta property="og:type" content="object">
-        <meta property="og:title" content="{{ pageTitle }}">
-        <meta property="og:description" content="{{ category.getPageDescription() }}">
-        {% if pagination.pageCount > 1 %}
-            {% if pagination.currentPageNumber == 1 %}
-                <link rel="next" href="{{ baseUrl ~ '/' ~ 2 }}">
-            {% elseif pagination.currentPageNumber < pagination.pageCount %}
-                <link rel="prev" href="{{ pagination.currentPageNumber == 2 ? baseUrl : baseUrl ~ '/' ~ (pagination.currentPageNumber - 1) }}">
-                <link rel="next" href="{{ baseUrl ~ '/' ~ (pagination.currentPageNumber + 1) }}">
-            {% else %}
-                <link rel="prev" href="{{ pagination.currentPageNumber == 2 ? baseUrl : baseUrl ~ '/' ~ (pagination.currentPageNumber - 1) }}">
-            {% endif %}
-        {% endif %}
-    {% endif %}
-{% endblock %}
-
-{% block blogPosting %}
-    {% set homeUrl = absolute_url(path('homepage')) %}
-    {% set authorUrl = absolute_url(path('author', {'slug': 'nguyenduytuan'})) %}
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org/",
-        "@type": "CollectionPage",
-        "@id": "{{ baseUrl }}#CollectionPage",
-        "url": "{{ baseUrl }}",
-        "name": "{{ pageTitle }}",
-        "description": "{{ pageDesc }}",
-        "isPartOf": {
-            "@id": "{{ homeUrl }}#website"
-        },
-        "inLanguage": "vi-VN"
-        {% if pagination|length > 0 %}
-            ,"mainEntity": {
-                "@type": "ItemList",
-                "numberOfItems":
-            {{ pagination|length }},
-                "itemListElement": [
-            {% for row in pagination %}
-                {
-                    "@type": "ListItem",
-                    "position":
-                {{ loop.index }},
-                    "item": {
-                        "@type": "BlogPosting",
-                        "headline": "{{ row.getTitle() }}",
-                        "url": "{{ absolute_url(path('news_show', {'slug': row.getUrl()})) }}",
-                        "description": "{{ row.getDescription()|slice(0, 160) }}",
-                        "datePublished": "{{ row.getCreatedAt()|date('Y-m-d h:m:s') }}+07:00",
-                        "dateModified": "{{ row.getUpdatedAt()|date('Y-m-d h:m:s') }}+07:00",
-                        "image": "{{ absolute_url(vich_uploader_asset(row, 'imageFile') ?: asset('assets/images/no-image.png')) }}",
-                        "author": {
-                            "@type": "Person",
-                            "name": "{{ row.getAuthor().getName() }}",
-                            "url": "{{ authorUrl }}"
-                        },
-                        "publisher": {
-                            "@type": "Organization",
-                            "@id": "{{ homeUrl }}#organization"
-                        }
-                    }
-                }
-                {% if not loop.last %},
-                {% endif %}
-            {% endfor %}
-            ]
-        }
-        {% endif %}
-    }
-    </script>
-{% endblock %}
-
-{% block robots %}
-    <meta name="robots" content="{{ category.getRobots() ?: 'index, follow' }}">
-{% endblock %}
-
-{% block canonical %}
-    <meta name="DC.identifier" content="{{ baseUrl }}">
-    <link rel="canonical" href="{{ baseUrl }}">
+    <link rel="stylesheet" href="{{ asset('build/css/v3-list.css') }}">
 {% endblock %}
 
 {% block body %}
-    {{ include('news/components/breadcrumbs.html.twig', {type: 'category', title: category.getTitleLandingPage() ?: category.getName(), description: category.getDescription()}) }}
-    <div class="container wrapper-container">
-        <div class="row ka-category-list">
-            <div class="col-lg-12">
-                {% if category.getContent() %}
-                    <div class="category-content">{{ category.getContent()|raw }}</div>
-                    <div class="ka-article-grid ka-article-grid-landing">
-                        <h2>Có thể bạn quan tâm</h2>
-                        <div class="row">
-                            {% for row in pagination %}
-                                {{ include('news/components/itemsGrid.html.twig', {row: row, target: '_blank', rel: 'noopener'}, with_context = false) }}
-                            {% endfor %}
-                        </div>
-                    </div>
-                {% elseif pagination|length > 0 %}
-                    <div class="ka-article-grid">
-                        <div class="row">
-                            {% for row in pagination %}
-                                {{ include('news/components/itemsGrid.html.twig') }}
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {{ include('news/components/pagination.html.twig') }}
-                {% else %}
-                    {{ include('news/components/noRecord.html.twig') }}
-                {% endif %}
+
+    {{ include('v3/components/_page_hero.html.twig', {
+        breadcrumb: [
+            { label: 'Trang chủ', path: path('homepage') },
+            { label: pageTitle }
+        ],
+        title: pageTitle,
+        description: category and category.description ? category.description : null
+    }) }}
+
+    {# Bộ lọc chuyên mục #}
+    {% if listCategories is defined and listCategories %}
+        <nav class="cat-filter" aria-label="Chuyên mục bài viết">
+            <div class="container max-w-7xl">
+                <ul>
+                    {% for cat in listCategories %}
+                        <li>
+                            <a href="{{ path('news_category', { level1: cat.url }) }}"
+                               {{ category and category.id == cat.id ? 'aria-current="true"' : '' }}>{{ cat.name }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
             </div>
+        </nav>
+    {% endif %}
+
+    <section class="py-16 lg:py-20" aria-label="Danh sách bài viết">
+        <div class="container max-w-7xl">
+
+            {% if pagination is defined and pagination|length %}
+                <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-x-8 gap-y-12">
+                    {% for post in pagination %}
+                        {{ include('v3/components/_post_card.html.twig', { post: post }) }}
+                    {% endfor %}
+                </div>
+
+                {# Phân trang KnpPaginator, bọc trong class v3 để lấy style #}
+                <div class="pagination-v3 mt-16">
+                    {{ knp_pagination_render(pagination) }}
+                </div>
+            {% else %}
+                <p class="list-empty">Chuyên mục này chưa có bài viết nào.</p>
+            {% endif %}
+
         </div>
-    </div>
+    </section>
+
+    {{ include('v3/components/_newsletter.html.twig') }}
+
 {% endblock %}

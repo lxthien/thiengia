@@ -2,70 +2,50 @@
 
 namespace App\Entity;
 
+use App\Repository\RedirectRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\RedirectRepository")
- * @ORM\Table(name="redirects")
- * @ORM\HasLifecycleCallbacks()
- */
+#[ORM\Entity(repositoryClass: RedirectRepository::class)]
+#[ORM\Table(name: 'redirects')]
+#[ORM\HasLifecycleCallbacks]
 class Redirect
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: Types::INTEGER)]
     private $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank(message="Source URL cannot be blank.")
-     */
+    #[ORM\Column(type: Types::STRING, length: 255)]
+    #[Assert\NotBlank(message: 'Source URL cannot be blank.')]
     private $sourceUrl;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank(message="Destination URL cannot be blank.")
-     */
+    #[ORM\Column(type: Types::STRING, length: 255)]
+    #[Assert\NotBlank(message: 'Destination URL cannot be blank.')]
     private $destinationUrl;
 
-    /**
-     * @ORM\Column(type="string", length=20)
-     * @Assert\Choice(choices={"exact", "wildcard", "regex"}, message="Invalid match type.")
-     */
+    #[ORM\Column(type: Types::STRING, length: 20)]
+    #[Assert\Choice(choices: ['exact', 'wildcard', 'regex'], message: 'Invalid match type.')]
     private $matchType = 'exact';
 
-    /**
-     * @ORM\Column(type="integer")
-     * @Assert\Choice(choices={301, 302, 307, 308}, message="Invalid status code.")
-     */
+    #[ORM\Column(type: Types::INTEGER)]
+    #[Assert\Choice(choices: [301, 302, 307, 308], message: 'Invalid status code.')]
     private $statusCode = 301;
 
-    /**
-     * @ORM\Column(type="boolean")
-     */
+    #[ORM\Column(type: Types::BOOLEAN)]
     private $isActive = true;
 
-    /**
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Column(type: Types::INTEGER)]
     private $orderNum = 0;
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private $note;
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private $createdAt;
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private $updatedAt;
 
     public function __construct()
@@ -74,9 +54,7 @@ class Redirect
         $this->updatedAt = new \DateTime();
     }
 
-    /**
-     * @ORM\PreUpdate
-     */
+    #[ORM\PreUpdate]
     public function setUpdatedAtValue()
     {
         $this->updatedAt = new \DateTime();

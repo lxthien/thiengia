@@ -1,341 +1,405 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}{{ v3.company.shortName }} — {{ v3.company.slogan }}{% endblock %}
+{% block description %}{{ v3.company.description }}{% endblock %}
+
 {% block stylesheets %}
-	<link href="{{ absolute_url(asset('build/css/homepage.css')) }}" rel="preload stylesheet" as="style" onload="this.rel='stylesheet'">
-	<noscript><link rel="stylesheet" href="{{ absolute_url(asset('build/css/homepage.css')) }}"></noscript>
-{% endblock %}
-
-{% block structuredOpenGraph %}
-	<meta property="og:type" content="website"/>
-	<meta property="og:title" content="{{ block('title') }}"/>
-	<meta property="og:description" content="{{ block('description') }}"/>
-	<meta property="og:image" content="{{ absolute_url(asset('assets/images/banner/xay-dung-kim-anh-5.jpg')) }}"/>
-	<meta property="og:image:width" content="1200"/>
-	<meta property="og:image:height" content="630"/>
-{% endblock %}
-
-{% block localBusiness %}
-	{{ get_setting('googleAnalytic')|raw }}
+    <link rel="stylesheet" href="{{ asset('build/css/v3-homepage.css') }}">
 {% endblock %}
 
 {% block body %}
-	<div class="wrapper-container">
-		<section class="ka-hero-cta-section">
-			<div class="container ka-hero-cta-container">
-				<div class="row">
-					<div class="col-md-10">
-						<div class="ka-hero-cta-text">BẠN ĐANG MUỐN THI CÔNG DỰ ÁN XÂY DỰNG? HÃY LIÊN HỆ NGAY ĐẾN CHÚNG TÔI ĐỂ ĐƯỢC TƯ VẤN MIỄN PHÍ!</div>
-					</div>
-					<div class="col-md-2 text-right">
-						<a href="tel:{{ get_setting('contens_hotline_1')|replace({' ': '', '.': ''}) }}">
-							<i class="fas fa-mobile-alt"></i>
-							{{ get_setting('contens_hotline_1') }}</a>
-					</div>
-				</div>
-			</div>
-		</section>
 
-		<section class="ka-about-section">
-			<div class="ka-about-wrapper">
-				<div class="ka-about-content">
-					<div class="container">
-						<div class="row">
-							<div class="col-xs-12 col-sm-7 col-md-7 ka-about-content-left">
-								<div class="ka-about-inner">
-									<div class="ka-block-text">
-										<h1>CÔNG TY THIẾT KẾ - XÂY DỰNG KIM ANH</h1>
-										<h4>Chuyên tư vấn, thiết kế kiến trúc - nội thất, xây dựng công trình dân dụng và công nghiệp.</h4>
-										<ul>
-											<li>Là một doanh nghiệp hoạt động kinh doanh chuyên nghiệp trong lĩnh vực tư vấn - thiết kế kiến trúc - xây dựng. Được thành lập từ năm 2017 bởi đội ngũ Kiến trúc sư, Kỹ sư trẻ trung và tâm huyết với nghề, lấy sự hài lòng của khách hàng làm niềm vui cho mình.</li>
-											<li>Với bề dày kinh nghiệm và năng lực trong Thiết kế kiến trúc – Thi công xây dựng – Tư vấn giám sát qua nhiều công trình từ nhà ở dân dụng, văn phòng, nhà xưởng, khách sạn, Xây Dựng Kim Anh luôn để lại ấn tượng tốt đối với khách hàng. Với phương châm
-												<strong>"Uy tín là vàng"</strong>
-												chúng tôi luôn cố gắng hết sức mình để đem đến sự hài lòng cho khách hàng.</li>
-										</ul>
-										<div class="ka-article-overlay"></div>
-									</div>
-									<div class="ka-about-cta">
-										<a href="{{ path('dynamic_post_page', {'slug': 'gioi-thieu' }) }}">
-											<em>Xem tiếp ...</em>
-										</a>
-									</div>
-								</div>
-							</div>
-							<div class="col-xs-12 col-sm-5 col-md-5 ka-about-content-right">
-								<a class="ka-about-img-effect"><img alt="Xây Dựng Kim Anh" src="{{ asset('assets/images/banner/xay-dung-kim-anh-5.jpg') }}" class="img-responsive"></a>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</section>
+    {# ============ HERO + FORM BÁO GIÁ ============ #}
+    <section class="hero2" aria-label="Giới thiệu tổng quan">
+        <div class="hero2-bg" data-hero-slides>
+            {% for slide in v3.heroSlides %}
+                <img {{ loop.first ? 'class="is-active"' : '' }}
+                     src="{{ asset(slide.image) }}"
+                     alt="{{ slide.alt }}"
+                     {{ loop.first ? 'fetchpriority="high"' : 'loading="lazy"' }}
+                     decoding="async">
+            {% endfor %}
+        </div>
 
+        <div class="container max-w-7xl grid lg:grid-cols-[1fr_350px] gap-12 items-center">
+            <div>
+                <p class="sec-label sec-label--light fade">Xây nhà trọn gói tại TP.HCM</p>
+                <h1 class="hero2-title mt-6 fade">Xây tổ ấm bằng <em>cái tâm</em></h1>
+                <p class="hero2-sub mt-6 fade">{{ v3.company.heroIntro }}</p>
 
-		<section class="ka-pricing-section" id="dich-vu">
-			<div class="container">
-				<h2 class="text-center text-uppercase ka-section-heading">Dịch vụ nổi bật</h2>
-				<div class="row ka-pricing-grid">
-					{% for priceOnHomepage in blockPricesOnHomepage %}
-						{% set imagePath = (vich_uploader_asset(priceOnHomepage, 'imageFile') ? vich_uploader_asset(priceOnHomepage, 'imageFile') : asset('assets/images/no-image.png')) %}
-						{% set imagePathFilter = (vich_uploader_asset(priceOnHomepage, 'imageFile') ? vich_uploader_asset(priceOnHomepage, 'imageFile') : asset('assets/images/no-image.png')) | imagine_filter('news_218_218') %}
-						{% if convert_images.fileExists(imagePath) == false %}
-							{% set imagePath = imagePath | imagine_filter('news_218_218') %}
-						{% else %}
-							{% set imagePath = convert_images.webpConvert(imagePathFilter, '', true) %}
-						{% endif %}
-						<div class="col-md-3 col-sm-3">
-							<div class="ka-pricing-card">
-								<a href="{{ path('news_show', {'slug': priceOnHomepage.getUrl() }) }}" class="ka-pricing-img">
-									<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="{{ priceOnHomepage.getTitle() }}" class="img-responsive lazyload" data-src="{{ imagePath != false ? absolute_url(imagePath) : absolute_url(imagePathFilter) }}" width="218" height="218">
-								</a>
-								<div class="ka-pricing-title">
-									<a href="{{ path('news_show', {'slug': priceOnHomepage.getUrl() }) }}">{{ priceOnHomepage.getTitle() }}</a>
-								</div>
-							</div>
-						</div>
-					{% endfor %}
-				</div>
-			</div>
-		</section>
+                <ul class="hero2-points mt-7 fade">
+                    {% for point in v3.heroPoints %}
+                        <li>
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                            {{ point }}
+                        </li>
+                    {% endfor %}
+                </ul>
 
-		<section class="ka-why-us-section">
-			<div class="container">
-				<h2 class="text-center text-uppercase ka-section-heading">Tại sao khách hàng chọn chúng tôi</h2>
-				<div class="row">
-					<div class="col-md-4 col-sm-6">
-						<article class="ka-feature-card">
-							<span class="ka-feature-icon-box">
-								<i class="fa fa-globe"></i>
-							</span>
-							<div class="ka-feature-content">
-								<b class="ka-feature-title text-uppercase">Chất lượng hàng đầu</b>
-								<p>Kiểm soát vật tư nghiêm ngặt, thi công đúng kỹ thuật bản vẽ.</p>
-							</div>
-						</article>
-					</div>
-					<div class="col-md-4 col-sm-6">
-						<article class="ka-feature-card">
-							<span class="ka-feature-icon-box">
-								<i class="fa fa-balance-scale"></i>
-							</span>
-							<div class="ka-feature-content">
-								<b class="ka-feature-title text-uppercase">Thi công đúng tiến độ</b>
-								<p>Cam kết bàn giao công trình đúng thời hạn trong hợp đồng.</p>
-							</div>
-						</article>
-					</div>
-					<div class="col-md-4 col-sm-6">
-						<article class="ka-feature-card">
-							<span class="ka-feature-icon-box">
-								<i class="fas fa-users"></i>
-							</span>
-							<div class="ka-feature-content">
-								<b class="ka-feature-title text-uppercase">Báo giá minh bạch</b>
-								<p>Không phát sinh chi phí sau khi đã ký hợp đồng trọn gói.</p>
-							</div>
-						</article>
-					</div>
-					<div class="col-md-4 col-sm-6">
-						<article class="ka-feature-card">
-							<span class="ka-feature-icon-box">
-								<i class="fas fa-gem"></i>
-							</span>
-							<div class="ka-feature-content">
-								<b class="ka-feature-title text-uppercase">Đội ngũ chuyên nghiệp</b>
-								<p>Đội ngũ KS, KTS tận tâm, giải quyết các vấn đề cực lùi và tinh gọn.</p>
-							</div>
-						</article>
-					</div>
-					<div class="col-md-4 col-sm-6">
-						<article class="ka-feature-card">
-							<span class="ka-feature-icon-box">
-								<i class="fas fa-lightbulb"></i>
-							</span>
-							<div class="ka-feature-content">
-								<b class="ka-feature-title text-uppercase">Mẫu mã đa dạng</b>
-								<p>Liên tục cập nhật các xu hướng thiết kế mới mang dấu ấn riêng.</p>
-							</div>
-						</article>
-					</div>
-					<div class="col-md-4 col-sm-6">
-						<article class="ka-feature-card">
-							<span class="ka-feature-icon-box">
-								<i class="fa fa-bullhorn"></i>
-							</span>
-							<div class="ka-feature-content">
-								<b class="ka-feature-title text-uppercase">Sự hài lòng tuyệt đối</b>
-								<p>Mong muốn mang đến tổ ấm lâu dài cho mọi nhà.</p>
-							</div>
-						</article>
-					</div>
-				</div>
-			</div>
+                <div class="mt-9 flex flex-wrap items-center gap-8 fade">
+                    <a href="#cong-trinh" class="btn2 btn2--ghost">Xem công trình thực tế</a>
+                    <div class="hero2-dots" role="tablist" aria-label="Chọn ảnh công trình">
+                        {% for slide in v3.heroSlides %}
+                            <button data-hero-dot="{{ loop.index0 }}"
+                                    {{ loop.first ? 'aria-current="true"' : '' }}
+                                    aria-label="Ảnh công trình {{ loop.index }}"></button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
 
-			<div class="row ka-stats-row">
-				<div class="col-md-3 col-xs-6">
-					<div class="ka-stat-item">
-						<div class="ka-stat-number">10<span class="ka-stat-symbol">+</span>
-						</div>
-						<div class="ka-stat-label">Năm kinh nghiệm</div>
-					</div>
-				</div>
-				<div class="col-md-3 col-xs-6">
-					<div class="ka-stat-item">
-						<div class="ka-stat-number">500<span class="ka-stat-symbol">+</span>
-						</div>
-						<div class="ka-stat-label">Công trình hoàn thiện</div>
-					</div>
-				</div>
-				<div class="col-md-3 col-xs-6">
-					<div class="ka-stat-item">
-						<div class="ka-stat-number">100<span class="ka-stat-symbol">%</span>
-						</div>
-						<div class="ka-stat-label">Khách hàng hài lòng</div>
-					</div>
-				</div>
-				<div class="col-md-3 col-xs-6">
-					<div class="ka-stat-item">
-						<div class="ka-stat-number">50<span class="ka-stat-symbol">+</span>
-						</div>
-						<div class="ka-stat-label">Nhân sự chuyên nghiệp</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</section>
+            {# Form báo giá nhanh — bước "form" sẽ thay action bằng route thật #}
+            <form id="bao-gia-nhanh" class="quick-quote fade" method="post" action="{{ path('contact') }}" data-quote>
+                <h2 class="qq-title">Nhận báo giá <em>miễn phí</em></h2>
+                <p class="qq-note">Kiến trúc sư gọi lại trong 30 phút giờ làm việc.</p>
 
-	{% for blockOnHomepage in blocksOnHomepage %}
-		{% if blockOnHomepage.category.getParentcat() == 'root' %}
-			{% set linkCat = path('dynamic_post_page', {'slug': blockOnHomepage.category.getUrl() }) %}
-		{% else %}
-			{% set linkCat = path('dynamic_category_post', {'level1': blockOnHomepage.category.getParentcat().getUrl(), 'level2': blockOnHomepage.category.getUrl() }) %}
-		{% endif %}
-		<section class="ka-category-block">
-			<div class="container">
-				<div class="ka-block-header">
-					<div class="text-uppercase ka-header-title">
-						<img alt="{{ blockOnHomepage.category.getName() }}" src="{{ asset('assets/images/icon-logo.png') }}" width="35" height="25">
-						<p class="ka-header-subtitle">{{ blockOnHomepage.title }}</p>
-						<i class="fa fa-angle-right"></i>
-						<h2>
-							<a href="{{ linkCat }}">{{ blockOnHomepage.category.getName() }}</a>
-						</h2>
-					</div>
-					<span class="ka-header-line"></span>
-					<p class="ka-header-desc">{{ blockOnHomepage.description }}</p>
-					{% if blockOnHomepage.listSubTabs|length > 0 %}
-						<ul class="nav nav-tabs ka-header-tabs" role="tablist">
-							{% for listSubTab in blockOnHomepage.listSubTabs %}
-								<li role="presentation" {{ loop.first ? ' class="active"' : '' }}>
-									<a href="#tab_{{ listSubTab.subCategory.getId() }}" role="tab" data-toggle="tab">{{ listSubTab.subCategory.getName() }}</a>
-								</li>
-							{% endfor %}
-						</ul>
-					{% endif %}
-				</div>
-				{% if blockOnHomepage.listSubTabs|length > 0 %}
-					<div class="tab-content">
-						{% for listSubTab in blockOnHomepage.listSubTabs %}
-							<div role="tabpanel" class="tab-pane{{ loop.first ? ' active' : '' }}" id="tab_{{ listSubTab.subCategory.getId() }}">
-								<div class="ka-article-grid">
-									<div class="row">
-										{% for row in listSubTab.posts %}
-											{% include 'news/components/itemsGridHomepage.html.twig' with {'category': listSubTab.subCategory} %}
-										{% endfor %}
-									</div>
-								</div>
-								<div class="ka-view-more text-center">
-									<a href="{{ path('dynamic_category_post', {'level1': blockOnHomepage.category.getUrl(), 'level2': listSubTab.subCategory.getUrl() }) }}">{{ listSubTab.subCategory.getName() }}</a>
-								</div>
-							</div>
-						{% endfor %}
-					</div>
-				{% else %}
-					<div class="ka-article-grid">
-						<div class="row">
-							{% for row in blockOnHomepage.posts %}
-								{% include 'news/components/itemsGridHomepage.html.twig' with {'category': blockOnHomepage.category} %}
-							{% endfor %}
-						</div>
-					</div>
-					<div class="ka-view-more text-center">
-						<a href="{{ linkCat }}">{{ blockOnHomepage.category.getName() }}</a>
-					</div>
-				{% endif %}
-			</div>
-		</section>
-	{% endfor %}
+                <div class="mt-5 space-y-4">
+                    <div>
+                        <label for="qq-name">Họ và tên</label>
+                        <input id="qq-name" name="hoten" type="text" placeholder="Nguyễn Văn A" autocomplete="name" required>
+                    </div>
+                    <div>
+                        <label for="qq-phone">Số điện thoại</label>
+                        <input id="qq-phone" name="sodienthoai" type="tel" placeholder="09xx xxx xxx" autocomplete="tel" required>
+                    </div>
+                    <div>
+                        <label for="qq-service">Nhu cầu</label>
+                        <select id="qq-service" name="nhucau">
+                            {% for item in v3.menu.services %}
+                                <option>{{ item }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn2">Gửi — nhận báo giá ngay</button>
+                </div>
+            </form>
+        </div>
+    </section>
 
-	<section class="ka-testimonials-section">
-		<div class="container">
-			<h2 class="text-center text-uppercase ka-testimonials-heading">Khách hàng đánh giá</h2>
-			<div class="row ka-video-grid">
-				<div class="col-sm-3 col-xs-6 mb-15">
-					<a data-fancybox="gallery-yt" href="https://www.youtube.com/watch?v=76AB9uOFBos" class="ka-video-item">
-						<div class="ka-video-thumb">
-							<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{ asset(convert_images.webpConvert2(asset('/assets/images/yt-1.jpg'), '')) }}" class="lazyload" alt="Khách hàng chia sẻ về Xây Dựng Kim Anh" width="277" height="208">
-							<div class="ka-play-icon">
-								<i class="fas fa-play"></i>
-							</div>
-						</div>
-					</a>
-				</div>
-				<div class="col-sm-3 col-xs-6 mb-15">
-					<a data-fancybox="gallery-yt" href="https://www.youtube.com/watch?v=qZHPIqGX7pA" class="ka-video-item">
-						<div class="ka-video-thumb">
-							<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{ asset(convert_images.webpConvert2(asset('/assets/images/yt-2.jpg'), '')) }}" class="lazyload" alt="Ý kiến khách hàng về Xây Dựng Kim Anh" width="282" height="212">
-							<div class="ka-play-icon">
-								<i class="fas fa-play"></i>
-							</div>
-						</div>
-					</a>
-				</div>
-				<div class="col-sm-3 col-xs-6 mb-15">
-					<a data-fancybox="gallery-yt" href="https://www.youtube.com/watch?v=CsMoN-G_QK8" class="ka-video-item">
-						<div class="ka-video-thumb">
-							<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{ asset(convert_images.webpConvert2(asset('/assets/images/yt-3.jpg'), '')) }}" class="lazyload" alt="Xây Nhà Quận Bình Tân - Uy Tín" width="277" height="208">
-							<div class="ka-play-icon">
-								<i class="fas fa-play"></i>
-							</div>
-						</div>
-					</a>
-				</div>
-				<div class="col-sm-3 col-xs-6 mb-15">
-					<a data-fancybox="gallery-yt" href="https://www.youtube.com/watch?v=Jw70fD5eZp4" class="ka-video-item">
-						<div class="ka-video-thumb">
-							<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{ asset(convert_images.webpConvert2(asset('/assets/images/yt-4.jpg'), '')) }}" class="lazyload" alt="Ý kiến khách hàng về Kim Anh" width="277" height="208">
-							<div class="ka-play-icon">
-								<i class="fas fa-play"></i>
-							</div>
-						</div>
-					</a>
-				</div>
-			</div>
-		</div>
-	</section>
+    {# ============ SỐ LIỆU ============ #}
+    <div class="figures">
+        <div class="container max-w-7xl grid grid-cols-2 lg:grid-cols-4 divide-x divide-white/10">
+            {% for figure in v3.figures %}
+                <div class="figure">
+                    <p class="figure-value"><span data-count="{{ figure.value }}">0</span><sup>{{ figure.unit }}</sup></p>
+                    <p class="figure-label">{{ figure.label }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 
-	<section class="ka-contact-form-section">
-		<div class="container">
-			<div class="row">
-				<div class="col-md-8 col-md-offset-2">
-					<div class="ka-contact-form-wrapper">
-						<h2 class="text-center text-uppercase ka-section-heading">Nhận tư vấn miễn phí</h2>
-						<p class="text-center ka-section-desc">Chúng tôi sẽ liên hệ lại với bạn trong thời gian sớm nhất</p>
+    {# ============ 6 CAM KẾT ============ #}
+    <section id="cam-ket" class="commits py-20 lg:py-24" aria-labelledby="cam-ket-h">
+        <div class="container max-w-7xl">
+            <div class="max-w-2xl mx-auto text-center">
+                <p class="sec-label sec-label--center fade">Vì sao chọn {{ v3.company.shortNameOnly }}</p>
+                <h2 id="cam-ket-h" class="h-display text-3xl lg:text-4xl mt-5 fade">6 cam kết <em>bằng văn bản</em></h2>
+            </div>
 
-						{{ form_start(form, {'attr': {'id': 'ka-homepage-contact-form', 'class': 'ka-ajax-form'}}) }}
-						<div class="row">
-							<div class="col-md-6">{{ form_row(form.name) }}</div>
-							<div class="col-md-6">{{ form_row(form.phone) }}</div>
-						</div>
-						{{ form_row(form.email) }}
-						{{ form_row(form.contents) }}
-						<div class="text-center form-submit-group">
-							{{ form_row(form.send) }}
-						</div>
-						{{ form_end(form) }}
-						<div id="ka-contact-form-message" style="display: none; margin-top: 15px;"></div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</section>
-</div>{% endblock %}
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mt-12">
+                {% for commit in v3.commitments %}
+                    <div class="commit fade">
+                        <span class="commit-icon" aria-hidden="true">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">{{ commit.icon|raw }}</svg>
+                        </span>
+                        <div>
+                            <h3 class="commit-name">{{ commit.name }}</h3>
+                            <p class="commit-desc">{{ commit.desc }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    {# ============ GIỚI THIỆU ============ #}
+    <section id="gioi-thieu" class="about2 py-20 lg:py-28" aria-labelledby="gioi-thieu-h">
+        <div class="container max-w-7xl grid lg:grid-cols-2 gap-14 lg:gap-20 items-center">
+            <div class="about2-media fade">
+                <img src="{{ asset(v3.about.image) }}" alt="{{ v3.about.imageAlt }}" loading="lazy" decoding="async">
+
+                {# Con dấu cam kết #}
+                <div class="seal" role="img" aria-label="Con dấu: {{ v3.company.slogan }} — {{ v3.company.shortName }}">
+                    <svg class="seal-ring" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <defs>
+                            <path id="v3-seal-circle" d="M 64,64 m -46,0 a 46,46 0 1,1 92,0 a 46,46 0 1,1 -92,0"/>
+                        </defs>
+                        <circle cx="64" cy="64" r="60" fill="none" stroke="{{ v3.colors.gold }}" stroke-width="2"/>
+                        <circle cx="64" cy="64" r="34" fill="none" stroke="{{ v3.colors.gold }}" stroke-width="1"/>
+                        <text fill="{{ v3.colors.primary }}" font-size="9.5" font-weight="700" letter-spacing="1.4">
+                            <textPath href="#v3-seal-circle">{{ v3.company.slogan|upper }} • {{ v3.company.shortNameOnly|upper }} •</textPath>
+                        </text>
+                    </svg>
+                    <svg class="seal-core" width="34" height="30" viewBox="0 0 100 88" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path fill="currentColor" fill-rule="evenodd" d="M50 4 L96 84 L4 84 Z M50 46 L72 84 L28 84 Z"/>
+                        <path fill="currentColor" d="M50 58 L64 84 L36 84 Z"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div>
+                <p class="sec-label fade">Về {{ v3.company.shortName }}</p>
+                <h2 id="gioi-thieu-h" class="h-display text-3xl lg:text-4xl mt-5 fade">
+                    Xây nhà là xây <em>tổ ấm</em> cho cả một đời người
+                </h2>
+                <p class="about2-lead fade">{{ v3.about.lead }}</p>
+
+                <ul class="mt-7 fade">
+                    {% for item in v3.about.checks %}
+                        <li class="about2-check">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                            <p><strong>{{ item.title }}:</strong> {{ item.text }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+                <div class="mt-9 flex flex-wrap items-center gap-5 fade">
+                    <a href="{{ path('contact') }}" class="btn2 btn2--dark">Tìm hiểu về chúng tôi</a>
+                    <a href="tel:{{ v3.company.phoneRaw }}" class="hd-hotline">
+                        <span class="hd-hotline-icon">
+                            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        </span>
+                        <span>
+                            <span class="hd-hotline-label">Gọi ngay</span>
+                            <span class="hd-hotline-number">{{ v3.company.phone }}</span>
+                        </span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# ============ DỊCH VỤ ============ #}
+    <section id="dich-vu" class="svc py-20 lg:py-24" aria-labelledby="dich-vu-h">
+        <div class="container max-w-7xl">
+            <div class="max-w-2xl mx-auto text-center">
+                <p class="sec-label sec-label--center fade">Dịch vụ</p>
+                <h2 id="dich-vu-h" class="h-display text-3xl lg:text-4xl mt-5 fade">Trọn gói từ móng đến <em>nội thất</em></h2>
+            </div>
+
+            <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-5 mt-12">
+                {% for service in v3.services %}
+                    <article class="svc-card fade">
+                        <figure>
+                            <img src="{{ asset(service.image) }}" alt="{{ service.name }}" loading="lazy" decoding="async">
+                        </figure>
+                        <div class="svc-body">
+                            <h3 class="svc-name">{{ service.name }}</h3>
+                            <p class="svc-desc">{{ service.desc }}</p>
+                            <a href="{{ path('contact') }}" class="svc-link">Xem báo giá <span aria-hidden="true">→</span></a>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    {# ============ CÔNG TRÌNH THỰC TẾ ============ #}
+    <section id="cong-trinh" class="works py-20 lg:py-24" aria-labelledby="cong-trinh-h">
+        <div class="container max-w-7xl">
+            <div class="flex flex-wrap items-end justify-between gap-6">
+                <div>
+                    <p class="sec-label fade">Công trình thực tế</p>
+                    <h2 id="cong-trinh-h" class="h-display text-3xl lg:text-4xl mt-5 fade">
+                        {{ v3.company.projectsCount }} mái ấm đã <em>bàn giao</em>
+                    </h2>
+                </div>
+                <a href="{{ path('news_category', { level1: v3.newsCategorySlug }) }}" class="btn2 btn2--dark !py-3 !px-5 fade">Xem tất cả công trình</a>
+            </div>
+
+            <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-5 mt-12">
+                {% for work in v3.works %}
+                    <a href="{{ work.path|default('#') }}" class="work-card fade">
+                        <img src="{{ asset(work.image) }}" alt="{{ work.name }}" loading="lazy" decoding="async">
+                        <span class="work-arrow" aria-hidden="true">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M7 7h10v10"/></svg>
+                        </span>
+                        <div class="work-meta">
+                            <h3 class="work-name">{{ work.name }}</h3>
+                            <p class="work-spec">{{ work.spec }}</p>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    {# ============ KHÁCH HÀNG ĐÁNH GIÁ ============ #}
+    <section class="quotes py-20 lg:py-28" aria-label="Khách hàng đánh giá">
+        <div class="container max-w-5xl">
+            <p class="sec-label sec-label--center fade">Khách hàng nói về chúng tôi</p>
+
+            <div class="quotes-viewport mt-10 fade" data-quotes
+                 aria-roledescription="carousel" aria-label="Đánh giá của khách hàng">
+                <div class="quotes-track">
+                    {% for quote in v3.testimonials %}
+                        <figure class="quote-slide">
+                            <p class="quote-mark" aria-hidden="true">“</p>
+                            <blockquote>{{ quote.text }}</blockquote>
+                            <p class="quote-stars" role="img" aria-label="Đánh giá 5 trên 5 sao">★★★★★</p>
+                            <figcaption class="quote-author">
+                                <img src="{{ asset(quote.avatar) }}" alt="Chân dung {{ quote.name }}" loading="lazy" decoding="async">
+                                <span>
+                                    <span class="quote-name">{{ quote.name }}</span>
+                                    <span class="quote-role">{{ quote.role }}</span>
+                                </span>
+                            </figcaption>
+                        </figure>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="quotes-controls fade">
+                <button class="quotes-nav" data-quotes-prev aria-label="Đánh giá trước">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </button>
+                <div class="quotes-dots" role="tablist" aria-label="Chọn đánh giá">
+                    {% for quote in v3.testimonials %}
+                        <button class="quotes-dot" data-quotes-dot="{{ loop.index0 }}"
+                                {{ loop.first ? 'aria-current="true"' : '' }}
+                                aria-label="Đánh giá {{ loop.index }}"></button>
+                    {% endfor %}
+                </div>
+                <button class="quotes-nav" data-quotes-next aria-label="Đánh giá tiếp theo">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    {# ============ QUY TRÌNH 8 BƯỚC ============ #}
+    <section id="quy-trinh" class="steps2 py-20 lg:py-24" aria-labelledby="quy-trinh-h">
+        <div class="container max-w-7xl">
+            <div class="max-w-2xl mx-auto text-center">
+                <p class="sec-label sec-label--center fade">Quy trình làm việc</p>
+                <h2 id="quy-trinh-h" class="h-display text-3xl lg:text-4xl mt-5 fade">8 bước — rõ ràng <em>từ đầu</em></h2>
+            </div>
+
+            <ol class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-12">
+                {% for step in v3.steps %}
+                    <li class="step2 fade">
+                        <p class="step2-no" aria-hidden="true">{{ '%02d'|format(loop.index) }}</p>
+                        <h3 class="step2-name">{{ step.name }}</h3>
+                        <p class="step2-desc">{{ step.desc }}</p>
+                    </li>
+                {% endfor %}
+            </ol>
+        </div>
+    </section>
+
+    {# ============ CẨM NANG (từ DB) ============
+       HomepageController truyền `blocksOnHomepage` (mỗi block có .posts).
+       Lấy bài của block đầu tiên có bài để hiển thị 4 bài mới nhất. #}
+    {% set latestNews = [] %}
+    {% for block in blocksOnHomepage|default([]) %}
+        {% if latestNews is empty and block.posts|default([])|length %}
+            {% set latestNews = block.posts|slice(0, 4) %}
+        {% endif %}
+    {% endfor %}
+
+    {% if latestNews|length %}
+        <section id="cam-nang" class="news2 py-20 lg:py-24" aria-labelledby="cam-nang-h">
+            <div class="container max-w-7xl">
+                <div class="flex flex-wrap items-end justify-between gap-6">
+                    <div>
+                        <p class="sec-label fade">Cẩm nang xây nhà</p>
+                        <h2 id="cam-nang-h" class="h-display text-3xl lg:text-4xl mt-5 fade">Đọc trước khi <em>xây</em></h2>
+                    </div>
+                    <a href="{{ path('news_category', { level1: v3.newsCategorySlug }) }}" class="btn2 btn2--dark !py-3 !px-5 fade">Xem tất cả bài viết</a>
+                </div>
+
+                <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-5 mt-12">
+                    {% for post in latestNews %}
+                        {% set imageSrc = vich_uploader_asset(post, 'imageFile')
+                            ? vich_uploader_asset(post, 'imageFile')|imagine_filter('news_277_220')
+                            : asset('assets/images/no-image.png') %}
+                        <article class="news2-card fade">
+                            <a href="{{ path('news_show', { slug: post.url }) }}" tabindex="-1" aria-hidden="true">
+                                <figure><img src="{{ imageSrc }}" alt="{{ post.title }}" loading="lazy" decoding="async"></figure>
+                            </a>
+                            <div class="news2-body">
+                                <time datetime="{{ post.createdAt|date('Y-m-d') }}">{{ post.createdAt|date('d/m/Y') }}</time>
+                                <h3 class="news2-title">
+                                    <a href="{{ path('news_show', { slug: post.url }) }}">{{ post.title }}</a>
+                                </h3>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
+    {# ============ CTA CUỐI ============ #}
+    <section class="cta2 py-20 lg:py-24" aria-labelledby="cta-h">
+        <div class="cta2-bg">
+            <img src="{{ asset(v3.ctaImage) }}" alt="" loading="lazy" decoding="async" aria-hidden="true">
+        </div>
+        <div class="container max-w-7xl flex flex-wrap items-center justify-between gap-10">
+            <div class="max-w-2xl">
+                <h2 id="cta-h" class="cta2-title fade">
+                    Bạn đang chuẩn bị <em>xây nhà</em>?<br>Đừng ký hợp đồng khi chưa gọi {{ v3.company.shortNameOnly }}.
+                </h2>
+                <p class="cta2-note fade">Khảo sát và dự toán sơ bộ hoàn toàn miễn phí — so sánh rồi hãy quyết định.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-5 fade">
+                <a href="tel:{{ v3.company.phoneRaw }}" class="btn2 !text-base !px-8 !py-4">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    {{ v3.company.phone }}
+                </a>
+                <a href="#bao-gia-nhanh" class="btn2 btn2--ghost">Nhận báo giá miễn phí</a>
+            </div>
+        </div>
+    </section>
+
+    {# ============ HÌNH ẢNH HOẠT ĐỘNG ============ #}
+    <section id="hoat-dong" class="gallery py-20 lg:py-24" aria-labelledby="hoat-dong-h">
+        <div class="container max-w-7xl">
+            <div class="flex flex-wrap items-end justify-between gap-6">
+                <div>
+                    <p class="sec-label fade">Hình ảnh hoạt động</p>
+                    <h2 id="hoat-dong-h" class="h-display text-3xl lg:text-4xl mt-5 fade">
+                        {{ v3.company.shortNameOnly }} trên <em>từng công trường</em>
+                    </h2>
+                </div>
+                <div class="flex gap-3 fade">
+                    <button class="gallery-nav" data-gallery-prev aria-label="Ảnh trước">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    </button>
+                    <button class="gallery-nav" data-gallery-next aria-label="Ảnh tiếp theo">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="gallery-track mt-10 fade" data-gallery-track>
+                {% for item in v3.gallery %}
+                    <button type="button" class="gallery-item"
+                            data-lightbox-src="{{ asset(item.image) }}"
+                            data-lightbox-caption="{{ item.caption }}">
+                        <figure>
+                            <img src="{{ asset(item.image) }}" alt="{{ item.caption }}" loading="lazy" decoding="async">
+                            <figcaption>{{ item.short }}</figcaption>
+                        </figure>
+                    </button>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    {# Popup phóng to ảnh #}
+    <div class="lightbox" role="dialog" aria-modal="true" aria-label="Xem ảnh phóng to" aria-hidden="true">
+        <button class="lightbox-close" aria-label="Đóng">✕</button>
+        <button class="lightbox-prev" aria-label="Ảnh trước">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="lightbox-body">
+            <img alt="">
+            <p class="lightbox-caption"></p>
+        </div>
+        <button class="lightbox-next" aria-label="Ảnh tiếp theo">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+    </div>
+
+{% endblock %}

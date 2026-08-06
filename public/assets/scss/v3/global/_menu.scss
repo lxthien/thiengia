@@ -1,0 +1,71 @@
+@use "../tokens" as *;
+
+// Menu di động toàn màn hình — nền tối ấm, chữ serif
+.hd-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: $dark;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4rem 2rem;
+  opacity: 0;
+  visibility: hidden;
+  overflow-y: auto;
+  transition: all $dur $ease;
+
+  &.is-open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  a.hd-menu-link {
+    display: block;
+    padding: 0.85rem 0;
+    font-family: $f-display;
+    font-size: clamp(1.6rem, 6vw, 2.4rem);
+    color: $white;
+    border-bottom: 1px solid rgba($white, 0.08);
+    transition: all $dur $ease;
+
+    &:hover {
+      color: $accent;
+      padding-left: 0.75rem;
+    }
+  }
+
+  // Menu con
+  .hd-menu-sub {
+    padding: 0.3rem 0 0.9rem 1.3rem;
+    border-bottom: 1px solid rgba($white, 0.08);
+
+    a {
+      display: block;
+      padding: 0.42rem 0;
+      font-size: 0.95rem;
+      font-weight: 300;
+      color: rgba($white, 0.6);
+      transition: all $dur $ease;
+
+      &:hover {
+        color: $accent;
+        padding-left: 0.4rem;
+      }
+    }
+  }
+
+  .hd-menu-close {
+    position: absolute;
+    top: 1.4rem;
+    right: 1.4rem;
+    width: 48px;
+    height: 48px;
+    font-size: 1.5rem;
+    color: $white;
+
+    &:hover {
+      color: $accent;
+    }
+  }
+}

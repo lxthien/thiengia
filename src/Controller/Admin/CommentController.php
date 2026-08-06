@@ -7,32 +7,35 @@ use App\Entity\Comment;
 use App\Form\CommentType;
 use App\Service\ActivityLogService;
 use App\Utils\Slugger;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
  * Controller used to manage comment in the backend.
- *
- * @Route("/admin/comment")
- * @Security("has_role('ROLE_ADMIN')")
  */
-
-class CommentController extends Controller
+#[Route('/admin/comment')]
+#[IsGranted('ROLE_ADMIN')]
+class CommentController extends AbstractController
 {
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly ActivityLogService $activityLogService,
+        private readonly RequestStack $requestStack,
+    ) {
+    }
+
     /**
      * Lists all Comment entities.
-     *
-     * @Route("/", name="admin_comment_index")
-     * @Method("GET")
      */
+    #[Route('/', name: 'admin_comment_index', methods: ['GET'])]
     public function indexAction()
     {
-        $em = $this->getDoctrine()->getManager();
-        $comments = $em->getRepository(Comment::class)->findBy(
+        $comments = $this->em->getRepository(Comment::class)->findBy(
             array(),
             array('createdAt' => 'DESC')
         );
@@ -44,10 +47,8 @@ class CommentController extends Controller
 
     /**
      * Displays a form to edit an existing Comment entity.
-     *
-     * @Route("/{id}/edit", requirements={"id": "\d+"}, name="admin_comment_edit")
-     * @Method({"GET", "POST"})
      */
+    #[Route('/{id}/edit', requirements: ['id' => '\d+'], name: 'admin_comment_edit', methods: ['GET', 'POST'])]
     public function editAction(Request $request, Comment $comment, Slugger $slugger)
     {
         //$this->denyAccessUnlessGranted('edit', $category, 'Posts can only be edited by their authors.');
@@ -57,12 +58,12 @@ class CommentController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Capture changes before flush
-            $diffDetails = $this->get(ActivityLogService::class)->getEntityDiff($comment);
+            $diffDetails = $this->activityLogService->getEntityDiff($comment);
 
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             // Activity Log
-            $this->get(ActivityLogService::class)->log(
+            $this->activityLogService->log(
                 ActivityLog::ACTION_UPDATE,
                 ActivityLog::ENTITY_COMMENT,
                 $comment->getId(),
@@ -83,10 +84,8 @@ class CommentController extends Controller
 
     /**
      * Displays a form to reply an existing Comment entity.
-     *
-     * @Route("/{id}/reply", requirements={"id": "\d+"}, name="admin_comment_reply")
-     * @Method({"GET", "POST"})
      */
+    #[Route('/{id}/reply', requirements: ['id' => '\d+'], name: 'admin_comment_reply', methods: ['GET', 'POST'])]
     public function replyAction(Request $request, Comment $comment, Slugger $slugger)
     {
         $replyComment = new Comment();
@@ -95,7 +94,7 @@ class CommentController extends Controller
         $replyComment->setEmail( $this->getUser()->getEmail() );
         $replyComment->setApproved( true );
         $replyComment->setAuthor( $this->getUser()->getName() );
-        $replyComment->setIp( $this->container->get('request_stack')->getCurrentRequest()->getClientIp() );
+        $replyComment->setIp( $this->requestStack->getCurrentRequest()->getClientIp() );
 
         $form = $this->createForm(CommentType::class, $replyComment);
 
@@ -103,12 +102,11 @@ class CommentController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($replyComment);
-            $em->flush();
+            $this->em->persist($replyComment);
+            $this->em->flush();
 
             // Activity Log
-            $this->get(ActivityLogService::class)->log(
+            $this->activityLogService->log(
                 ActivityLog::ACTION_CREATE,
                 ActivityLog::ENTITY_COMMENT,
                 $replyComment->getId(),
@@ -117,14 +115,13 @@ class CommentController extends Controller
 
             if (!$comment->getApproved()) {
                 $comment->setApproved( true );
-                
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($comment);
-                $em->flush();
+
+                $this->em->persist($comment);
+                $this->em->flush();
             }
 
             $this->addFlash('success', 'action.updated_successfully');
-            
+
             return $this->redirectToRoute('admin_comment_index');
         }
 
@@ -136,10 +133,8 @@ class CommentController extends Controller
 
     /**
      * Deletes a Comment entity.
-     *
-     * @Route("/{id}/delete", name="admin_comment_delete")
-     * @Method("POST")
      */
+    #[Route('/{id}/delete', name: 'admin_comment_delete', methods: ['POST'])]
     public function deleteAction(Request $request, Comment $comment)
     {
         if (!$this->isCsrfTokenValid('delete', $request->request->get('token'))) {
@@ -149,12 +144,11 @@ class CommentController extends Controller
         $commentAuthor = $comment->getAuthor();
         $commentId = $comment->getId();
 
-        $em = $this->getDoctrine()->getManager();
-        $em->remove($comment);
-        $em->flush();
+        $this->em->remove($comment);
+        $this->em->flush();
 
         // Activity Log
-        $this->get(ActivityLogService::class)->log(
+        $this->activityLogService->log(
             ActivityLog::ACTION_DELETE,
             ActivityLog::ENTITY_COMMENT,
             $commentId,

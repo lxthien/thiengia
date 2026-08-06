@@ -1,0 +1,34 @@
+// ============================================
+// V3 — THIỆN GIA · design tokens
+// Bảng màu chuẩn phong thủy
+//   Primary   Đỏ gạch    #B5462E  logo, CTA, heading nhấn
+//   Accent    Cam đất    #E07B39  hover, icon, badge
+//   Secondary Be cát     #E8DCC8  nền section xen kẽ
+//   Base      Trắng ngà  #FAF7F2  nền chính website
+//   Text      Nâu than   #2B2622  body text (AA)
+//   Metal     Vàng đồng  #C9A227  chi tiết viền, huy hiệu
+// Đồng bộ với tailwind.config.js
+// ============================================
+
+$primary: #b5462e;
+$accent: #e07b39;
+$sand: #e8dcc8;
+$base: #faf7f2;
+$text: #2b2622;
+$gold: #c9a227;
+
+$white: #ffffff;
+$dark: #221c17; // nền tối ấm (footer, overlay)
+$brown: #3b322a; // nền phụ tối vừa
+$tint: #f9e9dc;
+
+$line: rgba($text, 0.14);
+$mut: rgba($text, 0.62);
+
+$f-display: "Playfair Display", Georgia, serif;
+$f-body: "Be Vietnam Pro", system-ui, sans-serif;
+
+$ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+$dur: 0.45s;
+
+$hd-h: 82px;

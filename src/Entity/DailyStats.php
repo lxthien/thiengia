@@ -2,56 +2,36 @@
 
 namespace App\Entity;
 
+use App\Repository\DailyStatsRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * DailyStats - Thống kê hàng ngày
- *
- * @ORM\Table(name="daily_stats", uniqueConstraints={
- *     @ORM\UniqueConstraint(name="idx_daily_stats_date", columns={"date"})
- * })
- * @ORM\Entity(repositoryClass="App\Repository\DailyStatsRepository")
  */
+#[ORM\Table(name: 'daily_stats')]
+#[ORM\UniqueConstraint(name: 'idx_daily_stats_date', columns: ['date'])]
+#[ORM\Entity(repositoryClass: DailyStatsRepository::class)]
 class DailyStats
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: Types::INTEGER)]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private $id;
 
-    /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="date", type="date")
-     */
+    #[ORM\Column(name: 'date', type: Types::DATE_MUTABLE)]
     private $date;
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="viewCount", type="integer", options={"default": 0})
-     */
+    #[ORM\Column(name: 'viewCount', type: Types::INTEGER, options: ['default' => 0])]
     private $viewCount = 0;
 
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="createdAt", type="datetime")
-     */
+    #[Gedmo\Timestampable(on: 'create')]
+    #[ORM\Column(name: 'createdAt', type: Types::DATETIME_MUTABLE)]
     private $createdAt;
 
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updatedAt", type="datetime")
-     */
+    #[Gedmo\Timestampable(on: 'update')]
+    #[ORM\Column(name: 'updatedAt', type: Types::DATETIME_MUTABLE)]
     private $updatedAt;
 
     public function __construct(\DateTime $date = null)

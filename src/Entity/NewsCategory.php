@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Repository\NewsCategoryRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\HttpFoundation\File\File;
@@ -9,182 +11,99 @@ use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * NewsCategory
- *
- * @ORM\Table(name="newscategory", options={"collate"="utf8_general_ci"})
- * @ORM\Entity(repositoryClass="App\Repository\NewsCategoryRepository")
  */
+#[ORM\Table(name: 'newscategory', options: ['collate' => 'utf8_general_ci'])]
+#[ORM\Entity(repositoryClass: NewsCategoryRepository::class)]
 class NewsCategory
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: Types::INTEGER)]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private $id;
 
     /**
      * One Category has Many Categories.
-     * @ORM\OneToMany(targetEntity="App\Entity\NewsCategory", mappedBy="parentcat")
      */
+    #[ORM\OneToMany(targetEntity: NewsCategory::class, mappedBy: 'parentcat')]
     protected $children;
 
     /**
      * Many Categories have One Category.
-     * @ORM\ManyToOne(targetEntity="App\Entity\NewsCategory", inversedBy="children")
-     * @ORM\JoinColumn(name="parentcat_id", referencedColumnName="id", nullable=true)
      */
+    #[ORM\ManyToOne(targetEntity: NewsCategory::class, inversedBy: 'children')]
+    #[ORM\JoinColumn(name: 'parentcat_id', referencedColumnName: 'id', nullable: true)]
     private $parentcat;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="name", type="string", length=255)
-     */
+    #[ORM\Column(name: 'name', type: Types::STRING, length: 255)]
     private $name;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="titleLandingPage", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'titleLandingPage', type: Types::STRING, length: 255, nullable: true)]
     private $titleLandingPage;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="url", type="string", length=255)
-     */
+    #[ORM\Column(name: 'url', type: Types::STRING, length: 255)]
     private $url;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="urlReplace", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'urlReplace', type: Types::STRING, length: 255, nullable: true)]
     private $urlReplace;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="description", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'description', type: Types::TEXT, nullable: true)]
     private $description = null;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="content", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'content', type: Types::TEXT, nullable: true)]
     private $content = null;
 
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="enable", type="boolean")
-     */
+    #[ORM\Column(name: 'enable', type: Types::BOOLEAN)]
     private $enable = true;
 
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="showPostRelated", type="boolean")
-     */
+    #[ORM\Column(name: 'showPostRelated', type: Types::BOOLEAN)]
     private $showPostRelated = false;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="robots", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'robots', type: Types::STRING, length: 255, nullable: true)]
     private $robots = null;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="pageTitle", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'pageTitle', type: Types::STRING, length: 255, nullable: true)]
     private $pageTitle = null;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="pageDescription", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'pageDescription', type: Types::TEXT, nullable: true)]
     private $pageDescription = null;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="pageKeyword", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'pageKeyword', type: Types::STRING, length: 255, nullable: true)]
     private $pageKeyword = null;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="sortBy", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'sortBy', type: Types::STRING, length: 255, nullable: true)]
     private $sortBy = null;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="schemaMarkup", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'schemaMarkup', type: Types::TEXT, nullable: true)]
     private $schemaMarkup = null;
 
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="isPage", type="boolean")
-     */
+    #[ORM\Column(name: 'isPage', type: Types::BOOLEAN)]
     private $isPage = false;
 
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="createdAt", type="datetime") 
-     */
+    #[Gedmo\Timestampable(on: 'create')]
+    #[ORM\Column(name: 'createdAt', type: Types::DATETIME_MUTABLE)]
     private $createdAt;
 
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updatedAt", type="datetime")
-     */
+    #[Gedmo\Timestampable(on: 'update')]
+    #[ORM\Column(name: 'updatedAt', type: Types::DATETIME_MUTABLE)]
     private $updatedAt;
 
     /**
      * @var User
-     *
-     * @ORM\ManyToOne(targetEntity="App\Entity\User")
-     * @ORM\JoinColumn(nullable=false)
      */
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: false)]
     private $author;
 
     /**
      * @var News[]|ArrayCollection
-     * 
-     * @ORM\ManyToMany(targetEntity="App\Entity\News", mappedBy="category")
      */
+    #[ORM\ManyToMany(targetEntity: News::class, mappedBy: 'category')]
     private $news;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="cardFormat", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'cardFormat', type: Types::STRING, length: 255, nullable: true)]
     private $cardFormat = null;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="thumbnail", type="string", length=500, nullable=true)
-     */
+    #[ORM\Column(name: 'thumbnail', type: Types::STRING, length: 500, nullable: true)]
     private $thumbnail = null;
 
     public function __construct()

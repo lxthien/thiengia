@@ -1,0 +1,469 @@
+@use "../tokens" as *;
+
+// ---------- 6 cam kết — đường cam mọc trên đỉnh khi hover ----------
+.commits {
+  background: $sand;
+
+  .commit {
+    position: relative;
+    display: flex;
+    gap: 1.1rem;
+    padding: 1.75rem 1.5rem;
+    background: $white;
+    border: 1px solid $line;
+    transition: all $dur $ease;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: $primary;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform $dur $ease;
+    }
+
+    .commit-icon {
+      display: grid;
+      place-items: center;
+      width: 52px;
+      height: 52px;
+      flex-shrink: 0;
+      border-radius: 9999px;
+      background: $tint;
+      color: $accent;
+      transition: all $dur $ease;
+    }
+
+    .commit-name {
+      font-family: $f-display;
+      font-weight: 600;
+      font-size: 1.15rem;
+      color: $text;
+    }
+
+    .commit-desc {
+      margin-top: 0.4rem;
+      font-size: 0.86rem;
+      line-height: 1.75;
+      color: $mut;
+    }
+
+    &:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 30px 50px rgba($dark, 0.1);
+      border-color: transparent;
+
+      &::before {
+        transform: scaleX(1);
+      }
+
+      .commit-icon {
+        background: $accent;
+        color: $white;
+      }
+    }
+  }
+}
+
+// ---------- Giới thiệu ----------
+.about2 {
+  .about2-media {
+    position: relative;
+
+    img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+    }
+
+    .seal {
+      position: absolute;
+      right: -1.25rem;
+      bottom: -1.25rem;
+      background: $white;
+      border-radius: 9999px;
+      box-shadow: 0 16px 40px rgba($dark, 0.18);
+    }
+  }
+
+  .about2-lead {
+    margin-top: 1.5rem;
+    font-size: 0.95rem;
+    line-height: 2;
+    color: rgba($text, 0.7);
+  }
+
+  .about2-check {
+    display: flex;
+    gap: 0.9rem;
+    align-items: flex-start;
+    padding: 0.55rem 0;
+    font-size: 0.95rem;
+
+    svg {
+      flex-shrink: 0;
+      margin-top: 3px;
+      color: $accent;
+    }
+
+    strong {
+      font-weight: 600;
+      color: $text;
+    }
+  }
+}
+
+// ---------- Dịch vụ ----------
+.svc {
+  background: $sand;
+
+  .svc-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: $white;
+    border: 1px solid $line;
+    overflow: hidden;
+    transition: all $dur $ease;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: $primary;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform $dur $ease;
+      z-index: 1;
+    }
+
+    figure {
+      overflow: hidden;
+
+      img {
+        width: 100%;
+        aspect-ratio: 16 / 10;
+        object-fit: cover;
+        transition: transform 1.4s $ease;
+      }
+    }
+
+    .svc-body {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      padding: 1.6rem 1.5rem 1.7rem;
+    }
+
+    .svc-name {
+      font-family: $f-display;
+      font-weight: 600;
+      font-size: 1.3rem;
+      color: $text;
+      transition: color $dur $ease;
+    }
+
+    .svc-desc {
+      margin: 0.6rem 0 1.2rem;
+      font-size: 0.88rem;
+      line-height: 1.8;
+      color: $mut;
+    }
+
+    .svc-link {
+      margin-top: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      align-self: flex-start;
+      position: relative;
+      padding-bottom: 0.35rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: $primary;
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 1px;
+        background: currentColor;
+        transform: scaleX(0.35);
+        transform-origin: left;
+        transition: transform $dur $ease;
+      }
+    }
+
+    &:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 30px 50px rgba($dark, 0.12);
+      border-color: transparent;
+
+      &::before {
+        transform: scaleX(1);
+      }
+
+      img {
+        transform: scale(1.06);
+      }
+
+      .svc-name {
+        color: $accent;
+      }
+
+      .svc-link::after {
+        transform: scaleX(1);
+      }
+    }
+  }
+}
+
+// ---------- Công trình ----------
+.works {
+  .work-card {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    isolation: isolate;
+
+    img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      transition: transform 1.4s $ease;
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba($dark, 0.92) 0%, rgba($dark, 0.25) 45%, transparent 70%);
+      opacity: 0.75;
+      transition: opacity $dur $ease;
+    }
+
+    .work-meta {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1;
+      padding: 1.4rem;
+      color: $white;
+      transform: translateY(10px);
+      transition: transform $dur $ease;
+    }
+
+    .work-name {
+      font-family: $f-display;
+      font-weight: 600;
+      font-size: 1.15rem;
+      line-height: 1.35;
+    }
+
+    .work-spec {
+      margin-top: 0.35rem;
+      font-size: 0.76rem;
+      font-weight: 300;
+      color: rgba($white, 0.75);
+      opacity: 0;
+      transition: opacity $dur $ease;
+    }
+
+    .work-arrow {
+      position: absolute;
+      top: 1.1rem;
+      right: 1.1rem;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      background: $primary;
+      color: $white;
+      opacity: 0;
+      transform: translate(-8px, 8px);
+      transition: all $dur $ease;
+    }
+
+    &:hover {
+      img {
+        transform: scale(1.07);
+      }
+
+      &::after {
+        opacity: 1;
+      }
+
+      .work-meta {
+        transform: none;
+      }
+
+      .work-spec,
+      .work-arrow {
+        opacity: 1;
+        transform: none;
+      }
+    }
+  }
+}
+
+// ---------- Quy trình 8 bước ----------
+.steps2 {
+  .step2 {
+    position: relative;
+    padding: 1.9rem 1.6rem;
+    background: $white;
+    border: 1px solid $line;
+    transition: all $dur $ease;
+
+    .step2-no {
+      font-family: $f-display;
+      font-weight: 500;
+      font-size: 2.6rem;
+      line-height: 1;
+      color: rgba($text, 0.12);
+      transition: color $dur $ease;
+    }
+
+    .step2-name {
+      margin-top: 0.9rem;
+      font-family: $f-display;
+      font-weight: 600;
+      font-size: 1.15rem;
+      color: $text;
+    }
+
+    .step2-desc {
+      margin-top: 0.5rem;
+      font-size: 0.84rem;
+      line-height: 1.75;
+      color: $mut;
+    }
+
+    &:hover {
+      border-color: $accent;
+      box-shadow: 0 16px 36px rgba($dark, 0.1);
+      transform: translateY(-4px);
+
+      .step2-no {
+        color: $accent;
+      }
+    }
+  }
+}
+
+// ---------- Cẩm nang (khối trên trang chủ) ----------
+.news2 {
+  .news2-card {
+    display: flex;
+    flex-direction: column;
+    background: $white;
+    border: 1px solid $line;
+    overflow: hidden;
+    transition: all $dur $ease;
+
+    figure {
+      overflow: hidden;
+
+      img {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        object-fit: cover;
+        transition: transform 1.4s $ease;
+      }
+    }
+
+    .news2-body {
+      padding: 1.25rem 1.4rem 1.5rem;
+    }
+
+    time {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: $accent;
+    }
+
+    .news2-title {
+      margin-top: 0.55rem;
+      font-family: $f-display;
+      font-weight: 600;
+      font-size: 1.1rem;
+      line-height: 1.45;
+      color: $text;
+      transition: color $dur $ease;
+    }
+
+    &:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 40px rgba($dark, 0.1);
+
+      img {
+        transform: scale(1.05);
+      }
+
+      .news2-title {
+        color: $accent;
+      }
+    }
+  }
+}
+
+// ---------- CTA cuối trang ----------
+.cta2 {
+  position: relative;
+  isolation: isolate;
+  color: $white;
+  overflow: hidden;
+
+  .cta2-bg {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(96deg, rgba($dark, 0.95) 30%, rgba($primary, 0.7) 100%);
+  }
+
+  .cta2-title {
+    font-family: $f-display;
+    font-weight: 600;
+    font-size: clamp(1.9rem, 3.8vw, 3rem);
+    line-height: 1.25;
+
+    em {
+      font-style: italic;
+      color: #f2c49a;
+    }
+  }
+
+  .cta2-note {
+    margin-top: 1rem;
+    font-weight: 300;
+    color: rgba($white, 0.75);
+  }
+}

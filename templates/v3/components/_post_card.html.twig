@@ -1,0 +1,35 @@
+{#
+    Thẻ bài viết (KHÔNG có hàng meta — bỏ theo thiết kế v3).
+    Tham số:
+      post (News)
+      featured (bool, mặc định false) — bố cục lớn kiểu tạp chí
+      headingLevel (string, mặc định 'h2')
+      filter (string) — tên liip_imagine filter, mặc định 'news_277_220'
+#}
+{% set featured = featured|default(false) %}
+{% set headingLevel = headingLevel|default('h2') %}
+{% set filter = filter|default(featured ? 'news_277_350' : 'news_277_220') %}
+
+{% set imageSrc = vich_uploader_asset(post, 'imageFile')
+    ? vich_uploader_asset(post, 'imageFile')|imagine_filter(filter)
+    : asset('assets/images/no-image.png') %}
+
+<article class="post-card {{ featured ? 'post-card--featured' : '' }} fade">
+    <a href="{{ path('news_show', { slug: post.url }) }}" class="post-card-media" tabindex="-1" aria-hidden="true">
+        <img src="{{ imageSrc }}" alt="{{ post.title }}" loading="lazy" decoding="async">
+    </a>
+
+    <div class="post-card-body">
+        {% if post.category %}
+            <p class="post-card-category">{{ post.category.name }}</p>
+        {% endif %}
+
+        <{{ headingLevel }} class="post-card-title">
+            <a href="{{ path('news_show', { slug: post.url }) }}">{{ post.title }}</a>
+        </{{ headingLevel }}>
+
+        {% if post.description %}
+            <p class="post-card-excerpt">{{ post.description }}</p>
+        {% endif %}
+    </div>
+</article>

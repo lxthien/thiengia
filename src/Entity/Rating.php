@@ -2,57 +2,36 @@
 
 namespace App\Entity;
 
+use App\Repository\RatingRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\RatingRepository")
- * @ORM\Table(name="rating")
- */
-
+#[ORM\Entity(repositoryClass: RatingRepository::class)]
+#[ORM\Table(name: 'rating')]
 class Rating
 {
-    /**
-     * @var int
-     *
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: Types::INTEGER)]
     private $id;
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="news_id", type="integer", nullable=false)
-     * @Assert\NotBlank(message="news.blank")
-     */
+    #[ORM\Column(name: 'news_id', type: Types::INTEGER, nullable: false)]
+    #[Assert\NotBlank(message: 'news.blank')]
     private $news_id;
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="rating", type="integer", nullable=false)
-     * @Assert\NotBlank(message="rating.blank")
-     */
+    #[ORM\Column(name: 'rating', type: Types::INTEGER, nullable: false)]
+    #[Assert\NotBlank(message: 'rating.blank')]
     private $rating;
 
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="createdAt", type="datetime") 
-     */
+    #[Gedmo\Timestampable(on: 'create')]
+    #[ORM\Column(name: 'createdAt', type: Types::DATETIME_MUTABLE)]
     private $createdAt;
 
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updatedAt", type="datetime")
-     */
+    #[Gedmo\Timestampable(on: 'update')]
+    #[ORM\Column(name: 'updatedAt', type: Types::DATETIME_MUTABLE)]
     private $updatedAt;
 
     public function __construct()

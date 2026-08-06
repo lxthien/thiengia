@@ -1,0 +1,23 @@
+{#
+    Logo Thiện Gia (SVG inline).
+    Tham số:
+      onDark (bool) — true khi đặt trên nền tối (footer/menu mobile)
+#}
+{% set onDark = onDark|default(false) %}
+
+<a href="{{ path('homepage') }}" class="hd-logo {{ onDark ? '!text-white' : '' }}"
+   aria-label="{{ v3.company.shortName }} — Trang chủ">
+    <svg width="44" height="39" viewBox="0 0 100 88" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        {# Tam giác chính: đỏ gạch (Primary) — trên nền tối dùng currentColor để đủ tương phản #}
+        <path fill="{{ onDark ? 'currentColor' : v3.colors.primary }}" fill-rule="evenodd"
+              d="M50 4 L96 84 L4 84 Z M50 46 L72 84 L28 84 Z"/>
+        {# Tam giác nhỏ: vàng đồng (Metal) #}
+        <path fill="{{ v3.colors.gold }}" d="M50 58 L64 84 L36 84 Z"/>
+    </svg>
+    <span>
+        <span class="hd-logo-name {{ onDark ? '!text-white' : '' }}">
+            {{ v3.company.nameFirst }} <span>{{ v3.company.nameLast }}</span>
+        </span>
+        <span class="hd-logo-sub">{{ v3.company.nameSub }}</span>
+    </span>
+</a>

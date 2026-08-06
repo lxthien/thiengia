@@ -4,21 +4,17 @@ namespace App\Controller\Admin;
 
 use App\Form\GlobalSettingsType;
 use App\Service\SettingsManager;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-/**
- * @Route("/admin/settings")
- * @IsGranted("ROLE_ADMIN")
- */
+#[Route('/admin/settings')]
+#[IsGranted('ROLE_ADMIN')]
 class SettingsController extends AbstractController
 {
-    /**
-     * @Route("/global", name="admin_settings_global", methods={"GET", "POST"})
-     */
+    #[Route('/global', name: 'admin_settings_global', methods: ['GET', 'POST'])]
     public function global(Request $request, SettingsManager $settingsManager): Response
     {
         $settings = $settingsManager->all();
@@ -39,9 +35,8 @@ class SettingsController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
-    /**
-     * @Route("/construction-cost", name="admin_settings_construction_cost", methods={"GET", "POST"})
-     */
+
+    #[Route('/construction-cost', name: 'admin_settings_construction_cost', methods: ['GET', 'POST'])]
     public function constructionCost(Request $request, SettingsManager $settingsManager): Response
     {
         $settings = $settingsManager->all();

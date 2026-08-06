@@ -16,42 +16,41 @@ use App\Entity\Tag;
 use App\Form\TagType;
 use App\Service\ActivityLogService;
 use App\Utils\Slugger;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
  * Controller used to manage tag contents in the backend.
- *
- * @Route("/admin/tag")
- * @Security("has_role('ROLE_ADMIN')")
  */
-
-class TagController extends Controller
+#[Route('/admin/tag')]
+#[IsGranted('ROLE_ADMIN')]
+class TagController extends AbstractController
 {
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly ActivityLogService $activityLogService,
+    ) {
+    }
+
     /**
      * Lists all Tag entities.
-     *
-     * @Route("/", name="admin_tag_index")
-     * @Method("GET")
      */
+    #[Route('/', name: 'admin_tag_index', methods: ['GET'])]
     public function indexAction()
     {
-        $em = $this->getDoctrine()->getManager();
-        $tags = $em->getRepository(Tag::class)->findAll();
+        $tags = $this->em->getRepository(Tag::class)->findAll();
 
         return $this->render('admin/tag/index.html.twig', ['objects' => $tags]);
     }
 
     /**
      * Displays a form to edit an existing Tag entity.
-     *
-     * @Route("/{id}/edit", requirements={"id": "\d+"}, name="admin_tag_edit")
-     * @Method({"GET", "POST"})
      */
+    #[Route('/{id}/edit', requirements: ['id' => '\d+'], name: 'admin_tag_edit', methods: ['GET', 'POST'])]
     public function editAction(Request $request, Tag $tag, Slugger $slugger)
     {
         //$this->denyAccessUnlessGranted('edit', $category, 'Posts can only be edited by their authors.');
@@ -61,12 +60,12 @@ class TagController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Capture changes before flush
-            $diffDetails = $this->get(ActivityLogService::class)->getEntityDiff($tag);
+            $diffDetails = $this->activityLogService->getEntityDiff($tag);
 
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             // Activity Log
-            $this->get(ActivityLogService::class)->log(
+            $this->activityLogService->log(
                 ActivityLog::ACTION_UPDATE,
                 ActivityLog::ENTITY_TAG,
                 $tag->getId(),
@@ -86,14 +85,8 @@ class TagController extends Controller
 
     /**
      * Deletes a Tag entity.
-     *
-     * @Route("/{id}/delete", name="admin_tag_delete")
-     * @Method("POST")
-     * @Security("is_granted('delete', post)")
-     *
-     * The Security annotation value is an expression (if it evaluates to false,
-     * the authorization mechanism will prevent the user accessing this resource).
      */
+    #[Route('/{id}/delete', name: 'admin_tag_delete', methods: ['POST'])]
     public function deleteAction(Request $request, Tag $tag)
     {
         if (!$this->isCsrfTokenValid('delete', $request->request->get('token'))) {
@@ -103,12 +96,11 @@ class TagController extends Controller
         $tagName = $tag->getName();
         $tagId = $tag->getId();
 
-        $em = $this->getDoctrine()->getManager();
-        $em->remove($tag);
-        $em->flush();
+        $this->em->remove($tag);
+        $this->em->flush();
 
         // Activity Log
-        $this->get(ActivityLogService::class)->log(
+        $this->activityLogService->log(
             ActivityLog::ACTION_DELETE,
             ActivityLog::ENTITY_TAG,
             $tagId,

@@ -1,0 +1,35 @@
+{#
+    Phân trang — giữ nguyên markup/class của thiết kế v3.
+    Tham số:
+      current (int), total (int), route (string), routeParams (hash, tuỳ chọn)
+#}
+{% set routeParams = routeParams|default({}) %}
+
+{% if total > 1 %}
+    <nav class="pagination-v3 mt-16" aria-label="Phân trang">
+        <ul>
+            {% for page in 1..total %}
+                {# Rút gọn: luôn hiện trang 1, trang cuối và lân cận trang hiện tại #}
+                {% if page == 1 or page == total or (page >= current - 1 and page <= current + 1) %}
+                    <li>
+                        {% if page == current %}
+                            <span aria-current="page">{{ page }}</span>
+                        {% else %}
+                            <a href="{{ path(route, routeParams|merge({ page: page })) }}">{{ page }}</a>
+                        {% endif %}
+                    </li>
+                {% elseif page == 2 or page == total - 1 %}
+                    <li><span class="pagination-ellipsis" aria-hidden="true">…</span></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if current < total %}
+                <li>
+                    <a href="{{ path(route, routeParams|merge({ page: current + 1 })) }}" rel="next" aria-label="Trang sau">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}

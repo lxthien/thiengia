@@ -2,16 +2,14 @@
 
 namespace App\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 use App\Service\SitemapService;
 
-class SitemapController extends Controller
+class SitemapController extends AbstractController
 {
-    /**
-     * @Route("/sitemap.xml", name="sitemap")
-     */
+    #[Route('/sitemap.xml', name: 'sitemap')]
     public function sitemapAction(SitemapService $sitemapService)
     {
         $urls = $sitemapService->generateSitemap();

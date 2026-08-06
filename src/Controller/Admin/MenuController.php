@@ -10,30 +10,34 @@ use App\Form\MenuType;
 use App\Form\MenuItemType;
 use App\Entity\ActivityLog;
 use App\Service\ActivityLogService;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
  * Controller used to manage menus in the backend.
- * @Route("/admin/menu")
- * @Security("has_role('ROLE_ADMIN')")
  */
-class MenuController extends Controller
+#[Route('/admin/menu')]
+#[IsGranted('ROLE_ADMIN')]
+class MenuController extends AbstractController
 {
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly RequestStack $requestStack,
+    ) {
+    }
+
     /**
      * Lists all menu entities.
-     *
-     * @Route("/", name="admin_menu_index")
-     * @Method("GET")
      */
+    #[Route('/', name: 'admin_menu_index', methods: ['GET'])]
     public function indexAction()
     {
-        $em = $this->getDoctrine()->getManager();
-        $menus = $em->getRepository(Menu::class)->findAll();
+        $menus = $this->em->getRepository(Menu::class)->findAll();
 
         return $this->render('admin/menu/index.html.twig', [
             'objects' => $menus,
@@ -42,10 +46,8 @@ class MenuController extends Controller
 
     /**
      * Creates a new menu entity.
-     *
-     * @Route("/new", name="admin_menu_new")
-     * @Method({"GET", "POST"})
      */
+    #[Route('/new', name: 'admin_menu_new', methods: ['GET', 'POST'])]
     public function newAction(Request $request)
     {
         $menu = new Menu();
@@ -53,9 +55,8 @@ class MenuController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($menu);
-            $em->flush();
+            $this->em->persist($menu);
+            $this->em->flush();
 
             $this->addFlash('success', 'action.created_successfully');
 
@@ -70,28 +71,24 @@ class MenuController extends Controller
 
     /**
      * Edits a menu entity and its items.
-     *
-     * @Route("/{id}/edit", name="admin_menu_edit")
-     * @Method({"GET", "POST"})
      */
+    #[Route('/{id}/edit', name: 'admin_menu_edit', methods: ['GET', 'POST'])]
     public function editAction(Request $request, Menu $menu)
     {
         $form = $this->createForm(MenuType::class, $menu);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
             $this->addFlash('success', 'action.updated_successfully');
 
             return $this->redirectToRoute('admin_menu_edit', ['id' => $menu->getId()]);
         }
 
-        $em = $this->getDoctrine()->getManager();
-
         // Get available content for drag-drop
-        $posts = $em->getRepository(News::class)->findBy(['postType' => 'post'], ['title' => 'ASC']);
-        $pages = $em->getRepository(News::class)->findBy(['postType' => 'page'], ['title' => 'ASC']);
-        $categories = $em->getRepository(\App\Entity\NewsCategory::class)->findAll();
+        $posts = $this->em->getRepository(News::class)->findBy(['postType' => 'post'], ['title' => 'ASC']);
+        $pages = $this->em->getRepository(News::class)->findBy(['postType' => 'page'], ['title' => 'ASC']);
+        $categories = $this->em->getRepository(\App\Entity\NewsCategory::class)->findAll();
         $usedTargetIds = $this->getUsedTargetIds($menu);
 
         return $this->render('admin/menu/edit.html.twig', [
@@ -108,19 +105,16 @@ class MenuController extends Controller
 
     /**
      * Deletes a menu entity.
-     *
-     * @Route("/{id}/delete", name="admin_menu_delete")
-     * @Method("POST")
      */
+    #[Route('/{id}/delete', name: 'admin_menu_delete', methods: ['POST'])]
     public function deleteAction(Request $request, Menu $menu)
     {
         if (!$this->isCsrfTokenValid('delete', $request->request->get('token'))) {
             return $this->redirectToRoute('admin_menu_index');
         }
 
-        $em = $this->getDoctrine()->getManager();
-        $em->remove($menu);
-        $em->flush();
+        $this->em->remove($menu);
+        $this->em->flush();
 
         $this->addFlash('success', 'action.deleted_successfully');
 
@@ -129,10 +123,8 @@ class MenuController extends Controller
 
     /**
      * Adds a menu item.
-     *
-     * @Route("/{id}/item/new", name="admin_menu_item_new")
-     * @Method({"GET", "POST"})
      */
+    #[Route('/{id}/item/new', name: 'admin_menu_item_new', methods: ['GET', 'POST'])]
     public function addItemAction(Request $request, Menu $menu)
     {
         $menuItem = new MenuItem();
@@ -143,15 +135,14 @@ class MenuController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Calculate next position
-            $em = $this->getDoctrine()->getManager();
-            $maxPosition = $em->createQuery(
+            $maxPosition = $this->em->createQuery(
                 'SELECT MAX(mi.position) FROM App\Entity\MenuItem mi WHERE mi.menu = :menu AND mi.parent IS NULL'
             )->setParameter('menu', $menu)->getSingleScalarResult();
 
             $menuItem->setPosition(($maxPosition ?? 0) + 1);
 
-            $em->persist($menuItem);
-            $em->flush();
+            $this->em->persist($menuItem);
+            $this->em->flush();
 
             $this->addFlash('success', 'action.created_successfully');
 
@@ -168,17 +159,15 @@ class MenuController extends Controller
 
     /**
      * Edits a menu item.
-     *
-     * @Route("/item/{id}/edit", name="admin_menu_item_edit")
-     * @Method({"GET", "POST"})
      */
+    #[Route('/item/{id}/edit', name: 'admin_menu_item_edit', methods: ['GET', 'POST'])]
     public function editItemAction(Request $request, MenuItem $menuItem)
     {
         $form = $this->createForm(MenuItemType::class, $menuItem);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
             $this->addFlash('success', 'action.updated_successfully');
 
             return $this->redirectToRoute('admin_menu_edit', ['id' => $menuItem->getMenu()->getId()]);
@@ -194,10 +183,8 @@ class MenuController extends Controller
 
     /**
      * Deletes a menu item.
-     *
-     * @Route("/item/{id}/delete", name="admin_menu_item_delete")
-     * @Method("POST")
      */
+    #[Route('/item/{id}/delete', name: 'admin_menu_item_delete', methods: ['POST'])]
     public function deleteItemAction(Request $request, MenuItem $menuItem)
     {
         if (!$this->isCsrfTokenValid('delete', $request->request->get('token'))) {
@@ -205,9 +192,8 @@ class MenuController extends Controller
         }
 
         $menu = $menuItem->getMenu();
-        $em = $this->getDoctrine()->getManager();
-        $em->remove($menuItem);
-        $em->flush();
+        $this->em->remove($menuItem);
+        $this->em->flush();
 
         $this->addFlash('success', 'action.deleted_successfully');
 
@@ -216,22 +202,19 @@ class MenuController extends Controller
 
     /**
      * Reorders menu items via AJAX drag-drop.
-     *
-     * @Route("/{id}/reorder", name="admin_menu_reorder")
-     * @Method("POST")
      */
+    #[Route('/{id}/reorder', name: 'admin_menu_reorder', methods: ['POST'])]
     public function reorderAction(Request $request, Menu $menu)
     {
         $data = json_decode($request->getContent(), true);
-        $em = $this->getDoctrine()->getManager();
 
         if (!isset($data['items']) || !is_array($data['items'])) {
             return new JsonResponse(['success' => false, 'message' => 'Invalid data format'], 400);
         }
 
         try {
-            $this->reorderMenuItems($data['items'], $menu, null, $em);
-            $em->flush();
+            $this->reorderMenuItems($data['items'], $menu, null, $this->em);
+            $this->em->flush();
 
             return new JsonResponse(['success' => true, 'message' => 'Menu reordered successfully']);
         } catch (\Exception $e) {
@@ -241,10 +224,8 @@ class MenuController extends Controller
 
     /**
      * Get a single menu item data for inline editing
-     *
-     * @Route("/item/{id}/get", name="admin_menu_item_get")
-     * @Method("GET")
      */
+    #[Route('/item/{id}/get', name: 'admin_menu_item_get', methods: ['GET'])]
     public function getItemAction(MenuItem $menuItem)
     {
         return new JsonResponse([
@@ -264,10 +245,8 @@ class MenuController extends Controller
 
     /**
      * Update a menu item inline via AJAX
-     *
-     * @Route("/item/{id}/update", name="admin_menu_item_update")
-     * @Method("POST")
      */
+    #[Route('/item/{id}/update', name: 'admin_menu_item_update', methods: ['POST'])]
     public function updateItemAction(Request $request, MenuItem $menuItem)
     {
         $data = json_decode($request->getContent(), true);
@@ -292,7 +271,7 @@ class MenuController extends Controller
                 $menuItem->setEnable((bool)$data['enable']);
             }
 
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             return new JsonResponse([
                 'success' => true,
@@ -311,7 +290,7 @@ class MenuController extends Controller
 
     /**
      * Format URL to ensure leading and trailing slashes while avoiding doubles
-     * 
+     *
      * @param string $url
      * @return string
      */
@@ -362,14 +341,12 @@ class MenuController extends Controller
 
     /**
      * Add content item to menu via AJAX
-     *
-     * @Route("/{menuId}/add-item", name="admin_menu_add_content_item")
-     * @Method("POST")
      */
+    #[Route('/{menuId}/add-item', name: 'admin_menu_add_content_item', methods: ['POST'])]
     public function addContentItemAction(Request $request, $menuId)
     {
         $data = json_decode($request->getContent(), true);
-        $em = $this->getDoctrine()->getManager();
+        $em = $this->em;
 
         $menu = $em->getRepository(Menu::class)->find($menuId);
         if (!$menu) {
@@ -437,7 +414,7 @@ class MenuController extends Controller
                 $category = $em->getRepository(\App\Entity\NewsCategory::class)->find($itemId);
                 if ($category) {
                     $menuItem->setTitle($title ?: $category->getName());
-                    
+
                     $url = $category->getUrl();
                     $parent = $category->getParentcat();
                     if ($parent && !is_string($parent) && $parent->getId()) {
@@ -481,22 +458,18 @@ class MenuController extends Controller
 
     /**
      * Get available content items for menu
-     *
-     * @Route("/{id}/available-items", name="admin_menu_available_items")
-     * @Method("GET")
      */
+    #[Route('/{id}/available-items', name: 'admin_menu_available_items', methods: ['GET'])]
     public function getAvailableItemsAction(Menu $menu)
     {
-        $request = $this->get('request_stack')->getCurrentRequest();
+        $request = $this->requestStack->getCurrentRequest();
         if (!$request->isXmlHttpRequest()) {
             throw $this->createAccessDeniedException();
         }
 
-        $em = $this->getDoctrine()->getManager();
-
-        $posts = $em->getRepository(News::class)->findBy(['postType' => 'post'], ['title' => 'ASC']);
-        $pages = $em->getRepository(News::class)->findBy(['postType' => 'page'], ['title' => 'ASC']);
-        $categories = $em->getRepository(\App\Entity\NewsCategory::class)->findAll();
+        $posts = $this->em->getRepository(News::class)->findBy(['postType' => 'post'], ['title' => 'ASC']);
+        $pages = $this->em->getRepository(News::class)->findBy(['postType' => 'page'], ['title' => 'ASC']);
+        $categories = $this->em->getRepository(\App\Entity\NewsCategory::class)->findAll();
 
         $data = [
             'posts' => array_map(function($item) {

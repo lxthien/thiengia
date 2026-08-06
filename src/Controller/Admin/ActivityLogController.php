@@ -4,30 +4,31 @@ namespace App\Controller\Admin;
 
 use App\Entity\ActivityLog;
 use App\Entity\User;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
  * Controller quản lý Nhật ký hoạt động
- *
- * @Route("/admin/activity-log")
- * @Security("has_role('ROLE_ADMIN')")
  */
-class ActivityLogController extends Controller
+#[Route('/admin/activity-log')]
+#[IsGranted('ROLE_ADMIN')]
+class ActivityLogController extends AbstractController
 {
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+    ) {
+    }
+
     /**
      * Hiển thị danh sách nhật ký hoạt động
-     *
-     * @Route("/", name="admin_activity_log_index")
-     * @Method("GET")
      */
+    #[Route('/', name: 'admin_activity_log_index', methods: ['GET'])]
     public function indexAction(Request $request)
     {
-        $em = $this->getDoctrine()->getManager();
-        $repository = $em->getRepository(ActivityLog::class);
+        $repository = $this->em->getRepository(ActivityLog::class);
 
         // Build filters from query params
         $filters = [
@@ -44,7 +45,7 @@ class ActivityLogController extends Controller
         $result = $repository->findByFilters($filters, $page, 30);
 
         // Get all users for filter dropdown
-        $users = $em->getRepository(User::class)->findBy([], ['username' => 'ASC']);
+        $users = $this->em->getRepository(User::class)->findBy([], ['username' => 'ASC']);
 
         return $this->render('admin/activity_log/index.html.twig', [
             'logs' => $result['items'],

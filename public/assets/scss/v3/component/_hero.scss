@@ -1,0 +1,113 @@
+@use "../tokens" as *;
+
+// Hero trang chủ: slideshow ảnh công trình + overlay nâu ấm
+.hero2 {
+  position: relative;
+  isolation: isolate;
+  color: $white;
+  padding: 6rem 0 6.5rem;
+  overflow: hidden;
+
+  // Các ảnh xếp chồng, chuyển bằng cross-fade + ken burns
+  .hero2-bg {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+
+    img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 1.2s $ease;
+
+      &.is-active {
+        opacity: 1;
+        animation: hero-zoom 9s $ease forwards;
+      }
+    }
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(96deg, rgba($dark, 0.93) 25%, rgba($dark, 0.7) 60%, rgba($dark, 0.42) 100%);
+  }
+
+  .hero2-title {
+    font-family: $f-display;
+    font-weight: 600;
+    font-size: clamp(2.4rem, 5vw, 4.2rem);
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+
+    em {
+      font-style: italic;
+      color: $accent;
+    }
+  }
+
+  .hero2-sub {
+    font-size: 1rem;
+    font-weight: 300;
+    line-height: 1.9;
+    color: rgba($white, 0.85);
+    max-width: 32rem;
+  }
+
+  .hero2-points {
+    li {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.4rem 0;
+      font-size: 0.92rem;
+      font-weight: 400;
+
+      svg {
+        color: $accent;
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  // Chấm điều hướng slideshow
+  .hero2-dots {
+    display: flex;
+    gap: 0.65rem;
+
+    button {
+      width: 34px;
+      height: 3px;
+      background: rgba($white, 0.3);
+      transition: background $dur $ease;
+
+      &[aria-current="true"] {
+        background: $accent;
+      }
+
+      &:hover {
+        background: rgba($white, 0.6);
+      }
+    }
+  }
+}
+
+@keyframes hero-zoom {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero2 .hero2-bg img.is-active {
+    animation: none;
+  }
+}

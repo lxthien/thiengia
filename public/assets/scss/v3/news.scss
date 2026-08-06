@@ -1,0 +1,7 @@
+// Entry trang chi tiết bài viết (build/css/v3-news.css)
+
+@use "component/page-hero";
+@use "component/post-card"; // dùng cho khối "bài liên quan"
+@use "component/newsletter";
+
+@use "pages/news";

@@ -8,38 +8,37 @@ use App\Form\BannerCategoryType;
 use App\Service\ActivityLogService;
 
 use App\Utils\Slugger;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
  * Controller used to manage the banner category in the backend.
- * @Route("/admin/bannercategory")
- * @Security("has_role('ROLE_ADMIN')")
  */
-
-class BannerCategoryController extends Controller
+#[Route('/admin/bannercategory')]
+#[IsGranted('ROLE_ADMIN')]
+class BannerCategoryController extends AbstractController
 {
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly ActivityLogService $activityLogService,
+    ) {
+    }
+
     /**
      * Lists all the banner categories entities.
-     *
-     * @Route("/", name="admin_bannercategory_index")
-     * @Method("GET")
      */
+    #[Route('/', name: 'admin_bannercategory_index', methods: ['GET'])]
     public function indexAction()
     {
-        $em = $this->getDoctrine()->getManager();
-        $bannercategories = $em->getRepository(BannerCategory::class)->findAll();
+        $bannercategories = $this->em->getRepository(BannerCategory::class)->findAll();
 
         return $this->render('admin/bannercategory/index.html.twig', ['objects' => $bannercategories]);
     }
 
-    /**
-     * @Route("/new", name="admin_bannercategory_new")
-     * @Method({"GET", "POST"})
-     */
+    #[Route('/new', name: 'admin_bannercategory_new', methods: ['GET', 'POST'])]
     public function bannerCategoryNewAction(Request $request, Slugger $slugger)
     {
         $bannerCategory = new BannerCategory();
@@ -50,12 +49,11 @@ class BannerCategoryController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($bannerCategory);
-            $em->flush();
+            $this->em->persist($bannerCategory);
+            $this->em->flush();
 
             // Activity Log
-            $this->get(ActivityLogService::class)->log(
+            $this->activityLogService->log(
                 ActivityLog::ACTION_CREATE,
                 ActivityLog::ENTITY_BANNER_CATEGORY,
                 $bannerCategory->getId(),
@@ -73,10 +71,7 @@ class BannerCategoryController extends Controller
         ]);
     }
 
-    /**
-     * @Route("/{id}/edit", name="admin_bannercategory_edit")
-     * @Method({"GET", "POST"})
-     */
+    #[Route('/{id}/edit', name: 'admin_bannercategory_edit', methods: ['GET', 'POST'])]
     public function bannerCategoryEditAction(Request $request, BannerCategory $bannerCategory, Slugger $slugger)
     {
         $form = $this->createForm(BannerCategoryType::class, $bannerCategory);
@@ -84,10 +79,10 @@ class BannerCategoryController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $this->getDoctrine()->getManager()->flush();
+            $this->em->flush();
 
             // Activity Log
-            $this->get(ActivityLogService::class)->log(
+            $this->activityLogService->log(
                 ActivityLog::ACTION_UPDATE,
                 ActivityLog::ENTITY_BANNER_CATEGORY,
                 $bannerCategory->getId(),
@@ -107,10 +102,8 @@ class BannerCategoryController extends Controller
 
     /**
      * Deletes a banner category entity.
-     *
-     * @Route("/{id}/delete", name="admin_bannercategory_delete")
-     * @Method("POST")
      */
+    #[Route('/{id}/delete', name: 'admin_bannercategory_delete', methods: ['POST'])]
     public function deleteAction(Request $request, BannerCategory $bannerCategory)
     {
         if (!$this->isCsrfTokenValid('delete', $request->request->get('token'))) {
@@ -120,12 +113,11 @@ class BannerCategoryController extends Controller
         $catName = $bannerCategory->getName();
         $catId = $bannerCategory->getId();
 
-        $em = $this->getDoctrine()->getManager();
-        $em->remove($bannerCategory);
-        $em->flush();
+        $this->em->remove($bannerCategory);
+        $this->em->flush();
 
         // Activity Log
-        $this->get(ActivityLogService::class)->log(
+        $this->activityLogService->log(
             ActivityLog::ACTION_DELETE,
             ActivityLog::ENTITY_BANNER_CATEGORY,
             $catId,

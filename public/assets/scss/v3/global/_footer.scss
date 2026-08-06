@@ -1,0 +1,47 @@
+@use "../tokens" as *;
+
+.ft {
+  background: $dark;
+  color: rgba($white, 0.62);
+  font-size: 0.9rem;
+  font-weight: 300;
+
+  .ft-head {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: $white;
+    margin-bottom: 1.3rem;
+  }
+
+  a {
+    transition: all $dur $ease;
+
+    &:hover {
+      color: $accent;
+    }
+  }
+
+  .ft-link {
+    display: block;
+    padding: 0.35rem 0;
+
+    &:hover {
+      padding-left: 0.5rem;
+    }
+  }
+
+  .ft-legal {
+    margin-top: 1rem;
+    font-size: 0.72rem;
+    color: rgba($white, 0.4);
+  }
+
+  .ft-bottom {
+    border-top: 1px solid rgba($white, 0.08);
+    font-size: 0.76rem;
+    letter-spacing: 0.04em;
+    color: rgba($white, 0.38);
+  }
+}

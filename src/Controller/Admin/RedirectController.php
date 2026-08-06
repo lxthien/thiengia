@@ -6,29 +6,28 @@ use App\Entity\ActivityLog;
 use App\Entity\Redirect;
 use App\Form\RedirectType;
 use App\Service\ActivityLogService;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/admin/redirect")
- * @Security("has_role('ROLE_ADMIN')")
- */
-class RedirectController extends Controller
+#[Route('/admin/redirect')]
+#[IsGranted('ROLE_ADMIN')]
+class RedirectController extends AbstractController
 {
-    /**
-     * @Route("/", name="admin_redirect_index")
-     * @Method("GET")
-     */
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly ActivityLogService $activityLogService,
+    ) {
+    }
+
+    #[Route('/', name: 'admin_redirect_index', methods: ['GET'])]
     public function indexAction(Request $request)
     {
-        $em = $this->getDoctrine()->getManager();
-        $queryBuilder = $em->getRepository(Redirect::class)->createQueryBuilder('r');
+        $queryBuilder = $this->em->getRepository(Redirect::class)->createQueryBuilder('r');
 
         if ($search = $request->query->get('search')) {
             $queryBuilder->andWhere('r.sourceUrl LIKE :search OR r.destinationUrl LIKE :search OR r.note LIKE :search')
@@ -56,11 +55,8 @@ class RedirectController extends Controller
         ]);
     }
 
-    /**
-     * @Route("/new", name="admin_redirect_new")
-     * @Method({"GET", "POST"})
-     */
-    public function newAction(Request $request, EntityManagerInterface $em)
+    #[Route('/new', name: 'admin_redirect_new', methods: ['GET', 'POST'])]
+    public function newAction(Request $request)
     {
         $redirect = new Redirect();
         $form = $this->createForm(RedirectType::class, $redirect);
@@ -69,10 +65,10 @@ class RedirectController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $this->detectChain($redirect->getSourceUrl(), $redirect->getDestinationUrl());
 
-            $em->persist($redirect);
-            $em->flush();
+            $this->em->persist($redirect);
+            $this->em->flush();
 
-            $this->get(ActivityLogService::class)->log(
+            $this->activityLogService->log(
                 ActivityLog::ACTION_CREATE,
                 'Redirect',
                 $redirect->getId(),
@@ -88,11 +84,8 @@ class RedirectController extends Controller
         ]);
     }
 
-    /**
-     * @Route("/{id}/edit", requirements={"id": "\d+"}, name="admin_redirect_edit")
-     * @Method({"GET", "POST"})
-     */
-    public function editAction(Request $request, Redirect $redirect, EntityManagerInterface $em)
+    #[Route('/{id}/edit', requirements: ['id' => '\d+'], name: 'admin_redirect_edit', methods: ['GET', 'POST'])]
+    public function editAction(Request $request, Redirect $redirect)
     {
         $form = $this->createForm(RedirectType::class, $redirect);
         $form->handleRequest($request);
@@ -100,11 +93,11 @@ class RedirectController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $this->detectChain($redirect->getSourceUrl(), $redirect->getDestinationUrl(), $redirect->getId());
 
-            $diffDetails = $this->get(ActivityLogService::class)->getEntityDiff($redirect);
+            $diffDetails = $this->activityLogService->getEntityDiff($redirect);
 
-            $em->flush();
+            $this->em->flush();
 
-            $this->get(ActivityLogService::class)->log(
+            $this->activityLogService->log(
                 ActivityLog::ACTION_UPDATE,
                 'Redirect',
                 $redirect->getId(),
@@ -122,11 +115,8 @@ class RedirectController extends Controller
         ]);
     }
 
-    /**
-     * @Route("/{id}/delete", name="admin_redirect_delete")
-     * @Method("POST")
-     */
-    public function deleteAction(Request $request, Redirect $redirect, EntityManagerInterface $em)
+    #[Route('/{id}/delete', name: 'admin_redirect_delete', methods: ['POST'])]
+    public function deleteAction(Request $request, Redirect $redirect)
     {
         if (!$this->isCsrfTokenValid('delete', $request->request->get('token'))) {
             return $this->redirectToRoute('admin_redirect_index');
@@ -135,10 +125,10 @@ class RedirectController extends Controller
         $id = $redirect->getId();
         $source = $redirect->getSourceUrl();
 
-        $em->remove($redirect);
-        $em->flush();
+        $this->em->remove($redirect);
+        $this->em->flush();
 
-        $this->get(ActivityLogService::class)->log(
+        $this->activityLogService->log(
             ActivityLog::ACTION_DELETE,
             'Redirect',
             $id,
@@ -149,45 +139,36 @@ class RedirectController extends Controller
         return $this->redirectToRoute('admin_redirect_index');
     }
 
-    /**
-     * @Route("/{id}/toggle-status", name="admin_redirect_toggle_status")
-     * @Method("POST")
-     */
-    public function toggleStatusAction(Redirect $redirect, EntityManagerInterface $em)
+    #[Route('/{id}/toggle-status', name: 'admin_redirect_toggle_status', methods: ['POST'])]
+    public function toggleStatusAction(Redirect $redirect)
     {
         $redirect->setIsActive(!$redirect->getIsActive());
-        $em->flush();
+        $this->em->flush();
         return $this->json(['status' => $redirect->getIsActive()]);
     }
 
-    /**
-     * @Route("/bulk-delete", name="admin_redirect_bulk_delete")
-     * @Method("POST")
-     */
-    public function bulkDeleteAction(Request $request, EntityManagerInterface $em)
+    #[Route('/bulk-delete', name: 'admin_redirect_bulk_delete', methods: ['POST'])]
+    public function bulkDeleteAction(Request $request)
     {
         $ids = $request->request->get('ids', []);
         if (is_array($ids) && count($ids) > 0) {
-            $repository = $em->getRepository(Redirect::class);
+            $repository = $this->em->getRepository(Redirect::class);
             foreach ($ids as $id) {
                 $redirect = $repository->find($id);
                 if ($redirect) {
-                    $em->remove($redirect);
+                    $this->em->remove($redirect);
                 }
             }
-            $em->flush();
+            $this->em->flush();
             return $this->json(['message' => 'Deleted successfully.']);
         }
         return $this->json(['message' => 'No items selected.'], 400);
     }
 
-    /**
-     * @Route("/export-csv", name="admin_redirect_export_csv")
-     * @Method("GET")
-     */
-    public function exportCsvAction(EntityManagerInterface $em)
+    #[Route('/export-csv', name: 'admin_redirect_export_csv', methods: ['GET'])]
+    public function exportCsvAction()
     {
-        $redirects = $em->getRepository(Redirect::class)->findAll();
+        $redirects = $this->em->getRepository(Redirect::class)->findAll();
         $filename = "redirects_" . date('Y-m-d') . ".csv";
 
         $handle = fopen('php://temp', 'r+');
@@ -220,17 +201,14 @@ class RedirectController extends Controller
         return $response;
     }
 
-    /**
-     * @Route("/import-csv", name="admin_redirect_import_csv")
-     * @Method("POST")
-     */
-    public function importCsvAction(Request $request, EntityManagerInterface $em)
+    #[Route('/import-csv', name: 'admin_redirect_import_csv', methods: ['POST'])]
+    public function importCsvAction(Request $request)
     {
         $file = $request->files->get('csv_file');
         if ($file && in_array($file->getClientOriginalExtension(), ['csv', 'txt'])) {
             $handle = fopen($file->getRealPath(), 'r');
             fgetcsv($handle); // skip header
-            
+
             $count = 0;
             while (($data = fgetcsv($handle)) !== FALSE) {
                 if (count($data) >= 4) {
@@ -242,13 +220,13 @@ class RedirectController extends Controller
                     $redirect->setIsActive(isset($data[4]) ? (bool)$data[4] : true);
                     $redirect->setOrderNum(isset($data[5]) ? (int)$data[5] : 0);
                     $redirect->setNote(isset($data[6]) ? $data[6] : null);
-                    
-                    $em->persist($redirect);
+
+                    $this->em->persist($redirect);
                     $count++;
                 }
             }
             fclose($handle);
-            $em->flush();
+            $this->em->flush();
             $this->addFlash('success', "Imported $count redirects successfully.");
         } else {
             $this->addFlash('error', "Invalid file format.");
@@ -264,8 +242,7 @@ class RedirectController extends Controller
             return;
         }
 
-        $em = $this->getDoctrine()->getManager();
-        $qb = $em->getRepository(Redirect::class)->createQueryBuilder('r')
+        $qb = $this->em->getRepository(Redirect::class)->createQueryBuilder('r')
             ->where('r.isActive = 1');
 
         if ($excludeId) {

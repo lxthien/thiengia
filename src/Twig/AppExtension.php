@@ -77,6 +77,7 @@ class AppExtension extends AbstractExtension
     {
         return [
             new TwigFilter('md2html', [$this, 'markdownToHtml'], ['is_safe' => ['html']]),
+            new TwigFilter('rating', [$this, 'renderRating'], ['is_safe' => ['html']]),
         ];
     }
 
@@ -101,6 +102,23 @@ class AppExtension extends AbstractExtension
     public function markdownToHtml($content)
     {
         return $this->parser->toHtml($content);
+    }
+
+    /**
+     * Renders a row of full/empty star divs for a numeric rating value.
+     * Replaces blackknight467/star-rating-bundle's Twig filter (removed
+     * because its own implementation relied on the PHP templating engine).
+     */
+    public function renderRating($number, $max = 5, $starSize = '')
+    {
+        $html = '<div class="rating">';
+        for ($i = 1; $i <= $max; $i++) {
+            $class = $i <= $number ? 'star-full' : 'star-empty';
+            $html .= sprintf('<div class="%s %s"></div>', $class, $starSize);
+        }
+        $html .= '</div>';
+
+        return $html;
     }
 
     /**

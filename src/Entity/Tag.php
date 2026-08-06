@@ -15,74 +15,44 @@ use App\Utils\Slugger;
 
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Entity()
- * @UniqueEntity("url")
- * @ORM\HasLifecycleCallbacks()
- * @ORM\Table(name="tag", options={"collate"="utf8_general_ci"})
- */
+#[ORM\Entity]
+#[UniqueEntity('url')]
+#[ORM\HasLifecycleCallbacks]
+#[ORM\Table(name: 'tag', options: ['collate' => 'utf8_general_ci'])]
 class Tag implements \JsonSerializable
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: Types::INTEGER)]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private $id;
 
     /**
      * @var News
-     *
-     * @ORM\ManyToMany(targetEntity="App\Entity\News", mappedBy="tags")
      */
+    #[ORM\ManyToMany(targetEntity: News::class, mappedBy: 'tags')]
     private $news;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", unique=true)
-     */
+    #[ORM\Column(type: Types::STRING, unique: true)]
     private $name;
 
-    /**
-     * @var string
-     *
-     * @Assert\NotBlank()
-     * @ORM\Column(name="url", type="string", length=255, unique=true)
-     */
+    #[Assert\NotBlank]
+    #[ORM\Column(name: 'url', type: Types::STRING, length: 255, unique: true)]
     private $url;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="contents", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'contents', type: Types::TEXT, nullable: true)]
     private $contents;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="pageTitle", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'pageTitle', type: Types::STRING, length: 255, nullable: true)]
     private $pageTitle;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="pageDescription", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'pageDescription', type: Types::TEXT, nullable: true)]
     private $pageDescription;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="pageKeyword", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'pageKeyword', type: Types::STRING, length: 255, nullable: true)]
     private $pageKeyword;
 
     public function __toString()
@@ -135,11 +105,11 @@ class Tag implements \JsonSerializable
 
     /**
      * Set url
-     * 
-     * @ORM\PrePersist
-     * @ORM\PreUpdate
+     *
      * @return Tag
      */
+    #[ORM\PrePersist]
+    #[ORM\PreUpdate]
     public function setUrl()
     {
         $this->url = (new Slugger())->slugifyUtf8($this->getName());

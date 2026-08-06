@@ -2,14 +2,19 @@
 
 namespace App\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Helper\Table;
 use App\Service\SitemapService;
 
-class GenerateSitemapCommand extends ContainerAwareCommand
+class GenerateSitemapCommand extends Command
 {
+    public function __construct(private readonly SitemapService $sitemapService)
+    {
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this
@@ -19,8 +24,7 @@ class GenerateSitemapCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $sitemapService = $this->getContainer()->get(SitemapService::class);
-        $urls = $sitemapService->generateSitemap();
+        $urls = $this->sitemapService->generateSitemap();
 
         $output->writeln('<info>Sitemap Generated Successfully!</info>');
         $output->writeln('');
@@ -44,5 +48,7 @@ class GenerateSitemapCommand extends ContainerAwareCommand
         
         $output->writeln('');
         $output->writeln('<info>Sitemap is available at: /sitemap.xml</info>');
+
+        return Command::SUCCESS;
     }
 }

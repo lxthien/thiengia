@@ -1,0 +1,42 @@
+@use "../tokens" as *;
+
+.breadcrumb-v3 {
+  ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba($white, 0.55);
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+
+    // Gạch chéo mảnh giữa các cấp
+    & + li::before {
+      content: "";
+      width: 1.1rem;
+      height: 1px;
+      background: rgba($white, 0.3);
+      transform: rotate(-60deg);
+    }
+  }
+
+  a {
+    transition: color $dur $ease;
+
+    &:hover {
+      color: $accent;
+    }
+  }
+
+  [aria-current="page"] {
+    color: $white;
+  }
+}

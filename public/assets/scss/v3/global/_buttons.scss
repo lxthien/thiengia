@@ -1,0 +1,55 @@
+@use "../tokens" as *;
+
+// Nút chính — vuông sắc cạnh, uppercase thưa
+.btn2 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem 2.1rem;
+  background: $primary;
+  color: $white;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: all $dur $ease;
+
+  .btn-arrow {
+    transition: transform $dur $ease;
+  }
+
+  &:hover {
+    background: $accent;
+    color: $white;
+
+    .btn-arrow {
+      transform: translateX(6px);
+    }
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: default;
+  }
+
+  &--dark {
+    background: $brown;
+
+    &:hover {
+      background: $accent;
+    }
+  }
+
+  &--ghost {
+    background: transparent;
+    color: $white;
+    border: 1px solid rgba($white, 0.45);
+
+    &:hover {
+      background: rgba($white, 0.08);
+      border-color: $white;
+    }
+  }
+}

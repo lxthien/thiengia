@@ -2,12 +2,20 @@
 
 namespace App\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class SyncViewCountsCommand extends ContainerAwareCommand
+class SyncViewCountsCommand extends Command
 {
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly string $logsDir,
+    ) {
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this
@@ -17,13 +25,13 @@ class SyncViewCountsCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $logDir = $this->getContainer()->getParameter('kernel.logs_dir');
-        $logFile = rtrim($logDir, '/\\') . '/view_counts.log';
+        $logFile = rtrim($this->logsDir, '/\\') . '/view_counts.log';
         $processingFile = $logFile . '.processing';
 
         if (!file_exists($logFile) || filesize($logFile) === 0) {
             $output->writeln("Khong co log view nao can xu ly.");
-            return;
+
+            return Command::SUCCESS;
         }
 
         // Đổi tên file để lock tạm thời, tránh việc file vẫn bị ghi vào trong lúc đọc
@@ -46,7 +54,7 @@ class SyncViewCountsCommand extends ContainerAwareCommand
         }
 
         if (count($viewCounts) > 0) {
-            $em = $this->getContainer()->get('doctrine')->getManager();
+            $em = $this->em;
             $connection = $em->getConnection();
             $connection->beginTransaction();
 
@@ -93,5 +101,7 @@ class SyncViewCountsCommand extends ContainerAwareCommand
         if (file_exists($processingFile)) {
             unlink($processingFile);
         }
+
+        return Command::SUCCESS;
     }
 }

@@ -4,7 +4,7 @@
 use App\Kernel;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArgvInput;
-use Symfony\Component\Debug\Debug;
+use Symfony\Component\ErrorHandler\Debug;
 
 if (!file_exists(dirname(__DIR__).'/vendor/autoload.php')) {
     throw new LogicException('Dependencies are not installed. Please run "composer install".');
