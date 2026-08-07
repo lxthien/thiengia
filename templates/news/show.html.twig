@@ -20,8 +20,8 @@
     {% if post.updatedAt %}
         <meta property="article:modified_time" content="{{ post.updatedAt|date('Y-m-d') }}">
     {% endif %}
-    {% if post.category %}
-        <meta property="article:section" content="{{ post.category.name }}">
+    {% if category %}
+        <meta property="article:section" content="{{ category.name }}">
     {% endif %}
 {% endblock %}
 
@@ -37,7 +37,7 @@
         "datePublished": {{ post.createdAt|date('Y-m-d')|json_encode|raw }},
         {% if post.updatedAt %}"dateModified": {{ post.updatedAt|date('Y-m-d')|json_encode|raw }},{% endif %}
         "inLanguage": "vi",
-        {% if post.category %}"articleSection": {{ post.category.name|json_encode|raw }},{% endif %}
+        {% if category %}"articleSection": {{ category.name|json_encode|raw }},{% endif %}
         "author": {
             "@type": "Person",
             "name": {{ (post.author ? post.author.username : v3.company.authorName)|json_encode|raw }}
@@ -63,8 +63,8 @@
                 ]
             }) }}
 
-            {% if post.category|length %}
-                <p class="sec-label sec-label--light mt-8 fade">{{ post.category|first.name }}</p>
+            {% if category %}
+                <p class="sec-label sec-label--light mt-8 fade">{{ category.name }}</p>
             {% endif %}
 
             <h1 class="page-hero-title mt-5 max-w-4xl fade">{{ post.title }}</h1>

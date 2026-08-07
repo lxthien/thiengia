@@ -530,6 +530,25 @@ class News
         return $this->categoryPrimary;
     }
 
+    /**
+     * Resolve a single "primary" category for display contexts that only
+     * show one category per post (cards, meta tags...). $category is a
+     * ManyToMany collection, so this picks the entry matching
+     * categoryPrimary, falling back to the first assigned category.
+     */
+    public function getPrimaryCategory(): ?NewsCategory
+    {
+        if ($this->categoryPrimary) {
+            foreach ($this->category as $cat) {
+                if ($cat->getId() === $this->categoryPrimary) {
+                    return $cat;
+                }
+            }
+        }
+
+        return $this->category->first() ?: null;
+    }
+
     public function setCreatedAt($createdAt)
     {
         $this->createdAt = $createdAt;

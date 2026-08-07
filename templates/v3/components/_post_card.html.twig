@@ -20,8 +20,8 @@
     </a>
 
     <div class="post-card-body">
-        {% if post.category %}
-            <p class="post-card-category">{{ post.category.name }}</p>
+        {% if post.primaryCategory %}
+            <p class="post-card-category">{{ post.primaryCategory.name }}</p>
         {% endif %}
 
         <{{ headingLevel }} class="post-card-title">

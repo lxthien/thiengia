@@ -151,7 +151,7 @@ class NewsController extends AbstractController
             }
 
             // It's a top-level category - forward to listAction
-            return $this->listAction($slug, null, 1, $request);
+            return $this->listAction($request, $slug, null, 1);
         }
 
         // Not found
@@ -180,7 +180,7 @@ class NewsController extends AbstractController
 
         if ($childCategory) {
             // It's a child category - forward to listAction
-            return $this->listAction($level1, $level2, 1, $request);
+            return $this->listAction($request, $level1, $level2, 1);
         }
 
         // Check if level2 is a post in this category
