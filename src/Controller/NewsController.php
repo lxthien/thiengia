@@ -33,7 +33,6 @@ use App\Entity\Tag;
 use App\Entity\Rating;
 use App\Service\PageBuilderService;
 
-use blackknight467\StarRatingBundle\Form\RatingType as RatingType;
 use Vich\UploaderBundle\Templating\Helper\UploaderHelper;
 use EWZ\Bundle\RecaptchaBundle\Validator\Constraints\IsTrue as RecaptchaTrue;
 
@@ -87,7 +86,7 @@ class NewsController extends AbstractController
      * @param Request $request
      * @return Response
      */
-    public function dynamicRouteAction($slug = null, $level1 = null, $level2 = null, $level3 = null, Request $request)
+    public function dynamicRouteAction(Request $request, $slug = null, $level1 = null, $level2 = null, $level3 = null)
     {
         // Normalize parameters
         if (empty($slug) && !empty($level1)) {
@@ -264,7 +263,7 @@ class NewsController extends AbstractController
      * 
      * @return News
      */
-    public function listAction($level1, $level2 = null, $page = 1, Request $request)
+    public function listAction(Request $request, $level1, $level2 = null, $page = 1)
     {
         $page = $request->query->getInt('page', $page);
         if ($page < 1) {
@@ -1047,7 +1046,7 @@ class NewsController extends AbstractController
     }
 
     #[Route('/chi-phi-xay-dung/', name: 'caculator_cost_construction')]
-    public function caculatorCostConstructionAction($type = null, Request $request)
+    public function caculatorCostConstructionAction(Request $request, $type = null)
     {
         $settingsManager = $this->settingsManager;
 

@@ -94,7 +94,7 @@ class Tag implements \JsonSerializable
     /**
      * {@inheritdoc}
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         // This entity implements JsonSerializable (http://php.net/manual/en/class.jsonserializable.php)
         // so this method is used to customize its JSON representation when json_encode()
