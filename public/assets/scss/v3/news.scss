@@ -3,5 +3,6 @@
 @use "component/page-hero";
 @use "component/post-card"; // dùng cho khối "bài liên quan"
 @use "component/newsletter";
+@use "component/figures"; // dải số liệu tin cậy trên trang tĩnh (page.html.twig)
 
 @use "pages/news";

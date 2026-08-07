@@ -1,85 +1,109 @@
 {% extends 'layout.html.twig' %}
 
-{% block stylesheets %}
-	<link href="{{ absolute_url(asset('build/css/v3-news.css')) }}" rel="preload stylesheet" as="style" onload="this.rel='stylesheet'">
-	<noscript><link rel="stylesheet" href="{{ absolute_url(asset('build/css/v3-news.css')) }}"></noscript>
-{% endblock %}
+{% set coverSrc = vich_uploader_asset(post, 'imageFile') ?: null %}
 
-{% block title %}
-	{{ post.getPageTitle() is not null ? post.getPageTitle() : post.getTitle() }}
-{% endblock %}
-{% block description %}
-	{{ post.getPageDescription() is not null ? post.getPageDescription() : post.getDescription() }}
-{% endblock %}
-{% block keyword %}
-	{{ post.getPageKeyword() }}
+{% block title %}{{ post.pageTitle ?: post.title }} | {{ v3.company.shortName }}{% endblock %}
+{% block description %}{{ post.pageDescription ?: post.description }}{% endblock %}
+{% block keyword %}{{ post.pageKeyword }}{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('build/css/v3-news.css') }}">
 {% endblock %}
 
 {% block structuredOpenGraph %}
-	<meta property="og:type" content="article"/>
-	<meta property="og:title" content="{{ post.getPageTitle() is not null ? post.getPageTitle() : post.getTitle() }}"/>
-	<meta property="og:description" content="{{ post.getPageDescription() is not null ? post.getPageDescription() : post.getDescription() }}"/>
-	<meta property="article:author" content="{{ post.getAuthor().getName() }}"/>
-	<meta property="article:published_time" content="{{ post.getCreatedAt()|date("Y-m-d h:m:s") ~ "+07:00" }}"/>
-	<meta property="article:modified_time" content="{{ post.getUpdatedAt()|date("Y-m-d h:m:s") ~ "+07:00" }}"/>
-	{% set imagePathFilter = (vich_uploader_asset(post, 'imageFile') ?: absolute_url(asset('assets/images/no-image.png')))|imagine_filter('news_share_1200_630') %}
-	<meta property="og:image" content="{{ absolute_url(imagePathFilter) }}"/>
-	<meta property="og:image:alt" content="{{ post.getTitle() }}"/>
-	<meta property="og:image:width" content="1200"/>
-	<meta property="og:image:height" content="630"/>
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="{{ block('title') }}">
+    <meta property="og:description" content="{{ block('description') }}">
+    {% if coverSrc %}
+        <meta property="og:image" content="{{ absolute_url(coverSrc) }}">
+    {% endif %}
 {% endblock %}
 
 {% block blogPosting %}
-	{% if post.getSchemaMarkup() %}
-		{{ post.getSchemaMarkup()|raw }}
-	{% endif %}
+    {% if post.schemaMarkup %}
+        {{ post.schemaMarkup|raw }}
+    {% endif %}
 {% endblock %}
 
 {% block body %}
-	<div class="container page ka-page-detail">
-		<div class="row">
-			<div
-				class="col-12 col-md-12 col-lg-9 ka-content-column">
-				{# breadcrumbs #}
-				{{ include('news/components/breadcrumbs.html.twig') }}
 
-				<article id="post-{{ post.getId() }}" class="ka-article-wrapper">
-					<h1 class="ka-article-title">{{ post.getTitle() }}</h1>
-					<p class="ka-article-meta">Cập nhật ngày:
-						{{ post.getUpdatedAt()|date('d/m/Y') }}
-						bởi
-						<a href="{{ path('dynamic_post_page', {'slug': 'nguyenduytuan'}) }}" target="_blank" class="last-modified-author">Nguyễn Duy Tuấn</a>
-					</p>
+    {{ include('v3/components/_page_hero.html.twig', {
+        breadcrumb: [
+            { label: 'Trang chủ', path: path('homepage') },
+            { label: post.breadcrumbTitle ?: post.title }
+        ],
+        title: post.title,
+        description: post.description
+    }) }}
 
-					{% for message in app.flashes('error') %}
-						<div class="alert alert-danger" role="alert">
-							{{ message }}
-						</div>
-					{% endfor %}
-					{% for message in app.flashes('notice') %}
-						<div class="alert alert-success" role="alert">
-							{{ message }}
-						</div>
-					{% endfor %}
+    {% if coverSrc %}
+        <div class="container max-w-7xl post-cover">
+            <figure class="fade">
+                <img src="{{ coverSrc }}" alt="{{ post.title }}" fetchpriority="high" decoding="async">
+            </figure>
+        </div>
+    {% endif %}
 
-					<div class="ka-article-body">
-						{% if pageBuilderBlocks is defined and pageBuilderBlocks is not empty %}
-							{{ include('page_builder/_blocks.html.twig', {blocks: pageBuilderBlocks, contactBlockForm: contactBlockForm|default(null)}) }}
-						{% else %}
-							{{ contentsLazy|raw }}
-						{% endif %}
-					</div>
+    {# ============ SỐ LIỆU TIN CẬY ============ #}
+    <div class="figures">
+        <div class="container max-w-7xl grid grid-cols-2 lg:grid-cols-4 divide-x divide-white/10">
+            {% for figure in v3.figures %}
+                <div class="figure">
+                    <p class="figure-value"><span data-count="{{ figure.value }}">0</span><sup>{{ figure.unit }}</sup></p>
+                    <p class="figure-label">{{ figure.label }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 
-					<div class="ka-article-interactions">
-						{{ include('news/rating/rating.html.twig') }}
-					</div>
-					{{ include('news/components/author.html.twig') }}
-					{{ include('news/comments/list.html.twig') }}
-					{{ include('news/comments/form.html.twig') }}
-				</article>
-			</div>
+    {# ============ NỘI DUNG ============ #}
+    <div class="container max-w-7xl py-16 lg:py-20">
+        <div class="grid lg:grid-cols-[1fr_340px] gap-16 items-start">
 
-			{{ include('layout/sidebar.html.twig') }}
-		</div>
-	</div>
+            <article class="max-w-3xl">
+                {% for message in app.flashes('error') %}
+                    <div class="alert alert-danger" role="alert">{{ message }}</div>
+                {% endfor %}
+                {% for message in app.flashes('notice') %}
+                    <div class="alert alert-success" role="alert">{{ message }}</div>
+                {% endfor %}
+
+                <div class="post-content">
+                    {% if pageBuilderBlocks is defined and pageBuilderBlocks is not empty %}
+                        {{ include('page_builder/_blocks.html.twig', {blocks: pageBuilderBlocks, contactBlockForm: contactBlockForm|default(null)}) }}
+                    {% else %}
+                        {{ contentsLazy|raw }}
+                    {% endif %}
+                </div>
+
+                <aside class="author-box mt-12">
+                    <img src="{{ asset(v3.company.authorAvatar) }}" alt="Chân dung {{ v3.company.authorName }}" loading="lazy" decoding="async">
+                    <div>
+                        <p class="author-label">Tác giả</p>
+                        <p class="author-name">{{ post.author ? post.author.username : v3.company.authorName }}</p>
+                        <p class="author-bio">{{ v3.company.authorBio }}</p>
+                    </div>
+                </aside>
+            </article>
+
+            {# Sidebar dính #}
+            <aside class="lg:sticky lg:top-28 space-y-8" aria-label="Thanh bên trang">
+                {# Mục lục tự sinh từ h2 trong nội dung (xem js/v3/modules/toc.js) #}
+                <nav class="toc" data-toc aria-label="Mục lục trang">
+                    <p class="toc-title">Mục lục</p>
+                    <ol></ol>
+                </nav>
+
+                <div class="post-cta-card">
+                    <p class="post-cta-title">Nhận dự toán <em>miễn phí</em> cho ngôi nhà của bạn</p>
+                    <p class="post-cta-note">Kiến trúc sư trưởng lập bảng bóc tách chi tiết trong 48 giờ.</p>
+                    <a href="{{ path('contact') }}" class="btn2">Đặt lịch tư vấn</a>
+                    <a href="tel:{{ v3.company.phoneRaw }}" class="post-cta-phone">{{ v3.company.phone }}</a>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    {{ include('v3/components/_newsletter.html.twig') }}
+
 {% endblock %}
