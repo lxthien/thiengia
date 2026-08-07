@@ -61,7 +61,7 @@ class ActivityLogService
             }
 
             $this->em->persist($log);
-            $this->em->flush($log);
+            $this->em->flush();
         } catch (\Exception $e) {
             // Silently fail — logging should never break the main functionality
         }

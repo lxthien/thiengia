@@ -9,7 +9,7 @@ _liip_imagine:
 
 app:
     resource: '../src/Controller/'
-    type:     annotation
+    type:     attribute
     # prefix:   /{_locale}
     # requirements:
     #     _locale: '%app_locales%'

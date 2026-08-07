@@ -65,6 +65,10 @@ class Kernel extends BaseKernel
     {
         $confDir = $this->getProjectDir().'/config';
 
+        // Load per-bundle route imports (e.g. web profiler, security logout)
+        $routes->import($confDir.'/{routes}/'.$this->environment.'/*'.self::CONFIG_EXTS, 'glob');
+        $routes->import($confDir.'/{routes}/*'.self::CONFIG_EXTS, 'glob');
+
         // Load main routes.yaml
         if (file_exists($confDir.'/routes.yaml')) {
             $routes->import($confDir.'/routes.yaml');
