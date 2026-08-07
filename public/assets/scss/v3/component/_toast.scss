@@ -1,0 +1,47 @@
+@use "../tokens" as *;
+
+// Thông báo nổi (thành công/lỗi) sau khi submit form AJAX — xem js/v3/modules/toast.js
+.v3-toast-stack {
+  position: fixed;
+  z-index: 9999;
+  top: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: min(360px, calc(100vw - 2rem));
+  pointer-events: none;
+
+  @media (max-width: 640px) {
+    top: auto;
+    bottom: 1.5rem;
+    left: 1rem;
+    right: 1rem;
+    max-width: none;
+  }
+}
+
+.v3-toast {
+  pointer-events: auto;
+  background: $white;
+  color: $text;
+  border-left: 4px solid $primary;
+  box-shadow: 0 20px 45px rgba($dark, 0.22);
+  padding: 1rem 1.25rem;
+  font-size: 0.88rem;
+  font-weight: 400;
+  line-height: 1.5;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity $dur $ease, transform $dur $ease;
+
+  &.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  &--error {
+    border-left-color: #b3261e;
+  }
+}

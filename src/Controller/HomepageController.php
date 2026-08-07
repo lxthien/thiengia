@@ -9,11 +9,7 @@ use App\Entity\NewsCategory;
 use App\Entity\News;
 use App\Entity\Contact;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use App\Service\ActivityLogService;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use App\Service\SettingsManager;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -108,18 +104,31 @@ class HomepageController extends AbstractController
             }
         }
 
+        // Form "báo giá nhanh" trên hero — gửi AJAX tới contact_ajax (xem assets/js/v3/modules/forms.js)
         $contact = new Contact();
         $form = $this->createFormBuilder($contact)
             ->setAction($this->generateUrl('contact_ajax'))
-            ->add('name', TextType::class, array('label' => 'label.author', 'attr' => array('placeholder' => 'Họ và tên *')))
-            ->add('phone', TextType::class, array('label' => 'label.phone', 'attr' => array('placeholder' => 'Số điện thoại *')))
-            ->add('email', EmailType::class, array('label' => 'label.author_email', 'attr' => array('placeholder' => 'Email (không bắt buộc)'), 'required' => false))
-            ->add('contents', TextareaType::class, array(
-                'label' => 'label.content',
-                'attr' => array('rows' => '4', 'placeholder' => 'Nội dung yêu cầu tư vấn *')
+            ->setMethod('POST')
+            ->add('name', TextType::class, array(
+                'label' => false,
+                'attr' => array('placeholder' => 'Nguyễn Văn A', 'autocomplete' => 'name'),
             ))
-            ->add('gclid', HiddenType::class, array('required' => false))
-            ->add('send', SubmitType::class, array('label' => 'Gửi yêu cầu', 'attr' => array('class' => 'btn btn-primary ka-btn')))
+            ->add('phone', TextType::class, array(
+                'label' => false,
+                'attr' => array('placeholder' => '09xx xxx xxx', 'autocomplete' => 'tel'),
+            ))
+            ->add('title', ChoiceType::class, array(
+                'label' => false,
+                'required' => false,
+                // Giữ đồng bộ với v3.menu.services trong config/packages/v3.yaml
+                'choices' => array_combine($v3Services = [
+                    'Xây nhà trọn gói',
+                    'Xây nhà phần thô',
+                    'Xây biệt thự',
+                    'Sửa nhà trọn gói',
+                    'Thiết kế kiến trúc',
+                ], $v3Services),
+            ))
             ->getForm();
 
         return $this->render('homepage/index.html.twig', [

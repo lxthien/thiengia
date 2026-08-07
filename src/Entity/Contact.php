@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\ContactRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 
@@ -17,18 +18,21 @@ class Contact
     #[ORM\GeneratedValue(strategy: 'AUTO')]
     private $id;
 
+    #[Assert\NotBlank]
     #[ORM\Column(name: 'name', type: Types::STRING, length: 255)]
     private $name;
 
     #[ORM\Column(name: 'title', type: Types::STRING, length: 255, nullable: true)]
     private $title;
 
+    #[Assert\NotBlank]
     #[ORM\Column(name: 'phone', type: Types::STRING, length: 255)]
     private $phone;
 
     #[ORM\Column(name: 'email', type: Types::STRING, length: 255, nullable: true)]
     private $email;
 
+    #[Assert\NotBlank]
     #[ORM\Column(name: 'contents', type: Types::TEXT)]
     private $contents;
 

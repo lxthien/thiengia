@@ -48,31 +48,29 @@
                 </div>
             </div>
 
-            {# Form báo giá nhanh — bước "form" sẽ thay action bằng route thật #}
-            <form id="bao-gia-nhanh" class="quick-quote fade" method="post" action="{{ path('contact') }}" data-quote>
+            {# Form báo giá nhanh — gửi AJAX tới contact_ajax, xem assets/js/v3/modules/forms.js #}
+            {{ form_start(form, {
+                attr: { id: 'bao-gia-nhanh', class: 'quick-quote fade', 'data-quote': '', 'data-ajax-form': '' }
+            }) }}
                 <h2 class="qq-title">Nhận báo giá <em>miễn phí</em></h2>
                 <p class="qq-note">Kiến trúc sư gọi lại trong 30 phút giờ làm việc.</p>
 
                 <div class="mt-5 space-y-4">
                     <div>
-                        <label for="qq-name">Họ và tên</label>
-                        <input id="qq-name" name="hoten" type="text" placeholder="Nguyễn Văn A" autocomplete="name" required>
+                        <label for="{{ form.name.vars.id }}">Họ và tên</label>
+                        {{ form_widget(form.name) }}
                     </div>
                     <div>
-                        <label for="qq-phone">Số điện thoại</label>
-                        <input id="qq-phone" name="sodienthoai" type="tel" placeholder="09xx xxx xxx" autocomplete="tel" required>
+                        <label for="{{ form.phone.vars.id }}">Số điện thoại</label>
+                        {{ form_widget(form.phone) }}
                     </div>
                     <div>
-                        <label for="qq-service">Nhu cầu</label>
-                        <select id="qq-service" name="nhucau">
-                            {% for item in v3.menu.services %}
-                                <option>{{ item }}</option>
-                            {% endfor %}
-                        </select>
+                        <label for="{{ form.title.vars.id }}">Nhu cầu</label>
+                        {{ form_widget(form.title) }}
                     </div>
                     <button type="submit" class="btn2">Gửi — nhận báo giá ngay</button>
                 </div>
-            </form>
+            {{ form_end(form) }}
         </div>
     </section>
 

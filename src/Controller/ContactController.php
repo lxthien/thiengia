@@ -95,25 +95,30 @@ class ContactController extends AbstractController
         ]);
     }
 
-    #[Route('lien-he-ajax/', name: 'contact_ajax')]
+    #[Route('lien-he-ajax/', name: 'contact_ajax', methods: ['POST'])]
     public function ajaxAction(Request $request)
     {
         $contact = new Contact();
+        // Contact::contents has #[Assert\NotBlank]; the quick-quote form (no
+        // textarea) doesn't map this field, so pre-fill a placeholder here —
+        // otherwise validation would fail before the real fallback below runs.
+        $contact->setContents('Yêu cầu báo giá nhanh');
 
         $form = $this->createFormBuilder($contact)
             ->add('name', TextType::class, array('label' => 'label.author'))
-            ->add('email', EmailType::class, array('label' => 'label.author_email'))
             ->add('phone', TextType::class, array('label' => 'label.phone'))
-            ->add('contents', TextareaType::class, array(
-                'label' => 'label.content',
-                'attr' => array('rows' => '7')
-            ))
+            ->add('title', TextType::class, array('label' => 'label.title', 'required' => false))
+            ->add('email', EmailType::class, array('label' => 'label.author_email', 'required' => false))
             ->add('gclid', HiddenType::class, array('required' => false))
             ->getForm();
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            if ($contact->getTitle()) {
+                $contact->setContents('Yêu cầu báo giá nhanh — Nhu cầu: ' . $contact->getTitle());
+            }
+
             $this->em->persist($contact);
             $this->em->flush();
 
