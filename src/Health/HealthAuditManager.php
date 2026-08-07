@@ -330,7 +330,6 @@ class HealthAuditManager
 
         switch ($route['_route']) {
             case 'dynamic_post_page':
-            case 'news_show':
                 $slug = $route['slug'] ?? ($route['level1'] ?? '');
                 if (empty($slug)) return false;
                 return $this->publishedPostExists($slug) || $this->categoryExists($slug);

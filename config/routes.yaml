@@ -88,14 +88,3 @@ list_category:
         level1: '[-\w]+'
         level2: '[-\w]+'
         page: '\d+'
-
-# Legacy news_show route - now aliased to dynamic_post_page for backward compatibility
-news_show:
-    path: /{slug}/
-    defaults:
-        _controller: App\Controller\NewsController::dynamicRouteAction
-        level1: null
-        level2: null
-        level3: null
-    requirements:
-        slug: '[^\n]++'

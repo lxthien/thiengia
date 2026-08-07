@@ -10,7 +10,7 @@
                     <div class="card">
                         <div class="card-header">
                             <strong class="card-title">{{ 'title.edit_news'|trans({'%id%': object.id}) }}</strong>
-                            <a class="pull-right" target="_blank" href="{{ path('news_show', {'slug': object.url, 'preview' : 'true', 'preview_id' : object.id }) }}">Xem trước</a>
+                            <a class="pull-right" target="_blank" href="{{ path('dynamic_post_page', {'slug': object.url, 'preview' : 'true', 'preview_id' : object.id }) }}">Xem trước</a>
                         </div>
                         <div class="card-body">
                             <!-- Credit Card -->

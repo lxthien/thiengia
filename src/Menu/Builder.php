@@ -139,7 +139,7 @@ class Builder
 
         /*
         $menu->addChild('Giới thiệu', [
-            'route' => 'news_show',
+            'route' => 'dynamic_post_page',
             'routeParameters' => ['slug' => 'gioi-thieu']
         ])
         ->setAttribute('class', 'dropdown')
@@ -148,12 +148,12 @@ class Builder
         ->setChildrenAttribute('class', 'dropdown-menu');
 
         $menu['Giới thiệu']->addChild('Về chúng tôi', [
-            'route' => 'news_show',
+            'route' => 'dynamic_post_page',
             'routeParameters' => ['slug' => 'gioi-thieu']
         ]);
 
         $menu['Giới thiệu']->addChild('Tuyển dụng', [
-            'route' => 'news_show',
+            'route' => 'dynamic_post_page',
             'routeParameters' => ['slug' => 'tuyen-dung-kien-truc-su-xay-dung']
         ]);
 

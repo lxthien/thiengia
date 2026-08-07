@@ -34,13 +34,13 @@
                     width="277"
                     height="{{ isVerticalCard ? '350' : '220' }}" />
             </picture>
-            <a title="{{ row.getTitle() }}" href="{{ path('news_show', {'slug': row.getUrl() }) }}" {{ target is defined ? ' target=' ~ target : '' }} {{ rel is defined ? ' rel=' ~ rel : '' }}>
+            <a title="{{ row.getTitle() }}" href="{{ path('dynamic_post_page', {'slug': row.getUrl() }) }}" {{ target is defined ? ' target=' ~ target : '' }} {{ rel is defined ? ' rel=' ~ rel : '' }}>
                 <i class="fa fa-link"></i>
             </a>
         </div>
         <div class="ka-card-body">
             <h3 class="mt-0 mb-1">
-                <a title="{{ row.getTitle() }}" href="{{ path('news_show', {'slug': row.getUrl() }) }}" title="{{ row.getTitle() }}" {{ target is defined ? ' target=' ~ target : '' }} {{ rel is defined ? ' rel=' ~ rel : '' }}>
+                <a title="{{ row.getTitle() }}" href="{{ path('dynamic_post_page', {'slug': row.getUrl() }) }}" title="{{ row.getTitle() }}" {{ target is defined ? ' target=' ~ target : '' }} {{ rel is defined ? ' rel=' ~ rel : '' }}>
                     {% if row.highlightedTitle is defined %}
                         {{ row.highlightedTitle|raw }}
                     {% else %}

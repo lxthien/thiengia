@@ -16,11 +16,11 @@
         <div class="related-wrapper video-related">
             <div class="youtube-video-place embed-responsive embed-responsive-4by3" data-yt-url="https://www.youtube.com/embed/{{ v.yt }}?rel=0&showinfo=0&autoplay=1">
                 <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{ asset(convert_images.webpConvert2(asset('/assets/images/' ~ v.img), '')) }}" width="277" height="208" class="play-youtube-video lazyload" alt="{{ v.alt }}">
-                <a href="{{ path('news_show', {'slug': v.slug}) }}" class="text-center">{{ v.alt }}</a>
+                <a href="{{ path('dynamic_post_page', {'slug': v.slug}) }}" class="text-center">{{ v.alt }}</a>
             </div>
         </div>
     {% endfor %}
     {% for l in links %}
-        <div class="related-wrapper video-related"><div class="youtube-video-place embed-responsive embed-responsive-4by3"><a href="{{ path('news_show', {'slug': l.slug}) }}" class="text-center">{{ l.text }}</a></div></div>
+        <div class="related-wrapper video-related"><div class="youtube-video-place embed-responsive embed-responsive-4by3"><a href="{{ path('dynamic_post_page', {'slug': l.slug}) }}" class="text-center">{{ l.text }}</a></div></div>
     {% endfor %}
 </div>

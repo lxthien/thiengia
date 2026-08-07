@@ -143,7 +143,7 @@
                                                 <td>
                                                     <a href="{{ path('admin_news_edit', {id: post.id}) }}">{{ post.title }}</a>
                                                     <small class="d-block text-muted">
-                                                        <a href="{{ path('news_show', {slug: post.url}) }}" target="_blank">{{ post.url }}.html</a>
+                                                        <a href="{{ path('dynamic_post_page', {slug: post.url}) }}" target="_blank">{{ post.url }}.html</a>
                                                     </small>
                                                     <small class="d-block text-muted">
                                                         {% for category in post.category %}
@@ -178,7 +178,7 @@
                                                     <a href="{{ path('admin_news_edit', {id: post.id}) }}" class="btn-sm" title="Edit">
                                                         <i class="fa fa-edit" aria-hidden="true"></i>
                                                     </a>
-                                                    <a href="{{ path('news_show', {slug: post.url}) }}" target="_blank" class="btn-sm" title="Preview">
+                                                    <a href="{{ path('dynamic_post_page', {slug: post.url}) }}" target="_blank" class="btn-sm" title="Preview">
                                                         <i class="fa fa-external-link" aria-hidden="true"></i>
                                                     </a>
                                                 </td>

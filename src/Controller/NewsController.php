@@ -361,9 +361,9 @@ class NewsController extends AbstractController
 
     /**
      * Display a post/page
-     * 
-     * Note: Route is defined in app/config/routing.yml as both 'news_show' (legacy)
-     * and 'dynamic_post_page' (preferred). All routing goes through dynamicRoute().
+     *
+     * Note: Route is defined in config/routes.yaml as 'dynamic_post_page'.
+     * All routing goes through dynamicRouteAction().
      */
     public function showAction($slug, Request $request)
     {
@@ -393,7 +393,7 @@ class NewsController extends AbstractController
 
         // 3. SEO Canonical Redirect (301)
         if ($request->query->has('danh-muc')) {
-            return $this->redirectToRoute('news_show', ['slug' => $slug], 301);
+            return $this->redirectToRoute('dynamic_post_page', ['slug' => $slug], 301);
         }
 
         // Async log viewCount
@@ -965,10 +965,10 @@ class NewsController extends AbstractController
 
                 if ($index < count($pageChain) - 1) {
                     // Add as link for parent pages
-                    $breadcrumbs->addItem($breadcrumbLabel, $this->generateUrl('news_show', array('slug' => $p->getUrl())));
+                    $breadcrumbs->addItem($breadcrumbLabel, $this->generateUrl('dynamic_post_page', array('slug' => $p->getUrl())));
                 } else {
                     // Add current page without link
-                    $breadcrumbs->addItem($p->getTitle(), $this->generateUrl('news_show', array('slug' => $p->getUrl())));
+                    $breadcrumbs->addItem($p->getTitle(), $this->generateUrl('dynamic_post_page', array('slug' => $p->getUrl())));
                 }
             }
 

@@ -30,13 +30,13 @@
                     width="282"
                     height="220" />
             </picture>
-            <a title="{{ row.getTitle() }}" href="{{ path('news_show', {'slug': row.getUrl() }) }}">
+            <a title="{{ row.getTitle() }}" href="{{ path('dynamic_post_page', {'slug': row.getUrl() }) }}">
                 <i class="fa fa-link"></i>
             </a>
         </div>
         <div class="media-body">
             <h3 class="mt-0 mb-1">
-                <a title="{{ row.getTitle() }}" href="{{ path('news_show', {'slug': row.getUrl() }) }}" title="{{ row.getTitle() }}">{{ row.getTitle() }}</a>
+                <a title="{{ row.getTitle() }}" href="{{ path('dynamic_post_page', {'slug': row.getUrl() }) }}" title="{{ row.getTitle() }}">{{ row.getTitle() }}</a>
             </h3>
             <p>{{ row.getDescription()|slice(0, 105) }}</p>
         </div>

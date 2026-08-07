@@ -36,7 +36,7 @@
                 <li><a href="{{ path('homepage') }}#quy-trinh" class="hd-link">Quy trình</a></li>
                 <li>
                     <a href="{{ path('news_category', { level1: v3.newsCategorySlug }) }}"
-                       class="hd-link {{ route in ['news_category','news_show','dynamic_post_page','list_category'] ? 'is-active' : '' }}"
+                       class="hd-link {{ route in ['news_category','dynamic_post_page','list_category'] ? 'is-active' : '' }}"
                        {{ route == 'news_category' ? 'aria-current="page"' : '' }}>Cẩm nang</a>
                 </li>
                 <li>

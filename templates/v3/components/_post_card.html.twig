@@ -15,7 +15,7 @@
     : asset('assets/images/no-image.png') %}
 
 <article class="post-card {{ featured ? 'post-card--featured' : '' }} fade">
-    <a href="{{ path('news_show', { slug: post.url }) }}" class="post-card-media" tabindex="-1" aria-hidden="true">
+    <a href="{{ path('dynamic_post_page', { slug: post.url }) }}" class="post-card-media" tabindex="-1" aria-hidden="true">
         <img src="{{ imageSrc }}" alt="{{ post.title }}" loading="lazy" decoding="async">
     </a>
 
@@ -25,7 +25,7 @@
         {% endif %}
 
         <{{ headingLevel }} class="post-card-title">
-            <a href="{{ path('news_show', { slug: post.url }) }}">{{ post.title }}</a>
+            <a href="{{ path('dynamic_post_page', { slug: post.url }) }}">{{ post.title }}</a>
         </{{ headingLevel }}>
 
         {% if post.description %}

@@ -13,7 +13,7 @@
                 {% endif %}
 
                 <div class="item">
-                    <a href="{{ path('news_show', {'slug': row.getUrl() }) }}" class="list-group-item td-list-group-item" title="{{ row.getTitle() }}">
+                    <a href="{{ path('dynamic_post_page', {'slug': row.getUrl() }) }}" class="list-group-item td-list-group-item" title="{{ row.getTitle() }}">
                         <img
                             alt="{{ row.getTitle() }}"
                             width="70"
