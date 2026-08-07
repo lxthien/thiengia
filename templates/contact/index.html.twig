@@ -98,45 +98,50 @@
                 </address>
             </div>
 
-            {#
-                Form tĩnh — bước "form" (Symfony Form + validation + mail) chưa làm.
-                Khi làm: thay khối này bằng {{ form_start(form) }} … {{ form_end(form) }}
-                và giữ nguyên class .contact-form / .form-field.
-            #}
-            <form class="contact-form fade" method="post" action="{{ path('contact') }}" data-quote>
+            {{ form_start(form, { attr: { class: 'contact-form fade', 'data-quote': '' } }) }}
                 <h3 class="contact-form-title">Đăng ký tư vấn <em>miễn phí</em></h3>
                 <p class="contact-form-note">Chúng tôi sẽ liên hệ trong vòng 30 phút (giờ làm việc).</p>
 
+                {% for message in app.flashes('notice') %}
+                    <div class="v3-toast v3-toast--static v3-toast--success mt-6" role="status">{{ message }}</div>
+                {% endfor %}
+                {% for message in app.flashes('error') %}
+                    <div class="v3-toast v3-toast--static v3-toast--error mt-6" role="alert">{{ message }}</div>
+                {% endfor %}
+                {% if form.vars.errors|length %}
+                    <div class="v3-toast v3-toast--static v3-toast--error mt-6" role="alert">{{ form_errors(form) }}</div>
+                {% endif %}
+
                 <div class="grid sm:grid-cols-2 gap-6 mt-8">
                     <div class="form-field">
-                        <label for="f-name">Họ và tên</label>
-                        <input id="f-name" name="hoten" type="text" placeholder="Nguyễn Văn A" autocomplete="name" required>
+                        <label for="{{ form.name.vars.id }}">Họ và tên</label>
+                        {{ form_widget(form.name, { attr: { placeholder: 'Nguyễn Văn A', autocomplete: 'name' } }) }}
+                        {% if form.name.vars.errors|length %}<div class="form-error">{{ form_errors(form.name) }}</div>{% endif %}
                     </div>
                     <div class="form-field">
-                        <label for="f-phone">Số điện thoại</label>
-                        <input id="f-phone" name="sodienthoai" type="tel" placeholder="09xx xxx xxx" autocomplete="tel" required>
+                        <label for="{{ form.phone.vars.id }}">Số điện thoại</label>
+                        {{ form_widget(form.phone, { attr: { placeholder: '09xx xxx xxx', autocomplete: 'tel' } }) }}
+                        {% if form.phone.vars.errors|length %}<div class="form-error">{{ form_errors(form.phone) }}</div>{% endif %}
                     </div>
                 </div>
 
                 <div class="form-field mt-6">
-                    <label for="f-service">Nhu cầu của bạn</label>
-                    <select id="f-service" name="nhucau">
-                        {% for item in v3.menu.services %}
-                            <option>{{ item }}</option>
-                        {% endfor %}
-                    </select>
+                    <label for="{{ form.title.vars.id }}">Nhu cầu của bạn</label>
+                    {{ form_widget(form.title) }}
+                    {% if form.title.vars.errors|length %}<div class="form-error">{{ form_errors(form.title) }}</div>{% endif %}
                 </div>
 
                 <div class="form-field mt-6">
-                    <label for="f-message">Mô tả ngắn về dự án</label>
-                    <textarea id="f-message" name="mota" rows="4" placeholder="Diện tích đất, khu vực, phong cách yêu thích..."></textarea>
+                    <label for="{{ form.contents.vars.id }}">Mô tả ngắn về dự án</label>
+                    {{ form_widget(form.contents, { attr: { placeholder: 'Diện tích đất, khu vực, phong cách yêu thích...' } }) }}
+                    {% if form.contents.vars.errors|length %}<div class="form-error">{{ form_errors(form.contents) }}</div>{% endif %}
                 </div>
 
                 <button type="submit" class="btn2 w-full mt-8">
                     Gửi yêu cầu tư vấn
                     <svg class="btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </button>
-            </form>
+            {{ form_end(form) }}
         </div>
     </section>
 

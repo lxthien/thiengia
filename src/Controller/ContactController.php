@@ -9,10 +9,14 @@ use Symfony\Component\Routing\Annotation\Route;
 
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Mailer\MailerInterface;
@@ -42,22 +46,34 @@ class ContactController extends AbstractController
     {
         $contact = new Contact();
 
-        $form = $this->createFormBuilder($contact)
+        $formBuilder = $this->createFormBuilder($contact)
             ->add('name', TextType::class, array('label' => 'Họ và tên *'))
             ->add('phone', TextType::class, array('label' => 'Số điện thoại *'))
-            ->add('email', EmailType::class, array('label' => 'Email (không bắt buộc)', 'required' => false))
-            ->add('contents', TextareaType::class, array(
-                'label' => 'Nội dung yêu cầu tư vấn *',
-                'attr' => array('rows' => '7')
+            ->add('title', ChoiceType::class, array(
+                'label' => 'Nhu cầu của bạn',
+                'required' => false,
+                // Giữ đồng bộ với v3.menu.services trong config/packages/v3.yaml
+                'choices' => array_combine($v3Services = [
+                    'Xây nhà trọn gói',
+                    'Xây nhà phần thô',
+                    'Xây biệt thự',
+                    'Sửa nhà trọn gói',
+                    'Thiết kế kiến trúc',
+                ], $v3Services),
             ))
-            ->add('gclid', HiddenType::class, array('required' => false))
-            ->add('send', SubmitType::class, array('label' => 'Gửi yêu cầu tư vấn', 'attr' => array('class' => 'btn btn-primary')))
-            ->getForm();
+            ->add('contents', TextareaType::class, array(
+                'label' => 'Mô tả ngắn về dự án',
+                'required' => false,
+                'attr' => array('rows' => '4'),
+            ))
+            ->add('gclid', HiddenType::class, array('required' => false));
 
+        $this->addContentsFallbackListener($formBuilder, 'Yêu cầu tư vấn từ trang liên hệ');
+
+        $form = $formBuilder->getForm();
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $this->em->persist($contact);
             $this->em->flush();
 
@@ -198,5 +214,23 @@ class ContactController extends AbstractController
         $this->addFlash('notice', $this->translator->trans('contact.message.success'));
 
         return new RedirectResponse($redirectUrl);
+    }
+
+    /**
+     * Contact::contents has #[Assert\NotBlank], but some forms make the
+     * description optional in the UI. Symfony validates as part of
+     * handleRequest() itself (on FormEvents::POST_SUBMIT) rather than lazily
+     * when isValid() is called, so filling in a fallback afterwards is too
+     * late — it has to happen on FormEvents::SUBMIT, once data is mapped
+     * onto the entity but before validation runs.
+     */
+    private function addContentsFallbackListener(FormBuilderInterface $formBuilder, string $fallback): void
+    {
+        $formBuilder->addEventListener(FormEvents::SUBMIT, function (FormEvent $event) use ($fallback) {
+            $contact = $event->getData();
+            if ($contact instanceof Contact && empty($contact->getContents())) {
+                $contact->setContents($fallback . ($contact->getTitle() ? ' — Nhu cầu: ' . $contact->getTitle() : ''));
+            }
+        });
     }
 }
