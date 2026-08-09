@@ -1,0 +1,174 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% macro render_image_tile(image) %}
+    {% set parts = image.imageUrl|split('/') %}
+    {% set thumb = (parts|slice(0, -1)|join('/')) ~ '/thumbs/' ~ (parts|last) %}
+    <li class="dd-item album-image-item" data-id="{{ image.id }}" style="border:1px solid #eee;border-radius:4px;margin-bottom:8px;background:#fff;">
+        <div class="dd-handle" style="cursor:move;display:flex;align-items:center;gap:14px;padding:10px 14px;">
+            <i class="fa fa-arrows" style="color:#bbb;"></i>
+            <img src="{{ thumb }}" alt="" style="width:70px;height:50px;object-fit:cover;border-radius:3px;background:#f5f5f5;">
+            <div style="flex:1;display:flex;gap:10px;">
+                <input type="text" class="form-control input-sm album-image-caption" placeholder="Chú thích ảnh" value="{{ image.caption }}">
+                <input type="text" class="form-control input-sm album-image-alt" placeholder="Alt text" value="{{ image.alt }}">
+            </div>
+            <button type="button" class="btn btn-sm btn-danger album-image-delete" title="Xóa ảnh khỏi album">
+                <i class="fa fa-trash"></i>
+            </button>
+        </div>
+    </li>
+{% endmacro %}
+
+{% block main %}
+    <div class="content mt-3">
+        <div class="animated fadeIn">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <strong class="card-title">{{ 'action.edit'|trans }} — {{ object.name }}</strong>
+                        </div>
+                        <div class="card-body">
+                            <div id="pay-invoice">
+                                <div class="card-body">
+                                    {{ form_errors(form) }}
+                                    {{ form_start(form) }}
+                                        {{ form_row(form.name) }}
+                                        {{ form_row(form.description) }}
+                                        {{ form_row(form.enable) }}
+
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fa fa-save" aria-hidden="true"></i> {{ 'action.save'|trans }}
+                                        </button>
+
+                                        <a href="{{ path('admin_gallery_album_index') }}" class="btn btn-link">
+                                            <i class="fa fa-list-alt" aria-hidden="true"></i> {{ 'action.back_to_list'|trans }}
+                                        </a>
+                                    {{ form_end(form) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <strong class="card-title">Ảnh trong album</strong>
+                        </div>
+                        <div class="card-body">
+
+                            {# ── Chọn ảnh từ Media Library (staging — chưa lưu ngay) ── #}
+                            <div class="image-manager-card"
+                                 data-media-picker-block
+                                 data-picker-id="albumImagePicker"
+                                 data-upload-path="/uploads/media/"
+                                 style="border:1px solid #e0e4ef;border-radius:6px;margin-bottom:14px;overflow:hidden;">
+                                <div style="padding:14px;">
+                                    <div class="row" style="margin:0;">
+                                        <div class="col-sm-3" style="padding-right:14px;">
+                                            <div style="border:2px dashed #d5d9ef;border-radius:6px;background:#f9faff;min-height:90px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+                                                <img id="albumImagePicker_preview_img" src="" alt="Preview" style="max-width:100%;max-height:90px;display:none;object-fit:cover;">
+                                                <div id="albumImagePicker_placeholder" style="text-align:center;color:#b0b8d4;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px;">
+                                                    <i class="fa fa-image fa-2x"></i>
+                                                </div>
+                                                <button type="button" id="albumImagePicker_clear_btn" data-media-picker-clear data-picker-id="albumImagePicker" title="Bỏ chọn"
+                                                        style="position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;border:none;cursor:pointer;font-size:12px;line-height:20px;padding:0;display:none;">&times;</button>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-9" style="padding-left:8px;">
+                                            <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#5b7aff;margin-bottom:8px;display:block;">
+                                                <i class="fa fa-th-large"></i> Chọn ảnh từ Media Library
+                                            </label>
+                                            <div class="input-group">
+                                                <input type="text" id="albumImagePicker_display" class="form-control input-sm" readonly
+                                                       placeholder="Chưa chọn ảnh từ thư viện..." style="font-size:12px;background:#fff;color:#555;">
+                                                <span class="input-group-btn">
+                                                    <button type="button" class="btn btn-default btn-sm"
+                                                            data-media-picker-open data-picker-id="albumImagePicker"
+                                                            style="background:#5b7aff;color:#fff;border-color:#5b7aff;white-space:nowrap;">
+                                                        <i class="fa fa-image"></i> Chọn
+                                                    </button>
+                                                </span>
+                                            </div>
+                                            <button type="button" id="albumImageAddBtn" class="btn btn-success btn-sm mt-2" disabled>
+                                                <i class="fa fa-plus"></i> Thêm ảnh vào album
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {# Staging hidden input — không thuộc Symfony form, JS đọc để POST AJAX #}
+                            <input type="hidden" id="albumImagePicker_url_input">
+
+                            <p class="text-muted" style="font-size:12px;"><i class="fa fa-info-circle"></i> Kéo thả để sắp xếp thứ tự ảnh.</p>
+
+                            <div class="dd" id="album-image-nestable" data-reorder-url="{{ path('admin_gallery_album_images_reorder', {id: object.id}) }}">
+                                <ol class="dd-list" id="album-image-list">
+                                    {% import _self as self %}
+                                    {% for image in object.images %}
+                                        {{ self.render_image_tile(image) }}
+                                    {% endfor %}
+                                </ol>
+                            </div>
+                            {% if object.images|length == 0 %}
+                                <p class="text-muted" id="album-image-empty">Album chưa có ảnh nào.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Media Picker Modal #}
+    <div class="modal fade" id="albumImagePickerModal" tabindex="-1" role="dialog"
+         data-picker-url="{{ path('admin_media_picker') }}"
+         data-picker-id="albumImagePicker"
+         aria-labelledby="albumImagePickerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-media-picker-close data-picker-id="albumImagePicker">
+                        <span>&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="albumImagePickerModalLabel">
+                        <i class="fa fa-image"></i> Chọn ảnh từ thư viện
+                    </h4>
+                </div>
+                <div class="modal-body" id="albumImagePicker_body">
+                    <div class="text-center text-muted" style="padding:30px;">
+                        <i class="fa fa-spinner fa-spin fa-2x"></i>
+                        <p class="mt-2">Đang tải thư viện...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <span id="albumImagePicker_selName" class="text-muted pull-left" style="font-size:13px;line-height:34px;"></span>
+                    <button type="button" class="btn btn-default" data-media-picker-close data-picker-id="albumImagePicker">Hủy</button>
+                    <button type="button" class="btn btn-primary" id="albumImagePicker_confirm" disabled
+                            data-media-picker-confirm data-picker-id="albumImagePicker">
+                        <i class="fa fa-check"></i> Chọn ảnh này
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('build/js/menu-editor.js') }}"></script>
+    <script src="{{ asset('build/js/gallery-album-editor.js') }}"></script>
+    <script>
+        $(function () {
+            GalleryAlbumEditor.init({
+                addImageUrl: {{ path('admin_gallery_album_image_add', {id: object.id})|json_encode|raw }},
+                updateImageUrlBase: {{ path('admin_gallery_album_image_update', {id: '__ID__'})|json_encode|raw }},
+                deleteImageUrlBase: {{ path('admin_gallery_album_image_delete', {id: '__ID__'})|json_encode|raw }},
+                reorderUrl: {{ path('admin_gallery_album_images_reorder', {id: object.id})|json_encode|raw }},
+                deleteToken: {{ csrf_token('delete')|json_encode|raw }}
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,6 +1,6 @@
 {% extends 'admin/layout.html.twig' %}
 
-{% block body_id 'admin_news_index' %}
+{% block body_id 'admin_banner_index' %}
 
 {% block main %}
     <div class="content mt-3">
@@ -28,46 +28,76 @@
                     <div class="card">
                         <div class="card-header">
                             <strong class="card-title">{{ 'title.banner_list'|trans }}</strong>
+                            <span class="text-muted" style="font-size:12px;"><i class="fa fa-info-circle"></i> Kéo thả để sắp xếp thứ tự</span>
                         </div>
                         <div class="card-body">
-                            <table id="bootstrap-data-table" class="table table-striped table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>{{ 'label.images'|trans }}</th>
-                                        <th>{{ 'label.name'|trans }}</th>
-                                        <th>{{ 'label.category'|trans }}</th>
-                                        <th>{{ 'label.published_at'|trans }}</th>
-                                        <th>{{ 'label.actions'|trans }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
+                            <div class="dd" id="banner-nestable">
+                                <ol class="dd-list" id="banner-list">
                                     {% for row in objects %}
-                                    <tr>
-                                        <td>
-                                            <div class="images-container">
-                                                <img src="{{ (vich_uploader_asset(row, 'imageFile') ? vich_uploader_asset(row, 'imageFile') : asset('assets/images/no-image.png')) | imagine_filter('admin_thumb') }}" alt="{{ row.getName() }}" />
+                                        {% set _parts = row.urlImage|split('/') %}
+                                        {% set _thumb = row.urlImage ? (_parts|slice(0, -1)|join('/')) ~ '/thumbs/' ~ (_parts|last) : asset('assets/images/no-image.png') %}
+                                        <li class="dd-item" data-id="{{ row.id }}" style="border:1px solid #eee;border-radius:4px;margin-bottom:8px;background:#fff;">
+                                            <div class="dd-handle" style="cursor:move;display:flex;align-items:center;gap:14px;padding:10px 14px;">
+                                                <i class="fa fa-arrows" style="color:#bbb;"></i>
+                                                <img src="{{ _thumb }}" alt="{{ row.getName() }}" style="width:90px;height:40px;object-fit:cover;border-radius:3px;background:#f5f5f5;">
+                                                <div style="flex:1;">
+                                                    <strong>{{ row.getName() }}</strong>
+                                                    <div class="text-muted" style="font-size:12px;">
+                                                        {{ row.getBannerCategory() }}
+                                                        &middot;
+                                                        {% if row.getEnable() %}
+                                                            <span class="text-success">Đang hiển thị</span>
+                                                        {% else %}
+                                                            <span class="text-muted">Đã ẩn</span>
+                                                        {% endif %}
+                                                        &middot;
+                                                        {{ row.getCreatedAt() | localizeddate('medium', 'none', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY') }}
+                                                    </div>
+                                                </div>
+                                                <div class="item-actions">
+                                                    <a href="{{ path('admin_banner_edit', {id: row.id}) }}" class="btn-sm">
+                                                        <i class="fa fa-edit" aria-hidden="true"></i>
+                                                    </a>
+                                                    {{ include('admin/banner/_delete_form.html.twig', {object: row}, with_context = false) }}
+                                                </div>
                                             </div>
-                                        </td>
-                                        <td><strong>{{ row.getName() }}</strong></td>
-                                        <td>{{ row.getBannerCategory() }}</td>
-                                        <td>{{ row.getCreatedAt() | localizeddate('medium', 'none', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY') }}</td>
-                                        <td>
-                                            <div class="item-actions">
-                                                <a href="{{ path('admin_banner_edit', {id: row.id}) }}" class="btn-sm">
-                                                    <i class="fa fa-edit" aria-hidden="true"></i>
-                                                </a>
-                                                
-                                                {{ include('admin/banner/_delete_form.html.twig', {object: row}, with_context = false) }}
-                                            </div>
-                                        </td>
-                                    </tr>
+                                        </li>
                                     {% endfor %}
-                                </tbody>
-                            </table>
+                                </ol>
+                            </div>
+                            {% if objects|length == 0 %}
+                                <p class="text-muted">Chưa có banner nào.</p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {# nestable2 (drag-drop) already bundled with menu-editor.js — reused here for banner reorder #}
+    <script src="{{ asset('build/js/menu-editor.js') }}"></script>
+    <script>
+        $(function () {
+            if (!$.fn.nestable) { return; }
+
+            var reorderUrl = {{ path('admin_banner_reorder')|json_encode|raw }};
+
+            $('#banner-nestable').nestable({ maxDepth: 1 }).on('change', function () {
+                var ids = $('#banner-list').children('.dd-item').map(function () {
+                    return $(this).data('id');
+                }).get();
+
+                $.ajax({
+                    url: reorderUrl,
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ items: ids })
+                });
+            });
+        });
+    </script>
 {% endblock %}

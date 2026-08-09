@@ -9,6 +9,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 class BannerCategoryType extends AbstractType
 {
@@ -25,6 +26,10 @@ class BannerCategoryType extends AbstractType
             ->add('url', TextType::class, [
                 'attr' => ['class' => 'url', 'readonly' => 'readonly'],
                 'label' => 'label.url',
+            ])
+            ->add('zone', ChoiceType::class, [
+                'label' => 'Khu vực hiển thị',
+                'choices' => array_flip(\App\Entity\BannerCategory::ZONES),
             ])
         ;
     }

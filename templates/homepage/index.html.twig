@@ -12,10 +12,10 @@
     {# ============ HERO + FORM BÁO GIÁ ============ #}
     <section class="hero2" aria-label="Giới thiệu tổng quan">
         <div class="hero2-bg" data-hero-slides>
-            {% for slide in v3.heroSlides %}
+            {% for slide in heroBanners %}
                 <img {{ loop.first ? 'class="is-active"' : '' }}
-                     src="{{ asset(slide.image) }}"
-                     alt="{{ slide.alt }}"
+                     src="{{ slide.urlImage }}"
+                     alt="{{ slide.name }}"
                      {{ loop.first ? 'fetchpriority="high"' : 'loading="lazy"' }}
                      decoding="async">
             {% endfor %}
@@ -39,7 +39,7 @@
                 <div class="mt-9 flex flex-wrap items-center gap-8 fade">
                     <a href="#cong-trinh" class="btn2 btn2--ghost">Xem công trình thực tế</a>
                     <div class="hero2-dots" role="tablist" aria-label="Chọn ảnh công trình">
-                        {% for slide in v3.heroSlides %}
+                        {% for slide in heroBanners %}
                             <button data-hero-dot="{{ loop.index0 }}"
                                     {{ loop.first ? 'aria-current="true"' : '' }}
                                     aria-label="Ảnh công trình {{ loop.index }}"></button>
@@ -371,15 +371,17 @@
             </div>
 
             <div class="gallery-track mt-10 fade" data-gallery-track>
-                {% for item in v3.gallery %}
-                    <button type="button" class="gallery-item"
-                            data-lightbox-src="{{ asset(item.image) }}"
-                            data-lightbox-caption="{{ item.caption }}">
-                        <figure>
-                            <img src="{{ asset(item.image) }}" alt="{{ item.caption }}" loading="lazy" decoding="async">
-                            <figcaption>{{ item.short }}</figcaption>
-                        </figure>
-                    </button>
+                {% for album in galleryAlbums %}
+                    {% set cover = album.coverImage %}
+                    {% if cover %}
+                        <button type="button" class="gallery-item"
+                                data-album-images="{{ album.images|map(i => {src: i.imageUrl, caption: i.caption ?: album.name, alt: i.alt ?: album.name})|json_encode|e('html_attr') }}">
+                            <figure>
+                                <img src="{{ cover.imageUrl }}" alt="{{ cover.alt ?: album.name }}" loading="lazy" decoding="async">
+                                <figcaption>{{ album.name }}</figcaption>
+                            </figure>
+                        </button>
+                    {% endif %}
                 {% endfor %}
             </div>
         </div>

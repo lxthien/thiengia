@@ -2,34 +2,27 @@
 
 namespace App\Form;
 
-use App\Entity\Banner;
+use App\Entity\GalleryAlbum;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 
-class BannerType extends AbstractType
+class GalleryAlbumType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('bannercategory', null, [
-                'label' => 'label.category',
-            ])
             ->add('name', TextType::class, [
-                'label' => 'label.name',
+                'label' => 'Tên hoạt động',
             ])
-            ->add('url', TextType::class, [
+            ->add('description', TextareaType::class, [
+                'label' => 'Mô tả',
                 'required' => false,
-                'label' => 'label.url',
+                'attr' => ['rows' => 3],
             ])
-            // Ảnh được chọn qua Media Library picker, ghi thẳng vào field này (xem admin/banner/_form.html.twig)
-            ->add('urlImage', HiddenType::class)
             ->add('enable', CheckboxType::class, [
                 'required' => false,
                 'label' => 'Hiển thị',
@@ -37,13 +30,10 @@ class BannerType extends AbstractType
         ;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => Banner::class,
+            'data_class' => GalleryAlbum::class,
         ]);
     }
 }

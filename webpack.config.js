@@ -41,6 +41,7 @@ Encore
     .addEntry('js/search', './public/assets/js/admin/search.js')
     .addEntry('js/login', './public/assets/js/admin/login.js')
     .addEntry('js/menu-editor', './public/assets/js/admin/menu-editor.js')
+    .addEntry('js/gallery-album-editor', './public/assets/js/admin/gallery-album-editor.js')
     .addStyleEntry('css/admin', ['./public/assets/scss/admin/admin.scss'])
     .addStyleEntry('css/ckeditor-content', ['./public/assets/scss/admin/ckeditor-content.scss'])
 

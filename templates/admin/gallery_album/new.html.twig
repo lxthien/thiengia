@@ -7,28 +7,27 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-header">
-                            <strong class="card-title">{{ 'title.add_new'|trans }}</strong>
+                            <strong class="card-title">Thêm hoạt động mới</strong>
                         </div>
                         <div class="card-body">
                             <div id="pay-invoice">
                                 <div class="card-body">
                                     {{ form_errors(form) }}
                                     {{ form_start(form) }}
-                                        {{ form_row(form.bannercategory) }}
                                         {{ form_row(form.name) }}
-                                        {{ form_row(form.url) }}
+                                        {{ form_row(form.description) }}
                                         {{ form_row(form.enable) }}
-                                        {{ include('admin/banner/_form_media.html.twig', {current_image: object.urlImage}) }}
+
+                                        <p class="text-muted"><i class="fa fa-info-circle"></i> Sau khi tạo, bạn sẽ được chuyển tới trang chỉnh sửa để thêm ảnh.</p>
 
                                         <button type="submit" class="btn btn-primary">
-                                            <i class="fa fa-save" aria-hidden="true"></i> {{ 'label.create_news'|trans }}
+                                            <i class="fa fa-save" aria-hidden="true"></i> {{ 'action.save'|trans }}
                                         </button>
 
-                                        <a href="{{ path('admin_banner_index') }}" class="btn btn-link">
+                                        <a href="{{ path('admin_gallery_album_index') }}" class="btn btn-link">
                                             <i class="fa fa-list-alt" aria-hidden="true"></i> {{ 'action.back_to_list'|trans }}
                                         </a>
-                                        {{ form_widget(form._token) }}
-                                    {{ form_end(form, {render_rest: false}) }}
+                                    {{ form_end(form) }}
                                 </div>
                             </div>
                         </div>

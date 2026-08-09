@@ -15,6 +15,13 @@ use Gedmo\Mapping\Annotation as Gedmo;
 #[ORM\Table(name: 'bannercategory')]
 class BannerCategory
 {
+    // Zone constants — where a banner group is displayed on the site.
+    const ZONE_HERO = 'hero';
+
+    const ZONES = [
+        self::ZONE_HERO => 'Hero trang chủ',
+    ];
+
     #[ORM\Column(name: 'id', type: Types::INTEGER)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'AUTO')]
@@ -27,6 +34,9 @@ class BannerCategory
     #[Assert\NotBlank(message: 'url.blank')]
     #[ORM\Column(name: 'url', type: Types::STRING, length: 255, unique: true)]
     private $url;
+
+    #[ORM\Column(name: 'zone', type: Types::STRING, length: 50, options: ['default' => self::ZONE_HERO])]
+    private $zone = self::ZONE_HERO;
 
     #[Gedmo\Timestampable(on: 'create')]
     #[ORM\Column(name: 'createdAt', type: Types::DATETIME_MUTABLE)]
@@ -101,6 +111,29 @@ class BannerCategory
     public function getUrl()
     {
         return $this->url;
+    }
+
+    /**
+     * Set zone
+     *
+     * @param string $zone
+     * @return BannerCategory
+     */
+    public function setZone($zone)
+    {
+        $this->zone = $zone;
+
+        return $this;
+    }
+
+    /**
+     * Get zone
+     *
+     * @return string
+     */
+    public function getZone()
+    {
+        return $this->zone;
     }
 
     /**

@@ -8,6 +8,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\NewsCategory;
 use App\Entity\News;
 use App\Entity\Contact;
+use App\Entity\Banner;
+use App\Entity\BannerCategory;
+use App\Entity\GalleryAlbum;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use App\Service\SettingsManager;
@@ -131,11 +134,16 @@ class HomepageController extends AbstractController
             ))
             ->getForm();
 
+        $heroBanners = $this->em->getRepository(Banner::class)->findActiveByZone(BannerCategory::ZONE_HERO);
+        $galleryAlbums = $this->em->getRepository(GalleryAlbum::class)->findActiveOrdered();
+
         return $this->render('homepage/index.html.twig', [
             'blocksOnHomepage' => $blocksOnHomepage,
             'blockPricesOnHomepage' => $blockPricesOnHomepage,
             'showSlide' => true,
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'heroBanners' => $heroBanners,
+            'galleryAlbums' => $galleryAlbums,
         ]);
     }
 }

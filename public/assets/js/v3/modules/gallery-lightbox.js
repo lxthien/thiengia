@@ -1,4 +1,5 @@
-// Slider "Hình ảnh hoạt động" + popup phóng to ảnh
+// Slider "Hình ảnh hoạt động" + popup phóng to ảnh (theo album — mỗi thẻ
+// là 1 hoạt động, lightbox chỉ duyệt prev/next trong ảnh của album đó)
 export default function initGallery() {
   const track = document.querySelector("[data-gallery-track]");
   if (!track) return;
@@ -19,21 +20,25 @@ export default function initGallery() {
   const lightbox = document.querySelector(".lightbox");
   if (!lightbox) return;
 
-  const items = [...track.querySelectorAll(".gallery-item")];
+  const cards = [...track.querySelectorAll(".gallery-item")];
   const img = lightbox.querySelector("img");
   const caption = lightbox.querySelector(".lightbox-caption");
+  let items = [];
   let current = 0;
 
   const show = (i) => {
+    if (!items.length) return;
     current = (i + items.length) % items.length;
     const item = items[current];
-    img.src = item.dataset.lightboxSrc;
-    img.alt = item.dataset.lightboxCaption || "";
-    caption.textContent = item.dataset.lightboxCaption || "";
+    img.src = item.src;
+    img.alt = item.alt || "";
+    caption.textContent = item.caption || "";
   };
 
-  const open = (i) => {
-    show(i);
+  const open = (albumImages, startIndex) => {
+    items = albumImages;
+    if (!items.length) return;
+    show(startIndex);
     lightbox.classList.add("is-open");
     lightbox.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
@@ -46,7 +51,17 @@ export default function initGallery() {
     document.body.style.overflow = "";
   };
 
-  items.forEach((item, i) => item.addEventListener("click", () => open(i)));
+  cards.forEach((card) => {
+    card.addEventListener("click", () => {
+      let albumImages = [];
+      try {
+        albumImages = JSON.parse(card.dataset.albumImages || "[]");
+      } catch (e) {
+        albumImages = [];
+      }
+      open(albumImages, 0);
+    });
+  });
   lightbox.querySelector(".lightbox-close")?.addEventListener("click", close);
   lightbox.querySelector(".lightbox-prev")?.addEventListener("click", () => show(current - 1));
   lightbox.querySelector(".lightbox-next")?.addEventListener("click", () => show(current + 1));

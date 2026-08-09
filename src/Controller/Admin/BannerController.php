@@ -7,9 +7,9 @@ use App\Entity\Banner;
 use App\Form\BannerType;
 use App\Service\ActivityLogService;
 
-use App\Utils\Slugger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -33,13 +33,13 @@ class BannerController extends AbstractController
     #[Route('/', name: 'admin_banner_index', methods: ['GET'])]
     public function indexAction()
     {
-        $banners = $this->em->getRepository(Banner::class)->findAll();
+        $banners = $this->em->getRepository(Banner::class)->findAllOrdered();
 
         return $this->render('admin/banner/index.html.twig', ['objects' => $banners]);
     }
 
     #[Route('/new', name: 'admin_banner_new', methods: ['GET', 'POST'])]
-    public function newAction(Request $request, Slugger $slugger)
+    public function newAction(Request $request)
     {
         $banner = new Banner();
 
@@ -48,6 +48,10 @@ class BannerController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $maxPosition = $this->em->createQuery(
+                'SELECT MAX(b.position) FROM App\Entity\Banner b'
+            )->getSingleScalarResult();
+            $banner->setPosition(($maxPosition ?? -1) + 1);
 
             $this->em->persist($banner);
             $this->em->flush();
@@ -72,7 +76,7 @@ class BannerController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'admin_banner_edit', methods: ['GET', 'POST'])]
-    public function editAction(Request $request, Banner $banner, Slugger $slugger)
+    public function editAction(Request $request, Banner $banner)
     {
         $form = $this->createForm(BannerType::class, $banner);
         $form->handleRequest($request);
@@ -130,5 +134,34 @@ class BannerController extends AbstractController
         $this->addFlash('success', 'action.deleted_successfully');
 
         return $this->redirectToRoute('admin_banner_index');
+    }
+
+    /**
+     * Reorders banners via AJAX drag-drop.
+     */
+    #[Route('/reorder', name: 'admin_banner_reorder', methods: ['POST'])]
+    public function reorderAction(Request $request)
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['items']) || !is_array($data['items'])) {
+            return new JsonResponse(['success' => false, 'message' => 'Invalid data format'], 400);
+        }
+
+        try {
+            foreach ($data['items'] as $position => $id) {
+                $banner = $this->em->getRepository(Banner::class)->find($id);
+                if (!$banner) {
+                    continue;
+                }
+                $banner->setPosition($position);
+            }
+
+            $this->em->flush();
+
+            return new JsonResponse(['success' => true, 'message' => 'Banner reordered successfully']);
+        } catch (\Exception $e) {
+            return new JsonResponse(['success' => false, 'message' => $e->getMessage()], 400);
+        }
     }
 }

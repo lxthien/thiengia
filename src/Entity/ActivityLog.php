@@ -34,6 +34,7 @@ class ActivityLog
     const ENTITY_COMMENT = 'comment';
     const ENTITY_BANNER = 'banner';
     const ENTITY_BANNER_CATEGORY = 'banner_category';
+    const ENTITY_GALLERY_ALBUM = 'gallery_album';
     const ENTITY_MENU = 'menu';
     const ENTITY_MENU_ITEM = 'menu_item';
     const ENTITY_TAG = 'tag';
@@ -228,6 +229,7 @@ class ActivityLog
             self::ENTITY_COMMENT => 'Bình luận',
             self::ENTITY_BANNER => 'Banner',
             self::ENTITY_BANNER_CATEGORY => 'Nhóm banner',
+            self::ENTITY_GALLERY_ALBUM => 'Album hình ảnh',
             self::ENTITY_MENU => 'Menu',
             self::ENTITY_MENU_ITEM => 'Menu item',
             self::ENTITY_TAG => 'Tag',

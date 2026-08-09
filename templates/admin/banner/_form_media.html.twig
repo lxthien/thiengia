@@ -1,0 +1,105 @@
+{#
+ # Banner image field — Media Library only (không Vich).
+ # Tham số: current_image (string, URL ảnh hiện tại hoặc rỗng)
+ #}
+{% set _img_url = current_image|default('') %}
+
+<div class="form-group">
+    <label class="control-label">Ảnh banner</label>
+
+    <div class="image-manager-card"
+         data-media-picker-block
+         data-picker-id="bannerPicker"
+         data-upload-path="/uploads/media/"
+         style="border:1px solid #e0e4ef;border-radius:6px;margin-bottom:20px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+
+        <div style="padding:16px;">
+            <div class="row" style="margin:0;">
+
+                {# Preview box #}
+                <div class="col-sm-4" style="padding-right:16px;">
+                    <div style="border:2px dashed #d5d9ef;border-radius:6px;background:#f9faff;min-height:150px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+                        <img id="bannerPicker_preview_img"
+                             src="{{ _img_url }}"
+                             alt="Preview"
+                             style="max-width:100%;max-height:190px;display:{{ _img_url ? 'block' : 'none' }};object-fit:cover;">
+                        <div id="bannerPicker_placeholder"
+                             style="text-align:center;color:#b0b8d4;display:{{ _img_url ? 'none' : 'flex' }};flex-direction:column;align-items:center;gap:8px;padding:20px;">
+                            <i class="fa fa-image fa-3x"></i>
+                            <small style="font-size:11px;">Chưa có ảnh</small>
+                        </div>
+                        <button type="button"
+                                id="bannerPicker_clear_btn"
+                                data-media-picker-clear data-picker-id="bannerPicker"
+                                title="Bỏ chọn ảnh"
+                                style="position:absolute;top:5px;right:5px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;border:none;cursor:pointer;font-size:13px;line-height:22px;padding:0;display:{{ _img_url ? 'block' : 'none' }};">&times;</button>
+                    </div>
+                </div>
+
+                {# Picker control #}
+                <div class="col-sm-8" style="padding-left:8px;">
+                    <div style="background:#f7f9ff;border:1px solid #d5d9ef;border-radius:5px;padding:11px 14px;">
+                        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#5b7aff;margin-bottom:8px;display:block;">
+                            <i class="fa fa-th-large"></i> Chọn từ Media Library
+                        </label>
+                        <div class="input-group">
+                            <input type="text" id="bannerPicker_display" class="form-control input-sm" readonly
+                                   value="{{ _img_url }}"
+                                   placeholder="Chưa chọn ảnh từ thư viện..."
+                                   style="font-size:12px;background:#fff;color:#555;">
+                            <span class="input-group-btn">
+                                <button type="button" class="btn btn-default btn-sm"
+                                        data-media-picker-open data-picker-id="bannerPicker"
+                                        style="background:#5b7aff;color:#fff;border-color:#5b7aff;white-space:nowrap;">
+                                    <i class="fa fa-image"></i> Chọn
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if form is defined and form.urlImage.vars.errors|length %}
+        <div class="form-error" style="color:#b3261e;font-size:12px;margin-top:6px;">
+            {{ form_errors(form.urlImage) }}
+        </div>
+    {% endif %}
+
+    {# Ghi thẳng vào field urlImage của form (không qua Vich) #}
+    <input type="hidden" id="bannerPicker_url_input" name="banner[urlImage]" value="{{ _img_url }}">
+</div>
+
+{# Media Picker Modal #}
+<div class="modal fade" id="bannerPickerModal" tabindex="-1" role="dialog"
+     data-picker-url="{{ path('admin_media_picker') }}"
+     data-picker-id="bannerPicker"
+     aria-labelledby="bannerPickerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-media-picker-close data-picker-id="bannerPicker">
+                    <span>&times;</span>
+                </button>
+                <h4 class="modal-title" id="bannerPickerModalLabel">
+                    <i class="fa fa-image"></i> Chọn ảnh từ thư viện
+                </h4>
+            </div>
+            <div class="modal-body" id="bannerPicker_body">
+                <div class="text-center text-muted" style="padding:30px;">
+                    <i class="fa fa-spinner fa-spin fa-2x"></i>
+                    <p class="mt-2">Đang tải thư viện...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <span id="bannerPicker_selName" class="text-muted pull-left" style="font-size:13px;line-height:34px;"></span>
+                <button type="button" class="btn btn-default" data-media-picker-close data-picker-id="bannerPicker">Hủy</button>
+                <button type="button" class="btn btn-primary" id="bannerPicker_confirm" disabled
+                        data-media-picker-confirm data-picker-id="bannerPicker">
+                    <i class="fa fa-check"></i> Chọn ảnh này
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

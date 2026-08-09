@@ -5,16 +5,12 @@ namespace App\Entity;
 use App\Repository\BannerRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
 
-use Vich\UploaderBundle\Mapping\Attribute as Vich;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 #[ORM\Table(name: 'banner')]
 #[ORM\Entity(repositoryClass: BannerRepository::class)]
-#[Vich\Uploadable]
 class Banner
 {
     #[ORM\Column(name: 'id', type: Types::INTEGER)]
@@ -38,14 +34,16 @@ class Banner
     #[ORM\Column(name: 'url', type: Types::STRING, length: 255, nullable: true)]
     private $url;
 
+    /**
+     * Full root-relative URL of the image, chosen via the Media Library picker
+     * (e.g. "/uploads/media/xxx.jpg"). Not a Vich-managed field.
+     */
+    #[Assert\NotBlank(message: 'Vui lòng chọn ảnh banner từ Media Library.')]
     #[ORM\Column(name: 'urlImage', type: Types::STRING, length: 255)]
     private $urlImage;
 
-    /**
-     * @var File
-     */
-    #[Vich\UploadableField(mapping: 'banner_images', fileNameProperty: 'urlImage')]
-    private $imageFile;
+    #[ORM\Column(name: 'enable', type: Types::BOOLEAN, options: ['default' => true])]
+    private $enable = true;
 
     #[Gedmo\Timestampable(on: 'create')]
     #[ORM\Column(name: 'createdAt', type: Types::DATETIME_MUTABLE)]
@@ -186,31 +184,26 @@ class Banner
     }
 
     /**
-     * Set images file
+     * Set enable
      *
-     * @param File $urlImage
+     * @param bool $enable
      * @return Banner
      */
-    public function setImageFile(File $urlImage = null)
+    public function setEnable($enable)
     {
-        $this->imageFile = $urlImage;
+        $this->enable = $enable;
 
-        // VERY IMPORTANT:
-        // It is required that at least one field changes if you are using Doctrine,
-        // otherwise the event listeners won't be called and the file is lost
-        if ($urlImage) {
-            $this->updatedAt = new \DateTime('now');
-        }
+        return $this;
     }
 
     /**
-     * Get images file
+     * Get enable
      *
-     * @return string
+     * @return bool
      */
-    public function getImageFile()
+    public function getEnable()
     {
-        return $this->imageFile;
+        return $this->enable;
     }
 
     /**
