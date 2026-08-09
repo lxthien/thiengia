@@ -1,0 +1,251 @@
+@use "../tokens" as *;
+
+// Các khối nội dung GEO/AEO do CKEditor sinh ra bên trong .post-content
+// (tóm tắt nhanh, mục lục gấp mở, trích dẫn chuyên gia, định nghĩa, số liệu)
+// Markup nguồn: public/assets/scss/shared/_content-blocks.scss (bản admin CKEditor)
+
+.post-content {
+  // --- Tóm tắt nhanh ---
+  .key-takeaways {
+    background: $tint;
+    border-left: 3px solid $primary;
+    border-radius: 4px;
+    padding: 1.5rem 1.75rem;
+    margin: 2.25rem 0;
+
+    > p:first-child,
+    h3 {
+      margin-top: 0 !important;
+      font-family: $f-display;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: $primary;
+
+      strong {
+        color: inherit;
+      }
+    }
+
+    ul {
+      margin-top: 0.9rem !important;
+      padding-left: 0;
+
+      li {
+        font-size: 0.94rem;
+        color: $text;
+
+        &::before {
+          border-bottom-color: $primary;
+        }
+      }
+    }
+  }
+
+  // --- Mục lục gấp/mở trong bài (khác .toc ở sidebar) ---
+  .ka-table-of-contents {
+    margin: 2.25rem 0;
+    background: $white;
+    border: 1px solid $line;
+    overflow: hidden;
+
+    #main-toc {
+      margin: 0;
+      padding: 1rem 1.4rem;
+      background: $dark;
+      color: $white;
+      font-family: $f-display;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      user-select: none;
+      transition: background $dur $ease;
+
+      strong,
+      u,
+      b {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      &::after {
+        content: "";
+        flex-shrink: 0;
+        width: 8px;
+        height: 8px;
+        border-right: 2px solid $accent;
+        border-bottom: 2px solid $accent;
+        transform: rotate(45deg);
+        transition: transform $dur $ease;
+      }
+
+      &:hover {
+        background: $brown;
+      }
+    }
+
+    > div[id$="-toc"] {
+      padding: 0.55rem 1.4rem;
+      border-top: 1px solid $line;
+      max-height: 500px;
+      overflow: hidden;
+      opacity: 1;
+      transition: max-height $dur $ease, opacity $dur $ease, padding $dur $ease;
+
+      a {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        font-size: 0.88rem;
+        font-weight: 400;
+        color: $text;
+        text-decoration: none;
+        transition: color $dur $ease;
+
+        &::before {
+          content: "▸";
+          flex-shrink: 0;
+          color: $accent;
+          font-weight: 700;
+        }
+
+        &:hover {
+          color: $accent;
+        }
+
+        i {
+          font-style: normal;
+          line-height: 1.5;
+        }
+      }
+    }
+
+    #hr-toc {
+      display: none;
+    }
+
+    &.collapsed {
+      #main-toc::after {
+        transform: rotate(-45deg);
+      }
+
+      > div[id$="-toc"] {
+        max-height: 0;
+        opacity: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        border-top-color: transparent;
+      }
+    }
+  }
+
+  // --- Trích dẫn chuyên gia ---
+  blockquote.expert-quote {
+    background: $tint;
+    border-left: 3px solid $gold;
+    border-radius: 4px;
+    padding: 1.5rem 1.75rem;
+    margin: 2.25rem 0;
+    font-family: $f-body;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 300;
+    color: $text;
+
+    p {
+      margin: 0 0 0.5rem;
+      font-size: 1rem;
+      line-height: 1.8;
+    }
+
+    cite,
+    > em:last-child {
+      display: block;
+      font-size: 0.85rem;
+      font-style: italic;
+      color: $primary;
+    }
+  }
+
+  // --- Định nghĩa nhanh ---
+  .definition {
+    background: $white;
+    border: 1px solid $line;
+    border-radius: 4px;
+    padding: 1.1rem 1.4rem;
+    margin: 1.75rem 0;
+    font-size: 0.94rem;
+    line-height: 1.8;
+    color: $text;
+
+    strong {
+      color: $primary;
+    }
+  }
+
+  // --- Ô số liệu nổi bật ---
+  .stat-box {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: $tint;
+    border: 1px solid rgba($primary, 0.3);
+    border-radius: 4px;
+    padding: 1rem 1.5rem;
+    margin: 0.5rem 0.5rem 0.5rem 0;
+    min-width: 180px;
+
+    .stat-number {
+      font-family: $f-display;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: $primary;
+      line-height: 1.2;
+    }
+
+    .stat-label {
+      margin-top: 0.35rem;
+      font-size: 0.85rem;
+      font-weight: 400;
+      color: $text;
+      line-height: 1.5;
+    }
+
+    .stat-source {
+      margin-top: 0.4rem;
+      font-size: 0.72rem;
+      font-style: italic;
+      color: $mut;
+    }
+
+    &--blue {
+      background: #eef3f2;
+      border-color: rgba(#2f6f6b, 0.35);
+
+      .stat-number {
+        color: #2f6f6b;
+      }
+    }
+
+    &--green {
+      background: #f0f4ea;
+      border-color: rgba(#5b7553, 0.35);
+
+      .stat-number {
+        color: #5b7553;
+      }
+    }
+  }
+
+  @media (max-width: 640px) {
+    .stat-box {
+      display: flex;
+      width: 100%;
+      margin: 0.5rem 0;
+    }
+  }
+}

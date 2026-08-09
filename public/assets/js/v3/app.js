@@ -13,6 +13,7 @@ import initHeroSlider from "./modules/hero-slider";
 import initQuotes from "./modules/quotes";
 import initGallery from "./modules/gallery-lightbox";
 import initToc from "./modules/toc";
+import initContentToc from "./modules/content-toc";
 import initForms from "./modules/forms";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -24,5 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initQuotes();
   initGallery();
   initToc();
+  initContentToc();
   initForms();
 });
