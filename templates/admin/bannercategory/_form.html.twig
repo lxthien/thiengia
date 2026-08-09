@@ -1,4 +1,5 @@
 {{ form_start(form, {attr: attr|default({})}) }}
+    {{ form_errors(form) }}
     {{ form_widget(form) }}
 
     <button type="submit" class="{{ button_css|default("btn btn-primary") }}">

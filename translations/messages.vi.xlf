@@ -422,6 +422,10 @@
                 <source>menu.add_new</source>
                 <target>Thêm mới</target>
             </trans-unit>
+            <trans-unit id="title.add_new">
+                <source>title.add_new</source>
+                <target>Thêm mới</target>
+            </trans-unit>
             <trans-unit id="menu.news_list">
                 <source>menu.news_list</source>
                 <target>Danh sách bài viết</target>
