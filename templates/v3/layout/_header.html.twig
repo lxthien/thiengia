@@ -1,49 +1,31 @@
-{% set route = app.request.attributes.get('_route') %}
-
 <header class="hd">
     <div class="container max-w-7xl flex items-center justify-between">
         {{ include('v3/components/_logo.html.twig') }}
 
         <nav class="hidden xl:block" aria-label="Menu chính">
             <ul class="flex items-center gap-8">
-                {# Giới thiệu — dropdown #}
-                <li class="hd-drop">
-                    <a href="{{ path('homepage') }}#gioi-thieu" class="hd-link" aria-haspopup="true">
-                        Giới thiệu
-                        <svg class="hd-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-                    </a>
-                    <ul class="hd-drop-menu">
-                        {% for item in v3.menu.about %}
-                            <li><a href="{{ path('homepage') }}{{ item.anchor }}">{{ item.label }}</a></li>
-                        {% endfor %}
-                    </ul>
-                </li>
-
-                {# Dịch vụ — dropdown #}
-                <li class="hd-drop">
-                    <a href="{{ path('homepage') }}#dich-vu" class="hd-link" aria-haspopup="true">
-                        Dịch vụ
-                        <svg class="hd-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-                    </a>
-                    <ul class="hd-drop-menu">
-                        {% for item in v3.menu.services %}
-                            <li><a href="{{ path('homepage') }}#dich-vu">{{ item }}</a></li>
-                        {% endfor %}
-                    </ul>
-                </li>
-
-                <li><a href="{{ path('homepage') }}#cong-trinh" class="hd-link">Công trình</a></li>
-                <li><a href="{{ path('homepage') }}#quy-trinh" class="hd-link">Quy trình</a></li>
-                <li>
-                    <a href="{{ path('news_category', { level1: v3.newsCategorySlug }) }}"
-                       class="hd-link {{ route in ['news_category','dynamic_post_page','list_category'] ? 'is-active' : '' }}"
-                       {{ route == 'news_category' ? 'aria-current="page"' : '' }}>Cẩm nang</a>
-                </li>
-                <li>
-                    <a href="{{ path('contact') }}"
-                       class="hd-link {{ route == 'contact' ? 'is-active' : '' }}"
-                       {{ route == 'contact' ? 'aria-current="page"' : '' }}>Liên hệ</a>
-                </li>
+                {% for item in menu_items('Main Menu') %}
+                    <li class="{{ item.children ? 'hd-drop' : '' }}">
+                        <a href="{{ item.url }}"
+                           class="hd-link {{ (item.active or item.has_active_child) ? 'is-active' : '' }}"
+                           {% if item.children %}aria-haspopup="true"{% endif %}
+                           {% if item.target %}target="{{ item.target }}"{% endif %}
+                           {% if item.title_attr %}title="{{ item.title_attr }}"{% endif %}
+                           {% if item.active %}aria-current="page"{% endif %}>
+                            {{ item.title }}
+                            {% if item.children %}
+                                <svg class="hd-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                            {% endif %}
+                        </a>
+                        {% if item.children %}
+                            <ul class="hd-drop-menu">
+                                {% for child in item.children %}
+                                    <li><a href="{{ child.url }}" {% if child.target %}target="{{ child.target }}"{% endif %}>{{ child.title }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </li>
+                {% endfor %}
             </ul>
         </nav>
 

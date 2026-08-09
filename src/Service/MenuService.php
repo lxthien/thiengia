@@ -5,14 +5,17 @@ namespace App\Service;
 use App\Entity\Menu;
 use App\Entity\MenuItem;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class MenuService
 {
     private $em;
+    private $requestStack;
 
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(EntityManagerInterface $em, RequestStack $requestStack)
     {
         $this->em = $em;
+        $this->requestStack = $requestStack;
     }
 
     /**
@@ -146,10 +149,18 @@ class MenuService
             'children' => [],
         ];
 
+        $data['active'] = $this->isCurrentUrl($data['url']);
+
+        $hasActiveChild = false;
         $children = $this->getChildItems($item);
         foreach ($children as $child) {
-            $data['children'][] = $this->buildItemStructure($child);
+            $childData = $this->buildItemStructure($child);
+            $data['children'][] = $childData;
+            if ($childData['active'] || $childData['has_active_child']) {
+                $hasActiveChild = true;
+            }
         }
+        $data['has_active_child'] = $hasActiveChild;
 
         return $data;
     }
@@ -326,12 +337,18 @@ class MenuService
      */
     private function isCurrentUrl($url)
     {
-        if (empty($url) || $url === '#') {
+        if (empty($url) || $url === '#' || preg_match('#^https?://#i', $url)) {
             return false;
         }
 
-        // In a real application, you'd compare against the current request
-        // This is a simplified version
-        return false;
+        $request = $this->requestStack->getCurrentRequest();
+        if (!$request) {
+            return false;
+        }
+
+        $currentPath = rtrim($request->getPathInfo(), '/') . '/';
+        $itemPath = rtrim($url, '/') . '/';
+
+        return $currentPath === $itemPath;
     }
 }

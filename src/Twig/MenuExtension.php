@@ -21,7 +21,25 @@ class MenuExtension extends AbstractExtension
         return [
             new TwigFunction('render_menu', [$this, 'renderMenu'], ['is_safe' => ['html']]),
             new TwigFunction('get_menu', [$this, 'getMenu']),
+            new TwigFunction('menu_items', [$this, 'getMenuItems']),
         ];
+    }
+
+    /**
+     * Get the resolved, hierarchical item structure for a menu by name
+     *
+     * @param string $menuName
+     * @return array
+     */
+    public function getMenuItems($menuName)
+    {
+        $menu = $this->menuService->getMenuByName($menuName);
+
+        if (!$menu) {
+            return [];
+        }
+
+        return $this->menuService->buildMenuStructure($menu);
     }
 
     /**
