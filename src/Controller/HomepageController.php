@@ -11,6 +11,7 @@ use App\Entity\Contact;
 use App\Entity\Banner;
 use App\Entity\BannerCategory;
 use App\Entity\GalleryAlbum;
+use App\Entity\Testimonial;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use App\Service\SettingsManager;
@@ -136,6 +137,7 @@ class HomepageController extends AbstractController
 
         $heroBanners = $this->em->getRepository(Banner::class)->findActiveByZone(BannerCategory::ZONE_HERO);
         $galleryAlbums = $this->em->getRepository(GalleryAlbum::class)->findActiveOrdered();
+        $testimonials = $this->em->getRepository(Testimonial::class)->findActiveOrdered();
 
         return $this->render('homepage/index.html.twig', [
             'blocksOnHomepage' => $blocksOnHomepage,
@@ -144,6 +146,7 @@ class HomepageController extends AbstractController
             'form' => $form->createView(),
             'heroBanners' => $heroBanners,
             'galleryAlbums' => $galleryAlbums,
+            'testimonials' => $testimonials,
         ]);
     }
 }

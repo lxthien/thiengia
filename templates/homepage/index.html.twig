@@ -230,13 +230,15 @@
             <div class="quotes-viewport mt-10 fade" data-quotes
                  aria-roledescription="carousel" aria-label="Đánh giá của khách hàng">
                 <div class="quotes-track">
-                    {% for quote in v3.testimonials %}
+                    {% for quote in testimonials %}
                         <figure class="quote-slide">
                             <p class="quote-mark" aria-hidden="true">“</p>
                             <blockquote>{{ quote.text }}</blockquote>
-                            <p class="quote-stars" role="img" aria-label="Đánh giá 5 trên 5 sao">★★★★★</p>
+                            <p class="quote-stars" role="img" aria-label="Đánh giá {{ quote.rating }} trên 5 sao">
+                                {%- for i in 1..5 -%}{{ i <= quote.rating ? '★' : '☆' }}{%- endfor -%}
+                            </p>
                             <figcaption class="quote-author">
-                                <img src="{{ asset(quote.avatar) }}" alt="Chân dung {{ quote.name }}" loading="lazy" decoding="async">
+                                <img src="{{ quote.avatarUrl }}" alt="Chân dung {{ quote.name }}" loading="lazy" decoding="async">
                                 <span>
                                     <span class="quote-name">{{ quote.name }}</span>
                                     <span class="quote-role">{{ quote.role }}</span>
@@ -252,7 +254,7 @@
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                 </button>
                 <div class="quotes-dots" role="tablist" aria-label="Chọn đánh giá">
-                    {% for quote in v3.testimonials %}
+                    {% for quote in testimonials %}
                         <button class="quotes-dot" data-quotes-dot="{{ loop.index0 }}"
                                 {{ loop.first ? 'aria-current="true"' : '' }}
                                 aria-label="Đánh giá {{ loop.index }}"></button>

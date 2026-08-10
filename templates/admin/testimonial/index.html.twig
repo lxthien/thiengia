@@ -1,0 +1,104 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block body_id 'admin_testimonial_index' %}
+
+{% block main %}
+    <div class="content mt-3">
+        <div class="animated fadeIn">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card add">
+                        <div class="card-body">
+                            <div class="stat-widget-one">
+                                <a href="{{ path('admin_testimonial_new') }}">
+                                    <div class="stat-icon dib">
+                                        <i class="ti-plus text-success border-success"></i>
+                                    </div>
+                                    <div class="stat-content dib">
+                                        <div class="stat-text text-success">{{ 'menu.add_new'|trans }}</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <strong class="card-title">Khách hàng nói về chúng tôi</strong>
+                            <span class="text-muted" style="font-size:12px;"><i class="fa fa-info-circle"></i> Kéo thả để sắp xếp thứ tự</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="dd" id="testimonial-nestable">
+                                <ol class="dd-list" id="testimonial-list">
+                                    {% for row in objects %}
+                                        {% set _parts = row.avatarUrl|split('/') %}
+                                        {% set _thumb = row.avatarUrl ? (_parts|slice(0, -1)|join('/')) ~ '/thumbs/' ~ (_parts|last) : asset('assets/images/no-image.png') %}
+                                        <li class="dd-item" data-id="{{ row.id }}" style="border:1px solid #eee;border-radius:4px;margin-bottom:8px;background:#fff;">
+                                            <div class="dd-handle" style="cursor:move;display:flex;align-items:center;gap:14px;padding:10px 14px;">
+                                                <i class="fa fa-arrows" style="color:#bbb;"></i>
+                                                <img src="{{ _thumb }}" alt="{{ row.getName() }}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;background:#f5f5f5;">
+                                                <div style="flex:1;">
+                                                    <strong>{{ row.getName() }}</strong>
+                                                    <span class="text-warning" style="font-size:12px;">{% for i in 1..row.getRating() %}★{% endfor %}</span>
+                                                    <div class="text-muted" style="font-size:12px;">
+                                                        {{ row.getRole() }}
+                                                        &middot;
+                                                        {% if row.getEnable() %}
+                                                            <span class="text-success">Đang hiển thị</span>
+                                                        {% else %}
+                                                            <span class="text-muted">Đã ẩn</span>
+                                                        {% endif %}
+                                                        &middot;
+                                                        {{ row.getCreatedAt() | localizeddate('medium', 'none', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY') }}
+                                                    </div>
+                                                </div>
+                                                <div class="item-actions">
+                                                    <a href="{{ path('admin_testimonial_edit', {id: row.id}) }}" class="btn-sm">
+                                                        <i class="fa fa-edit" aria-hidden="true"></i>
+                                                    </a>
+                                                    {{ include('admin/testimonial/_delete_form.html.twig', {object: row}, with_context = false) }}
+                                                </div>
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                </ol>
+                            </div>
+                            {% if objects|length == 0 %}
+                                <p class="text-muted">Chưa có đánh giá nào.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {# nestable2 (drag-drop) already bundled with menu-editor.js — reused here for testimonial reorder #}
+    <script src="{{ asset('build/js/menu-editor.js') }}"></script>
+    <script>
+        $(function () {
+            if (!$.fn.nestable) { return; }
+
+            var reorderUrl = {{ path('admin_testimonial_reorder')|json_encode|raw }};
+
+            $('#testimonial-nestable').nestable({ maxDepth: 1 }).on('change', function () {
+                var ids = $('#testimonial-list').children('.dd-item').map(function () {
+                    return $(this).data('id');
+                }).get();
+
+                $.ajax({
+                    url: reorderUrl,
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ items: ids })
+                });
+            });
+        });
+    </script>
+{% endblock %}
