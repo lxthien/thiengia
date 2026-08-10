@@ -81,23 +81,26 @@
     {# nestable2 (drag-drop) already bundled with menu-editor.js — reused here for banner reorder #}
     <script src="{{ asset('build/js/menu-editor.js') }}"></script>
     <script>
-        $(function () {
-            if (!$.fn.nestable) { return; }
+        (function () {
+            // admin.js's global $ doesn't carry .fn.nestable (separate webpack bundle) —
+            // use the dedicated reference menu-editor.js exposes instead.
+            var $n = window.NestableJQuery;
+            if (!$n || !$n.fn.nestable) { return; }
 
             var reorderUrl = {{ path('admin_banner_reorder')|json_encode|raw }};
 
-            $('#banner-nestable').nestable({ maxDepth: 1 }).on('change', function () {
-                var ids = $('#banner-list').children('.dd-item').map(function () {
-                    return $(this).data('id');
+            $n('#banner-nestable').nestable({ maxDepth: 1 }).on('change', function () {
+                var ids = $n('#banner-list').children('.dd-item').map(function () {
+                    return $n(this).data('id');
                 }).get();
 
-                $.ajax({
+                $n.ajax({
                     url: reorderUrl,
                     method: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify({ items: ids })
                 });
             });
-        });
+        })();
     </script>
 {% endblock %}
