@@ -18,6 +18,7 @@ security:
         main:
             pattern: ^/
             provider: app_user_provider
+            user_checker: App\Security\AppUserChecker
             form_login:
                 login_path: app_login
                 check_path: app_login
@@ -29,6 +30,10 @@ security:
             remember_me:
                 secret: '%kernel.secret%'
                 lifetime: 604800
+
+            login_throttling:
+                max_attempts: 5
+                interval: '15 minutes'
 
     access_control:
         - { path: ^/login$, roles: PUBLIC_ACCESS }

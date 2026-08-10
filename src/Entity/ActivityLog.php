@@ -25,6 +25,7 @@ class ActivityLog
     const ACTION_TOGGLE = 'toggle';
     const ACTION_SETTINGS = 'settings';
     const ACTION_LOGIN = 'login';
+    const ACTION_LOGIN_FAILED = 'login_failed';
 
     // Entity type constants
     const ENTITY_NEWS = 'news';
@@ -211,6 +212,7 @@ class ActivityLog
             self::ACTION_TOGGLE => 'Thay đổi trạng thái',
             self::ACTION_SETTINGS => 'Cập nhật cài đặt',
             self::ACTION_LOGIN => 'Đăng nhập',
+            self::ACTION_LOGIN_FAILED => 'Đăng nhập thất bại',
         ];
 
         return isset($labels[$this->action]) ? $labels[$this->action] : $this->action;
@@ -251,6 +253,7 @@ class ActivityLog
             self::ACTION_TOGGLE => 'badge-info',
             self::ACTION_SETTINGS => 'badge-primary',
             self::ACTION_LOGIN => 'badge-dark',
+            self::ACTION_LOGIN_FAILED => 'badge-danger',
         ];
 
         return isset($classes[$this->action]) ? $classes[$this->action] : 'badge-secondary';
@@ -268,6 +271,7 @@ class ActivityLog
             self::ACTION_TOGGLE => 'fa-toggle-on',
             self::ACTION_SETTINGS => 'fa-cog',
             self::ACTION_LOGIN => 'fa-sign-in',
+            self::ACTION_LOGIN_FAILED => 'fa-exclamation-triangle',
         ];
 
         return isset($icons[$this->action]) ? $icons[$this->action] : 'fa-circle';

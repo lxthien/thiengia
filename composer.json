@@ -42,6 +42,7 @@
         "symfony/password-hasher": "6.4.*",
         "symfony/polyfill-apcu": "^1.0",
         "symfony/property-access": "6.4.*",
+        "symfony/rate-limiter": "6.4.*",
         "symfony/routing": "6.4.*",
         "symfony/security-bundle": "6.4.*",
         "symfony/stopwatch": "6.4.*",

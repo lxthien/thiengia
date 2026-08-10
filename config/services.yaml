@@ -76,3 +76,4 @@ services:
             $activityLogService: '@App\Service\ActivityLogService'
         tags:
             - { name: 'kernel.event_listener', event: 'security.interactive_login', method: 'onSecurityInteractiveLogin' }
+            - { name: 'kernel.event_listener', event: 'Symfony\Component\Security\Http\Event\LoginFailureEvent', method: 'onLoginFailure' }
