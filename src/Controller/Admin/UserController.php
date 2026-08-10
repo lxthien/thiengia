@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\ActivityLog;
 use App\Entity\User;
+use App\Security\Voter\UserVoter;
 use App\Service\ActivityLogService;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -58,6 +59,15 @@ class UserController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            if ($this->requestGrantsElevatedRole($user)) {
+                $this->addFlash('error', 'Bạn không có quyền cấp vai trò Admin/Super Admin cho người dùng khác');
+
+                return $this->render('admin/user/new.html.twig', [
+                    'user' => $user,
+                    'form' => $form->createView(),
+                ]);
+            }
+
             $encoded = $this->passwordHasher->hashPassword($user, $user->getPlainPassword());
             $user->setPassword($encoded);
             $user->setAdminNotificationRead(true);
@@ -90,10 +100,24 @@ class UserController extends AbstractController
     #[Route('/{id}/edit', name: 'admin_user_edit', methods: ['GET', 'POST'])]
     public function editAction(Request $request, User $user)
     {
+        $this->denyAccessUnlessGranted(UserVoter::MANAGE, $user);
+
+        $isSelf = $user->getId() === $this->getUser()->getId();
         $form = $this->createUserForm($user, false);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Field "roles" bị disabled khi tự sửa hồ sơ mình (không phải Super Admin) nên
+            // không cần kiểm tra lại ở đây — chỉ chặn khi sửa hồ sơ NGƯỜI KHÁC.
+            if (!$isSelf && $this->requestGrantsElevatedRole($user)) {
+                $this->addFlash('error', 'Bạn không có quyền cấp vai trò Admin/Super Admin cho người dùng khác');
+
+                return $this->render('admin/user/edit.html.twig', [
+                    'user' => $user,
+                    'form' => $form->createView(),
+                ]);
+            }
+
             // Update password if provided
             if (!empty($user->getPlainPassword())) {
                 $encoded = $this->passwordHasher->hashPassword($user, $user->getPlainPassword());
@@ -130,6 +154,8 @@ class UserController extends AbstractController
     #[Route('/{id}/delete', name: 'admin_user_delete', methods: ['POST'])]
     public function deleteAction(Request $request, User $user)
     {
+        $this->denyAccessUnlessGranted(UserVoter::MANAGE, $user);
+
         // Prevent deleting current user
         if ($this->getUser()->getId() === $user->getId()) {
             $this->addFlash('error', 'Không thể xóa tài khoản của chính mình');
@@ -164,6 +190,8 @@ class UserController extends AbstractController
     #[Route('/{id}/toggle-status', name: 'admin_user_toggle_status', methods: ['POST'])]
     public function toggleStatusAction(Request $request, User $user)
     {
+        $this->denyAccessUnlessGranted(UserVoter::MANAGE, $user);
+
         if (!$this->isCsrfTokenValid('toggle-status', $request->request->get('token'))) {
             return $this->redirectToRoute('admin_user_index');
         }
@@ -198,6 +226,8 @@ class UserController extends AbstractController
     #[Route('/{id}/change-password', name: 'admin_user_change_password', methods: ['GET', 'POST'])]
     public function changePasswordAction(Request $request, User $user)
     {
+        $this->denyAccessUnlessGranted(UserVoter::MANAGE, $user);
+
         $form = $this->createFormBuilder(null, ['csrf_protection' => false])
             ->setAction($this->generateUrl('admin_user_change_password', ['id' => $user->getId()]))
             ->add('plainPassword', PasswordType::class, [
@@ -296,16 +326,28 @@ class UserController extends AbstractController
             ]);
         }
 
+        $isSuperAdmin = $this->isGranted('ROLE_SUPER_ADMIN');
+        $roleChoices = [
+            'Editor' => 'ROLE_EDITOR',
+            'Author' => 'ROLE_AUTHOR',
+        ];
+        if ($isSuperAdmin) {
+            // Chỉ Super Admin mới được cấp role Admin/Super Admin cho người khác —
+            // xem thêm UserVoter + requestGrantsElevatedRole() (chặn cả khi bị submit thủ công).
+            $roleChoices = ['Super Admin' => 'ROLE_SUPER_ADMIN', 'Admin' => 'ROLE_ADMIN'] + $roleChoices;
+        }
+
+        // Tự sửa hồ sơ mình mà không phải Super Admin → khoá field roles để không tự nâng quyền
+        // (field disabled thì Symfony bỏ qua giá trị submit, giữ nguyên role hiện có).
+        $isSelfEdit = !$isNew && $user->getId() === $this->getUser()->getId();
+
         $builder
             ->add('roles', ChoiceType::class, [
                 'label' => 'Quyền',
-                'choices' => [
-                    'Admin' => 'ROLE_ADMIN',
-                    'Editor' => 'ROLE_EDITOR',
-                    'Author' => 'ROLE_AUTHOR',
-                ],
+                'choices' => $roleChoices,
                 'multiple' => true,
                 'expanded' => true,
+                'disabled' => $isSelfEdit && !$isSuperAdmin,
             ])
             ->add('enabled', CheckboxType::class, [
                 'label' => 'Kích hoạt',
@@ -316,5 +358,18 @@ class UserController extends AbstractController
             ]);
 
         return $builder->getForm();
+    }
+
+    /**
+     * True nếu $user đang được submit với role Admin/Super Admin mà actor hiện tại
+     * không phải Super Admin — dùng làm chốt chặn phía server, không chỉ ẩn UI.
+     */
+    private function requestGrantsElevatedRole(User $user): bool
+    {
+        if ($this->isGranted('ROLE_SUPER_ADMIN')) {
+            return false;
+        }
+
+        return array_intersect(['ROLE_ADMIN', 'ROLE_SUPER_ADMIN'], $user->getRoles()) !== [];
     }
 }

@@ -30,7 +30,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  * Dashboard Controller
  */
 #[Route('/admin')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_AUTHOR')]
 class DashboardController extends AbstractController
 {
     public function __construct(

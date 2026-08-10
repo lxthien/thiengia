@@ -19,7 +19,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  * Controller used to manage page contents in the backend.
  */
 #[Route('/admin/page')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_EDITOR')]
 class PageController extends AbstractController
 {
     public function __construct(

@@ -31,17 +31,20 @@
 							<i class="fa fa-plus-circle"></i>
 							<a href="{{ path('admin_news_new') }}">{{ 'menu.add_new'|trans }}</a>
 						</li>
-						<li>
-							<i class="fa fa-folder-open-o"></i>
-							<a href="{{ path('admin_newscategory_index') }}">{{ 'menu.category_list'|trans }}</a>
-						</li>
-						<li>
-							<i class="fa fa-tags"></i>
-							<a href="{{ path('admin_tag_index') }}">{{ 'menu.tags'|trans }}</a>
-						</li>
+						{% if is_granted('ROLE_EDITOR') %}
+							<li>
+								<i class="fa fa-folder-open-o"></i>
+								<a href="{{ path('admin_newscategory_index') }}">{{ 'menu.category_list'|trans }}</a>
+							</li>
+							<li>
+								<i class="fa fa-tags"></i>
+								<a href="{{ path('admin_tag_index') }}">{{ 'menu.tags'|trans }}</a>
+							</li>
+						{% endif %}
 					</ul>
 				</li>
 
+				{% if is_granted('ROLE_EDITOR') %}
 				<li class="menu-item-has-children dropdown">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 						<i class="menu-icon fa fa-file-text-o"></i>
@@ -58,27 +61,34 @@
 						</li>
 					</ul>
 				</li>
+				{% endif %}
 
+				{% if is_granted('ROLE_ADMIN') %}
 				<li>
 					<a href="{{ path('admin_menu_index') }}">
 						<i class="menu-icon fa fa-sitemap"></i>
 						Quản lý Menu
 					</a>
 				</li>
+				{% endif %}
 
+				{% if is_granted('ROLE_EDITOR') %}
 				<li>
 					<a href="{{ path('admin_comment_index') }}">
 						<i class="menu-icon fa fa-comments"></i>
 						{{ 'menu.comments'|trans }}
 					</a>
 				</li>
+				{% endif %}
 
+				{% if is_granted('ROLE_ADMIN') %}
 				<li>
 					<a href="{{ path('admin_contact_index') }}">
 						<i class="menu-icon fa fa-envelope-o"></i>
 						{{ 'menu.contact'|trans }}
 					</a>
 				</li>
+				{% endif %}
 
 				<li>
 					<a href="{{ path('admin_media_index') }}">
@@ -87,6 +97,7 @@
 					</a>
 				</li>
 
+				{% if is_granted('ROLE_EDITOR') %}
 				<li class="menu-item-has-children dropdown">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 						<i class="menu-icon fa fa-flag"></i>
@@ -110,7 +121,9 @@
 						Hình ảnh hoạt động
 					</a>
 				</li>
+				{% endif %}
 
+				{% if is_granted('ROLE_ADMIN') %}
 				<li class="menu-item-has-children dropdown">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 						<i class="menu-icon fa fa-users"></i>
@@ -131,21 +144,34 @@
 						</li>
 					</ul>
 				</li>
+				{% else %}
+				<li>
+					<a href="{{ path('admin_user_edit', {id: app.user.id}) }}">
+						<i class="menu-icon fa fa-user"></i>
+						{{ 'menu.users_profile'|trans }}
+					</a>
+				</li>
+				{% endif %}
 
+				{% if is_granted('ROLE_ADMIN') %}
 				<li>
 					<a href="{{ path('admin_health_index') }}">
 						<i class="menu-icon fa fa-heartbeat"></i>
 						Health dashboard
 					</a>
 				</li>
+				{% endif %}
 
+				{% if is_granted('ROLE_EDITOR') %}
 				<li>
 					<a href="{{ path('admin_content_decay_index') }}">
 						<i class="menu-icon fa fa-line-chart"></i>
 						Content decay
 					</a>
 				</li>
+				{% endif %}
 
+				{% if is_granted('ROLE_ADMIN') %}
 				<li>
 					<a href="{{ path('admin_activity_log_index') }}">
 						<i class="menu-icon fa fa-history"></i>
@@ -173,6 +199,7 @@
 						</li>
 					</ul>
 				</li>
+				{% endif %}
 			</ul>
 		</div>
 		<!-- /.navbar-collapse -->

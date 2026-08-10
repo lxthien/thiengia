@@ -14,7 +14,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  * Media Library Management Controller
  */
 #[Route('/admin/media')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_AUTHOR')]
 class MediaController extends AbstractController
 {
     private $uploadDir = 'uploads/media/';
@@ -163,6 +163,7 @@ class MediaController extends AbstractController
      * Delete media file
      */
     #[Route('/{filename}/delete', name: 'admin_media_delete', requirements: ['filename' => '.+'], methods: ['POST'])]
+    #[IsGranted('ROLE_EDITOR')]
     public function deleteAction(Request $request, $filename)
     {
         if (!$this->isCsrfTokenValid('delete-media', $request->request->get('token'))) {
@@ -191,6 +192,7 @@ class MediaController extends AbstractController
      * Move media file to another folder
      */
     #[Route('/{filename}/move', name: 'admin_media_move', requirements: ['filename' => '.+'], methods: ['POST'])]
+    #[IsGranted('ROLE_EDITOR')]
     public function moveAction(Request $request, $filename)
     {
         if (!$this->isCsrfTokenValid('delete-media', $request->request->get('token'))) {
@@ -263,6 +265,7 @@ class MediaController extends AbstractController
      * Crop image
      */
     #[Route('/{filename}/crop', name: 'admin_media_crop', requirements: ['filename' => '.+'], methods: ['POST'])]
+    #[IsGranted('ROLE_EDITOR')]
     public function cropAction(Request $request, $filename)
     {
         $uploadDirPath = $this->getParameter('kernel.project_dir') . '/public/' . $this->uploadDir;
@@ -299,6 +302,7 @@ class MediaController extends AbstractController
      * Resize image
      */
     #[Route('/{filename}/resize', name: 'admin_media_resize', requirements: ['filename' => '.+'], methods: ['POST'])]
+    #[IsGranted('ROLE_EDITOR')]
     public function resizeAction(Request $request, $filename)
     {
         $uploadDirPath = $this->getParameter('kernel.project_dir') . '/public/' . $this->uploadDir;

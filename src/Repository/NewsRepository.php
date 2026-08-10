@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\News;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -19,14 +20,18 @@ class NewsRepository extends ServiceEntityRepository
         parent::__construct($registry, News::class);
     }
 
-    public function findAllPosts()
+    public function findAllPosts(?User $author = null)
     {
-        return $this->getEntityManager()
-            ->createQuery(
-                'SELECT n FROM App\Entity\News n WHERE n.postType = :postType ORDER BY n.createdAt DESC'
-            )
-            ->setParameter('postType', "post")
-            ->getResult();
+        $qb = $this->createQueryBuilder('n')
+            ->where('n.postType = :postType')
+            ->setParameter('postType', 'post')
+            ->orderBy('n.createdAt', 'DESC');
+
+        if (null !== $author) {
+            $qb->andWhere('n.author = :author')->setParameter('author', $author);
+        }
+
+        return $qb->getQuery()->getResult();
     }
 
     public function findAllPages()
@@ -69,7 +74,7 @@ class NewsRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function searchPosts($query, $categoryId = null)
+    public function searchPosts($query, $categoryId = null, ?User $author = null)
     {
         $qb = $this->createQueryBuilder('n')
             ->where('n.postType = :postType')
@@ -91,6 +96,10 @@ class NewsRepository extends ServiceEntityRepository
                 ->leftJoin('n.category', 'c')
                 ->andWhere('c.id = :categoryId')
                 ->setParameter('categoryId', $categoryId);
+        }
+
+        if (null !== $author) {
+            $qb->andWhere('n.author = :author')->setParameter('author', $author);
         }
 
         return $qb->getQuery()->getResult();

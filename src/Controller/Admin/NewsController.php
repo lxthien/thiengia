@@ -18,12 +18,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Security\Voter\NewsVoter;
 
 /**
  * Controller used to manage post contents in the backend.
  */
 #[Route('/admin/news')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_AUTHOR')]
 class NewsController extends AbstractController
 {
     public function __construct(
@@ -41,10 +42,13 @@ class NewsController extends AbstractController
         $repository = $this->em->getRepository(News::class);
         $searchQuery = trim((string) $request->query->get('q', ''));
 
+        // ROLE_AUTHOR chỉ thấy bài viết của chính mình; ROLE_EDITOR trở lên thấy tất cả.
+        $authorFilter = $this->isGranted('ROLE_EDITOR') ? null : $this->getUser();
+
         if ($searchQuery !== '') {
-            $news = $repository->searchPosts($searchQuery);
+            $news = $repository->searchPosts($searchQuery, null, $authorFilter);
         } else {
-            $news = $repository->findAllPosts();
+            $news = $repository->findAllPosts($authorFilter);
         }
 
         return $this->render('admin/news/index.html.twig', [
@@ -62,17 +66,24 @@ class NewsController extends AbstractController
         $repository = $this->em->getRepository(News::class);
         $searchQuery = trim((string) $request->query->get('q', ''));
 
+        // ROLE_AUTHOR chỉ thấy bài viết của chính mình; ROLE_EDITOR trở lên thấy tất cả.
+        $authorFilter = $this->isGranted('ROLE_EDITOR') ? null : $this->getUser();
+
         if ($searchQuery !== '') {
-            $news = $repository->searchPosts($searchQuery, $categoryId);
+            $news = $repository->searchPosts($searchQuery, $categoryId, $authorFilter);
         } else {
-            $news = $repository
+            $qb = $repository
                 ->createQueryBuilder('n')
                 ->leftJoin('n.category', 'c')
                 ->where('c.id = :categoryId')
                 ->setParameter('categoryId', $categoryId)
-                ->orderBy('n.createdAt', 'DESC')
-                ->getQuery()
-                ->getResult();
+                ->orderBy('n.createdAt', 'DESC');
+
+            if ($authorFilter) {
+                $qb->andWhere('n.author = :author')->setParameter('author', $authorFilter);
+            }
+
+            $news = $qb->getQuery()->getResult();
         }
 
         return $this->render('admin/news/list.html.twig', [
@@ -193,6 +204,8 @@ class NewsController extends AbstractController
     #[Route('/{id}/edit', requirements: ['id' => '\d+'], name: 'admin_news_edit', methods: ['GET', 'POST'])]
     public function editAction(Request $request, News $news, Slugger $slugger)
     {
+        $this->denyAccessUnlessGranted(NewsVoter::EDIT, $news);
+
         $form = $this->createForm(NewsType::class, $news);
         $form->handleRequest($request);
 
@@ -283,6 +296,8 @@ class NewsController extends AbstractController
     #[Route('/{id}/delete', methods: ['POST'], name: 'admin_news_delete')]
     public function deleteAction(Request $request, $id, News $news)
     {
+        $this->denyAccessUnlessGranted(NewsVoter::DELETE, $news);
+
         if (!$this->isCsrfTokenValid('delete', $request->request->get('token'))) {
             return $this->redirectToRoute('admin_news_index');
         }
@@ -314,6 +329,7 @@ class NewsController extends AbstractController
         $news = $this->em->getRepository(News::class)->find($request->request->get('newsId'));
 
         if ($news) {
+            $this->denyAccessUnlessGranted(NewsVoter::EDIT, $news);
             $news->setEnable($request->request->get('enable'));
         }
 

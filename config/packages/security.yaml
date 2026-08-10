@@ -5,7 +5,9 @@ security:
         App\Entity\User: bcrypt
 
     role_hierarchy:
-        ROLE_ADMIN:       ROLE_USER
+        ROLE_AUTHOR:      ROLE_USER
+        ROLE_EDITOR:      ROLE_AUTHOR
+        ROLE_ADMIN:       ROLE_EDITOR
         ROLE_SUPER_ADMIN: ROLE_ADMIN
 
     providers:
@@ -37,4 +39,6 @@ security:
 
     access_control:
         - { path: ^/login$, roles: PUBLIC_ACCESS }
-        - { path: ^/admin/, roles: ROLE_ADMIN }
+        # Chỉ chặn ở ngưỡng thấp nhất (ROLE_AUTHOR) — phân quyền chi tiết hơn theo
+        # từng controller nằm ở #[IsGranted(...)] cấp class/method (xem src/Controller/Admin/*).
+        - { path: ^/admin/, roles: ROLE_AUTHOR }

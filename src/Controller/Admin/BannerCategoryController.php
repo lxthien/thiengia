@@ -18,7 +18,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  * Controller used to manage the banner category in the backend.
  */
 #[Route('/admin/bannercategory')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_EDITOR')]
 class BannerCategoryController extends AbstractController
 {
     public function __construct(

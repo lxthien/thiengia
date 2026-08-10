@@ -59,7 +59,9 @@
                                             <td>
                                                 <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                                                     {% for role in row.getRoles() %}
-                                                        {% if role == 'ROLE_ADMIN' %}
+                                                        {% if role == 'ROLE_SUPER_ADMIN' %}
+                                                            <span class="badge badge-dark badge-sm">Super Admin</span>
+                                                        {% elseif role == 'ROLE_ADMIN' %}
                                                             <span class="badge badge-danger badge-sm">Admin</span>
                                                         {% elseif role == 'ROLE_EDITOR' %}
                                                             <span class="badge badge-warning badge-sm">Editor</span>

@@ -27,7 +27,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  * Controller used to manage tag contents in the backend.
  */
 #[Route('/admin/tag')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_EDITOR')]
 class TagController extends AbstractController
 {
     public function __construct(

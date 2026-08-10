@@ -19,7 +19,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  * Controller used to manage gallery albums (hình ảnh hoạt động) in the backend.
  */
 #[Route('/admin/gallery-album')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_EDITOR')]
 class GalleryAlbumController extends AbstractController
 {
     public function __construct(

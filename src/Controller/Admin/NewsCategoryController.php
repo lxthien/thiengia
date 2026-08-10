@@ -27,7 +27,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  * Controller used to manage post category contents in the backend.
  */
 #[Route('/admin/newscategory')]
-#[IsGranted('ROLE_ADMIN')]
+#[IsGranted('ROLE_EDITOR')]
 class NewsCategoryController extends AbstractController
 {
     public function __construct(
