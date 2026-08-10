@@ -1,0 +1,178 @@
+@use "../tokens" as *;
+
+// Khối bình luận + form dưới bài viết/trang (templates/news/comments/)
+.comments-section {
+  margin-top: 3.5rem;
+  padding-top: 3.5rem;
+  border-top: 1px solid $line;
+}
+
+.comments-count {
+  font-family: $f-display;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: $text;
+}
+
+.comments-empty {
+  font-size: 0.92rem;
+  font-weight: 300;
+  color: $mut;
+}
+
+.comment-thread {
+  list-style: none;
+  margin: 1.75rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+
+  &--replies {
+    margin: 1.5rem 0 0;
+    padding-left: 1.75rem;
+    border-left: 2px solid $line;
+    gap: 1.5rem;
+  }
+}
+
+.comment-item {
+  display: flex;
+  gap: 1rem;
+}
+
+.comment-avatar {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  display: grid;
+  place-items: center;
+  background: $primary;
+  color: $white;
+  font-family: $f-display;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1;
+
+  &--reply {
+    width: 38px;
+    height: 38px;
+    background: $accent;
+    font-size: 0.88rem;
+  }
+}
+
+.comment-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.comment-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.comment-author {
+  font-family: $f-display;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: $text;
+}
+
+.comment-date {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: $mut;
+}
+
+.comment-content {
+  margin-top: 0.4rem;
+  font-size: 0.92rem;
+  font-weight: 300;
+  line-height: 1.8;
+  color: rgba($text, 0.85);
+}
+
+// --- Form gửi bình luận ---
+.comment-form {
+  margin-top: 3rem;
+  background: $white;
+  border: 1px solid $line;
+  border-top: 3px solid $primary;
+  padding: 2.25rem;
+
+  @media (max-width: 640px) {
+    padding: 1.5rem;
+  }
+
+  .comment-form-title {
+    font-family: $f-display;
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: $text;
+  }
+
+  .comment-form-note {
+    margin-top: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 300;
+    color: $mut;
+  }
+
+  .form-field {
+    label {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: $text;
+      margin-bottom: 0.6rem;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      background: $base;
+      border: 1px solid transparent;
+      border-bottom: 1px solid rgba($text, 0.22);
+      padding: 0.9rem 1.1rem;
+      font-family: $f-body;
+      font-size: 0.95rem;
+      font-weight: 300;
+      color: $text;
+      outline: none;
+      transition: border-color $dur $ease;
+
+      &::placeholder {
+        color: rgba($text, 0.35);
+      }
+
+      &:focus {
+        border-bottom-color: $accent;
+      }
+    }
+
+    textarea {
+      resize: vertical;
+    }
+  }
+
+  .form-error {
+    margin-top: 0.4rem;
+    font-size: 0.78rem;
+    color: $primary;
+  }
+
+  .btn2 {
+    width: 100%;
+
+    @media (min-width: 640px) {
+      width: auto;
+    }
+  }
+}

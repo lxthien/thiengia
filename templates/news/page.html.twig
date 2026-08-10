@@ -36,14 +36,6 @@
         description: post.description
     }) }}
 
-    {% if coverSrc %}
-        <div class="container max-w-7xl post-cover">
-            <figure class="fade">
-                <img src="{{ coverSrc }}" alt="{{ post.title }}" fetchpriority="high" decoding="async">
-            </figure>
-        </div>
-    {% endif %}
-
     {# ============ SỐ LIỆU TIN CẬY ============ #}
     <div class="figures">
         <div class="container max-w-7xl grid grid-cols-2 lg:grid-cols-4 divide-x divide-white/10">
@@ -84,6 +76,8 @@
                         <p class="author-bio">{{ v3.company.authorBio }}</p>
                     </div>
                 </aside>
+
+                {{ include('news/comments/_section.html.twig', { comments: comments, form: form }, with_context = false) }}
             </article>
 
             {# Sidebar dính #}

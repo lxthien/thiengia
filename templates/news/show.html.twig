@@ -79,13 +79,6 @@
         </div>
     </header>
 
-    {# Ảnh đại diện kéo đè lên mép banner #}
-    <div class="container max-w-7xl post-cover">
-        <figure class="fade">
-            <img src="{{ coverSrc }}" alt="{{ post.title }}" fetchpriority="high" decoding="async">
-        </figure>
-    </div>
-
     {# ============ NỘI DUNG ============ #}
     <div class="container max-w-7xl py-16 lg:py-20">
         <div class="grid lg:grid-cols-[1fr_340px] gap-16 items-start">
@@ -110,6 +103,8 @@
                         <p class="author-bio">{{ v3.company.authorBio }}</p>
                     </div>
                 </aside>
+
+                {{ include('news/comments/_section.html.twig', { comments: comments, form: form }, with_context = false) }}
             </article>
 
             {# Sidebar dính #}

@@ -1,0 +1,4 @@
+<section class="comments-section" id="binh-luan" aria-label="Bình luận">
+    {{ include('news/comments/list.html.twig', { comments: comments }, with_context = false) }}
+    {{ include('news/comments/form.html.twig', { form: form }, with_context = false) }}
+</section>

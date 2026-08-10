@@ -5,6 +5,7 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -383,12 +384,15 @@ class NewsController extends AbstractController
             throw $this->createNotFoundException("Nội dung không tồn tại.");
         }
 
-        // 2. HTTP Caching: Tăng tốc cho người dùng quay lại và giảm tải Server
-        $response = new Response();
-        $response->setEtag(md5($post->getId() . $post->getUpdatedAt()->getTimestamp() . $this->getParameter('app.cache_version')));
-        $response->setPublic();
-        if ($response->isNotModified($request)) {
-            return $response;
+        // 2. HTTP Caching: Tăng tốc cho người dùng quay lại và giảm tải Server (chỉ bật ở production)
+        $response = null;
+        if ($this->getParameter('kernel.environment') === 'prod') {
+            $response = new Response();
+            $response->setEtag(md5($post->getId() . $post->getUpdatedAt()->getTimestamp() . $this->getParameter('app.cache_version')));
+            $response->setPublic();
+            if ($response->isNotModified($request)) {
+                return $response;
+            }
         }
 
         // 3. SEO Canonical Redirect (301)
@@ -858,64 +862,43 @@ class NewsController extends AbstractController
     public function handleCommentFormAction(Request $request)
     {
         if (!$request->isXmlHttpRequest()) {
-            return new Response(
-                json_encode(
-                    array(
-                        'status' => 'error',
-                        'message' => 'You can access this only using Ajax!'
-                    )
-                )
-            );
-        } else {
-            $comment = new Comment();
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'You can access this only using Ajax!',
+            ], 400);
+        }
 
-            $form = $this->createFormBuilder($comment)
-                ->add('content', TextareaType::class)
-                ->add('author', TextType::class)
-                ->add('phone', TextType::class)
-                ->add('ip', HiddenType::class)
-                ->add('news_id', HiddenType::class)
-                ->add('comment_id', HiddenType::class)
-                ->add('gclid', HiddenType::class, array('required' => false))
-                ->getForm();
+        $comment = new Comment();
 
-            $form->handleRequest($request);
+        $form = $this->createFormBuilder($comment)
+            ->add('content', TextareaType::class)
+            ->add('author', TextType::class)
+            ->add('phone', TextType::class)
+            ->add('ip', HiddenType::class)
+            ->add('news_id', HiddenType::class)
+            ->add('comment_id', HiddenType::class)
+            ->add('gclid', HiddenType::class, array('required' => false))
+            ->getForm();
 
-            if ($form->isValid()) {
-                $em = $this->em;
-                $em->persist($comment);
-                $em->flush();
+        $form->handleRequest($request);
 
-                if (null !== $comment->getId()) {
-                    return new Response(
-                        json_encode(
-                            array(
-                                'status' => 'success',
-                                'message' => '<div class="alert alert-success" role="alert">' . $this->translator->trans('comment.thank_for_your_comment') . '</div>'
-                            )
-                        )
-                    );
-                } else {
-                    return new Response(
-                        json_encode(
-                            array(
-                                'status' => 'error',
-                                'message' => '<div class="alert alert-warning" role="alert">' . $this->translator->trans('comment.have_a_problem_on_your_request') . '</div>'
-                            )
-                        )
-                    );
-                }
-            } else {
-                return new Response(
-                    json_encode(
-                        array(
-                            'status' => 'error',
-                            'message' => '<div class="alert alert-warning" role="alert">' . $this->translator->trans('comment.have_a_problem_on_your_request') . '</div>'
-                        )
-                    )
-                );
+        if ($form->isValid()) {
+            $em = $this->em;
+            $em->persist($comment);
+            $em->flush();
+
+            if (null !== $comment->getId()) {
+                return new JsonResponse([
+                    'success' => true,
+                    'message' => $this->translator->trans('comment.thank_for_your_comment'),
+                ]);
             }
         }
+
+        return new JsonResponse([
+            'success' => false,
+            'message' => $this->translator->trans('comment.have_a_problem_on_your_request'),
+        ]);
     }
 
     /**
