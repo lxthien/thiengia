@@ -3,11 +3,14 @@
 namespace App\Form;
 
 use App\Entity\News;
+use App\Enum\PostStatus;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -17,7 +20,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Vich\UploaderBundle\Form\Type\VichFileType;
 use App\Service\PageBuilderService;
 
 class PageType extends AbstractType
@@ -53,14 +55,20 @@ class PageType extends AbstractType
                 'attr' => ['class' => 'url', 'readonly' => 'readonly'],
                 'label' => 'label.url',
             ])
-            ->add('enable', CheckboxType::class, [
-                'required' => false,
-                'label' => 'label.enable',
+            ->add('status', EnumType::class, [
+                'class' => PostStatus::class,
+                'choice_label' => fn (PostStatus $status) => $status->label(),
+                'label' => 'Trạng thái',
             ])
-            ->add('imageFile', VichFileType::class, [
+            ->add('scheduledAt', DateTimeType::class, [
                 'required' => false,
-                'allow_delete' => true,
+                'widget' => 'single_text',
+                'label' => 'Ngày đặt lịch',
+                'attr' => ['class' => 'js-scheduled-at'],
             ])
+            // Ảnh được chọn qua Media Library picker, ghi thẳng vào field này
+            // (xem admin/page/_form.html.twig) — không còn qua Vich.
+            ->add('images', HiddenType::class)
             ->add('description', TextareaType::class, [
                 'required' => false,
                 'label' => 'label.description',

@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\News;
 use App\Entity\NewsCategory;
+use App\Enum\PostStatus;
 use App\Seo\ContentDecayReporter;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -38,9 +39,9 @@ class ContentDecayController extends AbstractController
             ->leftJoin('n.category', 'c')
             ->addSelect('c')
             ->where('n.postType = :postType')
-            ->andWhere('n.enable = :enable')
+            ->andWhere('n.status = :status')
             ->setParameter('postType', 'post')
-            ->setParameter('enable', true)
+            ->setParameter('status', PostStatus::Published)
             ->orderBy('n.updatedAt', 'ASC');
 
         if ($filters['q'] !== '') {

@@ -7,9 +7,6 @@ parameters:
     # This parameter defines the codes of the locales (languages) enabled in the application
     app_locales: vi|en
     app.notifications.email_sender: anonymous@example.com
-    app.path.product_images: "/uploads/images/products"
-    app.path.news_images: "/uploads/images/news"
-    app.path.banner_images: "/uploads/images/banner"
 
 # Basic configuration for the Symfony framework features
 framework:
@@ -71,28 +68,6 @@ stof_doctrine_extensions:
             sluggable: true
             timestampable: true
 
-# VichUploadBundle
-vich_uploader:
-    db_driver: orm
-    mappings:
-        product_images:
-            uri_prefix:         '%app.path.product_images%'
-            upload_destination: '%kernel.project_dir%/public/uploads/images/products'
-            namer: vich_uploader.namer_origname
-        news_images:
-            uri_prefix:         '%app.path.news_images%'
-            upload_destination: '%kernel.project_dir%/public/uploads/images/news'
-            namer: vich_uploader.namer_origname
-            delete_on_remove: true
-            delete_on_update: true
-        banner_images:
-            uri_prefix:         '%app.path.banner_images%'
-            upload_destination: '%kernel.project_dir%/public/uploads/images/banner'
-            namer: vich_uploader.namer_origname
-            delete_on_remove: true
-            delete_on_update: true
-
-
 # LiipImagineBundle
 # https://github.com/liip/LiipImagineBundle
 liip_imagine:
@@ -111,9 +86,10 @@ liip_imagine:
     cache:                default
     data_loader:          default
     default_image:        '%kernel.project_dir%/public/assets/images/no-image.png'
-    controller:
-        filter_action:         liip_imagine.controller:filterAction
-        filter_runtime_action: liip_imagine.controller:filterRuntimeAction
+    # Không override controller filter_action/filter_runtime_action nữa — cú pháp
+    # "service:method" (1 dấu :) đã bị Symfony 5+ bỏ, giữ nguyên default của bundle
+    # (dùng "Class::method") thay vì override sai làm ảnh mới upload không tạo được
+    # thumbnail lần đầu (phát hiện khi test lại tính năng ảnh cho News/Page).
 
     filter_sets:
         cache: ~

@@ -5,6 +5,7 @@ namespace App\Health;
 use App\Entity\News;
 use App\Entity\NewsCategory;
 use App\Entity\Tag;
+use App\Enum\PostStatus;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
@@ -121,10 +122,10 @@ class HealthAuditManager
     private function findPostsWithoutFeaturedImage()
     {
         return $this->em->getRepository(News::class)->createQueryBuilder('n')
-            ->where('n.enable = :enabled')
+            ->where('n.status = :status')
             ->andWhere('n.postType IN (:postTypes)')
             ->andWhere('n.images IS NULL OR n.images = :empty')
-            ->setParameter('enabled', true)
+            ->setParameter('status', PostStatus::Published)
             ->setParameter('postTypes', ['post', 'page'])
             ->setParameter('empty', '')
             ->orderBy('n.updatedAt', 'DESC')
@@ -144,7 +145,9 @@ class HealthAuditManager
             ->getResult();
 
         foreach ($posts as $post) {
-            $path = 'uploads/images/news/' . ltrim($post->getImages(), '/');
+            // getImages() lưu URL đầy đủ tính từ webroot (Media picker), không
+            // còn là filename trần cần ghép tiền tố như hồi còn VichUploaderBundle.
+            $path = ltrim($post->getImages(), '/');
 
             if (!$this->localFileExists($path)) {
                 $issues[] = [
@@ -234,9 +237,9 @@ class HealthAuditManager
         }
 
         $this->publishedContentCache = $this->em->getRepository(News::class)->createQueryBuilder('n')
-            ->where('n.enable = :enabled')
+            ->where('n.status = :status')
             ->andWhere('n.postType IN (:postTypes)')
-            ->setParameter('enabled', true)
+            ->setParameter('status', PostStatus::Published)
             ->setParameter('postTypes', ['post', 'page'])
             ->orderBy('n.updatedAt', 'DESC')
             ->getQuery()
@@ -410,7 +413,7 @@ class HealthAuditManager
         if (!array_key_exists($url, $this->postUrlCache)) {
             $this->postUrlCache[$url] = $this->em->getRepository(News::class)->findOneBy([
                 'url' => $url,
-                'enable' => true,
+                'status' => PostStatus::Published,
             ]) !== null;
         }
 

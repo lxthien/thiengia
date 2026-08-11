@@ -4,8 +4,8 @@
 			<h3 class="ka-related-title">Có thể bạn quan tâm</h3>
 			<div class="row">
 				{% for row in relatedNews %}
-					{% set imagePath = (vich_uploader_asset(row, 'imageFile') ? vich_uploader_asset(row, 'imageFile') : asset('assets/images/no-image.png')) %}
-					{% set imagePathFilter = (vich_uploader_asset(row, 'imageFile') ? vich_uploader_asset(row, 'imageFile') : asset('assets/images/no-image.png')) | imagine_filter('news_554_400') %}
+					{% set imagePath = (row.images ? row.images : asset('assets/images/no-image.png')) %}
+					{% set imagePathFilter = (row.images ? row.images : asset('assets/images/no-image.png')) | imagine_filter('news_554_400') %}
 
 					{% if convert_images.fileExists(imagePath) == false %}
 						{% set imagePath = imagePath | imagine_filter('news_554_400') %}

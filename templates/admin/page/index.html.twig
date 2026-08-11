@@ -61,9 +61,24 @@
                                     </div>
                                 </div>
                             </form>
+                            <form id="admin-page-bulk-form" method="post" action="{{ path('admin_page_bulk') }}" data-bulk-form>
+                                <input type="hidden" name="token" value="{{ csrf_token('bulk_page') }}">
+                                <div class="admin-bulk-toolbar">
+                                    <select name="bulk_action" class="form-control">
+                                        <option value="">Chọn thao tác</option>
+                                        <option value="publish">Xuất bản đã chọn</option>
+                                        <option value="pending_review">Chuyển chờ duyệt</option>
+                                        <option value="draft">Chuyển về bản nháp</option>
+                                        <option value="archive">Lưu trữ đã chọn</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-default">Áp dụng</button>
+                                </div>
+                            </form>
+
                             <table id="bootstrap-data-table" class="table table-striped table-bordered">
                                 <thead>
                                     <tr>
+                                        <th class="admin-list-check"><input type="checkbox" data-bulk-check-all></th>
                                         <th>{{ 'label.images'|trans }}</th>
                                         <th>{{ 'label.title'|trans }}</th>
                                         <th>{{ 'label.status'|trans }}</th>

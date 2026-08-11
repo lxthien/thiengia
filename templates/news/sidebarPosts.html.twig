@@ -9,8 +9,8 @@
     <div class="ka-widget-body">
         <div class="ka-post-list">
             {% for row in posts %}
-                {% set imagePath = vich_uploader_asset(row, 'imageFile') ?: asset('assets/images/no-image.png') %}
-                {% set imagePathFilter = (vich_uploader_asset(row, 'imageFile') ?: asset('assets/images/no-image.png'))|imagine_filter('news_70_65') %}
+                {% set imagePath = row.images ?: asset('assets/images/no-image.png') %}
+                {% set imagePathFilter = (row.images ?: asset('assets/images/no-image.png'))|imagine_filter('news_70_65') %}
                 {% set imgSrc = convert_images.fileExists(imagePath) ? convert_images.webpConvert(imagePathFilter, '', true) : imagePath|imagine_filter('news_70_65') %}
                 <a href="{{ path('dynamic_post_page', {'slug': row.getUrl()}) }}" class="ka-post-item" title="{{ row.getTitle() }}">
                     <div class="ka-post-thumb">

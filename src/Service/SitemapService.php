@@ -5,6 +5,7 @@ namespace App\Service;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\News;
 use App\Entity\NewsCategory;
+use App\Enum\PostStatus;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class SitemapService
@@ -67,9 +68,9 @@ class SitemapService
             ];
         }
 
-        // Get all enabled news articles
+        // Get all published news articles
         $news = $this->em->getRepository(News::class)
-            ->findBy(['enable' => true], ['createdAt' => 'DESC']);
+            ->findBy(['status' => PostStatus::Published], ['createdAt' => 'DESC']);
 
         foreach ($news as $article) {
             $urls[] = [

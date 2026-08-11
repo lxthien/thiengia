@@ -1,6 +1,6 @@
-{% set imagePath = (vich_uploader_asset(row, 'imageFile') ? vich_uploader_asset(row, 'imageFile') : asset('assets/images/no-image.png')) %}
-{% set imagePathFilter = (vich_uploader_asset(row, 'imageFile') ? vich_uploader_asset(row, 'imageFile') : asset('assets/images/no-image.png')) | imagine_filter('news_277_220') %}
-{% set imagePathFilterMobile = (vich_uploader_asset(row, 'imageFile') ? vich_uploader_asset(row, 'imageFile') : asset('assets/images/no-image.png')) | imagine_filter('news_345_250') %}
+{% set imagePath = (row.images ? row.images : asset('assets/images/no-image.png')) %}
+{% set imagePathFilter = (row.images ? row.images : asset('assets/images/no-image.png')) | imagine_filter('news_277_220') %}
+{% set imagePathFilterMobile = (row.images ? row.images : asset('assets/images/no-image.png')) | imagine_filter('news_345_250') %}
                         
 {% if convert_images.fileExists(imagePath) == false %}
     {% set imagePath = imagePath | imagine_filter('news_277_220') %}

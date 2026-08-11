@@ -1,7 +1,8 @@
 <tr>
+    <td><input type="checkbox" name="ids[]" value="{{ page.id }}" form="admin-page-bulk-form" data-bulk-check></td>
     <td>
         <div class="images-container">
-            <img src="{{ (vich_uploader_asset(page, 'imageFile') ? vich_uploader_asset(page, 'imageFile') : asset('assets/images/no-image.png')) | imagine_filter('admin_thumb') }}" alt="{{ page.getTitle() }}" />
+            <img src="{{ (page.getImages() ? page.getImages() : asset('assets/images/no-image.png')) | imagine_filter('admin_thumb') }}" alt="{{ page.getTitle() }}" />
         </div>
     </td>
     <td>
@@ -32,19 +33,14 @@
         </span>
     </td>
     <td>
-        <label class="switch switch-text switch-primary switch-pill mb-0">
-            <input
-                type="checkbox"
-                class="switch-input"
-                {{ page.getEnable() ? 'checked="true"' : '' }}
-                data-id="{{ page.getId() }}"
-                data-action="{{ path('admin_page_disable') }}"
-            >
-            <span data-on="On" data-off="Off" class="switch-label"></span>
-            <span class="switch-handle"></span>
-        </label>
+        <span class="badge {{ page.getStatus().badgeClass() }}">{{ page.getStatus().label() }}</span>
+        {% if page.isScheduled() and page.getScheduledAt() %}
+            <small class="d-block text-muted mt-1">
+                <i class="fa fa-clock-o"></i> {{ page.getScheduledAt() | localizeddate('medium', 'short', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY HH:mm') }}
+            </small>
+        {% endif %}
     </td>
-    <td>{{ page.getCreatedAt() | localizeddate('medium', 'none', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY') }}</td>
+    <td>{{ page.getPublishedAt() ? page.getPublishedAt() | localizeddate('medium', 'none', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY') : '—' }}</td>
     <td>{{ page.getUpdatedAt() | localizeddate('medium', 'none', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY') }}</td>
     <td>
         <div class="item-actions">

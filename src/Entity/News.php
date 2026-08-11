@@ -2,16 +2,15 @@
 
 namespace App\Entity;
 
+use App\Enum\PostStatus;
 use App\Repository\NewsRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
 
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
-use Vich\UploaderBundle\Mapping\Attribute as Vich;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
@@ -20,7 +19,6 @@ use Gedmo\Mapping\Annotation as Gedmo;
 #[ORM\Table(name: 'news', options: ['charset' => 'utf8mb4', 'collate' => 'utf8mb4_unicode_ci'])]
 #[ORM\Entity(repositoryClass: NewsRepository::class)]
 #[UniqueEntity('url')]
-#[Vich\Uploadable]
 class News
 {
     #[ORM\Column(name: 'id', type: Types::INTEGER)]
@@ -62,17 +60,22 @@ class News
     #[ORM\Column(name: 'contents', type: Types::TEXT, columnDefinition: 'LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL')]
     private $contents;
 
+    /**
+     * URL đầy đủ tính từ webroot (vd "/uploads/media/2026/08/xxx.jpg"), chọn
+     * qua Media picker — cùng kiểu dữ liệu Banner::$urlImage/Testimonial::$avatarUrl
+     * đang dùng, không còn qua VichUploaderBundle.
+     */
     #[ORM\Column(name: 'images', type: Types::STRING, length: 255, nullable: true)]
     private $images;
 
-    /**
-     * @var File
-     */
-    #[Vich\UploadableField(mapping: 'news_images', fileNameProperty: 'images')]
-    private $imageFile;
+    #[ORM\Column(name: 'status', type: Types::STRING, length: 20, enumType: PostStatus::class)]
+    private PostStatus $status = PostStatus::Draft;
 
-    #[ORM\Column(name: 'enable', type: Types::BOOLEAN)]
-    private $enable = true;
+    #[ORM\Column(name: 'publishedAt', type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $publishedAt = null;
+
+    #[ORM\Column(name: 'scheduledAt', type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $scheduledAt = null;
 
     #[ORM\Column(name: 'postType', type: Types::STRING, length: 255)]
     private $postType = 'post';
@@ -348,34 +351,6 @@ class News
     }
 
     /**
-     * Set images file
-     *
-     * @param File $images
-     * @return News
-     */
-    public function setImageFile(File $images = null)
-    {
-        $this->imageFile = $images;
-
-        // VERY IMPORTANT:
-        // It is required that at least one field changes if you are using Doctrine,
-        // otherwise the event listeners won't be called and the file is lost
-        if ($images) {
-            $this->updatedAt = new \DateTime('now');
-        }
-    }
-
-    /**
-     * Get images file
-     *
-     * @return string
-     */
-    public function getImageFile()
-    {
-        return $this->imageFile;
-    }
-
-    /**
      * Set images
      *
      * @param string $images
@@ -393,16 +368,63 @@ class News
         return $this->images;
     }
 
-    public function setEnable($enable)
+    public function getStatus(): PostStatus
     {
-        $this->enable = $enable;
+        return $this->status;
+    }
+
+    /**
+     * Tự đánh dấu publishedAt lần đầu tiên chuyển sang Published — không ghi
+     * đè nếu đã xuất bản trước đó rồi lại chuyển trạng thái qua lại.
+     */
+    public function setStatus(PostStatus $status): static
+    {
+        $this->status = $status;
+
+        if ($status === PostStatus::Published && !$this->publishedAt) {
+            $this->publishedAt = new \DateTime();
+        }
 
         return $this;
     }
 
-    public function getEnable()
+    public function isPublished(): bool
     {
-        return $this->enable;
+        return $this->status === PostStatus::Published;
+    }
+
+    public function isDraft(): bool
+    {
+        return $this->status === PostStatus::Draft;
+    }
+
+    public function isScheduled(): bool
+    {
+        return $this->status === PostStatus::Scheduled;
+    }
+
+    public function getPublishedAt(): ?\DateTimeInterface
+    {
+        return $this->publishedAt;
+    }
+
+    public function setPublishedAt(?\DateTimeInterface $publishedAt): static
+    {
+        $this->publishedAt = $publishedAt;
+
+        return $this;
+    }
+
+    public function getScheduledAt(): ?\DateTimeInterface
+    {
+        return $this->scheduledAt;
+    }
+
+    public function setScheduledAt(?\DateTimeInterface $scheduledAt): static
+    {
+        $this->scheduledAt = $scheduledAt;
+
+        return $this;
     }
 
     public function setPostType($postType)

@@ -2,9 +2,9 @@
 {% set isVerticalCard = filterType == 'news_277_350' %}
 {% set filterTypeMobile = isVerticalCard ? 'news_345_435' : 'news_345_250' %}
 
-{% set imagePath = (vich_uploader_asset(row, 'imageFile') ? vich_uploader_asset(row, 'imageFile') : asset('assets/images/no-image.png')) %}
-{% set imagePathFilter = (vich_uploader_asset(row, 'imageFile') ? vich_uploader_asset(row, 'imageFile') : asset('assets/images/no-image.png')) | imagine_filter(filterType) %}
-{% set imagePathFilterMobile = (vich_uploader_asset(row, 'imageFile') ? vich_uploader_asset(row, 'imageFile') : asset('assets/images/no-image.png')) | imagine_filter(filterTypeMobile) %}
+{% set imagePath = (row.images ? row.images : asset('assets/images/no-image.png')) %}
+{% set imagePathFilter = (row.images ? row.images : asset('assets/images/no-image.png')) | imagine_filter(filterType) %}
+{% set imagePathFilterMobile = (row.images ? row.images : asset('assets/images/no-image.png')) | imagine_filter(filterTypeMobile) %}
                         
 {% if convert_images.fileExists(imagePath) == false %}
     {% set imagePath = imagePath | imagine_filter(filterType) %}

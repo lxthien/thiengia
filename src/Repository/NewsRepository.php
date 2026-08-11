@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\News;
 use App\Entity\User;
+use App\Enum\PostStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -109,9 +110,9 @@ class NewsRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('n')
             ->innerJoin('n.category', 't')
             ->where('t.id IN (:categoryIds)')
-            ->andWhere('n.enable = :enable')
+            ->andWhere('n.status = :status')
             ->setParameter('categoryIds', $categoryIds)
-            ->setParameter('enable', 1)
+            ->setParameter('status', PostStatus::Published)
             ->orderBy('n.' . $orderBy, $orderDir);
             
         if ($limit) {
@@ -124,9 +125,9 @@ class NewsRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('n')
             ->innerJoin('n.category', 't')
             ->where('t.id = :categoryId')
-            ->andWhere('n.enable = :enable')
+            ->andWhere('n.status = :status')
             ->setParameter('categoryId', $categoryId)
-            ->setParameter('enable', 1)
+            ->setParameter('status', PostStatus::Published)
             ->orderBy('n.' . $orderBy, $orderDir);
             
         if ($limit) {
@@ -141,11 +142,11 @@ class NewsRepository extends ServiceEntityRepository
             ->where('t.id = :categoryId')
             ->andWhere('r.id <> :id')
             ->andWhere('r.postType = :postType')
-            ->andWhere('r.enable = :enable')
+            ->andWhere('r.status = :status')
             ->setParameter('categoryId', $categoryId)
             ->setParameter('id', $excludeId)
             ->setParameter('postType', $postType)
-            ->setParameter('enable', 1)
+            ->setParameter('status', PostStatus::Published)
             ->setMaxResults($limit)
             ->orderBy('r.' . $orderBy, $orderDir)
             ->getQuery()
@@ -156,9 +157,9 @@ class NewsRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('n')
             ->innerJoin('n.tags', 't')
             ->where('t.id = :tagId')
-            ->andWhere('n.enable = :enable')
+            ->andWhere('n.status = :status')
             ->setParameter('tagId', $tagId)
-            ->setParameter('enable', 1)
+            ->setParameter('status', PostStatus::Published)
             ->orderBy('n.createdAt', 'DESC');
             
         if ($limit) {

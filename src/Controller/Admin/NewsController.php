@@ -6,6 +6,7 @@ use App\Entity\ActivityLog;
 use App\Entity\NewsCategory;
 use App\Entity\News;
 use App\Entity\Rating;
+use App\Enum\PostStatus;
 use App\Form\NewsCategoryType;
 use App\Form\NewsType;
 use App\Service\ActivityLogService;
@@ -15,7 +16,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Security\Voter\NewsVoter;
@@ -108,10 +108,10 @@ class NewsController extends AbstractController
 
         $items = $this->em->getRepository(News::class)
             ->createQueryBuilder('n')
-            ->where('n.enable = :enabled')
+            ->where('n.status = :status')
             ->andWhere('n.id != :currentId')
             ->andWhere('n.title LIKE :query OR n.url LIKE :query OR n.description LIKE :query')
-            ->setParameter('enabled', true)
+            ->setParameter('status', PostStatus::Published)
             ->setParameter('currentId', $currentId)
             ->setParameter('query', '%' . $query . '%')
             ->orderBy('n.createdAt', 'DESC')
@@ -147,9 +147,6 @@ class NewsController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                // Handle Media Picker selection (bypasses Vich to avoid path conflicts)
-                $this->applyMediaPickerUrl($request, $news);
-
                 $this->em->persist($news);
                 $this->em->flush();
 
@@ -175,13 +172,13 @@ class NewsController extends AbstractController
                     'id' => $news->getId()
                 ));
             } catch (\DBALException $e) {
-                $message = sprintf('DBALException [%i]: %s', $e->getCode(), $e->getMessage());
+                $message = sprintf('DBALException [%d]: %s', $e->getCode(), $e->getMessage());
             } catch (\PDOException $e) {
-                $message = sprintf('PDOException [%i]: %s', $e->getCode(), $e->getMessage());
+                $message = sprintf('PDOException [%d]: %s', $e->getCode(), $e->getMessage());
             } catch (\ORMException $e) {
-                $message = sprintf('ORMException [%i]: %s', $e->getCode(), $e->getMessage());
+                $message = sprintf('ORMException [%d]: %s', $e->getCode(), $e->getMessage());
             } catch (\Exception $e) {
-                $message = sprintf('Exception [%i]: %s', $e->getCode(), $e->getMessage());
+                $message = sprintf('Exception [%d]: %s', $e->getCode(), $e->getMessage());
             }
 
             $this->addFlash('error', $message);
@@ -211,16 +208,8 @@ class NewsController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                // Handle Media Picker selection (bypasses Vich to avoid path conflicts)
-                $this->applyMediaPickerUrl($request, $news);
-
                 $unitOfWork = $this->em->getUnitOfWork();
                 $originalData = $unitOfWork->getOriginalEntityData($news);
-
-                // Update createdAt if enable changed from false to true
-                if (isset($originalData['enable']) && !$originalData['enable'] && $news->getEnable()) {
-                    $news->setCreatedAt(new \DateTime());
-                }
 
                 // Handle postType change logic
                 $originalPostType = isset($originalData['postType']) ? $originalData['postType'] : 'post';
@@ -267,13 +256,13 @@ class NewsController extends AbstractController
                     'id' => $news->getId()
                 ));
             } catch (\DBALException $e) {
-                $message = sprintf('DBALException [%i]: %s', $e->getCode(), $e->getMessage());
+                $message = sprintf('DBALException [%d]: %s', $e->getCode(), $e->getMessage());
             } catch (\PDOException $e) {
-                $message = sprintf('PDOException [%i]: %s', $e->getCode(), $e->getMessage());
+                $message = sprintf('PDOException [%d]: %s', $e->getCode(), $e->getMessage());
             } catch (\ORMException $e) {
-                $message = sprintf('ORMException [%i]: %s', $e->getCode(), $e->getMessage());
+                $message = sprintf('ORMException [%d]: %s', $e->getCode(), $e->getMessage());
             } catch (\Exception $e) {
-                $message = sprintf('Exception [%i]: %s', $e->getCode(), $e->getMessage());
+                $message = sprintf('Exception [%d]: %s', $e->getCode(), $e->getMessage());
             }
 
             $this->addFlash('error', $message);
@@ -323,78 +312,60 @@ class NewsController extends AbstractController
         return $this->redirectToRoute('admin_news_index');
     }
 
-    #[Route('/disable', name: 'admin_news_disable')]
-    public function disableAction(Request $request)
+    /**
+     * Đổi trạng thái hàng loạt từ danh sách admin (chọn nhiều bài viết + 1 thao tác).
+     * Thay cho công tắc bật/tắt nhanh cũ trên từng dòng — 5 trạng thái không hợp
+     * để diễn đạt bằng 1 công tắc on/off nữa, đổi trạng thái giờ qua đây hoặc
+     * qua dropdown "Trạng thái" trong form sửa từng bài.
+     */
+    #[Route('/bulk', name: 'admin_news_bulk', methods: ['POST'])]
+    public function bulkAction(Request $request)
     {
-        $news = $this->em->getRepository(News::class)->find($request->request->get('newsId'));
-
-        if ($news) {
-            $this->denyAccessUnlessGranted(NewsVoter::EDIT, $news);
-            $news->setEnable($request->request->get('enable'));
+        if (!$this->isCsrfTokenValid('bulk_news', $request->request->get('token'))) {
+            $this->addFlash('error', 'Phiên làm việc đã hết hạn, vui lòng thử lại.');
+            return $this->redirectToRoute('admin_news_index');
         }
 
-        $this->em->persist($news);
+        $ids = $request->request->all('ids');
+        $bulkAction = (string) $request->request->get('bulk_action');
+
+        $statusMap = [
+            'publish' => PostStatus::Published,
+            'draft' => PostStatus::Draft,
+            'pending_review' => PostStatus::PendingReview,
+            'archive' => PostStatus::Archived,
+        ];
+
+        if (empty($ids) || !isset($statusMap[$bulkAction])) {
+            $this->addFlash('error', 'Vui lòng chọn bài viết và thao tác hợp lệ.');
+            return $this->redirectToRoute('admin_news_index');
+        }
+
+        $newStatus = $statusMap[$bulkAction];
+        $newsList = $this->em->getRepository(News::class)->findBy(['id' => $ids]);
+
+        $count = 0;
+        foreach ($newsList as $news) {
+            if (!$this->isGranted(NewsVoter::EDIT, $news)) {
+                continue;
+            }
+
+            $news->setStatus($newStatus);
+            $count++;
+        }
 
         $this->em->flush();
 
-        // Activity Log
         $this->activityLogService->log(
             ActivityLog::ACTION_TOGGLE,
             ActivityLog::ENTITY_NEWS,
-            $news->getId(),
-            $news->getTitle(),
-            $news->getEnable() ? 'Bật hiển thị' : 'Tắt hiển thị'
+            null,
+            sprintf('%d bài viết', $count),
+            'Đổi trạng thái hàng loạt sang "' . $newStatus->label() . '"'
         );
 
-        return new Response(
-            json_encode(
-                array(
-                    'status'=>'success',
-                    'message' => 'Thao tác thành công'
-                )
-            )
-        );
-    }
+        $this->addFlash('success', sprintf('Đã cập nhật %d bài viết sang "%s".', $count, $newStatus->label()));
 
-    /**
-     * Handle _media_picker_url POST param: copy the selected media file
-     * into the Vich upload dir and update entity->images (filename only).
-     * Only acts when no new imageFile was uploaded (Vich takes precedence).
-     */
-    private function applyMediaPickerUrl(Request $request, News $news): void
-    {
-        // If a new file was uploaded via Vich, let Vich handle images — skip
-        $uploadedFile = $request->files->get('news');
-        if (!empty($uploadedFile['imageFile']['file'])) {
-            return;
-        }
-
-        $pickerUrl = trim((string) $request->request->get('_media_picker_url', ''));
-        if ($pickerUrl === '') {
-            return;
-        }
-
-        $webRoot   = $this->getParameter('kernel.project_dir') . '/public';
-        $sourcePath = $webRoot . '/' . ltrim($pickerUrl, '/');
-
-        if (!is_file($sourcePath)) {
-            return;
-        }
-
-        $destDir  = $webRoot . '/uploads/images/news/';
-        $filename = basename($sourcePath);
-        $destPath = $destDir . $filename;
-
-        if (!is_dir($destDir)) {
-            mkdir($destDir, 0755, true);
-        }
-
-        // Copy only if not already there
-        if (!is_file($destPath)) {
-            copy($sourcePath, $destPath);
-        }
-
-        // Set only filename — Vich uri_prefix handles the rest
-        $news->setImages($filename);
+        return $this->redirectToRoute('admin_news_index');
     }
 }

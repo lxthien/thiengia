@@ -13,6 +13,7 @@ use App\Service\SettingsManager;
 
 use App\Entity\User;
 use App\Entity\News;
+use App\Enum\PostStatus;
 
 class ProfileController extends AbstractController
 {
@@ -44,10 +45,10 @@ class ProfileController extends AbstractController
             ->getRepository(News::class)
             ->createQueryBuilder('n')
             ->where('n.author = :author')
-            ->andWhere('n.enable = :enable')
+            ->andWhere('n.status = :status')
             ->andWhere('n.postType = :postType')
             ->setParameter('author', $user->getId())
-            ->setParameter('enable', 1)
+            ->setParameter('status', PostStatus::Published)
             ->setParameter('postType', 'post')
             ->orderBy('n.createdAt', 'DESC')
             ->getQuery()->getResult();

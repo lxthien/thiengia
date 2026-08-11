@@ -310,8 +310,8 @@
 
                 <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-5 mt-12">
                     {% for post in latestNews %}
-                        {% set imageSrc = vich_uploader_asset(post, 'imageFile')
-                            ? vich_uploader_asset(post, 'imageFile')|imagine_filter('news_277_220')
+                        {% set imageSrc = post.images
+                            ? post.images|imagine_filter('news_277_220')
                             : asset('assets/images/no-image.png') %}
                         <article class="news2-card fade">
                             <a href="{{ path('dynamic_post_page', { slug: post.url }) }}" tabindex="-1" aria-hidden="true">

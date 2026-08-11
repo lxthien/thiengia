@@ -10,8 +10,8 @@
 {% set headingLevel = headingLevel|default('h2') %}
 {% set filter = filter|default(featured ? 'news_277_350' : 'news_277_220') %}
 
-{% set imageSrc = vich_uploader_asset(post, 'imageFile')
-    ? vich_uploader_asset(post, 'imageFile')|imagine_filter(filter)
+{% set imageSrc = post.images
+    ? post.images|imagine_filter(filter)
     : asset('assets/images/no-image.png') %}
 
 <article class="post-card {{ featured ? 'post-card--featured' : '' }} fade">

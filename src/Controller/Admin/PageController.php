@@ -4,13 +4,13 @@ namespace App\Controller\Admin;
 
 use App\Entity\ActivityLog;
 use App\Entity\News;
+use App\Enum\PostStatus;
 use App\Form\PageType;
 use App\Service\ActivityLogService;
 use App\Utils\Slugger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -74,17 +74,6 @@ class PageController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                // Handle Media Picker selection (bypasses Vich to avoid path conflicts)
-                $this->applyMediaPickerUrl($request, $news);
-
-                $unitOfWork = $this->em->getUnitOfWork();
-                $originalData = $unitOfWork->getOriginalEntityData($news);
-
-                // Update createdAt if enable changed from false to true
-                if (isset($originalData['enable']) && !$originalData['enable'] && $news->getEnable()) {
-                    $news->setCreatedAt(new \DateTime());
-                }
-
                 $this->em->persist($news);
                 $this->em->flush();
 
@@ -106,13 +95,13 @@ class PageController extends AbstractController
                     'id' => $news->getId()
                 ));
             } catch (\DBALException $e) {
-                $message = sprintf('DBALException [%i]: %s', $e->getCode(), $e->getMessage());
+                $message = sprintf('DBALException [%d]: %s', $e->getCode(), $e->getMessage());
             } catch (\PDOException $e) {
-                $message = sprintf('PDOException [%i]: %s', $e->getCode(), $e->getMessage());
+                $message = sprintf('PDOException [%d]: %s', $e->getCode(), $e->getMessage());
             } catch (\ORMException $e) {
-                $message = sprintf('ORMException [%i]: %s', $e->getCode(), $e->getMessage());
+                $message = sprintf('ORMException [%d]: %s', $e->getCode(), $e->getMessage());
             } catch (\Exception $e) {
-                $message = sprintf('Exception [%i]: %s', $e->getCode(), $e->getMessage());
+                $message = sprintf('Exception [%d]: %s', $e->getCode(), $e->getMessage());
             }
 
             $this->addFlash('error', $message);
@@ -136,16 +125,8 @@ class PageController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                // Handle Media Picker selection (bypasses Vich to avoid path conflicts)
-                $this->applyMediaPickerUrl($request, $news);
-
                 $unitOfWork = $this->em->getUnitOfWork();
                 $originalData = $unitOfWork->getOriginalEntityData($news);
-
-                // Update createdAt if enable changed from false to true
-                if (isset($originalData['enable']) && !$originalData['enable'] && $news->getEnable()) {
-                    $news->setCreatedAt(new \DateTime());
-                }
 
                 // Handle postType change logic
                 $originalPostType = isset($originalData['postType']) ? $originalData['postType'] : 'page';
@@ -192,13 +173,13 @@ class PageController extends AbstractController
                     'id' => $news->getId()
                 ));
             } catch (\DBALException $e) {
-                $message = sprintf('DBALException [%i]: %s', $e->getCode(), $e->getMessage());
+                $message = sprintf('DBALException [%d]: %s', $e->getCode(), $e->getMessage());
             } catch (\PDOException $e) {
-                $message = sprintf('PDOException [%i]: %s', $e->getCode(), $e->getMessage());
+                $message = sprintf('PDOException [%d]: %s', $e->getCode(), $e->getMessage());
             } catch (\ORMException $e) {
-                $message = sprintf('ORMException [%i]: %s', $e->getCode(), $e->getMessage());
+                $message = sprintf('ORMException [%d]: %s', $e->getCode(), $e->getMessage());
             } catch (\Exception $e) {
-                $message = sprintf('Exception [%i]: %s', $e->getCode(), $e->getMessage());
+                $message = sprintf('Exception [%d]: %s', $e->getCode(), $e->getMessage());
             }
 
             $this->addFlash('error', $message);
@@ -244,76 +225,54 @@ class PageController extends AbstractController
         return $this->redirectToRoute('admin_page_index');
     }
 
-    #[Route('/disable', name: 'admin_page_disable', methods: ['POST'])]
-    public function disableAction(Request $request)
-    {
-        $page = $this->em->getRepository(News::class)->find($request->request->get('newsId'));
-
-        if ($page && $page->getPostType() === 'page') {
-            $page->setEnable((bool) $request->request->get('enable'));
-            $this->em->persist($page);
-            $this->em->flush();
-
-            // Activity Log
-            $this->activityLogService->log(
-                ActivityLog::ACTION_TOGGLE,
-                ActivityLog::ENTITY_PAGE,
-                $page->getId(),
-                $page->getTitle(),
-                $page->getEnable() ? 'Bật hiển thị' : 'Tắt hiển thị'
-            );
-        }
-
-        return new Response(
-            json_encode(
-                array(
-                    'status' => 'success',
-                    'message' => 'Thao tác thành công'
-                )
-            )
-        );
-    }
-
     /**
-     * Handle _media_picker_url POST param: copy the selected media file
-     * into the Vich upload dir and update entity->images (filename only).
-     * Only acts when no new imageFile was uploaded (Vich takes precedence).
+     * Đổi trạng thái hàng loạt từ danh sách admin — xem NewsController::bulkAction
+     * cho lý do thay công tắc bật/tắt cũ (5 trạng thái không hợp để diễn đạt
+     * bằng 1 công tắc on/off).
      */
-    private function applyMediaPickerUrl(Request $request, News $news): void
+    #[Route('/bulk', name: 'admin_page_bulk', methods: ['POST'])]
+    public function bulkAction(Request $request)
     {
-        // If a new file was uploaded via Vich, let Vich handle images — skip
-        $uploadedFile = $request->files->get('page');
-        if (!empty($uploadedFile['imageFile']['file'])) {
-            return;
+        if (!$this->isCsrfTokenValid('bulk_page', $request->request->get('token'))) {
+            $this->addFlash('error', 'Phiên làm việc đã hết hạn, vui lòng thử lại.');
+            return $this->redirectToRoute('admin_page_index');
         }
 
-        $pickerUrl = trim((string) $request->request->get('_media_picker_url', ''));
-        if ($pickerUrl === '') {
-            return;
+        $ids = $request->request->all('ids');
+        $bulkAction = (string) $request->request->get('bulk_action');
+
+        $statusMap = [
+            'publish' => PostStatus::Published,
+            'draft' => PostStatus::Draft,
+            'pending_review' => PostStatus::PendingReview,
+            'archive' => PostStatus::Archived,
+        ];
+
+        if (empty($ids) || !isset($statusMap[$bulkAction])) {
+            $this->addFlash('error', 'Vui lòng chọn trang và thao tác hợp lệ.');
+            return $this->redirectToRoute('admin_page_index');
         }
 
-        $webRoot   = $this->getParameter('kernel.project_dir') . '/public';
-        $sourcePath = $webRoot . '/' . ltrim($pickerUrl, '/');
+        $newStatus = $statusMap[$bulkAction];
+        $pages = $this->em->getRepository(News::class)->findBy(['id' => $ids, 'postType' => 'page']);
 
-        if (!is_file($sourcePath)) {
-            return;
+        foreach ($pages as $page) {
+            $page->setStatus($newStatus);
         }
 
-        $destDir  = $webRoot . '/uploads/images/news/';
-        $filename = basename($sourcePath);
-        $destPath = $destDir . $filename;
+        $this->em->flush();
 
-        if (!is_dir($destDir)) {
-            mkdir($destDir, 0755, true);
-        }
+        $this->activityLogService->log(
+            ActivityLog::ACTION_TOGGLE,
+            ActivityLog::ENTITY_PAGE,
+            null,
+            sprintf('%d trang', count($pages)),
+            'Đổi trạng thái hàng loạt sang "' . $newStatus->label() . '"'
+        );
 
-        // Copy only if not already there
-        if (!is_file($destPath)) {
-            copy($sourcePath, $destPath);
-        }
+        $this->addFlash('success', sprintf('Đã cập nhật %d trang sang "%s".', count($pages), $newStatus->label()));
 
-        // Set only filename — Vich uri_prefix handles the rest
-        $news->setImages($filename);
+        return $this->redirectToRoute('admin_page_index');
     }
 
     private function getPageLevel(News $page)

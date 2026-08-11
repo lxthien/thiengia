@@ -1,6 +1,6 @@
 {% extends 'layout.html.twig' %}
 
-{% set coverSrc = vich_uploader_asset(post, 'imageFile') ?: null %}
+{% set coverSrc = post.images ?: null %}
 
 {% block title %}{{ post.pageTitle ?: post.title }} | {{ v3.company.shortName }}{% endblock %}
 {% block description %}{{ post.pageDescription ?: post.description }}{% endblock %}

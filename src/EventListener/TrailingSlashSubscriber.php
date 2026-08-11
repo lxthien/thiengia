@@ -4,6 +4,7 @@ namespace App\EventListener;
 
 use App\Entity\News;
 use App\Entity\NewsCategory;
+use App\Enum\PostStatus;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -110,7 +111,7 @@ class TrailingSlashSubscriber implements EventSubscriberInterface
         // Single segment: /slug/
         if ($level2 === null) {
             $post = $this->em->getRepository(News::class)
-                ->findOneBy(['url' => $slug, 'enable' => 1]);
+                ->findOneBy(['url' => $slug, 'status' => PostStatus::Published]);
             if ($post) {
                 return true;
             }
@@ -124,7 +125,7 @@ class TrailingSlashSubscriber implements EventSubscriberInterface
         // Two segments: /level1/level2/
         if ($level3 === null) {
             $post = $this->em->getRepository(News::class)
-                ->findOneBy(['url' => $level2, 'enable' => 1]);
+                ->findOneBy(['url' => $level2, 'status' => PostStatus::Published]);
             if ($post) {
                 return true;
             }
@@ -137,7 +138,7 @@ class TrailingSlashSubscriber implements EventSubscriberInterface
 
         // Three segments: /level1/level2/level3/
         $post = $this->em->getRepository(News::class)
-            ->findOneBy(['url' => $level3, 'enable' => 1]);
+            ->findOneBy(['url' => $level3, 'status' => PostStatus::Published]);
 
         return $post !== null;
     }

@@ -12,6 +12,7 @@ use App\Entity\Banner;
 use App\Entity\BannerCategory;
 use App\Entity\GalleryAlbum;
 use App\Entity\Testimonial;
+use App\Enum\PostStatus;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use App\Service\SettingsManager;
@@ -72,9 +73,9 @@ class HomepageController extends AbstractController
                                         ->createQueryBuilder('n')
                                         ->leftJoin('n.category', 't')
                                         ->where('t.id =:subCat')
-                                        ->andWhere('n.enable = :enable')
+                                        ->andWhere('n.status = :status')
                                         ->setParameter('subCat', $subCat->getId())
-                                        ->setParameter('enable', 1)
+                                        ->setParameter('status', PostStatus::Published)
                                         ->orderBy('n.createdAt', 'DESC')
                                         ->setMaxResults( $listCategoriesOnHomepage[$i]["items"] )
                                         ->getQuery()->getResult();
@@ -87,9 +88,9 @@ class HomepageController extends AbstractController
                                 ->createQueryBuilder('n')
                                 ->leftJoin('n.category', 't')
                                 ->where('t.id =:subCat')
-                                ->andWhere('n.enable = :enable')
+                                ->andWhere('n.status = :status')
                                 ->setParameter('subCat', $category->getId())
-                                ->setParameter('enable', 1)
+                                ->setParameter('status', PostStatus::Published)
                                 ->orderBy('n.createdAt', 'DESC')
                                 ->setMaxResults( $listCategoriesOnHomepage[$i]["items"] )
                                 ->getQuery()->getResult();

@@ -34,26 +34,21 @@ use App\Entity\Comment;
 use App\Entity\Contact;
 use App\Entity\Tag;
 use App\Entity\Rating;
+use App\Enum\PostStatus;
 use App\Service\PageBuilderService;
 
-use Vich\UploaderBundle\Templating\Helper\UploaderHelper;
 use EWZ\Bundle\RecaptchaBundle\Validator\Constraints\IsTrue as RecaptchaTrue;
 
 use App\Utils\ConvertImages;
 
 class NewsController extends AbstractController
 {
-    /**
-     * @var UploaderHelper
-     */
-    private $helper;
     private $convertImages;
     private $contentFormatter;
     private $viewCountLogger;
     private $pageBuilderService;
 
     public function __construct(
-        UploaderHelper $helper,
         ConvertImages $convertImages,
         \App\Service\ContentFormatter $contentFormatter,
         \App\Service\ViewCountLogger $viewCountLogger,
@@ -65,7 +60,6 @@ class NewsController extends AbstractController
         private readonly SettingsManager $settingsManager,
         private readonly FormFactoryInterface $formFactory,
     ) {
-        $this->helper = $helper;
         $this->convertImages = $convertImages;
         $this->contentFormatter = $contentFormatter;
         $this->viewCountLogger = $viewCountLogger;
@@ -128,7 +122,7 @@ class NewsController extends AbstractController
         // First, try to find it as a post/page
         if ($request->query->get('preview') === false || $request->query->get('preview_id') === null) {
             $post = $this->em->getRepository(News::class)
-                ->findOneBy(['url' => $slug, 'enable' => 1]);
+                ->findOneBy(['url' => $slug, 'status' => PostStatus::Published]);
         } else {
             $post = $this->em->getRepository(News::class)
                 ->find($request->query->get('preview_id'));
@@ -188,7 +182,7 @@ class NewsController extends AbstractController
 
         // Check if level2 is a post in this category
         $post = $this->em->getRepository(News::class)
-            ->findOneBy(['url' => $level2, 'enable' => 1]);
+            ->findOneBy(['url' => $level2, 'status' => PostStatus::Published]);
 
         if ($post) {
             // Verify that the post belongs to this category
@@ -234,7 +228,7 @@ class NewsController extends AbstractController
 
         // Find post by slug
         $post = $this->em->getRepository(News::class)
-            ->findOneBy(['url' => $level3, 'enable' => 1]);
+            ->findOneBy(['url' => $level3, 'status' => PostStatus::Published]);
 
         if ($post) {
             // Verify post belongs to child category or its parent
@@ -379,7 +373,7 @@ class NewsController extends AbstractController
             }
             $post = $this->em->getRepository(News::class)->find($request->query->get('preview_id'));
         } else {
-            $post = $this->em->getRepository(News::class)->findOneBy(['url' => $slug, 'enable' => 1]);
+            $post = $this->em->getRepository(News::class)->findOneBy(['url' => $slug, 'status' => PostStatus::Published]);
         }
 
         if (!$post) {
@@ -450,7 +444,7 @@ class NewsController extends AbstractController
         }
         
         // Tối ưu Image Size (Vẫn dùng filesystem nhưng ltrim cho an toàn)
-        $imagePath = $this->helper->asset($post, 'imageFile');
+        $imagePath = $post->getImages();
         $imageSize = $imagePath ? @getimagesize(ltrim($imagePath, '/')) : null;
 
         // Form Comment & Rating
@@ -542,7 +536,7 @@ class NewsController extends AbstractController
     {
         $posts = $this->em->getRepository(News::class)
             ->findBy(
-                array('postType' => 'post', 'enable' => 1),
+                array('postType' => 'post', 'status' => PostStatus::Published),
                 array('createdAt' => 'DESC'),
                 20
             );
@@ -568,7 +562,7 @@ class NewsController extends AbstractController
     {
         $posts = $this->em->getRepository(News::class)
             ->findBy(
-                array('postType' => 'post', 'enable' => 1),
+                array('postType' => 'post', 'status' => PostStatus::Published),
                 array('viewCounts' => 'DESC'),
                 20
             );
@@ -661,9 +655,9 @@ class NewsController extends AbstractController
             ->createQueryBuilder('n')
             ->innerJoin('n.category', 't')
             ->where('t.id IN (:listCategoriesIds)')
-            ->andWhere('n.enable = :enable')
+            ->andWhere('n.status = :status')
             ->setParameter('listCategoriesIds', $listCategoriesIds)
-            ->setParameter('enable', 1)
+            ->setParameter('status', PostStatus::Published)
             ->setMaxResults(10)
             ->orderBy('n.viewCounts', 'DESC')
             ->getQuery()
@@ -694,9 +688,9 @@ class NewsController extends AbstractController
             ->createQueryBuilder('n')
             ->innerJoin('n.category', 't')
             ->where('t.id IN (:listCategoriesIds)')
-            ->andWhere('n.enable = :enable')
+            ->andWhere('n.status = :status')
             ->setParameter('listCategoriesIds', $listCategoriesIds)
-            ->setParameter('enable', 1)
+            ->setParameter('status', PostStatus::Published)
             ->setMaxResults($postNumber)
             ->orderBy('n.createdAt', 'DESC')
             ->getQuery()
@@ -773,9 +767,9 @@ class NewsController extends AbstractController
                     OR p.pageTitle LIKE :q 
                     OR p.pageDescription LIKE :q 
                     OR p.pageKeyword LIKE :q')
-            ->andWhere('p.enable = :enable')
+            ->andWhere('p.status = :status')
             ->setParameter('q', $searchPattern)
-            ->setParameter('enable', 1)
+            ->setParameter('status', PostStatus::Published)
             ->orderBy('p.createdAt', 'DESC')
             ->getQuery();
 

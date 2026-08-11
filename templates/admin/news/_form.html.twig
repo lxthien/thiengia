@@ -1,15 +1,10 @@
 {{ form_start(form, {attr: attr|default({})}) }}
 
-{% set _img = (form.vars.value and form.vars.value.images) ? form.vars.value.images : '' %}
-{% set _img_url = _img ? '/uploads/images/news/' ~ _img : '' %}
-{# _picker_url: only pre-populated when image was previously picked from Media Library.
-   Vich-uploaded images must NOT be sent as _media_picker_url or controller will call
-   setImages() every save, causing Vich/LiipImagine to clear the cache. #}
-{% set _picker_url = '' %}
+{% set _img_url = (form.vars.value and form.vars.value.images) ? form.vars.value.images : '' %}
 
-{# Render title, url, enable before image card #}
+{# Render title, url, status, scheduledAt before image card #}
 {% for child in form %}
-    {% if child.vars.name in ['title', 'url', 'enable'] %}
+    {% if child.vars.name in ['title', 'url', 'status', 'scheduledAt'] %}
         {{ form_row(child) }}
     {% endif %}
 {% endfor %}
@@ -47,31 +42,14 @@
                             title="Bỏ chọn ảnh thư viện"
                             style="position:absolute;top:5px;right:5px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;border:none;cursor:pointer;font-size:13px;line-height:22px;padding:0;display:{{ _img_url ? 'block' : 'none' }};">&times;</button>
                 </div>
-                {% if _img %}
-                    <p style="font-size:10px;color:#aaa;margin-top:5px;word-break:break-all;text-align:center;">{{ _img }}</p>
+                {% if _img_url %}
+                    <p style="font-size:10px;color:#aaa;margin-top:5px;word-break:break-all;text-align:center;">{{ _img_url }}</p>
                 {% endif %}
             </div>
 
             {# Right: Options #}
             <div class="col-sm-8" style="padding-left:8px;">
 
-                {# Option 1: Vich upload #}
-                <div style="background:#fff8f0;border:1px solid #ffe0b0;border-radius:5px;padding:11px 14px;margin-bottom:12px;">
-                    <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#b07020;margin-bottom:6px;display:block;">
-                        <i class="fa fa-upload"></i> Upload ảnh mới
-                    </label>
-                    {{ form_widget(form.imageFile) }}
-                    {{ form_errors(form.imageFile) }}
-                    <small style="color:#aaa;font-size:11px;margin-top:4px;display:block;">Upload ảnh mới sẽ thay thế ảnh hiện tại.</small>
-                </div>
-
-                {# Divider #}
-                <div style="position:relative;text-align:center;margin:10px 0;">
-                    <span style="background:#fff;padding:0 10px;font-size:11px;color:#b0b8d4;position:relative;z-index:1;">── hoặc ──</span>
-                    <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:#e8eaf6;z-index:0;"></div>
-                </div>
-
-                {# Option 2: Media Library #}
                 <div style="background:#f7f9ff;border:1px solid #d5d9ef;border-radius:5px;padding:11px 14px;">
                     <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#5b7aff;margin-bottom:8px;display:block;">
                         <i class="fa fa-th-large"></i> Chọn từ Media Library
@@ -96,10 +74,9 @@
     </div>
 </div>
 
-{# Hidden POST param — handled by Controller, outside Vich mapping.
-   Value is intentionally blank for Vich-uploaded images (prevent unnecessary setImages() calls). #}
-<input type="hidden" id="newsPicker_url_input" name="_media_picker_url"
-       value="{{ _picker_url }}" data-picker-id="newsPicker">
+{# Render qua form_widget (không tự viết <input> tay) để field được đánh dấu
+   "đã render" — tránh form_rest() ở cuối render trùng thêm 1 input images nữa. #}
+{{ form_widget(form.images, {id: 'newsPicker_url_input', attr: {'data-picker-id': 'newsPicker'}}) }}
 
 {# Media Picker Modal #}
 <div class="modal fade" id="newsPickerModal" tabindex="-1" role="dialog"
@@ -136,7 +113,7 @@
 
 {# Remaining fields — skip title/url/enable/imageFile and submit buttons #}
 {% for child in form %}
-    {% if child.vars.name not in ['title', 'url', 'enable', 'imageFile', 'save', 'saveAndCreateNew'] %}
+    {% if child.vars.name not in ['title', 'url', 'status', 'scheduledAt', 'images', 'save', 'saveAndCreateNew'] %}
         {% if child.vars.name == 'contents' %}
             <div class="cms-block-editor-layout">
                 {{ include('admin/content_block/_toolbar.html.twig', {
