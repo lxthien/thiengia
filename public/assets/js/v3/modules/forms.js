@@ -8,7 +8,24 @@ export default function initForms() {
   document.querySelectorAll("form[data-quote]").forEach((form) => {
     const isAjax = form.hasAttribute("data-ajax-form");
 
+    // Mặc định trình duyệt validate ngay khi submit rồi bám live theo từng
+    // ký tự gõ tiếp (bubble lỗi tự cập nhật liên tục) — gây cảm giác báo lỗi
+    // ngay cả khi chưa gõ xong. Tắt validate tự động (novalidate), tự kiểm
+    // tra bằng JS và chỉ báo lỗi khi rời khỏi ô (blur) hoặc khi bấm gửi.
+    form.setAttribute("novalidate", "");
+    form.querySelectorAll("input, textarea, select").forEach((field) => {
+      field.addEventListener("blur", () => {
+        if (!field.validity.valid) field.reportValidity();
+      });
+    });
+
     form.addEventListener("submit", (event) => {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        form.reportValidity();
+        return;
+      }
+
       const btn = form.querySelector("button[type=submit]");
       const lockButton = () => {
         if (!btn) return;
