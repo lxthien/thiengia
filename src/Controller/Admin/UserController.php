@@ -228,7 +228,10 @@ class UserController extends AbstractController
     {
         $this->denyAccessUnlessGranted(UserVoter::MANAGE, $user);
 
-        $form = $this->createFormBuilder(null, ['csrf_protection' => false])
+        // Template dùng form_start()/form_end() nên CSRF token được render tự động
+        // — không có lý do phải tắt csrf_protection ở đây (khác với form công khai
+        // viết tay ở NewsletterController, nơi thực sự không có chỗ render token).
+        $form = $this->createFormBuilder(null)
             ->setAction($this->generateUrl('admin_user_change_password', ['id' => $user->getId()]))
             ->add('plainPassword', PasswordType::class, [
                 'label' => 'Mật khẩu mới',

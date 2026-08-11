@@ -196,9 +196,11 @@ white_october_breadcrumbs:
     separator:          ''
     viewTemplate:       '@WhiteOctoberBreadcrumbs/breadcrumbs.html.twig'
 
-# EWZRecaptchaBundle
+# EWZRecaptchaBundle — public/private key thật đã chuyển sang biến môi trường
+# (EWZ_RECAPTCHA_SITE_KEY/SECRET, xem .env + .env.local) thay vì hardcode ở đây;
+# phần còn lại của cấu hình (public_key/private_key qua %env(...)%) nằm ở
+# config/packages/ewz_recaptcha.yaml, không lặp lại ở đây để tránh 2 nơi định
+# nghĩa cùng 1 khoá config đè lên nhau.
 ewz_recaptcha:
-    public_key:  6LfF6jkUAAAAAEXwdFdSqBiu7S5EQ6EuDAf449uM
-    private_key: 6LfF6jkUAAAAAJzxFsfmh2Pt3MxuQT5MC62fzPiH
     locale_key:  '%kernel.default_locale%'
     locale_from_request: true

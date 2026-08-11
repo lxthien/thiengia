@@ -25,8 +25,46 @@ $config = array();
 /*============================ Enable PHP Connector HERE ==============================*/
 // http://docs.cksource.com/ckfinder3-php/configuration.html#configuration_options_authentication
 
-$config['authentication'] = function () {
-    return true;
+// File CKFinder chạy độc lập, không qua front controller Symfony, nên trước đây
+// callback này luôn trả về true — bất kỳ ai (kể cả không đăng nhập) cũng có toàn
+// quyền tạo/xoá file trong uploads/ckfinder. Sửa bằng cách đọc lại session mà
+// Symfony đã ghi (cùng session name + save_path, xem framework.yaml session
+// config) và tìm vai trò (ROLE_*) đã được Symfony\...\ContextListener nhúng
+// trong chuỗi serialize của token bảo mật ("_security_main").
+//
+// Cố tình KHÔNG require vendor/autoload.php của app (và không unserialize()
+// thành object thật): CKFinder tự mang theo 1 bản vendor/ riêng bên trong
+// core/connector/php/vendor (Symfony HttpKernel bản cũ) — nếu nạp thêm
+// composer autoloader thật của app trong cùng request, 2 bản class
+// Symfony\Component\HttpKernel\HttpKernel không tương thích chữ ký sẽ đụng
+// nhau và gây Fatal error. Chỉ cần dò chuỗi ROLE_* trong session, không cần
+// autoload bất kỳ class nào — vừa an toàn (chỉ đọc dữ liệu do chính app này
+// ghi), vừa tránh hẳn xung đột autoloader.
+$projectDir = __DIR__ . '/../../../../';
+
+$config['authentication'] = function () use ($projectDir) {
+    $env = $_SERVER['APP_ENV'] ?? getenv('APP_ENV') ?: null;
+
+    if (!$env) {
+        $envFile = $projectDir . '.env';
+        $env = (is_file($envFile) && preg_match('/^APP_ENV=(\S+)/m', file_get_contents($envFile), $m))
+            ? trim($m[1], "\"' \t\r\n")
+            : 'prod';
+    }
+
+    ini_set('session.save_path', $projectDir . 'var/sessions/' . $env);
+    session_start();
+
+    $token = $_SESSION['_sf2_attributes']['_security_main'] ?? null;
+    session_write_close();
+
+    if (!$token || !preg_match_all('/"(ROLE_[A-Z_]+)"/', $token, $matches)) {
+        return false;
+    }
+
+    $allowedRoles = ['ROLE_AUTHOR', 'ROLE_EDITOR', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN'];
+
+    return (bool) array_intersect($allowedRoles, $matches[1]);
 };
 
 /*============================ License Key ============================================*/
