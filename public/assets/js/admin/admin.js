@@ -36,6 +36,7 @@ $(function() {
     initPageBuilder();
     initContentBlocks();
     initMediaPicker();
+    initBulkActions();
 
     /**
      * Create sluggable from name
@@ -55,6 +56,43 @@ $(function() {
         $(":input.url").focusout(function () {
             if (!$(this).attr('readonly')) {
                 $(":input.url").attr('readonly', 'readonly');
+            }
+        });
+    }
+
+    /**
+     * Bulk-select checkboxes for admin list pages (comment, ...): check-all toggle,
+     * 2-way sync with per-row checkboxes, guard against submitting bulk forms with
+     * nothing selected/no action chosen.
+     */
+    function initBulkActions() {
+        $('[data-bulk-check-all]').on('change', function() {
+            var checked = $(this).prop('checked');
+            $(this).closest('table').find('[data-bulk-check]').prop('checked', checked);
+        });
+
+        $('[data-bulk-check]').on('change', function() {
+            var $table = $(this).closest('table');
+            var total = $table.find('[data-bulk-check]').length;
+            var checked = $table.find('[data-bulk-check]:checked').length;
+
+            $table.find('[data-bulk-check-all]').prop('checked', total > 0 && total === checked);
+        });
+
+        $('[data-bulk-form]').on('submit', function(event) {
+            var $form = $(this);
+            var formId = $form.attr('id');
+            var action = $form.find('[name="bulk_action"]').val();
+            var checkedCount = formId ? $('[data-bulk-check][form="' + formId + '"]:checked').length : $form.find('[data-bulk-check]:checked').length;
+
+            if (!action || checkedCount === 0) {
+                event.preventDefault();
+                alert('Vui lòng chọn dữ liệu và thao tác.');
+                return;
+            }
+
+            if (action === 'delete' && !confirm('Bạn chắc chắn muốn xóa các mục đã chọn?')) {
+                event.preventDefault();
             }
         });
     }

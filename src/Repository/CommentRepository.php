@@ -42,10 +42,38 @@ class CommentRepository extends ServiceEntityRepository
     public function getApprovedCommentsForNews($newsId)
     {
         return $this->createQueryBuilder('c')
-            ->where('c.news_id = :news_id')
+            ->where('c.news = :news_id')
             ->andWhere('c.approved = :approved')
             ->setParameter('news_id', $newsId)
             ->setParameter('approved', 1)
             ->getQuery()->getResult();
+    }
+
+    /**
+     * Query builder tìm kiếm/lọc/sắp xếp cho trang admin — comment gốc trước
+     * (mới nhất lên đầu), reply theo ngay sau, join sẵn News + parent để tránh N+1.
+     */
+    public function search(string $q, string $status): \Doctrine\ORM\QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->leftJoin('c.news', 'n')->addSelect('n')
+            ->leftJoin('c.parent', 'p')->addSelect('p')
+            ->addSelect('COALESCE(p.id, c.id) AS HIDDEN threadId')
+            ->addSelect('CASE WHEN p.id IS NULL THEN 0 ELSE 1 END AS HIDDEN threadDepth');
+
+        if ($q !== '') {
+            $qb->andWhere('c.author LIKE :q OR c.email LIKE :q OR c.phone LIKE :q OR c.content LIKE :q OR c.ip LIKE :q OR n.title LIKE :q')
+                ->setParameter('q', '%' . $q . '%');
+        }
+
+        if ($status === 'approved') {
+            $qb->andWhere('c.approved = :approved')->setParameter('approved', true);
+        } elseif ($status === 'pending') {
+            $qb->andWhere('c.approved = :approved')->setParameter('approved', false);
+        }
+
+        return $qb->orderBy('threadId', 'DESC')
+            ->addOrderBy('threadDepth', 'ASC')
+            ->addOrderBy('c.createdAt', 'ASC');
     }
 }

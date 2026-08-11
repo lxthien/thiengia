@@ -81,7 +81,7 @@ class DashboardController extends AbstractController
 
         // Recent comments
         $recentComments = $em->getRepository(Comment::class)->createQueryBuilder('c')
-            ->select('c.id, c.author, c.createdAt, c.approved, c.news_id')
+            ->select('c.id, c.author, c.createdAt, c.approved, IDENTITY(c.news) AS newsId')
             ->orderBy('c.createdAt', 'DESC')
             ->setMaxResults(8)
             ->getQuery()

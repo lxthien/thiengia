@@ -17,6 +17,8 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -833,7 +835,7 @@ class NewsController extends AbstractController
     {
         $comment = new Comment();
         $comment->setIp($this->container->get('request_stack')->getCurrentRequest()->getClientIp());
-        $comment->setNewsId($post->getId());
+        $comment->setNews($post);
 
         $form = $this->createFormBuilder($comment)
             ->setAction($this->generateUrl('handle_comment_form'))
@@ -845,8 +847,11 @@ class NewsController extends AbstractController
             ->add('author', TextType::class, array('label' => 'label.author'))
             ->add('phone', TextType::class, array('label' => 'Số điện thoại'))
             ->add('ip', HiddenType::class)
-            ->add('news_id', HiddenType::class)
-            ->add('comment_id', HiddenType::class)
+            // Không bind thẳng vào entity nữa (news/comment_id giờ là quan hệ Doctrine,
+            // không phải field int) — chỉ mang giá trị sang handleCommentFormAction() để
+            // resolve thủ công ở đó (xem addNewsRelationListener()).
+            ->add('news_id', HiddenType::class, array('mapped' => false, 'data' => $post->getId()))
+            ->add('comment_id', HiddenType::class, array('mapped' => false, 'required' => false))
             ->add('gclid', HiddenType::class, array('required' => false))
             ->add('send', ButtonType::class, array('label' => 'label.send'))
             ->getForm();
@@ -870,15 +875,43 @@ class NewsController extends AbstractController
 
         $comment = new Comment();
 
-        $form = $this->createFormBuilder($comment)
+        $formBuilder = $this->createFormBuilder($comment)
             ->add('content', TextareaType::class)
             ->add('author', TextType::class)
             ->add('phone', TextType::class)
             ->add('ip', HiddenType::class)
-            ->add('news_id', HiddenType::class)
-            ->add('comment_id', HiddenType::class)
-            ->add('gclid', HiddenType::class, array('required' => false))
-            ->getForm();
+            ->add('news_id', HiddenType::class, array('mapped' => false))
+            ->add('comment_id', HiddenType::class, array('mapped' => false, 'required' => false))
+            ->add('gclid', HiddenType::class, array('required' => false));
+
+        // news/parent giờ là quan hệ Doctrine, không phải field int mapped thẳng — phải tự
+        // resolve từ ID gửi lên. Chạy ở SUBMIT (không phải sau isValid()) vì handleRequest()
+        // đã validate ngay bên trong nó — set muộn hơn sẽ không kịp cho Assert\NotBlank trên $news.
+        $formBuilder->addEventListener(FormEvents::SUBMIT, function (FormEvent $event) {
+            $comment = $event->getData();
+            if (!$comment instanceof Comment) {
+                return;
+            }
+
+            $form = $event->getForm();
+            $newsId = $form->has('news_id') ? $form->get('news_id')->getData() : null;
+            if ($newsId) {
+                $news = $this->em->getRepository(News::class)->find($newsId);
+                if ($news) {
+                    $comment->setNews($news);
+                }
+            }
+
+            $parentId = $form->has('comment_id') ? $form->get('comment_id')->getData() : null;
+            if ($parentId) {
+                $parent = $this->em->getRepository(Comment::class)->find($parentId);
+                if ($parent) {
+                    $comment->setParent($parent);
+                }
+            }
+        });
+
+        $form = $formBuilder->getForm();
 
         $form->handleRequest($request);
 

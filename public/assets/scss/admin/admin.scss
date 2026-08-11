@@ -788,3 +788,164 @@
     padding: 40px;
     text-align: center;
 }
+
+// ─── Danh sách admin có tìm kiếm/lọc/bulk action (dùng chung, không riêng comment) ───
+.admin-list-filters {
+    margin-bottom: 18px;
+    padding: 16px;
+    border: 1px solid #dce4ec;
+    background: #f8fafc;
+
+    .form-control,
+    .btn {
+        margin-bottom: 8px;
+    }
+}
+
+.admin-bulk-toolbar {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .form-control {
+        width: 180px;
+    }
+}
+
+.admin-list-table {
+    table-layout: fixed;
+
+    th,
+    td {
+        vertical-align: middle;
+        word-break: break-word;
+    }
+
+    .admin-list-check {
+        width: 42px;
+        text-align: center;
+    }
+}
+
+.admin-pagination {
+    margin-top: 18px;
+
+    .pagination {
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+
+        > li {
+            display: block;
+
+            > a,
+            > span {
+                min-width: 38px;
+                height: 38px;
+                padding: 8px 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+    }
+}
+
+.admin-inline-form {
+    display: inline-block;
+    margin: 0;
+
+    button {
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+    }
+}
+
+// ─── Trang quản lý bình luận ───
+#admin_comment_index {
+    .admin-comment-row.is-reply {
+        background: #f8fafc;
+
+        .admin-comment-author-cell,
+        .admin-comment-content-cell {
+            border-top-color: #e6edf5;
+        }
+    }
+
+    .admin-comment-author-col {
+        width: 18%;
+    }
+
+    .admin-comment-content-col {
+        width: 42%;
+    }
+
+    .admin-comment-status-col {
+        width: 110px;
+    }
+
+    .admin-comment-date-col {
+        width: 110px;
+    }
+
+    .admin-comment-actions-col {
+        width: 160px;
+    }
+
+    .admin-comment-excerpt {
+        margin: 8px 0 0;
+        color: #4b5563;
+        line-height: 1.45;
+    }
+
+    .admin-comment-thread-node {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .admin-comment-thread-icon {
+        flex: 0 0 28px;
+        width: 28px;
+        height: 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #007bff;
+        position: relative;
+    }
+
+    .admin-comment-row.is-reply {
+        .admin-comment-thread-node {
+            padding-left: 38px;
+        }
+
+        .admin-comment-thread-icon {
+            color: #6b7280;
+
+            &::before {
+                content: '';
+                position: absolute;
+                left: -28px;
+                top: 50%;
+                width: 24px;
+                border-top: 1px solid #c8d3df;
+            }
+        }
+    }
+
+    .admin-comment-thread-body {
+        min-width: 0;
+    }
+
+    .admin-comment-actions {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        white-space: nowrap;
+    }
+}

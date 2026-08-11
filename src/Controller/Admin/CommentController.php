@@ -8,6 +8,7 @@ use App\Form\CommentType;
 use App\Service\ActivityLogService;
 use App\Utils\Slugger;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,6 +27,7 @@ class CommentController extends AbstractController
         private readonly EntityManagerInterface $em,
         private readonly ActivityLogService $activityLogService,
         private readonly RequestStack $requestStack,
+        private readonly PaginatorInterface $paginator,
     ) {
     }
 
@@ -33,15 +35,25 @@ class CommentController extends AbstractController
      * Lists all Comment entities.
      */
     #[Route('/', name: 'admin_comment_index', methods: ['GET'])]
-    public function indexAction()
+    public function indexAction(Request $request)
     {
-        $comments = $this->em->getRepository(Comment::class)->findBy(
-            array(),
-            array('createdAt' => 'DESC')
+        $q = trim((string) $request->query->get('q', ''));
+        $status = (string) $request->query->get('status', '');
+
+        $qb = $this->em->getRepository(Comment::class)->search($q, $status);
+
+        $pagination = $this->paginator->paginate(
+            $qb,
+            $request->query->getInt('page', 1),
+            20
         );
 
         return $this->render('admin/comment/index.html.twig', [
-            'objects' => $comments
+            'pagination' => $pagination,
+            'filters' => [
+                'q' => $q,
+                'status' => $status,
+            ],
         ]);
     }
 
@@ -89,8 +101,8 @@ class CommentController extends AbstractController
     public function replyAction(Request $request, Comment $comment, Slugger $slugger)
     {
         $replyComment = new Comment();
-        $replyComment->setNewsId( $comment->getNewsId() );
-        $replyComment->setCommentId( $comment->getId() );
+        $replyComment->setNews( $comment->getNews() );
+        $replyComment->setParent( $comment );
         $replyComment->setEmail( $this->getUser()->getEmail() );
         $replyComment->setApproved( true );
         $replyComment->setAuthor( $this->getUser()->getName() );
@@ -158,5 +170,108 @@ class CommentController extends AbstractController
         $this->addFlash('success', 'action.deleted_successfully');
 
         return $this->redirectToRoute('admin_comment_index');
+    }
+
+    /**
+     * Quick-approve a Comment entity.
+     */
+    #[Route('/{id}/approve', requirements: ['id' => '\d+'], name: 'admin_comment_approve', methods: ['POST'])]
+    public function approveAction(Request $request, Comment $comment)
+    {
+        if (!$this->isCsrfTokenValid('comment_status_' . $comment->getId(), $request->request->get('token'))) {
+            return $this->redirectToRoute('admin_comment_index', $request->query->all());
+        }
+
+        $comment->setApproved(true);
+        $this->em->flush();
+
+        // Activity Log
+        $this->activityLogService->log(
+            ActivityLog::ACTION_TOGGLE,
+            ActivityLog::ENTITY_COMMENT,
+            $comment->getId(),
+            'Bình luận của ' . $comment->getAuthor(),
+            'Đã duyệt'
+        );
+
+        $this->addFlash('success', 'Đã duyệt bình luận.');
+
+        return $this->redirectToRoute('admin_comment_index', $request->query->all());
+    }
+
+    /**
+     * Quick-unapprove a Comment entity.
+     */
+    #[Route('/{id}/unapprove', requirements: ['id' => '\d+'], name: 'admin_comment_unapprove', methods: ['POST'])]
+    public function unapproveAction(Request $request, Comment $comment)
+    {
+        if (!$this->isCsrfTokenValid('comment_status_' . $comment->getId(), $request->request->get('token'))) {
+            return $this->redirectToRoute('admin_comment_index', $request->query->all());
+        }
+
+        $comment->setApproved(false);
+        $this->em->flush();
+
+        // Activity Log
+        $this->activityLogService->log(
+            ActivityLog::ACTION_TOGGLE,
+            ActivityLog::ENTITY_COMMENT,
+            $comment->getId(),
+            'Bình luận của ' . $comment->getAuthor(),
+            'Chuyển về chờ duyệt'
+        );
+
+        $this->addFlash('success', 'Đã chuyển bình luận về chờ duyệt.');
+
+        return $this->redirectToRoute('admin_comment_index', $request->query->all());
+    }
+
+    /**
+     * Bulk approve/unapprove/delete for a set of Comment entities.
+     */
+    #[Route('/bulk', name: 'admin_comment_bulk', methods: ['POST'])]
+    public function bulkAction(Request $request)
+    {
+        if (!$this->isCsrfTokenValid('bulk_comment', $request->request->get('token'))) {
+            return $this->redirectToRoute('admin_comment_index', $request->query->all());
+        }
+
+        $action = $request->request->get('bulk_action');
+        $ids = array_filter((array) $request->request->all('ids'), 'is_numeric');
+
+        if (!$ids || !in_array($action, ['approve', 'unapprove', 'delete'], true)) {
+            $this->addFlash('warning', 'Vui lòng chọn bình luận và thao tác hợp lệ.');
+
+            return $this->redirectToRoute('admin_comment_index', $request->query->all());
+        }
+
+        $comments = $this->em->getRepository(Comment::class)->createQueryBuilder('c')
+            ->where('c.id IN (:ids)')
+            ->setParameter('ids', $ids)
+            ->getQuery()
+            ->getResult();
+
+        foreach ($comments as $comment) {
+            if ($action === 'delete') {
+                $this->em->remove($comment);
+            } else {
+                $comment->setApproved($action === 'approve');
+            }
+        }
+
+        $this->em->flush();
+
+        // Activity Log — 1 dòng tổng hợp, tránh spam nhật ký khi xử lý hàng loạt
+        $this->activityLogService->log(
+            $action === 'delete' ? ActivityLog::ACTION_DELETE : ActivityLog::ACTION_TOGGLE,
+            ActivityLog::ENTITY_COMMENT,
+            null,
+            'Xử lý hàng loạt (' . $action . ')',
+            count($comments) . ' bình luận'
+        );
+
+        $this->addFlash('success', 'Đã xử lý ' . count($comments) . ' bình luận.');
+
+        return $this->redirectToRoute('admin_comment_index', $request->query->all());
     }
 }

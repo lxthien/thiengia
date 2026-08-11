@@ -21,12 +21,14 @@ class Comment
     #[ORM\Column(type: Types::INTEGER)]
     private $id;
 
-    #[ORM\Column(name: 'comment_id', type: Types::INTEGER, nullable: true)]
-    private $comment_id;
+    #[ORM\ManyToOne(targetEntity: Comment::class)]
+    #[ORM\JoinColumn(name: 'comment_id', referencedColumnName: 'id', nullable: true, onDelete: 'CASCADE')]
+    private $parent;
 
-    #[ORM\Column(name: 'news_id', type: Types::INTEGER, nullable: false)]
+    #[ORM\ManyToOne(targetEntity: News::class)]
+    #[ORM\JoinColumn(name: 'news_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     #[Assert\NotBlank(message: 'news.blank')]
-    private $news_id;
+    private $news;
 
     #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank(message: 'content.blank')]
@@ -92,33 +94,49 @@ class Comment
     }
 
     /**
-     * Set news_id
-     *
-     * @param int $newsId
-     * @return Comment
+     * @deprecated Không còn set trực tiếp được — dùng setNews(). Giữ lại no-op để code cũ
+     * gọi setNewsId() không lỗi (chữ ký trước đây bind thẳng field int, giờ là quan hệ).
      */
     public function setNewsId($newsId)
     {
-        $this->news_id = $newsId;
-
         return $this;
     }
 
     public function getNewsId()
     {
-        return $this->news_id;
+        return $this->news ? $this->news->getId() : null;
     }
 
+    public function setNews(?News $news = null)
+    {
+        $this->news = $news;
+
+        return $this;
+    }
+
+    /**
+     * @deprecated Không còn set trực tiếp được — dùng setParent().
+     */
     public function setCommentId($commentId)
     {
-        $this->comment_id = $commentId;
-
         return $this;
     }
 
     public function getCommentId()
     {
-        return $this->comment_id;
+        return $this->parent ? $this->parent->getId() : null;
+    }
+
+    public function setParent(?Comment $parent = null)
+    {
+        $this->parent = $parent;
+
+        return $this;
+    }
+
+    public function getParent()
+    {
+        return $this->parent;
     }
 
     public function setContent($content)
@@ -265,19 +283,10 @@ class Comment
     /**
      * Get news
      *
-     * @return App\Entity\News
+     * @return News|null
      */
     public function getNews()
     {
-        global $kernel;
-        if ('AppCache' === get_class($kernel)) {
-            $kernel = $kernel->getKernel();
-        }
-        $em = $kernel->getContainer()->get('doctrine')->getManager();
-        
-        return $em->getRepository(\App\Entity\News::class)
-            ->findOneBy(
-                array('id'=> $this->getNewsId())
-            );
+        return $this->news;
     }
 }

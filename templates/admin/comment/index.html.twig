@@ -12,42 +12,114 @@
                             <strong class="card-title">{{ 'title.comment_list'|trans }}</strong>
                         </div>
                         <div class="card-body">
-                            <table id="bootstrap-data-table" class="table table-striped table-bordered">
+                            <form class="admin-list-filters" method="get" action="{{ path('admin_comment_index') }}">
+                                <div class="row">
+                                    <div class="col-md-5">
+                                        <input type="text" name="q" value="{{ filters.q }}" class="form-control" placeholder="Tìm theo tên, email, SĐT, IP, nội dung, tiêu đề bài viết">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select name="status" class="form-control">
+                                            <option value="">Tất cả trạng thái</option>
+                                            <option value="approved" {{ filters.status == 'approved' ? 'selected' : '' }}>Đã duyệt</option>
+                                            <option value="pending" {{ filters.status == 'pending' ? 'selected' : '' }}>Chờ duyệt</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Lọc</button>
+                                        <a href="{{ path('admin_comment_index') }}" class="btn btn-link">Xóa lọc</a>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <form id="admin-comment-bulk-form" method="post" action="{{ path('admin_comment_bulk', app.request.query.all) }}" data-bulk-form>
+                                <input type="hidden" name="token" value="{{ csrf_token('bulk_comment') }}">
+                                <div class="admin-bulk-toolbar">
+                                    <select name="bulk_action" class="form-control">
+                                        <option value="">Chọn thao tác</option>
+                                        <option value="approve">Duyệt đã chọn</option>
+                                        <option value="unapprove">Bỏ duyệt đã chọn</option>
+                                        <option value="delete">Xóa đã chọn</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-default">Áp dụng</button>
+                                    <span class="text-muted">{{ pagination.getTotalItemCount }} bình luận</span>
+                                </div>
+                            </form>
+
+                            <table class="table table-striped table-bordered admin-list-table">
                                 <thead>
                                     <tr>
-                                        <th>{{ 'label.author'|trans }}</th>
-                                        <th>{{ 'label.response.on.post'|trans }}</th>
-                                        <th>{{ 'label.status'|trans }}</th>
-                                        <th>{{ 'label.published_at'|trans }}</th>
-                                        <th>{{ 'label.actions'|trans }}</th>
+                                        <th class="admin-list-check"><input type="checkbox" data-bulk-check-all></th>
+                                        <th class="admin-comment-author-col">{{ 'label.author'|trans }}</th>
+                                        <th class="admin-comment-content-col">{{ 'label.response.on.post'|trans }}</th>
+                                        <th class="admin-comment-status-col">{{ 'label.status'|trans }}</th>
+                                        <th class="admin-comment-date-col">{{ 'label.published_at'|trans }}</th>
+                                        <th class="admin-comment-actions-col text-center">{{ 'label.actions'|trans }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for row in objects %}
-                                        <tr>
-                                            <td>
+                                    {% for row in pagination %}
+                                        {% set isReply = row.getParent() is not null %}
+                                        <tr class="admin-comment-row {{ isReply ? 'is-reply' : 'is-parent' }}">
+                                            <td><input type="checkbox" name="ids[]" value="{{ row.id }}" form="admin-comment-bulk-form" data-bulk-check></td>
+                                            <td class="admin-comment-author-cell">
                                                 <strong>{{ row.getAuthor() }}</strong><br />
-                                                {% if row.getEmail() is not null %}
-                                                <a href="mailto:{{ row.getEmail() }}"><i>{{ row.getEmail() }}</i></a><br />
-                                                {% else %}
-                                                <a href="{{ path('admin_comment_edit', {id: row.id}) }}"><i>{{ row.getPhone() }}</i></a><br />
+                                                {% if row.getEmail() %}
+                                                    <a href="mailto:{{ row.getEmail() }}"><i>{{ row.getEmail() }}</i></a><br />
+                                                {% endif %}
+                                                {% if row.getPhone() %}
+                                                    <span>{{ row.getPhone() }}</span><br />
                                                 {% endif %}
                                                 <a href="{{ path('admin_comment_edit', {id: row.id}) }}"><i>{{ row.getIp() }}</i></a>
                                             </td>
-                                            <td>
-                                                <a href="{{ path('admin_news_edit', {id: row.getNewsId()}) }}"><strong>{{ row.getNews() }}</strong><a>
-                                                <p>{{ row.getContent()|striptags|slice(0, 200)|raw }}</p>
+                                            <td class="admin-comment-content-cell">
+                                                <div class="admin-comment-thread-node">
+                                                    <div class="admin-comment-thread-icon">
+                                                        {% if isReply %}
+                                                            <i class="fa fa-reply" aria-hidden="true"></i>
+                                                        {% else %}
+                                                            <i class="fa fa-comment" aria-hidden="true"></i>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="admin-comment-thread-body">
+                                                        {% if row.getNews() %}
+                                                            <a href="{{ path(row.getNews().isPage ? 'admin_page_edit' : 'admin_news_edit', {id: row.getNewsId()}) }}">
+                                                                <strong>{{ row.getNews().getTitle() }}</strong>
+                                                            </a>
+                                                        {% else %}
+                                                            <strong class="text-danger">Bài viết không tồn tại</strong>
+                                                        {% endif %}
+                                                        {% if isReply %}
+                                                            <small class="d-block text-muted">Trả lời #{{ row.getParent().getId() }} - {{ row.getParent().getAuthor() }}</small>
+                                                        {% endif %}
+                                                        <p class="admin-comment-excerpt">{{ row.getContent()|striptags|slice(0, 260)|raw }}</p>
+                                                    </div>
+                                                </div>
                                             </td>
                                             <td>
-                                                <label class="switch switch-text switch-primary switch-pill">
-                                                    <input type="checkbox" class="switch-input" {{ row.getApproved() ? 'checked="true"' : '' }}>
-                                                    <span data-on="On" data-off="Off" class="switch-label"></span>
-                                                    <span class="switch-handle"></span>
-                                                </label>
+                                                {% if row.getApproved() %}
+                                                    <span class="badge badge-success">Đã duyệt</span>
+                                                {% else %}
+                                                    <span class="badge badge-warning">Chờ duyệt</span>
+                                                {% endif %}
                                             </td>
                                             <td>{{ row.getCreatedAt() | localizeddate('medium', 'none', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY') }}</td>
-                                            <td>
-                                                <div class="item-actions">
+                                            <td class="text-center">
+                                                <div class="item-actions admin-comment-actions">
+                                                    {% if row.getApproved() %}
+                                                        <form action="{{ path('admin_comment_unapprove', {id: row.id}) }}" method="post" class="admin-inline-form">
+                                                            <input type="hidden" name="token" value="{{ csrf_token('comment_status_' ~ row.id) }}">
+                                                            <button type="submit" class="btn-sm btn-link" title="Bỏ duyệt">
+                                                                <i class="fa fa-eye-slash" aria-hidden="true"></i>
+                                                            </button>
+                                                        </form>
+                                                    {% else %}
+                                                        <form action="{{ path('admin_comment_approve', {id: row.id}) }}" method="post" class="admin-inline-form">
+                                                            <input type="hidden" name="token" value="{{ csrf_token('comment_status_' ~ row.id) }}">
+                                                            <button type="submit" class="btn-sm btn-link text-success" title="Duyệt nhanh">
+                                                                <i class="fa fa-check" aria-hidden="true"></i>
+                                                            </button>
+                                                        </form>
+                                                    {% endif %}
                                                     <a href="{{ path('admin_comment_edit', {id: row.id}) }}" class="btn-sm btn-edit">
                                                         <i class="fa fa-edit" aria-hidden="true"></i>
                                                     </a>
@@ -59,14 +131,21 @@
                                                 </div>
                                             </td>
                                         </tr>
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted">Không tìm thấy bình luận.</td>
+                                        </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
+
+                            <div class="admin-pagination">
+                                {{ knp_pagination_render(pagination, '@KnpPaginator/Pagination/twitter_bootstrap_v4_pagination.html.twig') }}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- .animated -->
     </div>
 {% endblock %}

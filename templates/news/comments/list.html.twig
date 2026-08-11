@@ -26,7 +26,7 @@
                                                     <strong class="comment-author">{{ replyAuthor }}</strong>
                                                     <time class="comment-date">{{ reply.getCreatedAt()|date('d/m/Y') }}</time>
                                                 </div>
-                                                <div class="comment-content">{{ reply.getContent()|nl2br }}</div>
+                                                <div class="comment-content">{{ reply.getContent()|raw }}</div>
                                             </div>
                                         </li>
                                     {% endfor %}
