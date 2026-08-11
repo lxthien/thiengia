@@ -32,12 +32,36 @@ framework:
         storage_factory_id: session.storage.factory.native
         handler_id:  session.handler.native_file
         save_path:   '%kernel.project_dir%/var/sessions/%kernel.environment%'
+        # "auto" chỉ đánh dấu cookie Secure khi request hiện tại thực sự là
+        # HTTPS — không phá local dev chạy HTTP, nhưng chặn được rò rỉ session
+        # qua HTTP thường một khi site chạy HTTPS. Không set cứng "true" vì
+        # chưa xác nhận production đã force HTTPS toàn bộ chưa.
+        cookie_secure: auto
+        cookie_samesite: lax
     fragments:       ~
     http_method_override: true
     assets:
         json_manifest_path: '%kernel.project_dir%/public/build/manifest.json'
     php_errors:
         log: true
+
+    # symfony/rate-limiter đã có trong composer.json từ trước nhưng chưa được
+    # dùng ở đâu cả — 2 policy dưới đây gắn cho 3 form công khai (liên hệ,
+    # đăng ký bản tin, bình luận) đang không có giới hạn nào ngoài reCAPTCHA.
+    # Khoá theo IP (xem cách dùng trong các controller tương ứng).
+    rate_limiter:
+        # form liên hệ + đăng ký bản tin: hành động hiếm khi lặp lại nhiều lần
+        # trong thời gian ngắn với người dùng thật.
+        public_form:
+            policy: 'sliding_window'
+            limit: 5
+            interval: '1 minute'
+        # bình luận: người đọc thật có thể bình luận nhiều bài trong 1 phiên
+        # đọc, nới lỏng hơn form liên hệ.
+        public_comment:
+            policy: 'sliding_window'
+            limit: 10
+            interval: '5 minutes'
 
 # Twig Configuration (used for rendering application templates)
 twig:

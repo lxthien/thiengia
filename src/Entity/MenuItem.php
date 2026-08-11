@@ -13,6 +13,9 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * MenuItem
  */
 #[ORM\Table(name: 'menu_item', options: ['collate' => 'utf8_general_ci'])]
+// findEnabledByMenu() lọc theo cả menu_id lẫn enable cùng lúc — menu_id đã
+// có index sẵn (khóa ngoại), thêm composite để khớp đúng điều kiện WHERE.
+#[ORM\Index(columns: ['menu_id', 'enable'], name: 'idx_menuitem_menu_enable')]
 #[ORM\Entity(repositoryClass: MenuItemRepository::class)]
 class MenuItem
 {

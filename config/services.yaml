@@ -1,5 +1,4 @@
 parameters:
-    google_recaptcha_site_key: '%env(GOOGLE_RECAPTCHA_SITE_KEY)%'
     locale: vi
     app.cache_version: '%env(CACHE_VERSION)%'
 

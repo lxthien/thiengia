@@ -11,6 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 #[ORM\Table(name: 'menu', options: ['collate' => 'utf8_general_ci'])]
+#[ORM\Index(columns: ['enable'], name: 'idx_menu_enable')]
 #[ORM\Entity(repositoryClass: MenuRepository::class)]
 class Menu
 {

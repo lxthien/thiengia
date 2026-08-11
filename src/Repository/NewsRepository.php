@@ -106,6 +106,15 @@ class NewsRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    // 4 method dưới đây join category/tags CHỈ để lọc (t.id IN/=), không
+    // addSelect('t') — cố ý. Nếu addSelect thẳng vào join lọc này, collection
+    // category/tags mỗi News sẽ chỉ chứa phần tử KHỚP điều kiện lọc chứ không
+    // phải toàn bộ category/tag thật của bài viết đó — sai dữ liệu khi có bài
+    // gán nhiều category. Đã kiểm tra: không có template nào đang gọi
+    // post.getCategory()/post.getTags() trên kết quả các hàm này (chỉ dùng
+    // title/ảnh/mô tả/ngày), nên hiện không có N+1 thật xảy ra. Nếu sau này
+    // cần hiển thị category/tag trên các danh sách này, phải thêm 1 join
+    // KHÔNG điều kiện riêng (leftJoin + addSelect) chứ không tái dùng join lọc.
     public function getNewsByCategories($categoryIds, $orderBy, $orderDir, $limit = null) {
         $qb = $this->createQueryBuilder('n')
             ->innerJoin('n.category', 't')

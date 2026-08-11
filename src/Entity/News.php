@@ -17,6 +17,9 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * News
  */
 #[ORM\Table(name: 'news', options: ['charset' => 'utf8mb4', 'collate' => 'utf8mb4_unicode_ci'])]
+// Hầu hết query công khai lọc theo cả postType (post/page) lẫn status
+// (published) cùng lúc — xem NewsRepository, SitemapService, HealthAuditManager.
+#[ORM\Index(columns: ['postType', 'status'], name: 'idx_news_posttype_status')]
 #[ORM\Entity(repositoryClass: NewsRepository::class)]
 #[UniqueEntity('url')]
 class News

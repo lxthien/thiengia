@@ -486,6 +486,17 @@ class MediaController extends AbstractController
             ];
         }
 
+        // Đuôi file client gửi lên chỉ là tên gợi ý, không đảm bảo nội dung
+        // thật là ảnh — đổi tên 1 file .php thành .jpg vẫn qua được check trên.
+        // getimagesize() đọc thật header ảnh (đã dùng sẵn ở createThumbnail()
+        // trong file này), false nghĩa là nội dung không phải ảnh hợp lệ.
+        if (@getimagesize($file->getPathname()) === false) {
+            return [
+                'valid' => false,
+                'message' => 'File không phải là ảnh hợp lệ.',
+            ];
+        }
+
         return ['valid' => true, 'message' => 'OK'];
     }
 

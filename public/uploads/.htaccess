@@ -1,0 +1,24 @@
+# Thư mục này chỉ chứa file người dùng/admin tải lên (ảnh, CSV redirect...).
+# MediaController đã lọc theo phần mở rộng + xác minh nội dung thật là ảnh
+# (getimagesize), nhưng vẫn nên chặn thực thi PHP ở đây làm lớp phòng thủ
+# thứ hai — phòng trường hợp có lỗ hổng khác cho phép ghi file vào thư mục
+# này (vd CKFinder trước đây từng bị lộ, xem commit vá Giai đoạn 0).
+<FilesMatch "\.(php|php[3-8]?|phtml|pht|phar)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>

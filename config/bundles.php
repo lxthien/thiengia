@@ -15,4 +15,5 @@ return [
     Symfony\Bundle\DebugBundle\DebugBundle::class => ['dev' => true, 'test' => true],
     Symfony\Bundle\WebProfilerBundle\WebProfilerBundle::class => ['dev' => true, 'test' => true],
     WhiteOctober\BreadcrumbsBundle\WhiteOctoberBreadcrumbsBundle::class => ['all' => true],
+    Nelmio\SecurityBundle\NelmioSecurityBundle::class => ['all' => true],
 ];

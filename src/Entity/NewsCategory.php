@@ -13,6 +13,10 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * NewsCategory
  */
 #[ORM\Table(name: 'newscategory', options: ['collate' => 'utf8_general_ci'])]
+// Routing công khai tra cứu danh mục theo url+enable nhiều lần mỗi request
+// (handleSingleSegment/handleTwoSegments/handleThreeSegments/listAction) mà
+// trước đây bảng này không có index nào ngoài khóa chính/khóa ngoại.
+#[ORM\Index(columns: ['url', 'enable'], name: 'idx_newscategory_url_enable')]
 #[ORM\Entity(repositoryClass: NewsCategoryRepository::class)]
 class NewsCategory
 {

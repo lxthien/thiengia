@@ -6,21 +6,32 @@ use App\Entity\NewsletterSubscriber;
 use App\Repository\NewsletterSubscriberRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Annotation\Route;
 
 class NewsletterController extends AbstractController
 {
     public function __construct(
         private readonly EntityManagerInterface $em,
+        #[Autowire(service: 'limiter.public_form')]
+        private readonly RateLimiterFactory $publicFormLimiter,
     ) {
     }
 
     #[Route('/newsletter/subscribe', name: 'newsletter_subscribe', methods: ['POST'])]
     public function subscribeAction(Request $request, NewsletterSubscriberRepository $repository)
     {
+        if (!$this->publicFormLimiter->create($request->getClientIp())->consume(1)->isAccepted()) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Bạn gửi quá nhiều yêu cầu. Vui lòng thử lại sau ít phút.',
+            ], 429);
+        }
+
         $subscriber = new NewsletterSubscriber();
 
         // Form công khai chỉ có 1 input <email> viết tay (không qua form_widget()

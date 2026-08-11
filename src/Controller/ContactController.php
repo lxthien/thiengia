@@ -23,7 +23,9 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use App\Entity\Contact;
 use App\Entity\News;
@@ -38,6 +40,8 @@ class ContactController extends AbstractController
         private readonly SettingsManager $settingsManager,
         private readonly Breadcrumbs $breadcrumbs,
         private readonly FormFactoryInterface $formFactory,
+        #[Autowire(service: 'limiter.public_form')]
+        private readonly RateLimiterFactory $publicFormLimiter,
     ) {
     }
 
@@ -72,6 +76,14 @@ class ContactController extends AbstractController
 
         $form = $formBuilder->getForm();
         $form->handleRequest($request);
+
+        if ($form->isSubmitted() && !$this->publicFormLimiter->create($request->getClientIp())->consume(1)->isAccepted()) {
+            $this->addFlash('error', 'Bạn gửi quá nhiều yêu cầu. Vui lòng thử lại sau ít phút.');
+
+            return $this->render('contact/index.html.twig', [
+                'form' => $form->createView(),
+            ]);
+        }
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->persist($contact);
@@ -114,6 +126,13 @@ class ContactController extends AbstractController
     #[Route('lien-he-ajax/', name: 'contact_ajax', methods: ['POST'])]
     public function ajaxAction(Request $request)
     {
+        if (!$this->publicFormLimiter->create($request->getClientIp())->consume(1)->isAccepted()) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Bạn gửi quá nhiều yêu cầu. Vui lòng thử lại sau ít phút.',
+            ], 429);
+        }
+
         $contact = new Contact();
         // Contact::contents has #[Assert\NotBlank]; the quick-quote form (no
         // textarea) doesn't map this field, so pre-fill a placeholder here —
@@ -156,6 +175,12 @@ class ContactController extends AbstractController
     #[Route('page-builder-contact/', name: 'page_builder_contact_submit', methods: ['POST'])]
     public function pageBuilderSubmitAction(Request $request, MailerInterface $mailer)
     {
+        if (!$this->publicFormLimiter->create($request->getClientIp())->consume(1)->isAccepted()) {
+            $this->addFlash('error', 'Bạn gửi quá nhiều yêu cầu. Vui lòng thử lại sau ít phút.');
+
+            return new RedirectResponse($request->headers->get('referer') ?: $this->generateUrl('contact'));
+        }
+
         $contact = new Contact();
 
         $form = $this->formFactory->createNamedBuilder('page_builder_contact', FormType::class, $contact, [

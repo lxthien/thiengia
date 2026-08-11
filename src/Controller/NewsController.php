@@ -24,6 +24,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use WhiteOctober\BreadcrumbsBundle\Model\Breadcrumbs;
 use App\Service\SettingsManager;
@@ -59,6 +61,8 @@ class NewsController extends AbstractController
         private readonly Breadcrumbs $breadcrumbs,
         private readonly SettingsManager $settingsManager,
         private readonly FormFactoryInterface $formFactory,
+        #[Autowire(service: 'limiter.public_comment')]
+        private readonly RateLimiterFactory $publicCommentLimiter,
     ) {
         $this->convertImages = $convertImages;
         $this->contentFormatter = $contentFormatter;
@@ -865,6 +869,13 @@ class NewsController extends AbstractController
                 'success' => false,
                 'message' => 'You can access this only using Ajax!',
             ], 400);
+        }
+
+        if (!$this->publicCommentLimiter->create($request->getClientIp())->consume(1)->isAccepted()) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Bạn gửi quá nhiều bình luận. Vui lòng thử lại sau ít phút.',
+            ], 429);
         }
 
         $comment = new Comment();

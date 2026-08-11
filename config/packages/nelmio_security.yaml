@@ -1,0 +1,59 @@
+nelmio_security:
+    # prevents framing of the entire site
+    clickjacking:
+        paths:
+            '^/.*': DENY
+
+    # disables content type sniffing for script resources
+    content_type:
+        nosniff: true
+
+    # Send a full URL in the `Referer` header when performing a same-origin request,
+    # only send the origin of the document to secure destination (HTTPS->HTTPS),
+    # and send no header to a less secure destination (HTTPS->HTTP).
+    # If `strict-origin-when-cross-origin` is not supported, use `no-referrer` policy,
+    # no referrer information is sent along with requests.
+    referrer_policy:
+        enabled: true
+        policies:
+            - 'no-referrer'
+            - 'strict-origin-when-cross-origin'
+
+    # CSP để Ở CHẾ ĐỘ REPORT-ONLY (Content-Security-Policy-Report-Only) — cố
+    # tình CHƯA bật chặn thật (enforce). Trang cho phép admin tự nhúng script
+    # tùy ý qua Cài đặt chung (get_setting('facebookMessenger')|raw trong
+    # layout.html.twig), nên không thể biết trước hết domain nào sẽ được dùng
+    # — bật enforce ngay có thể chặn nhầm nội dung admin đã cấu hình mà không
+    # ai kiểm tra được từ đây (không có trình duyệt thật để test). Report-only
+    # không chặn gì cả, chỉ log vi phạm ra console trình duyệt — mở F12 >
+    # Console ở vài trang (trang chủ, bài viết, trang admin) để xem còn thiếu
+    # domain nào trước khi cân nhắc chuyển "report" thành "enforce".
+    csp:
+        report:
+            default-src:
+                - 'self'
+            script-src:
+                - 'self'
+                - 'unsafe-inline'
+                - 'unsafe-eval'
+                - 'https://www.google.com'
+                - 'https://www.gstatic.com'
+                - 'https://cdn.datatables.net'
+            style-src:
+                - 'self'
+                - 'unsafe-inline'
+                - 'https://fonts.googleapis.com'
+            font-src:
+                - 'self'
+                - 'data:'
+                - 'https://fonts.gstatic.com'
+            img-src:
+                - 'self'
+                - 'data:'
+                - 'https:'
+            connect-src:
+                - 'self'
+            frame-src:
+                - 'self'
+                - 'https://www.google.com'
+                - 'https://www.facebook.com'
