@@ -67,4 +67,24 @@
             {% endfor %}
         {% endif %}
     </div>
+
+    <div class="notification-section">
+        <div class="notification-section-title">
+            <a href="{{ path('admin_newsletter_index') }}">Đăng ký mới</a>
+            <span class="badge badge-primary">{{ notifications.newsletter.count }}</span>
+        </div>
+        {% if notifications.newsletter.items is empty %}
+            <div class="notification-empty small">Không có đăng ký mới.</div>
+        {% else %}
+            {% for subscriber in notifications.newsletter.items %}
+                <a class="dropdown-item media notification-item" href="{{ path('admin_newsletter_index') }}">
+                    <span class="notification-icon bg-primary"><i class="fa fa-paper-plane"></i></span>
+                    <span class="media-body">
+                        <span class="notification-title">{{ subscriber.email }}</span>
+                        <span class="notification-meta">{{ subscriber.createdAt|localizeddate('medium', 'short', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY HH:mm') }}</span>
+                    </span>
+                </a>
+            {% endfor %}
+        {% endif %}
+    </div>
 {% endif %}

@@ -41,6 +41,7 @@ class ActivityLog
     const ENTITY_TAG = 'tag';
     const ENTITY_SETTINGS = 'settings';
     const ENTITY_TESTIMONIAL = 'testimonial';
+    const ENTITY_NEWSLETTER = 'newsletter';
 
     #[ORM\Column(name: 'id', type: Types::INTEGER)]
     #[ORM\Id]
@@ -238,6 +239,7 @@ class ActivityLog
             self::ENTITY_TAG => 'Tag',
             self::ENTITY_SETTINGS => 'Cài đặt',
             self::ENTITY_TESTIMONIAL => 'Đánh giá khách hàng',
+            self::ENTITY_NEWSLETTER => 'Đăng ký bản tin',
         ];
 
         return isset($labels[$this->entityType]) ? $labels[$this->entityType] : $this->entityType;

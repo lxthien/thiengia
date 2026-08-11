@@ -5,10 +5,9 @@
             <p class="newsletter-note">Kinh nghiệm xây nhà thực chiến, gửi thẳng vào hộp thư — không quảng cáo.</p>
         </div>
 
-        {# Bước "form" chưa làm — action để trống, sẽ trỏ về route đăng ký sau #}
-        <form class="newsletter-form" method="post" action="#" data-quote>
+        <form class="newsletter-form" method="post" action="{{ path('newsletter_subscribe') }}" data-quote data-ajax-form>
             <label for="v3-nl-email" class="sr-only">Địa chỉ email</label>
-            <input id="v3-nl-email" name="email" type="email" placeholder="Email của bạn" autocomplete="email" required>
+            <input id="v3-nl-email" name="form[email]" type="email" placeholder="Email của bạn" autocomplete="email" required>
             <button type="submit" class="btn2">Đăng ký</button>
         </form>
     </div>

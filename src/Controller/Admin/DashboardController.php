@@ -16,6 +16,7 @@ use App\Entity\News;
 use App\Entity\Comment;
 use App\Entity\User;
 use App\Entity\Contact;
+use App\Entity\NewsletterSubscriber;
 use App\Entity\Banner;
 use App\Entity\Tag;
 use App\Entity\DailyStats;
@@ -189,13 +190,15 @@ class DashboardController extends AbstractController
         $contactRepository = $this->em->getRepository(Contact::class);
         $commentRepository = $this->em->getRepository(Comment::class);
         $userRepository = $this->em->getRepository(User::class);
+        $newsletterRepository = $this->em->getRepository(NewsletterSubscriber::class);
 
         $contactCount = $contactRepository->countUnread();
         $commentCount = $commentRepository->countPending();
         $userCount = $userRepository->countUnreadRegistrationNotifications();
+        $newsletterCount = $newsletterRepository->countUnread();
 
         return [
-            'total' => $contactCount + $commentCount + $userCount,
+            'total' => $contactCount + $commentCount + $userCount + $newsletterCount,
             'contacts' => [
                 'count' => $contactCount,
                 'items' => $contactRepository->findUnreadNotifications(),
@@ -207,6 +210,10 @@ class DashboardController extends AbstractController
             'users' => [
                 'count' => $userCount,
                 'items' => $userRepository->findUnreadRegistrationNotifications(),
+            ],
+            'newsletter' => [
+                'count' => $newsletterCount,
+                'items' => $newsletterRepository->findUnreadNotifications(),
             ],
         ];
     }

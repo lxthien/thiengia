@@ -13,6 +13,7 @@ namespace App\Twig;
 
 use App\Entity\Comment;
 use App\Entity\Contact;
+use App\Entity\NewsletterSubscriber;
 use App\Entity\User;
 use App\Utils\Markdown;
 use Doctrine\Bundle\DoctrineBundle\Registry;
@@ -148,23 +149,27 @@ class AppExtension extends AbstractExtension
                 'contacts' => ['count' => 0, 'items' => []],
                 'comments' => ['count' => 0, 'items' => []],
                 'users' => ['count' => 0, 'items' => []],
+                'newsletter' => ['count' => 0, 'items' => []],
             ];
         }
 
         $contactRepository = $this->doctrine->getRepository(Contact::class);
         $commentRepository = $this->doctrine->getRepository(Comment::class);
         $userRepository = $this->doctrine->getRepository(User::class);
+        $newsletterRepository = $this->doctrine->getRepository(NewsletterSubscriber::class);
 
         $contacts = $contactRepository->findUnreadNotifications();
         $comments = $commentRepository->findPendingNotifications();
         $users = $userRepository->findUnreadRegistrationNotifications();
+        $subscribers = $newsletterRepository->findUnreadNotifications();
 
         $contactCount = $contactRepository->countUnread();
         $commentCount = $commentRepository->countPending();
         $userCount = $userRepository->countUnreadRegistrationNotifications();
+        $newsletterCount = $newsletterRepository->countUnread();
 
         return [
-            'total' => $contactCount + $commentCount + $userCount,
+            'total' => $contactCount + $commentCount + $userCount + $newsletterCount,
             'contacts' => [
                 'count' => $contactCount,
                 'items' => $contacts,
@@ -176,6 +181,10 @@ class AppExtension extends AbstractExtension
             'users' => [
                 'count' => $userCount,
                 'items' => $users,
+            ],
+            'newsletter' => [
+                'count' => $newsletterCount,
+                'items' => $subscribers,
             ],
         ];
     }
