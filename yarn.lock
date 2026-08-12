@@ -810,11 +810,6 @@
   resolved "https://registry.npmjs.org/@discoveryjs/json-ext/-/json-ext-0.5.7.tgz"
   integrity sha512-dBVuXR082gk3jsFp7Rd/JI4kytwGHecnCoTtXFb7DB6CNHp4rg5k1bhg0nWdLGLnOV71lmDzGQaLMy8iPLY0pw==
 
-"@fancyapps/fancybox@^3.5.6":
-  version "3.5.6"
-  resolved "https://registry.npmjs.org/@fancyapps/fancybox/-/fancybox-3.5.6.tgz"
-  integrity sha512-Hp83AAWb0uNR7ekGQExGv0fMJEa/0t97Ab1aPk2hopWnKKpFI6acnIssJ2SD2YCBqv5Rb4W+lHDJTtJPRbcqhA==
-
 "@jridgewell/gen-mapping@^0.3.12", "@jridgewell/gen-mapping@^0.3.2", "@jridgewell/gen-mapping@^0.3.5":
   version "0.3.13"
   resolved "https://registry.npmjs.org/@jridgewell/gen-mapping/-/gen-mapping-0.3.13.tgz"
@@ -1597,11 +1592,6 @@ bootstrap-tagsinput@^0.7.1:
   resolved "https://registry.npmjs.org/bootstrap-tagsinput/-/bootstrap-tagsinput-0.7.1.tgz"
   integrity sha1-/+Owa74qEGlF7ygUVoAFqU8hGTc=
 
-bootstrap@^3.1.1:
-  version "3.4.1"
-  resolved "https://registry.npmjs.org/bootstrap/-/bootstrap-3.4.1.tgz"
-  integrity sha512-yN5oZVmRCwe5aKwzRj6736nSmKDX7pLYwsXiCj/EYmo16hODaBiT4En5btW/jhBF/seV+XMx3aYwukYC3A49DA==
-
 bootswatch@^3.3.7:
   version "3.3.7"
   resolved "https://registry.npmjs.org/bootswatch/-/bootswatch-3.3.7.tgz"
@@ -1637,11 +1627,6 @@ buffer-from@^1.0.0:
   version "1.1.2"
   resolved "https://registry.npmjs.org/buffer-from/-/buffer-from-1.1.2.tgz"
   integrity sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==
-
-bxslider@^4.2.14:
-  version "4.2.14"
-  resolved "https://registry.npmjs.org/bxslider/-/bxslider-4.2.14.tgz"
-  integrity sha512-7/OV7Jxe8yBS/7tOcxg2hYTPmACFMU1rRs3xqoljjFX/rSgMFVX0dzFqxZHWvUgl0+9TryNy5vhufB/499heFQ==
 
 bytes@~3.1.2, bytes@3.1.2:
   version "3.1.2"
@@ -3055,25 +3040,10 @@ jiti@^1.21.7, jiti@>=1.21.0:
   resolved "https://registry.npmjs.org/jiti/-/jiti-1.21.7.tgz"
   integrity sha512-/imKNG4EbWNrVjoNC/1H5/9GFy+tqjGBHCaSsN+P2RnPqjsLmv6UD3Ej+Kj8nBWaRAwyk7kK5ZUc+OEatnTR3A==
 
-jquery-bootstrap-scrolling-tabs@^2.6.1:
-  version "2.6.1"
-  resolved "https://registry.npmjs.org/jquery-bootstrap-scrolling-tabs/-/jquery-bootstrap-scrolling-tabs-2.6.1.tgz"
-  integrity sha512-8Kbf3co6w7IgKLKLQLGp7wZfBZ5g/UC6MYdbhQHCBAkwz48ryerD3nabbB3cNUysrZY4ftbfxPiR69z/Qa2yXw==
-  dependencies:
-    bootstrap "^3.1.1"
-    jquery ">=1.9.0 <4.0.0"
-
-jquery-validation@^1.19.0:
-  version "1.19.0"
-  resolved "https://registry.npmjs.org/jquery-validation/-/jquery-validation-1.19.0.tgz"
-  integrity sha512-i1ygcs9K9eI0jqQ8fiOZdT0Ofw941YII1zyPQDUkBS8t2G8SoSWz8UUEVT6gV1KvsaBbovtL8YxjLALACR0syQ==
-  dependencies:
-    jquery "^1.7 || ^2.0 || ^3.1"
-
-"jquery@^1.7 || ^2.0 || ^3.1", jquery@^3.3.1, jquery@>=1.7, jquery@>=1.7.2, jquery@>=1.9.0, "jquery@>=1.9.0 <4.0.0":
-  version "3.3.1"
-  resolved "https://registry.npmjs.org/jquery/-/jquery-3.3.1.tgz"
-  integrity sha512-Ubldcmxp5np52/ENotGxlLe6aGMvmF4R8S6tZjsP6Knsaxd/xp3Zrh50cG93lR6nPXyUFwzN3ZSOQI0wRJNdGg==
+jquery@^3.7.1, jquery@>=1.7, jquery@>=1.7.2:
+  version "3.7.1"
+  resolved "https://registry.npmjs.org/jquery/-/jquery-3.7.1.tgz"
+  integrity sha512-m4avr8yL8kmFN8psrbFFFmB/If14iN5o9nw/NgnnM+kybDJpRsAynV2BsfpTYrTRysYUdADVD7CkUUizgkpLfg==
 
 js-tokens@^4.0.0:
   version "4.0.0"

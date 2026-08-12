@@ -15,7 +15,6 @@ use App\Entity\Comment;
 use App\Entity\Contact;
 use App\Entity\NewsletterSubscriber;
 use App\Entity\User;
-use App\Utils\Markdown;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Symfony\Component\Intl\Intl;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -39,11 +38,6 @@ use Twig\TwigFunction;
 class AppExtension extends AbstractExtension
 {
     /**
-     * @var Markdown
-     */
-    private $parser;
-
-    /**
      * @var array
      */
     private $locales;
@@ -59,13 +53,11 @@ class AppExtension extends AbstractExtension
     private $authorizationChecker;
 
     public function __construct(
-        Markdown $parser,
         $locales,
         Registry $doctrine,
         AuthorizationCheckerInterface $authorizationChecker
     )
     {
-        $this->parser = $parser;
         $this->locales = $locales;
         $this->doctrine = $doctrine;
         $this->authorizationChecker = $authorizationChecker;
@@ -77,7 +69,6 @@ class AppExtension extends AbstractExtension
     public function getFilters()
     {
         return [
-            new TwigFilter('md2html', [$this, 'markdownToHtml'], ['is_safe' => ['html']]),
             new TwigFilter('rating', [$this, 'renderRating'], ['is_safe' => ['html']]),
         ];
     }

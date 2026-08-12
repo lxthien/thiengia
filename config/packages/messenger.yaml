@@ -1,0 +1,29 @@
+framework:
+    messenger:
+        failure_transport: failed
+
+        transports:
+            # https://symfony.com/doc/current/messenger.html#transport-configuration
+            # Dùng chung DB hiện có (bảng messenger_messages) — không cần thêm
+            # hạ tầng (Redis/RabbitMQ) cho quy mô project này. Cần worker chạy
+            # định kỳ để xử lý hàng đợi, xem app:sync-views/app:publish-scheduled
+            # cho quy ước cron sẵn có — thêm dòng cron tương tự:
+            #   * * * * * cd /path/to/project && php bin/console messenger:consume async --time-limit=55 --memory-limit=64M >> var/log/messenger.log 2>&1
+            async: '%env(MESSENGER_TRANSPORT_DSN)%'
+            failed: 'doctrine://default?queue_name=failed'
+            sync: 'sync://'
+
+        routing:
+            # Gửi email (form-builder-contact, thông báo user...) qua hàng đợi
+            # thay vì chặn request chờ SMTP trả lời — Symfony Mailer tự dispatch
+            # SendEmailMessage lên bus này mỗi khi có message bus, không cần
+            # sửa code ở nơi gọi $mailer->send().
+            Symfony\Component\Mailer\Messenger\SendEmailMessage: async
+
+# when@test:
+#    framework:
+#        messenger:
+#            transports:
+#                # replace with your transport name here (e.g., my_transport: 'in-memory://')
+#                # For more Messenger testing tools, see https://github.com/zenstruck/messenger-test
+#                async: 'in-memory://'

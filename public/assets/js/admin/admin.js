@@ -1,4 +1,5 @@
 import 'typeahead.js';
+import Bloodhound from 'bloodhound-js';
 import 'bootstrap-tagsinput';
 
 import 'bootstrap-sass/assets/javascripts/bootstrap/modal.js';

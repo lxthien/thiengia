@@ -5,6 +5,13 @@
 {% block main %}
     <div class="content mt-3 health-dashboard">
         <div class="animated fadeIn">
+            {% if report is null %}
+                <div class="alert alert-warning">
+                    Chưa có báo cáo nào. Report được tính bởi lệnh
+                    <code>php bin/console app:compute-health-report</code>
+                    chạy định kỳ qua cron — chạy lệnh này 1 lần để có báo cáo đầu tiên.
+                </div>
+            {% else %}
             <div class="row health-summary">
                 <div class="col-sm-6 col-lg">
                     <div class="card dashboard-mini-card">
@@ -308,6 +315,7 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
         </div>
     </div>
 {% endblock %}

@@ -24,7 +24,6 @@ services:
 
     App\Twig\AppExtension:
         arguments:
-            $parser: '@App\Utils\Markdown'
             $locales: '%app_locales%'
             $doctrine: '@doctrine'
             $authorizationChecker: '@security.authorization_checker'

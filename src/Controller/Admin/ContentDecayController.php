@@ -2,10 +2,8 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\News;
+use App\Entity\ContentDecaySnapshot;
 use App\Entity\NewsCategory;
-use App\Enum\PostStatus;
-use App\Seo\ContentDecayReporter;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,8 +21,12 @@ class ContentDecayController extends AbstractController
     ) {
     }
 
+    /**
+     * Đọc từ content_decay_snapshot (tính sẵn bởi app:compute-content-decay
+     * qua cron) — không phân tích lại (word count, v.v.) lúc mở trang.
+     */
     #[Route('/', name: 'admin_content_decay_index', methods: ['GET'])]
-    public function indexAction(Request $request, ContentDecayReporter $reporter)
+    public function indexAction(Request $request)
     {
         $filters = [
             'q' => trim((string) $request->query->get('q')),
@@ -35,14 +37,16 @@ class ContentDecayController extends AbstractController
             'sort' => $request->query->get('sort', 'decay_desc'),
         ];
 
-        $qb = $this->em->getRepository(News::class)->createQueryBuilder('n')
-            ->leftJoin('n.category', 'c')
-            ->addSelect('c')
-            ->where('n.postType = :postType')
-            ->andWhere('n.status = :status')
-            ->setParameter('postType', 'post')
-            ->setParameter('status', PostStatus::Published)
-            ->orderBy('n.updatedAt', 'ASC');
+        $qb = $this->em->getRepository(ContentDecaySnapshot::class)->createQueryBuilder('s')
+            ->innerJoin('s.news', 'n')
+            ->addSelect('n')
+            // Join riêng CHỈ để hiển thị (post.category trong template cần đủ
+            // toàn bộ danh mục của bài, không phải chỉ danh mục khớp filter) —
+            // addSelect ở đây không bị giới hạn bởi điều kiện filter category
+            // bên dưới (dùng alias catFilter riêng), tránh corrupt collection
+            // giống bài học ở NewsRepository (xem comment trong file đó).
+            ->leftJoin('n.category', 'catDisplay')
+            ->addSelect('catDisplay');
 
         if ($filters['q'] !== '') {
             $qb->andWhere('n.title LIKE :q OR n.url LIKE :q OR n.description LIKE :q')
@@ -50,70 +54,122 @@ class ContentDecayController extends AbstractController
         }
 
         if ($filters['category'] !== '') {
-            $qb->andWhere('c.id = :categoryId')
+            $qb->leftJoin('n.category', 'catFilter')
+                ->andWhere('catFilter.id = :categoryId')
                 ->setParameter('categoryId', $filters['category']);
         }
 
-        $posts = $qb->getQuery()->getResult();
-        $items = [];
-
-        foreach ($posts as $post) {
-            $item = $reporter->analyze($post);
-
-            if ($filters['age'] > 0 && $item['ageDays'] < $filters['age']) {
-                continue;
-            }
-
-            if ($filters['seo'] > 0 && $item['seo']['score'] > $filters['seo']) {
-                continue;
-            }
-
-            // kientruc indexable filter logic uses the analyzed flag from robots
-            if ($filters['indexable'] === '1' && !$item['isIndexable']) {
-                continue;
-            }
-
-            $items[] = $item;
+        if ($filters['age'] > 0) {
+            $qb->andWhere('s.ageDays >= :age')->setParameter('age', $filters['age']);
         }
 
-        $this->sortItems($items, $filters['sort']);
+        if ($filters['seo'] > 0) {
+            $qb->andWhere('s.seoScore <= :seo')->setParameter('seo', $filters['seo']);
+        }
+
+        if ($filters['indexable'] === '1') {
+            $qb->andWhere('s.isIndexable = :indexable')->setParameter('indexable', true);
+        }
+
+        switch ($filters['sort']) {
+            case 'updated_asc':
+                $qb->orderBy('n.updatedAt', 'ASC');
+                break;
+            case 'views_asc':
+                $qb->orderBy('s.views', 'ASC');
+                break;
+            case 'seo_asc':
+                $qb->orderBy('s.seoScore', 'ASC');
+                break;
+            case 'age_desc':
+                $qb->orderBy('s.ageDays', 'DESC');
+                break;
+            case 'decay_desc':
+            default:
+                $qb->orderBy('s.decayScore', 'DESC')->addOrderBy('s.ageDays', 'DESC');
+                break;
+        }
 
         $pagination = $this->paginator->paginate(
-            $items,
+            $qb,
             $request->query->getInt('page', 1),
             30
         );
+
+        $items = [];
+        foreach ($pagination as $snapshot) {
+            $items[] = $this->toItem($snapshot);
+        }
+        $pagination->setItems($items);
 
         $categories = $this->em->getRepository(NewsCategory::class)->findBy([], ['name' => 'ASC']);
 
         return $this->render('admin/content_decay/index.html.twig', [
             'pagination' => $pagination,
-            'summary' => $reporter->summarize($items),
+            'summary' => $this->summarize($qb),
             'categories' => $categories,
             'filters' => $filters,
         ]);
     }
 
-    private function sortItems(array &$items, $sort)
+    /**
+     * Giữ nguyên hình dạng mảng cũ (post/decayScore/seo.score/...) để không
+     * phải sửa template.
+     */
+    private function toItem(ContentDecaySnapshot $snapshot): array
     {
-        usort($items, function ($a, $b) use ($sort) {
-            switch ($sort) {
-                case 'updated_asc':
-                    return $a['post']->getUpdatedAt()->getTimestamp() <=> $b['post']->getUpdatedAt()->getTimestamp();
-                case 'views_asc':
-                    return $a['views'] <=> $b['views'];
-                case 'seo_asc':
-                    return $a['seo']['score'] <=> $b['seo']['score'];
-                case 'age_desc':
-                    return $b['ageDays'] <=> $a['ageDays'];
-                case 'decay_desc':
-                default:
-                    if ($a['decayScore'] === $b['decayScore']) {
-                        return $b['ageDays'] <=> $a['ageDays'];
-                    }
+        return [
+            'post' => $snapshot->getNews(),
+            'decayScore' => $snapshot->getDecayScore(),
+            'decayStatus' => $snapshot->getDecayStatus(),
+            'ageDays' => $snapshot->getAgeDays(),
+            'views' => $snapshot->getViews(),
+            'seo' => [
+                'score' => $snapshot->getSeoScore(),
+                'status' => $snapshot->getSeoStatus(),
+            ],
+            'reasons' => $snapshot->getReasons(),
+            'recommendations' => $snapshot->getRecommendations(),
+            'isIndexable' => $snapshot->isIndexable(),
+        ];
+    }
 
-                    return $b['decayScore'] <=> $a['decayScore'];
-            }
-        });
+    /**
+     * Tổng hợp summary trên TOÀN BỘ kết quả đã lọc (không chỉ trang hiện
+     * tại) — chạy 1 query aggregate riêng, rẻ hơn nhiều so với việc load
+     * hết bản ghi rồi cộng dồn trong PHP như bản cũ.
+     */
+    private function summarize($qb): array
+    {
+        $countQb = (clone $qb)
+            ->resetDQLPart('orderBy')
+            ->select('COUNT(s.news) as totalCount', 'AVG(s.decayScore) as avgScore')
+            ->setMaxResults(null)
+            ->setFirstResult(null);
+
+        $result = $countQb->getQuery()->getOneOrNullResult();
+        $total = (int) ($result['totalCount'] ?? 0);
+        $avg = $result['avgScore'] ?? 0;
+
+        $highRiskQb = (clone $qb)
+            ->resetDQLPart('orderBy')
+            ->select('COUNT(s.news)')
+            ->andWhere('s.decayScore >= 70')
+            ->setMaxResults(null)
+            ->setFirstResult(null);
+
+        $needsRefreshQb = (clone $qb)
+            ->resetDQLPart('orderBy')
+            ->select('COUNT(s.news)')
+            ->andWhere('s.decayScore >= 40 AND s.decayScore < 70')
+            ->setMaxResults(null)
+            ->setFirstResult(null);
+
+        return [
+            'total' => $total,
+            'highRisk' => (int) $highRiskQb->getQuery()->getSingleScalarResult(),
+            'needsRefresh' => (int) $needsRefreshQb->getQuery()->getSingleScalarResult(),
+            'averageDecayScore' => $total ? (int) round($avg) : 0,
+        ];
     }
 }
