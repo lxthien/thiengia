@@ -163,7 +163,10 @@
                                                     <div class="modal-body">
                                                         <ul class="nav nav-tabs" role="tablist">
                                                             <li class="nav-item">
-                                                                <a class="nav-link active" data-toggle="tab" href="#resize{{ loop.index }}">Thay đổi kích thước</a>
+                                                                <a class="nav-link active" data-toggle="tab" href="#alt{{ loop.index }}">Alt text</a>
+                                                            </li>
+                                                            <li class="nav-item">
+                                                                <a class="nav-link" data-toggle="tab" href="#resize{{ loop.index }}">Thay đổi kích thước</a>
                                                             </li>
                                                             <li class="nav-item">
                                                                 <a class="nav-link" data-toggle="tab" href="#crop{{ loop.index }}">Cắt ảnh</a>
@@ -173,8 +176,20 @@
                                                             </li>
                                                         </ul>
                                                         <div class="tab-content mt-3">
+                                                            <!-- Alt text Tab -->
+                                                            <div id="alt{{ loop.index }}" class="tab-pane fade show active">
+                                                                <div class="form-group">
+                                                                    <label>Mô tả ảnh (alt text)</label>
+                                                                    <input type="text" class="form-control" id="altInput{{ loop.index }}" value="{{ file.alt }}" placeholder="Mô tả ngắn nội dung ảnh, phục vụ SEO & khả năng tiếp cận...">
+                                                                    <small class="form-text text-muted">Dùng làm thuộc tính alt khi ảnh này hiển thị ở trang chủ/danh mục/bài viết.</small>
+                                                                </div>
+                                                                <button class="btn btn-primary" onclick="saveAlt('{{ file.filename }}', '#altInput{{ loop.index }}')">
+                                                                    <i class="fa fa-save"></i> Lưu alt text
+                                                                </button>
+                                                            </div>
+
                                                             <!-- Resize Tab -->
-                                                            <div id="resize{{ loop.index }}" class="tab-pane fade show active">
+                                                            <div id="resize{{ loop.index }}" class="tab-pane fade">
                                                                 <div class="form-group">
                                                                     <label>Chiều rộng (pixels)</label>
                                                                     <input type="number" class="form-control" id="resizeWidth{{ loop.index }}" value="{{ file.width }}">
@@ -479,6 +494,29 @@
                 console.error('Error:', error);
                 alert('Lỗi cắt ảnh');
             });
+        }
+
+        // ── Save alt text ────────────────────────────────────────────────────
+        function saveAlt(filename, inputSelector) {
+            const alt = document.querySelector(inputSelector).value;
+            const formData = new FormData();
+            formData.append('token', '{{ csrf_token("delete-media") }}');
+            formData.append('alt', alt);
+
+            fetch('{{ path("admin_media_alt", {filename: "FILENAME"}) }}'.replace('FILENAME', encodeURIComponent(filename)), {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Đã lưu alt text!');
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            })
+            .catch(() => alert('Lỗi khi lưu alt text'));
         }
 
         // ── Move media to another folder ────────────────────────────────────

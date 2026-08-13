@@ -315,7 +315,7 @@
                             : asset('assets/images/no-image.png') %}
                         <article class="news2-card fade">
                             <a href="{{ path('dynamic_post_page', { slug: post.url }) }}" tabindex="-1" aria-hidden="true">
-                                <figure><img src="{{ imageSrc }}" alt="{{ post.title }}" loading="lazy" decoding="async"></figure>
+                                <figure><img src="{{ imageSrc }}" width="277" height="220" alt="{{ media_alt(post.images) ?: post.title }}" loading="lazy" decoding="async"></figure>
                             </a>
                             <div class="news2-body">
                                 <time datetime="{{ post.createdAt|date('Y-m-d') }}">{{ post.createdAt|date('d/m/Y') }}</time>

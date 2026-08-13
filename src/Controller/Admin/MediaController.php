@@ -2,6 +2,9 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\MediaAsset;
+use App\Repository\MediaAssetRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,6 +23,12 @@ class MediaController extends AbstractController
     private $uploadDir = 'uploads/media/';
     private $maxFileSize = 10485760; // 10MB
     private $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly MediaAssetRepository $mediaAssetRepository,
+    ) {
+    }
 
     /**
      * Display media library
@@ -182,10 +191,47 @@ class MediaController extends AbstractController
                 unlink($thumbpath);
             }
 
+            $asset = $this->mediaAssetRepository->findOneBy(['path' => $filename]);
+            if ($asset) {
+                $this->em->remove($asset);
+                $this->em->flush();
+            }
+
             return new JsonResponse(['status' => 'success', 'message' => 'File đã được xóa']);
         } catch (\Exception $e) {
             return new JsonResponse(['status' => 'error', 'message' => 'Lỗi xóa file']);
         }
+    }
+
+    /**
+     * Set/update alt text for a media file
+     */
+    #[Route('/{filename}/alt', name: 'admin_media_alt', requirements: ['filename' => '.+'], methods: ['POST'])]
+    #[IsGranted('ROLE_EDITOR')]
+    public function setAltAction(Request $request, $filename)
+    {
+        if (!$this->isCsrfTokenValid('delete-media', $request->request->get('token'))) {
+            return new JsonResponse(['status' => 'error', 'message' => 'Invalid CSRF token']);
+        }
+
+        $uploadDirPath = $this->getParameter('kernel.project_dir') . '/public/' . $this->uploadDir;
+        if (!file_exists($uploadDirPath . $filename)) {
+            return new JsonResponse(['status' => 'error', 'message' => 'File not found']);
+        }
+
+        $altText = trim((string) $request->request->get('alt', ''));
+
+        $asset = $this->mediaAssetRepository->findOneBy(['path' => $filename]);
+        if (!$asset) {
+            $asset = new MediaAsset();
+            $asset->setPath($filename);
+        }
+        $asset->setAltText($altText !== '' ? $altText : null);
+
+        $this->em->persist($asset);
+        $this->em->flush();
+
+        return new JsonResponse(['status' => 'success', 'message' => 'Đã lưu alt text', 'alt' => $altText]);
     }
 
     /**
@@ -250,6 +296,13 @@ class MediaController extends AbstractController
             }
 
             $newRelativePath = $uploadSubdir . basename($srcPath);
+
+            $asset = $this->mediaAssetRepository->findOneBy(['path' => $filename]);
+            if ($asset) {
+                $asset->setPath($newRelativePath);
+                $this->em->flush();
+            }
+
             return new JsonResponse([
                 'status'   => 'success',
                 'message'  => 'Di chuyển file thành công',
@@ -371,11 +424,18 @@ class MediaController extends AbstractController
     private function getMediaFiles($uploadDirPath, $folderFilter = '')
     {
         if ($folderFilter === '') {
-            return $this->scanFilesRecursive($uploadDirPath, $uploadDirPath);
+            $files = $this->scanFilesRecursive($uploadDirPath, $uploadDirPath);
         } else {
             $targetDir = $uploadDirPath . '/' . ltrim($folderFilter, '/');
-            return $this->scanFilesRecursive($targetDir, $uploadDirPath);
+            $files = $this->scanFilesRecursive($targetDir, $uploadDirPath);
         }
+
+        $altMap = $this->mediaAssetRepository->findAltTextMap(array_column($files, 'filename'));
+        foreach ($files as &$file) {
+            $file['alt'] = $altMap[$file['filename']] ?? '';
+        }
+
+        return $files;
     }
 
     private function scanFilesRecursive($dirPath, $baseDirPath)
