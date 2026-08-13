@@ -10,6 +10,19 @@
 {% block description %}{{ category and category.pageDescription ? category.pageDescription : v3.company.description }}{% endblock %}
 {% block robots %}<meta name="robots" content="{{ category ? category.getRobotsContent() : 'index, follow' }}">{% endblock %}
 
+{% set currentPage = pagination is defined ? pagination.currentPageNumber : 1 %}
+{% set pageCount = pagination is defined and pagination.itemNumberPerPage > 0 ? (pagination.totalItemCount / pagination.itemNumberPerPage)|round(0, 'ceil') : 1 %}
+
+{% block canonical %}
+    <link rel="canonical" href="{{ currentPage > 1 ? baseUrl ~ '?page=' ~ currentPage : baseUrl }}">
+    {% if currentPage > 1 %}
+        <link rel="prev" href="{{ currentPage == 2 ? baseUrl : baseUrl ~ '?page=' ~ (currentPage - 1) }}">
+    {% endif %}
+    {% if currentPage < pageCount %}
+        <link rel="next" href="{{ baseUrl ~ '?page=' ~ (currentPage + 1) }}">
+    {% endif %}
+{% endblock %}
+
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('build/css/v3-list.css') }}">
 {% endblock %}
