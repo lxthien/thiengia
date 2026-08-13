@@ -10,7 +10,7 @@ twig:
         v3:
             # Slug chuyên mục dùng cho link "Cẩm nang" trên menu/footer.
             # Đổi cho khớp NewsCategory.url thật trong DB.
-            newsCategorySlug: 'tin-tuc'
+            newsCategorySlug: 'blog'
 
             colors:
                 primary: '#b5462e'   # đỏ gạch — logo, CTA, heading nhấn
