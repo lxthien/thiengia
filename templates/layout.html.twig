@@ -43,8 +43,11 @@
         <meta property="og:url" content="{{ url(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) }}">
     {% endif %}
 
-    {% block blogPosting %}{% endblock %}
-    {% block localBusiness %}{% endblock %}
+    {% block jsonld %}{% endblock %}
+    {% block localBusiness %}
+        {{ get_setting('schemaOrganization')|raw }}
+        {{ get_setting('schemaLocalBusiness')|raw }}
+    {% endblock %}
     {% block structuredReview %}{% endblock %}
 
     {# CSS chung của theme v3 #}

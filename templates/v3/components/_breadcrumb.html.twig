@@ -15,3 +15,20 @@
         {% endfor %}
     </ol>
 </nav>
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {% for item in items %}
+            {
+                "@type": "ListItem",
+                "position": {{ loop.index }},
+                "name": {{ item.label|json_encode|raw }}
+                {%- if item.path is defined %}, "item": {{ absolute_url(item.path)|json_encode|raw }}{% endif %}
+            }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]
+}
+</script>

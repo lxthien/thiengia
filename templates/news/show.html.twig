@@ -47,6 +47,15 @@
             "@type": "Organization",
             "name": {{ v3.company.legalName|json_encode|raw }}
         }
+        {%- if ratingCount is defined and ratingCount > 0 %},
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": {{ rating }},
+            "reviewCount": {{ ratingCount }},
+            "bestRating": 5,
+            "worstRating": 1
+        }
+        {%- endif %}
     }
     </script>
 {% endblock %}

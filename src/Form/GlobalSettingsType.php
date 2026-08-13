@@ -56,6 +56,10 @@ class GlobalSettingsType extends AbstractType
             ->add('contens_hotline_3', TextType::class, ['required' => false, 'label' => 'Hotline 3'])
             ->add('contens_email', TextType::class, ['required' => false, 'label' => 'Email'])
             ->add('contens_mst', TextType::class, ['required' => false, 'label' => 'Mã số thuế'])
+
+            // Structured data (JSON-LD) — dán nguyên thẻ <script type="application/ld+json">...</script>
+            ->add('schemaOrganization', TextareaType::class, ['required' => false, 'attr' => ['rows' => 14], 'label' => 'Schema Organization'])
+            ->add('schemaLocalBusiness', TextareaType::class, ['required' => false, 'attr' => ['rows' => 14], 'label' => 'Schema LocalBusiness'])
         ;
     }
 
