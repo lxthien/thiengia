@@ -16,19 +16,16 @@
     </ol>
 </nav>
 
-<script type="application/ld+json">
-{
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-        {% for item in items %}
-            {
-                "@type": "ListItem",
-                "position": {{ loop.index }},
-                "name": {{ item.label|json_encode|raw }}
-                {%- if item.path is defined %}, "item": {{ absolute_url(item.path)|json_encode|raw }}{% endif %}
-            }{% if not loop.last %},{% endif %}
-        {% endfor %}
-    ]
-}
-</script>
+{% set breadcrumbListItems = [] %}
+{% for item in items %}
+    {% set listItem = {'@type': 'ListItem', 'position': loop.index, 'name': item.label} %}
+    {% if item.path is defined %}
+        {% set listItem = listItem|merge({'item': absolute_url(item.path)}) %}
+    {% endif %}
+    {% set breadcrumbListItems = breadcrumbListItems|merge([listItem]) %}
+{% endfor %}
+<script type="application/ld+json">{{ {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    'itemListElement': breadcrumbListItems
+}|json_encode(constant('JSON_PRETTY_PRINT') b-or constant('JSON_UNESCAPED_SLASHES') b-or constant('JSON_UNESCAPED_UNICODE'))|raw }}</script>
