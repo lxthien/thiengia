@@ -26,13 +26,18 @@
     {% endif %}
 {% endblock %}
 
+{% set breadcrumbItems = [{ label: 'Trang chủ', path: path('homepage') }] %}
+{% for ancestor in pageAncestors|default([]) %}
+    {% set breadcrumbItems = breadcrumbItems|merge([
+        { label: ancestor.breadcrumbTitle ?: ancestor.title, path: path('dynamic_post_page', { slug: ancestor.url }) }
+    ]) %}
+{% endfor %}
+{% set breadcrumbItems = breadcrumbItems|merge([{ label: post.breadcrumbTitle ?: post.title }]) %}
+
 {% block body %}
 
     {{ include('v3/components/_page_hero.html.twig', {
-        breadcrumb: [
-            { label: 'Trang chủ', path: path('homepage') },
-            { label: post.breadcrumbTitle ?: post.title }
-        ],
+        breadcrumb: breadcrumbItems,
         title: post.title,
         description: post.description
     }) }}

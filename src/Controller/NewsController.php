@@ -479,6 +479,8 @@ class NewsController extends AbstractController
         ];
 
         if ($post->isPage()) {
+            $viewData['pageAncestors'] = $post->getAncestors();
+
             return $this->render('news/page.html.twig', $viewData, $response);
         }
 

@@ -646,6 +646,24 @@ class News
         }
     }
 
+    /**
+     * Chuỗi trang cha, từ gốc đến cha trực tiếp (không gồm chính nó) — dùng cho breadcrumb.
+     *
+     * @return News[]
+     */
+    public function getAncestors(): array
+    {
+        $ancestors = [];
+        $current = $this->getParent();
+
+        while ($current) {
+            $ancestors[] = $current;
+            $current = $current->getParent();
+        }
+
+        return array_reverse($ancestors);
+    }
+
     public function getComments()
     {
         return $this->comments;
