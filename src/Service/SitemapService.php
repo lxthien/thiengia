@@ -54,9 +54,8 @@ class SitemapService
             ->findBy(['enable' => true], ['createdAt' => 'DESC']);
 
         foreach ($categories as $category) {
-            // Skip categories with noindex or nofollow in robots field
-            $robots = $category->getRobots();
-            if ($robots && (stripos($robots, 'noindex') !== false || stripos($robots, 'nofollow') !== false)) {
+            // Bỏ qua danh mục đang đặt noindex
+            if (!$category->isMetaIndex()) {
                 continue;
             }
 
@@ -73,6 +72,11 @@ class SitemapService
             ->findBy(['status' => PostStatus::Published], ['createdAt' => 'DESC']);
 
         foreach ($news as $article) {
+            // Bỏ qua bài viết đang đặt noindex
+            if (!$article->isMetaIndex()) {
+                continue;
+            }
+
             $urls[] = [
                 'url' => $this->generateNewsUrl($article),
                 'lastmod' => $article->getUpdatedAt() ? $article->getUpdatedAt()->format('Y-m-d') : $article->getCreatedAt()->format('Y-m-d'),

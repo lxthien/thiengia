@@ -8,6 +8,7 @@
 
 {% block title %}{{ category and category.pageTitle ? category.pageTitle : pageTitle }} | {{ v3.company.shortName }}{% endblock %}
 {% block description %}{{ category and category.pageDescription ? category.pageDescription : v3.company.description }}{% endblock %}
+{% block robots %}<meta name="robots" content="{{ category ? category.getRobotsContent() : 'index, follow' }}">{% endblock %}
 
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('build/css/v3-list.css') }}">

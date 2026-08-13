@@ -153,8 +153,15 @@ class News
     #[Assert\Count(max: 10, maxMessage: 'news.too_many_tags')]
     private $tags;
 
-    #[ORM\Column(name: 'robots', type: Types::STRING, length: 255, nullable: true)]
-    private $robots = null;
+    // Thay cho field "robots" dạng text tự do trước đây (vd "noindex,nofollow")
+    // — admin dễ gõ sai/không biết cú pháp, và không thể kiểm tra được true/false
+    // ở code mà phải strpos() chuỗi. 2 checkbox độc lập, mặc định bật cả 2 (=
+    // index, follow, giống hành vi mặc định khi không set gì).
+    #[ORM\Column(name: 'metaIndex', type: Types::BOOLEAN, options: ['default' => true])]
+    private $metaIndex = true;
+
+    #[ORM\Column(name: 'metaFollow', type: Types::BOOLEAN, options: ['default' => true])]
+    private $metaFollow = true;
 
     #[ORM\Column(name: 'template', type: Types::STRING, length: 255, nullable: true)]
     private $template = null;
@@ -658,16 +665,36 @@ class News
         $this->comments->removeElement($comment);
     }
 
-    public function setRobots($robots)
+    public function setMetaIndex($metaIndex)
     {
-        $this->robots = $robots;
+        $this->metaIndex = (bool) $metaIndex;
 
         return $this;
     }
 
-    public function getRobots()
+    public function isMetaIndex()
     {
-        return $this->robots;
+        return (bool) $this->metaIndex;
+    }
+
+    public function setMetaFollow($metaFollow)
+    {
+        $this->metaFollow = (bool) $metaFollow;
+
+        return $this;
+    }
+
+    public function isMetaFollow()
+    {
+        return (bool) $this->metaFollow;
+    }
+
+    /**
+     * Nội dung thật cho thẻ <meta name="robots">, vd "index, follow".
+     */
+    public function getRobotsContent(): string
+    {
+        return ($this->metaIndex ? 'index' : 'noindex') . ', ' . ($this->metaFollow ? 'follow' : 'nofollow');
     }
 
     public function setSchemaMarkup($schemaMarkup)

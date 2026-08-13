@@ -13,6 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvents;
@@ -103,9 +104,13 @@ class NewsType extends AbstractType
                 'required' => false,
                 'label' => 'label.pageKeyword',
             ])
-            ->add('robots', TextType::class, [
+            ->add('metaIndex', CheckboxType::class, [
                 'required' => false,
-                'label' => 'Robots',
+                'label' => 'Index',
+            ])
+            ->add('metaFollow', CheckboxType::class, [
+                'required' => false,
+                'label' => 'Follow',
             ])
             ->add('postType', ChoiceType::class, [
                 'required' => false,

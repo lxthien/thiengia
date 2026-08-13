@@ -62,8 +62,12 @@ class NewsCategory
     #[ORM\Column(name: 'showPostRelated', type: Types::BOOLEAN)]
     private $showPostRelated = false;
 
-    #[ORM\Column(name: 'robots', type: Types::STRING, length: 255, nullable: true)]
-    private $robots = null;
+    // Thay cho field "robots" dạng text tự do — xem comment cùng tên trong News.php.
+    #[ORM\Column(name: 'metaIndex', type: Types::BOOLEAN, options: ['default' => true])]
+    private $metaIndex = true;
+
+    #[ORM\Column(name: 'metaFollow', type: Types::BOOLEAN, options: ['default' => true])]
+    private $metaFollow = true;
 
     #[ORM\Column(name: 'pageTitle', type: Types::STRING, length: 255, nullable: true)]
     private $pageTitle = null;
@@ -236,16 +240,36 @@ class NewsCategory
         return $this->showPostRelated;
     }
 
-    public function setRobots($robots)
+    public function setMetaIndex($metaIndex)
     {
-        $this->robots = $robots;
+        $this->metaIndex = (bool) $metaIndex;
 
         return $this;
     }
 
-    public function getRobots()
+    public function isMetaIndex()
     {
-        return $this->robots;
+        return (bool) $this->metaIndex;
+    }
+
+    public function setMetaFollow($metaFollow)
+    {
+        $this->metaFollow = (bool) $metaFollow;
+
+        return $this;
+    }
+
+    public function isMetaFollow()
+    {
+        return (bool) $this->metaFollow;
+    }
+
+    /**
+     * Nội dung thật cho thẻ <meta name="robots">, vd "index, follow".
+     */
+    public function getRobotsContent(): string
+    {
+        return ($this->metaIndex ? 'index' : 'noindex') . ', ' . ($this->metaFollow ? 'follow' : 'nofollow');
     }
 
     public function setPageTitle($pageTitle)

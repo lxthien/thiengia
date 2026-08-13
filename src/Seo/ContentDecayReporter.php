@@ -78,16 +78,13 @@ class ContentDecayReporter
             $reasons[] = 'Thiếu ảnh đại diện';
         }
 
-        // 5. Indexing adjust based on "robots" field for kientruc
-        $robots = strtolower((string) $post->getRobots());
-        $isIndexable = strpos($robots, 'noindex') === false;
-        
-        if (!$isIndexable) {
+        // 5. Indexing adjust based on metaIndex/metaFollow
+        if (!$post->isMetaIndex()) {
             $score -= 20;
             $recommendations[] = 'Đang noindex nên ít ưu tiên SEO';
         }
 
-        if (strpos($robots, 'nofollow') !== false) {
+        if (!$post->isMetaFollow()) {
             $score += 4;
             $recommendations[] = 'Đang nofollow';
         }
@@ -106,7 +103,7 @@ class ContentDecayReporter
             ],
             'reasons' => array_values(array_unique($reasons)),
             'recommendations' => array_values(array_unique($recommendations)),
-            'isIndexable' => $isIndexable,
+            'isIndexable' => $post->isMetaIndex(),
         ];
     }
 

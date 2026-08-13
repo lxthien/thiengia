@@ -79,9 +79,13 @@ class NewsCategoryType extends AbstractType
                 'required' => false,
                 'label' => 'label.pageKeyword',
             ])
-            ->add('robots', TextType::class, [
+            ->add('metaIndex', CheckboxType::class, [
                 'required' => false,
-                'label' => 'Robots',
+                'label' => 'Index',
+            ])
+            ->add('metaFollow', CheckboxType::class, [
+                'required' => false,
+                'label' => 'Follow',
             ])
             ->add('schemaMarkup', TextareaType::class, [
                 'attr' => ['rows' => '10'],

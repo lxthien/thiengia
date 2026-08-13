@@ -35,4 +35,4 @@ User-agent: ChatGPT-User
 Allow: /
 
 # XML Sitemaps
-Sitemap: https://kientruckimanh.com/sitemap.xml
+Sitemap: https://xaydungthiengia.vn/sitemap.xml
