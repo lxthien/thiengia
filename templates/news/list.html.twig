@@ -14,13 +14,18 @@
     <link rel="stylesheet" href="{{ asset('build/css/v3-list.css') }}">
 {% endblock %}
 
+{% set breadcrumbItems = [{ label: 'Trang chủ', path: path('homepage') }] %}
+{% if category and category.parentcat is not same as('root') %}
+    {% set breadcrumbItems = breadcrumbItems|merge([
+        { label: category.parentcat.name, path: path('dynamic_post_page', { slug: category.parentcat.url }) }
+    ]) %}
+{% endif %}
+{% set breadcrumbItems = breadcrumbItems|merge([{ label: pageTitle }]) %}
+
 {% block body %}
 
     {{ include('v3/components/_page_hero.html.twig', {
-        breadcrumb: [
-            { label: 'Trang chủ', path: path('homepage') },
-            { label: pageTitle }
-        ],
+        breadcrumb: breadcrumbItems,
         title: pageTitle,
         description: category and category.description ? category.description : null
     }) }}

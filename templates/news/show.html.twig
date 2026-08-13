@@ -60,18 +60,29 @@
     </script>
 {% endblock %}
 
+{% set breadcrumbItems = [{ label: 'Trang chủ', path: path('homepage') }] %}
+{% if category %}
+    {% if category.parentcat is not same as('root') %}
+        {% set breadcrumbItems = breadcrumbItems|merge([
+            { label: category.parentcat.name, path: path('dynamic_post_page', { slug: category.parentcat.url }) }
+        ]) %}
+        {% set breadcrumbItems = breadcrumbItems|merge([
+            { label: category.name, path: path('dynamic_category_post', { level1: category.parentcat.url, level2: category.url }) }
+        ]) %}
+    {% else %}
+        {% set breadcrumbItems = breadcrumbItems|merge([
+            { label: category.name, path: path('dynamic_post_page', { slug: category.url }) }
+        ]) %}
+    {% endif %}
+{% endif %}
+{% set breadcrumbItems = breadcrumbItems|merge([{ label: post.breadcrumbTitle ?: post.title }]) %}
+
 {% block body %}
 
     {# ============ BANNER BÀI VIẾT ============ #}
     <header class="page-hero !pb-32" aria-label="Thông tin bài viết">
         <div class="container max-w-7xl relative">
-            {{ include('v3/components/_breadcrumb.html.twig', {
-                items: [
-                    { label: 'Trang chủ', path: path('homepage') },
-                    { label: 'Cẩm nang xây dựng', path: path('news_category', { level1: v3.newsCategorySlug }) },
-                    { label: post.breadcrumbTitle ?: post.title }
-                ]
-            }) }}
+            {{ include('v3/components/_breadcrumb.html.twig', { items: breadcrumbItems }) }}
 
             {% if category %}
                 <p class="sec-label sec-label--light mt-8 fade">{{ category.name }}</p>
