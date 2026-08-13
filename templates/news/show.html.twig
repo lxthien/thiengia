@@ -147,7 +147,7 @@
     </div>
 
     {# ============ BÀI LIÊN QUAN ============ #}
-    {% if relatedPosts|default([])|length %}
+    {% if relatedNews|default([])|length %}
         <section class="commits py-20 lg:py-24" aria-labelledby="lien-quan-h">
             <div class="container max-w-7xl">
                 <div class="flex flex-wrap items-end justify-between gap-6">
@@ -159,7 +159,7 @@
                 </div>
 
                 <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-x-8 gap-y-12 mt-12">
-                    {% for related in relatedPosts %}
+                    {% for related in relatedNews %}
                         {{ include('v3/components/_post_card.html.twig', { post: related, headingLevel: 'h3' }) }}
                     {% endfor %}
                 </div>
