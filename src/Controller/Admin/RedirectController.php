@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\ActivityLog;
 use App\Entity\Redirect;
+use App\EventListener\RedirectSubscriber;
 use App\Form\RedirectType;
 use App\Service\ActivityLogService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -12,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Cache\CacheInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
 #[Route('/admin/redirect')]
@@ -21,6 +23,7 @@ class RedirectController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly ActivityLogService $activityLogService,
+        private readonly CacheInterface $cache,
     ) {
     }
 
@@ -67,6 +70,7 @@ class RedirectController extends AbstractController
 
             $this->em->persist($redirect);
             $this->em->flush();
+            $this->cache->delete(RedirectSubscriber::CACHE_KEY);
 
             $this->activityLogService->log(
                 ActivityLog::ACTION_CREATE,
@@ -96,6 +100,7 @@ class RedirectController extends AbstractController
             $diffDetails = $this->activityLogService->getEntityDiff($redirect);
 
             $this->em->flush();
+            $this->cache->delete(RedirectSubscriber::CACHE_KEY);
 
             $this->activityLogService->log(
                 ActivityLog::ACTION_UPDATE,
@@ -127,6 +132,7 @@ class RedirectController extends AbstractController
 
         $this->em->remove($redirect);
         $this->em->flush();
+        $this->cache->delete(RedirectSubscriber::CACHE_KEY);
 
         $this->activityLogService->log(
             ActivityLog::ACTION_DELETE,
@@ -144,6 +150,7 @@ class RedirectController extends AbstractController
     {
         $redirect->setIsActive(!$redirect->getIsActive());
         $this->em->flush();
+        $this->cache->delete(RedirectSubscriber::CACHE_KEY);
         return $this->json(['status' => $redirect->getIsActive()]);
     }
 
@@ -160,6 +167,7 @@ class RedirectController extends AbstractController
                 }
             }
             $this->em->flush();
+            $this->cache->delete(RedirectSubscriber::CACHE_KEY);
             return $this->json(['message' => 'Deleted successfully.']);
         }
         return $this->json(['message' => 'No items selected.'], 400);
@@ -227,6 +235,7 @@ class RedirectController extends AbstractController
             }
             fclose($handle);
             $this->em->flush();
+            $this->cache->delete(RedirectSubscriber::CACHE_KEY);
             $this->addFlash('success', "Imported $count redirects successfully.");
         } else {
             $this->addFlash('error', "Invalid file format.");
