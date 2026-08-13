@@ -463,6 +463,12 @@ class NewsController extends AbstractController
         // Dữ liệu chung cho View
         $viewData = [
             'post' => $post,
+            // Bài viết/trang có thể truy cập qua nhiều URL khác nhau (theo
+            // từng danh mục nó thuộc về, hoặc slug trần /{slug}/) — canonical
+            // luôn cố định về đúng 1 URL /{slug}/ duy nhất, không phụ thuộc
+            // route nào vừa khớp, tránh trùng lặp nội dung khi bài có nhiều
+            // danh mục.
+            'canonicalUrl' => $this->generateUrl('dynamic_post_page', ['slug' => $post->getUrl()], UrlGeneratorInterface::ABSOLUTE_URL),
             'contentsLazy' => $contentsLazy,
             'pageBuilderBlocks' => $pageBuilderBlocks,
             'contactBlockForm' => $post->isPage() && $this->pageBuilderService->hasBlockType($pageBuilderBlocks, 'contact_form')

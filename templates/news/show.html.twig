@@ -7,6 +7,7 @@
 {% block title %}{{ post.pageTitle ?: post.title }} | {{ v3.company.shortName }}{% endblock %}
 {% block description %}{{ post.pageDescription ?: post.description }}{% endblock %}
 {% block robots %}<meta name="robots" content="{{ post.getRobotsContent() }}">{% endblock %}
+{% block canonical %}<link rel="canonical" href="{{ canonicalUrl }}">{% endblock %}
 
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('build/css/v3-news.css') }}">

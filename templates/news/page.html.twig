@@ -6,6 +6,7 @@
 {% block description %}{{ post.pageDescription ?: post.description }}{% endblock %}
 {% block keyword %}{{ post.pageKeyword }}{% endblock %}
 {% block robots %}<meta name="robots" content="{{ post.getRobotsContent() }}">{% endblock %}
+{% block canonical %}<link rel="canonical" href="{{ canonicalUrl }}">{% endblock %}
 
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('build/css/v3-news.css') }}">
