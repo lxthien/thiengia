@@ -77,12 +77,18 @@ class SitemapService
                 continue;
             }
 
-            $urls[] = [
+            $entry = [
                 'url' => $this->generateNewsUrl($article),
                 'lastmod' => $article->getUpdatedAt() ? $article->getUpdatedAt()->format('Y-m-d') : $article->getCreatedAt()->format('Y-m-d'),
                 'changefreq' => 'weekly',
                 'priority' => '0.9'
             ];
+
+            if ($article->getImages()) {
+                $entry['image'] = $this->generateBaseUrl() . ltrim($article->getImages(), '/');
+            }
+
+            $urls[] = $entry;
         }
 
         $urls[] = [
