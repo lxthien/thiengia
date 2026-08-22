@@ -9,6 +9,7 @@ use App\Form\PageType;
 use App\Service\ActivityLogService;
 use App\Utils\Slugger;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,6 +26,7 @@ class PageController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly ActivityLogService $activityLogService,
+        private readonly PaginatorInterface $paginator,
     ) {
     }
 
@@ -36,21 +38,31 @@ class PageController extends AbstractController
     {
         $repository = $this->em->getRepository(News::class);
         $searchQuery = trim((string) $request->query->get('q', ''));
+        $pageLevels = [];
 
         if ($searchQuery !== '') {
-            $pages = $repository->searchPages($searchQuery);
-            $pageLevels = [];
+            $qb = $repository->searchPages($searchQuery);
+        } else {
+            // Phân trang theo trang gốc (parent IS NULL) — mỗi trang kết quả vẫn
+            // hiển thị đầy đủ cây con của nó (xem _tree_row.html.twig), không cắt
+            // ngang quan hệ cha/con.
+            $qb = $repository->findPagesAsTree();
+        }
 
-            foreach ($pages as $page) {
+        $pagination = $this->paginator->paginate(
+            $qb,
+            $request->query->getInt('page', 1),
+            20
+        );
+
+        if ($searchQuery !== '') {
+            foreach ($pagination as $page) {
                 $pageLevels[$page->getId()] = $this->getPageLevel($page);
             }
-        } else {
-            $pages = $repository->findPagesAsTree();
-            $pageLevels = [];
         }
 
         return $this->render('admin/page/index.html.twig', [
-            'pages' => $pages,
+            'pagination' => $pagination,
             'page_levels' => $pageLevels,
             'search_query' => $searchQuery,
         ]);

@@ -64,12 +64,37 @@ $(function() {
     /**
      * Bulk-select checkboxes for admin list pages (comment, ...): check-all toggle,
      * 2-way sync with per-row checkboxes, guard against submitting bulk forms with
-     * nothing selected/no action chosen.
+     * nothing selected/no action chosen. Nút "Áp dụng" cũng được disable/enable
+     * theo đúng trạng thái đó, thay vì luôn hiện màu xám mặc định của .btn-default
+     * bất kể đã chọn gì hay chưa (gây cảm giác nút bị khóa dù vẫn bấm được).
      */
     function initBulkActions() {
+        function getCheckedCount($form) {
+            var formId = $form.attr('id');
+            return formId
+                ? $('[data-bulk-check][form="' + formId + '"]:checked').length
+                : $form.find('[data-bulk-check]:checked').length;
+        }
+
+        function updateApplyButtonState($form) {
+            var action = $form.find('[name="bulk_action"]').val();
+            var checkedCount = getCheckedCount($form);
+
+            $form.find('button[type="submit"]').prop('disabled', !action || checkedCount === 0);
+        }
+
+        function refreshAllBulkForms() {
+            $('[data-bulk-form]').each(function() {
+                updateApplyButtonState($(this));
+            });
+        }
+
+        refreshAllBulkForms();
+
         $('[data-bulk-check-all]').on('change', function() {
             var checked = $(this).prop('checked');
             $(this).closest('table').find('[data-bulk-check]').prop('checked', checked);
+            refreshAllBulkForms();
         });
 
         $('[data-bulk-check]').on('change', function() {
@@ -78,13 +103,17 @@ $(function() {
             var checked = $table.find('[data-bulk-check]:checked').length;
 
             $table.find('[data-bulk-check-all]').prop('checked', total > 0 && total === checked);
+            refreshAllBulkForms();
+        });
+
+        $('[data-bulk-form] [name="bulk_action"]').on('change', function() {
+            updateApplyButtonState($(this).closest('[data-bulk-form]'));
         });
 
         $('[data-bulk-form]').on('submit', function(event) {
             var $form = $(this);
-            var formId = $form.attr('id');
             var action = $form.find('[name="bulk_action"]').val();
-            var checkedCount = formId ? $('[data-bulk-check][form="' + formId + '"]:checked').length : $form.find('[data-bulk-check]:checked').length;
+            var checkedCount = getCheckedCount($form);
 
             if (!action || checkedCount === 0) {
                 event.preventDefault();

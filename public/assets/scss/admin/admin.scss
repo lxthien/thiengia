@@ -811,6 +811,14 @@
     .form-control {
         width: 180px;
     }
+
+    // Nút "Áp dụng" chỉ nổi bật (btn-primary) khi đã chọn dữ liệu + thao tác —
+    // xem admin.js:initBulkActions(). Ở trạng thái chưa sẵn sàng, làm mờ hẳn rõ
+    // ràng thay vì để mặc định .btn-primary vẫn xanh dù bị disabled.
+    button[type="submit"][disabled] {
+        opacity: .45;
+        cursor: not-allowed;
+    }
 }
 
 .admin-list-table {
@@ -835,6 +843,7 @@
         margin: 0;
         display: flex;
         flex-wrap: wrap;
+        justify-content: center;
         gap: 6px;
 
         > li {

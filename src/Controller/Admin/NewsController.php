@@ -12,6 +12,7 @@ use App\Form\NewsType;
 use App\Service\ActivityLogService;
 use App\Utils\Slugger;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -30,6 +31,7 @@ class NewsController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly ActivityLogService $activityLogService,
+        private readonly PaginatorInterface $paginator,
     ) {
     }
 
@@ -46,13 +48,19 @@ class NewsController extends AbstractController
         $authorFilter = $this->isGranted('ROLE_EDITOR') ? null : $this->getUser();
 
         if ($searchQuery !== '') {
-            $news = $repository->searchPosts($searchQuery, null, $authorFilter);
+            $qb = $repository->searchPosts($searchQuery, null, $authorFilter);
         } else {
-            $news = $repository->findAllPosts($authorFilter);
+            $qb = $repository->findAllPosts($authorFilter);
         }
 
+        $pagination = $this->paginator->paginate(
+            $qb,
+            $request->query->getInt('page', 1),
+            20
+        );
+
         return $this->render('admin/news/index.html.twig', [
-            'objects' => $news,
+            'pagination' => $pagination,
             'search_query' => $searchQuery,
         ]);
     }
@@ -70,7 +78,7 @@ class NewsController extends AbstractController
         $authorFilter = $this->isGranted('ROLE_EDITOR') ? null : $this->getUser();
 
         if ($searchQuery !== '') {
-            $news = $repository->searchPosts($searchQuery, $categoryId, $authorFilter);
+            $qb = $repository->searchPosts($searchQuery, $categoryId, $authorFilter);
         } else {
             $qb = $repository
                 ->createQueryBuilder('n')
@@ -82,12 +90,16 @@ class NewsController extends AbstractController
             if ($authorFilter) {
                 $qb->andWhere('n.author = :author')->setParameter('author', $authorFilter);
             }
-
-            $news = $qb->getQuery()->getResult();
         }
 
+        $pagination = $this->paginator->paginate(
+            $qb,
+            $request->query->getInt('page', 1),
+            20
+        );
+
         return $this->render('admin/news/list.html.twig', [
-            'objects' => $news,
+            'pagination' => $pagination,
             'search_query' => $searchQuery,
             'category_id' => $categoryId,
         ]);

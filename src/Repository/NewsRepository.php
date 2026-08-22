@@ -32,7 +32,7 @@ class NewsRepository extends ServiceEntityRepository
             $qb->andWhere('n.author = :author')->setParameter('author', $author);
         }
 
-        return $qb->getQuery()->getResult();
+        return $qb;
     }
 
     public function findAllPages()
@@ -47,12 +47,11 @@ class NewsRepository extends ServiceEntityRepository
 
     public function findPagesAsTree()
     {
-        return $this->getEntityManager()
-            ->createQuery(
-                'SELECT n FROM App\Entity\News n WHERE n.postType = :postType AND n.parent IS NULL ORDER BY n.title ASC'
-            )
-            ->setParameter('postType', "page")
-            ->getResult();
+        return $this->createQueryBuilder('n')
+            ->where('n.postType = :postType')
+            ->andWhere('n.parent IS NULL')
+            ->setParameter('postType', 'page')
+            ->orderBy('n.title', 'ASC');
     }
 
     public function searchPages($query)
@@ -70,9 +69,7 @@ class NewsRepository extends ServiceEntityRepository
             )
             ->setParameter('postType', 'page')
             ->setParameter('query', '%'.$query.'%')
-            ->orderBy('n.title', 'ASC')
-            ->getQuery()
-            ->getResult();
+            ->orderBy('n.title', 'ASC');
     }
 
     public function searchPosts($query, $categoryId = null, ?User $author = null)
@@ -103,7 +100,7 @@ class NewsRepository extends ServiceEntityRepository
             $qb->andWhere('n.author = :author')->setParameter('author', $author);
         }
 
-        return $qb->getQuery()->getResult();
+        return $qb;
     }
 
     // 4 method dưới đây join category/tags CHỈ để lọc (t.id IN/=), không
