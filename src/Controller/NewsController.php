@@ -435,7 +435,7 @@ class NewsController extends AbstractController
 
         // 5. Thu thập dữ liệu khác
         $comments = $this->em->getRepository(Comment::class)->getApprovedCommentsForNews($post->getId());
-        $rating = $this->em->getRepository(Rating::class)->getAverageRatingForNews($post->getId());
+        $ratingStats = $this->getRatingStats($post->getId());
         $pageBuilderBlocks = [];
         $contentsLazy = $this->contentFormatter->lazyloadContent($post);
 
@@ -451,11 +451,8 @@ class NewsController extends AbstractController
         $imagePath = $post->getImages();
         $imageSize = $imagePath ? @getimagesize(ltrim($imagePath, '/')) : null;
 
-        // Form Comment & Rating
+        // Form Comment
         $form = $this->renderFormComment($post);
-        $formRating = $this->createForm(\App\Form\PostRatingType::class, null, [
-            'action' => $this->generateUrl('rating')
-        ]);
 
         // Build breadcrumbs
         $this->buildBreadcrums(null, $post->isPage() ? null : $post, $post->isPage() ? $post : null);
@@ -475,11 +472,11 @@ class NewsController extends AbstractController
                 ? $this->renderPageBuilderContactForm()->createView()
                 : null,
             'form' => $form->createView(),
-            'formRating' => $formRating->createView(),
-            'rating' => !empty($rating['ratingValue']) ? str_replace('.0', '', number_format($rating['ratingValue'], 1)) : 0,
-            'ratingPercent' => !empty($rating['ratingValue']) ? str_replace('.00', '', number_format(($rating['ratingValue'] * 100) / 5, 2)) : 0,
-            'ratingValue' => round($rating['ratingValue'] ?? 0),
-            'ratingCount' => round($rating['ratingCount'] ?? 0),
+            'rating' => $ratingStats['rating'],
+            'ratingPercent' => $ratingStats['ratingPercent'],
+            'ratingValue' => $ratingStats['ratingValue'],
+            'ratingCount' => $ratingStats['ratingCount'],
+            'alreadyRated' => (bool) $request->getSession()->get('rated_news_' . $post->getId()),
             'comments' => $comments,
             'imageSize' => $imageSize,
         ];
@@ -717,27 +714,76 @@ class NewsController extends AbstractController
     /**
      * @return JSON
      */
-    #[Route('/rating', name: 'rating')]
-    public function ratingAction(Request $request)
+    #[Route('/rating', name: 'rating', methods: ['POST'])]
+    public function ratingAction(Request $request): JsonResponse
     {
-        $em = $this->em;
+        $newsId = $request->request->getInt('newsId');
+        $ratingValue = $request->request->getInt('rating');
+
+        $news = $this->em->getRepository(News::class)->find($newsId);
+        if (!$news) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Không tìm thấy bài viết',
+            ], 404);
+        }
+
+        if (!$this->isCsrfTokenValid('rating_item', $request->request->get('_token'))) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Phiên làm việc đã hết hạn, vui lòng tải lại trang',
+            ], 403);
+        }
+
+        if ($ratingValue < 1 || $ratingValue > 5) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Giá trị đánh giá không hợp lệ',
+            ], 400);
+        }
+
+        // Mỗi phiên (session) chỉ được đánh giá 1 lần cho 1 bài viết,
+        // chặn spam vote làm sai lệch dữ liệu AggregateRating dùng cho SEO.
+        $session = $request->getSession();
+        $votedKey = 'rated_news_' . $newsId;
+
+        if ($session->get($votedKey)) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Bạn đã đánh giá bài viết này rồi',
+            ], 409);
+        }
 
         $rating = new Rating();
-        $rating->setNewsId($request->request->get('newsId'));
-        $rating->setRating($request->request->get('rating'));
+        $rating->setNewsId($newsId);
+        $rating->setRating($ratingValue);
 
-        $em->persist($rating);
+        $this->em->persist($rating);
+        $this->em->flush();
 
-        $em->flush();
+        $session->set($votedKey, true);
 
-        return new Response(
-            json_encode(
-                array(
-                    'status' => 'success',
-                    'message' => 'Cảm ơn đánh giá của bạn'
-                )
-            )
-        );
+        return new JsonResponse(array_merge([
+            'success' => true,
+            'message' => 'Cảm ơn đánh giá của bạn',
+        ], $this->getRatingStats($newsId)));
+    }
+
+    /**
+     * Điểm trung bình + số lượt đánh giá của 1 bài viết. Dùng chung giữa
+     * showAction (hiển thị ban đầu) và ratingAction (trả về sau khi vote
+     * để JS cập nhật số liệu trên trang mà không cần tải lại).
+     */
+    private function getRatingStats(int $newsId): array
+    {
+        $rating = $this->em->getRepository(Rating::class)->getAverageRatingForNews($newsId);
+
+        return [
+            'rating' => !empty($rating['ratingValue']) ? str_replace('.0', '', number_format($rating['ratingValue'], 1)) : 0,
+            'ratingPercent' => !empty($rating['ratingValue']) ? str_replace('.00', '', number_format(($rating['ratingValue'] * 100) / 5, 2)) : 0,
+            'ratingValue' => round($rating['ratingValue'] ?? 0),
+            'ratingCount' => round($rating['ratingCount'] ?? 0),
+        ];
     }
 
     /**

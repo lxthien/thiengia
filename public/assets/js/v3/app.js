@@ -15,6 +15,7 @@ import initGallery from "./modules/gallery-lightbox";
 import initToc from "./modules/toc";
 import initContentToc from "./modules/content-toc";
 import initForms from "./modules/forms";
+import initRating from "./modules/rating";
 
 document.addEventListener("DOMContentLoaded", () => {
   initHeader();
@@ -27,4 +28,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initToc();
   initContentToc();
   initForms();
+  initRating();
 });

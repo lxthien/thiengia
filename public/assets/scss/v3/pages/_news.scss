@@ -339,6 +339,54 @@
   }
 }
 
+// Widget đánh giá sao — bấm 1 sao là gửi luôn (xem js/v3/modules/rating.js)
+.post-rating {
+  margin-top: 2.5rem;
+  padding: 1.75rem;
+  background: $tint;
+  border-left: 3px solid $gold;
+  text-align: center;
+
+  .post-rating-label {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: $text;
+  }
+
+  .post-rating-stars {
+    display: inline-flex;
+    gap: 0.35rem;
+    margin-top: 0.85rem;
+  }
+
+  .post-rating-star {
+    padding: 0;
+    background: none;
+    border: 0;
+    font-size: 1.7rem;
+    line-height: 1;
+    color: rgba($text, 0.25);
+    cursor: pointer;
+    transition: color $dur $ease;
+
+    &:hover:not(:disabled),
+    &.is-filled {
+      color: $gold;
+    }
+
+    &:disabled {
+      cursor: default;
+    }
+  }
+
+  .post-rating-summary {
+    margin-top: 0.65rem;
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: $mut;
+  }
+}
+
 // Hộp tác giả
 .author-box {
   display: flex;

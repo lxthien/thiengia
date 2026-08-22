@@ -1,0 +1,33 @@
+{# Widget đánh giá sao cho bài viết — bấm 1 sao là gửi luôn, không cần nút Gửi.
+   JS xử lý ở public/assets/js/v3/modules/rating.js, endpoint ở NewsController::ratingAction. #}
+<div class="post-rating{{ alreadyRated ? ' is-voted' : '' }}" data-rating-widget data-current-average="{{ ratingValue }}" aria-label="Đánh giá bài viết">
+    <p class="post-rating-label">
+        {{ alreadyRated ? 'Cảm ơn bạn đã đánh giá bài viết này' : 'Bạn thấy bài viết này thế nào?' }}
+    </p>
+
+    <form data-rating-form action="{{ path('rating') }}" method="post">
+        <input type="hidden" name="newsId" value="{{ post.getId() }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('rating_item') }}">
+        <input type="hidden" name="rating" value="" data-rating-value>
+
+        <div class="post-rating-stars" role="group" aria-label="Chọn số sao, từ 1 đến 5">
+            {% for i in 1..5 %}
+                <button
+                    type="button"
+                    class="post-rating-star{{ i <= ratingValue ? ' is-filled' : '' }}"
+                    data-rating-star="{{ i }}"
+                    aria-label="{{ i }} sao"
+                    {{ alreadyRated ? 'disabled' : '' }}
+                >★</button>
+            {% endfor %}
+        </div>
+    </form>
+
+    <p class="post-rating-summary" data-rating-summary>
+        {% if ratingCount > 0 %}
+            {{ rating }}/5 ({{ ratingCount }} lượt đánh giá)
+        {% else %}
+            Chưa có đánh giá nào — hãy là người đầu tiên
+        {% endif %}
+    </p>
+</div>

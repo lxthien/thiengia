@@ -117,6 +117,14 @@
                     </nav>
                 {% endif %}
 
+                {{ include('v3/components/_rating.html.twig', {
+                    post: post,
+                    rating: rating,
+                    ratingValue: ratingValue,
+                    ratingCount: ratingCount,
+                    alreadyRated: alreadyRated,
+                }, with_context = false) }}
+
                 <aside class="author-box mt-12">
                     <img src="{{ asset(v3.company.authorAvatar) }}" alt="Chân dung {{ v3.company.authorName }}" loading="lazy" decoding="async">
                     <div>
