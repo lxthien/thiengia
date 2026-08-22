@@ -63,7 +63,7 @@
 
 {% set breadcrumbItems = [{ label: 'Trang chủ', path: path('homepage') }] %}
 {% if category %}
-    {% if category.parentcat is not same as('root') %}
+    {% if category.parentcat is not null %}
         {% set breadcrumbItems = breadcrumbItems|merge([
             { label: category.parentcat.name, path: path('dynamic_post_page', { slug: category.parentcat.url }) }
         ]) %}

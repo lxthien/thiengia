@@ -143,7 +143,7 @@ class NewsController extends AbstractController
 
         if ($category) {
             // Check if this is a child category
-            if ($category->getParentcat() !== 'root') {
+            if ($category->getParentcat() !== null) {
                 // It's a child category - redirect to proper hierarchical URL
                 return $this->redirectToRoute('dynamic_category_post', array(
                     'level1' => $category->getParentcat()->getUrl(),
@@ -279,7 +279,7 @@ class NewsController extends AbstractController
         }
 
         // If this is a child category accessed directly (shouldn't happen with dynamic routing, but check anyway)
-        if ($category->getParentcat() !== 'root') {
+        if ($category->getParentcat() !== null) {
             return $this->redirectToRoute('dynamic_category_post', array('level1' => $category->getParentcat()->getUrl(), 'level2' => $category->getUrl()), 301);
         }
 
@@ -422,7 +422,7 @@ class NewsController extends AbstractController
                     ->getRelatedNews($categoryPrimaryId, $post->getId(), $post->getPostType(), $sortKey, $ordering[$sortKey], 12);
                 
                 // Build category URL
-                if ($category->getParentcat() === 'root') {
+                if ($category->getParentcat() === null) {
                     $categoryUrl = $this->generateUrl("dynamic_post_page", ['slug' => $category->getUrl()], UrlGeneratorInterface::ABSOLUTE_URL);
                 } else {
                     $categoryUrl = $this->generateUrl("dynamic_category_post", [
@@ -1052,7 +1052,7 @@ class NewsController extends AbstractController
 
         // Breadcrum for category page
         if (!empty($category)) {
-            if ($category->getParentcat() === 'root') {
+            if ($category->getParentcat() === null) {
                 $breadcrumbs->addItem($category->getName(), $this->generateUrl("dynamic_post_page", array('slug' => $category->getUrl())));
             } else {
                 $breadcrumbs->addItem($category->getParentcat()->getName(), $this->generateUrl("dynamic_post_page", array('slug' => $category->getParentcat()->getUrl())));
@@ -1080,7 +1080,7 @@ class NewsController extends AbstractController
             }
 
             if (!empty($category)) {
-                if ($category->getParentcat() === 'root') {
+                if ($category->getParentcat() === null) {
                     $breadcrumbs->addItem($category->getName(), $this->generateUrl("dynamic_post_page", array('slug' => $category->getUrl())));
                     $breadcrumbs->addItem($post->getTitle(), $this->generateUrl('dynamic_post_page', array('slug' => $post->getUrl())));
                 } else {

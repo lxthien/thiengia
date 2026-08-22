@@ -117,7 +117,7 @@ class SitemapService
     private function generateCategoryUrl(NewsCategory $category)
     {
         // Check if category has a parent
-        if ($category->getParentcat() !== 'root') {
+        if ($category->getParentcat() !== null) {
             // If it has parent, use two-level route
             return $this->generateBaseUrl() . $category->getParentcat()->getUrl() . '/' . $category->getUrl() . '/';
         } else {

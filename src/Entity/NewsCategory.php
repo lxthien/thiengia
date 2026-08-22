@@ -161,7 +161,7 @@ class NewsCategory
     }
 
     public function getParentcat() {
-        return $this->parentcat != null ? $this->parentcat : 'root';
+        return $this->parentcat;
     }
 
     public function getChildren() {
