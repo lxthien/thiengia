@@ -3,6 +3,39 @@
 @import "menu-editor.scss";
 @import "../shared/content-blocks";
 
+// CKEditor 5 — chặn tràn ngang cả trang khi toolbar dài (nhiều nút hơn CKEditor 4).
+// Nguyên nhân thật: .row/.col-* của theme admin là flexbox (Bootstrap 4, xem
+// sufeeadmin/assets/css/bootstrap.min.css), mà flex item mặc định có
+// min-width: auto — tức KHÔNG chịu co lại nhỏ hơn nội dung bên trong, nên
+// .col-* bị toolbar CKEditor 5 (nội dung rộng) kéo giãn ra khỏi viewport dù
+// toolbar tự nó đã biết gom nút/wrap đúng. Đây là flexbug #1 rất kinh điển
+// (https://github.com/philipwalton/flexbugs#flexbug-1) — fix chuẩn là ép
+// min-width: 0 cho flex item, không phải giới hạn width của CKEditor.
+.row > [class*="col-"] {
+    min-width: 0;
+}
+
+.ck.ck-editor {
+    max-width: 100%;
+
+    // Chiều cao KHỞI ĐIỂM, không phải chiều cao cố định: khung luôn cao sẵn
+    // --ck-min-height rồi tự dài thêm theo nội dung. Cố tình KHÔNG kẹp
+    // max-height để tránh thanh cuộn lồng trong thanh cuộn của trang — bài dài
+    // vẫn thao tác được vì toolbar của ClassicEditor tự dính khi cuộn qua.
+    // Biến set 1 lần lúc tạo editor theo data-height của textarea (xem
+    // admin/ckeditor5.js), thừa hưởng xuống cả khung Source (SourceEditing) vì
+    // custom property truyền xuống mọi con cháu.
+    // Bắt buộc loại trừ .ck-editor__nested-editable: class .ck-editor__editable
+    // nằm trên CẢ vùng soạn gốc LẪN vùng soạn lồng nhau (figcaption của ảnh, ô
+    // trong table) — chính CSS của CKEditor 5 cũng phải tự loại trừ y hệt. Thiếu
+    // :not() thì chiều cao này ăn luôn vào figcaption, làm ô chú thích ảnh phình
+    // thành khối trống cao 500px.
+    .ck-editor__editable:not(.ck-editor__nested-editable),
+    .ck-source-editing-area {
+        min-height: var(--ck-min-height, 500px);
+    }
+}
+
 /*===========================================================================
  * Listing page
  ============================================================================*/

@@ -16,6 +16,7 @@ import initToc from "./modules/toc";
 import initContentToc from "./modules/content-toc";
 import initForms from "./modules/forms";
 import initRating from "./modules/rating";
+import initLoBanRuler from "./modules/lo-ban-ruler";
 
 document.addEventListener("DOMContentLoaded", () => {
   initHeader();
@@ -29,4 +30,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initContentToc();
   initForms();
   initRating();
+  initLoBanRuler();
 });

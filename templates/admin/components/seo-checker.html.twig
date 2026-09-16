@@ -373,21 +373,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Get content text from CKEditor or textarea
     function getContentText(field) {
-        // If it's a CKEditor instance
+        // CKEditor 4 (đang migrate dần sang CKEditor 5 — xem admin/ckeditor5.js)
         if (window.CKEDITOR && CKEDITOR.instances && CKEDITOR.instances.news_contents) {
             return CKEDITOR.instances.news_contents.getData();
         }
-        
+
         // CKEditor 5
+        if (window.KIENTRUC_CKEDITOR5) {
+            var data = window.KIENTRUC_CKEDITOR5.getData('news_contents');
+            if (data !== null) {
+                return data;
+            }
+        }
         if (field.classList && field.classList.contains('ck-editor__editable')) {
             return field.textContent || '';
         }
-        
+
         // Regular textarea
         if (field.tagName === 'TEXTAREA') {
             return field.value || '';
         }
-        
+
         // Fallback
         return field.value || field.textContent || '';
     }
@@ -668,6 +674,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 CKEDITOR.instances[instanceName].on('change', updateSeoUI);
             }
         }
+    }
+
+    // CKEditor 5 — xem admin/ckeditor5.js. onReady() tự chạy ngay lập tức nếu
+    // editor đã sẵn sàng, hoặc xếp hàng chờ nếu ClassicEditor.create() còn
+    // đang chạy dở (script này và admin.js không đảm bảo thứ tự chạy trước/sau).
+    if (window.KIENTRUC_CKEDITOR5) {
+        window.KIENTRUC_CKEDITOR5.onReady('news_contents', function(editor) {
+            editor.model.document.on('change:data', updateSeoUI);
+        });
     }
 
     // Initial check

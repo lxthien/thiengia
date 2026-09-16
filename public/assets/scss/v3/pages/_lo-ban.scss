@@ -1,0 +1,342 @@
+@use "../tokens" as *;
+
+.loban-v3 {
+  .loban-tool {
+    background: $white;
+    border: 1px solid $line;
+    border-top: 4px solid $primary;
+    box-shadow: 0 40px 80px rgba($dark, 0.08);
+    padding: 2.75rem;
+    margin-bottom: 3.5rem;
+
+    @media (max-width: 640px) {
+      padding: 1.75rem;
+    }
+  }
+
+  .loban-top {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    align-items: end;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid $line;
+  }
+
+  .loban-field {
+    label {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: $text;
+      margin-bottom: 0.6rem;
+    }
+
+    input {
+      width: 180px;
+      max-width: 100%;
+      background: $base;
+      border: 1px solid transparent;
+      border-bottom: 2px solid $text;
+      padding: 0.7rem 1rem;
+      font-family: $f-body;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: $text;
+      outline: none;
+      transition: border-color $dur $ease;
+
+      &:focus {
+        border-bottom-color: $accent;
+      }
+    }
+  }
+
+  .loban-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 240px;
+  }
+
+  .loban-chip {
+    border: 1px solid $line;
+    background: $white;
+    border-radius: 999px;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.78rem;
+    color: $mut;
+    cursor: pointer;
+    transition: all $dur $ease;
+
+    &:hover {
+      border-color: $accent;
+      color: $primary;
+    }
+  }
+
+  .loban-hint {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    font-size: 0.78rem;
+    color: $mut;
+    margin: 1rem 0;
+  }
+
+  .loban-key {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+
+    i {
+      width: 14px;
+      height: 3px;
+      display: block;
+      border-radius: 2px;
+
+      &.is-cat {
+        background: $primary;
+      }
+
+      &.is-hung {
+        background: $text;
+      }
+    }
+  }
+
+  .loban-view {
+    position: relative;
+    background: $white;
+    border: 1px solid $line;
+    padding: 0.75rem 0 0.85rem;
+    overflow: hidden;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+
+    &.is-dragging {
+      cursor: grabbing;
+    }
+  }
+
+  .loban-ruler-row {
+    margin-bottom: 0.75rem;
+
+    &:last-of-type {
+      margin-bottom: 0;
+    }
+  }
+
+  .loban-ruler-name {
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0 0.9rem 0.3rem;
+    color: $text;
+
+    em {
+      font-style: normal;
+      font-weight: 400;
+      color: $mut;
+    }
+  }
+
+  .loban-ruler-row canvas {
+    display: block;
+    width: 100%;
+  }
+
+  .loban-pointer {
+    position: absolute;
+    top: 0.4rem;
+    bottom: 0.5rem;
+    left: 50%;
+    width: 1px;
+    background: $accent;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .loban-pointer-label {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background: $accent;
+    color: $white;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 5px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  .loban-cards {
+    display: grid;
+    gap: 0.8rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    margin-top: 1.5rem;
+  }
+
+  .loban-card {
+    background: $base;
+    border: 1px solid $line;
+    border-radius: 4px;
+    padding: 1rem 1.1rem;
+    border-left: 4px solid $line;
+
+    &.is-cat {
+      border-left-color: $primary;
+    }
+
+    &.is-hung {
+      border-left-color: $text;
+    }
+
+    h3 {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: $text;
+    }
+
+    .loban-card-use {
+      font-size: 0.72rem;
+      color: $mut;
+      margin-bottom: 0.6rem;
+    }
+  }
+
+  .loban-verdict {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.15rem 0.55rem;
+    border-radius: 5px;
+    margin-bottom: 0.5rem;
+    color: $white;
+    background: $text;
+  }
+
+  .loban-card.is-cat .loban-verdict {
+    background: $primary;
+  }
+
+  .loban-cung {
+    font-family: $f-display;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: $text;
+  }
+
+  .loban-card.is-cat .loban-cung {
+    color: $primary;
+  }
+
+  .loban-sub {
+    font-size: 0.88rem;
+    color: $mut;
+    margin-top: 0.1rem;
+  }
+
+  .loban-warn {
+    margin-top: 0.6rem;
+    font-size: 0.75rem;
+    color: $primary;
+    background: rgba($primary, 0.07);
+    border-radius: 6px;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .loban-suggest {
+    margin-top: 1.5rem;
+    background: $base;
+    border: 1px solid $line;
+    padding: 1rem 1.1rem;
+
+    h3 {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: $text;
+    }
+
+    p {
+      font-size: 0.78rem;
+      color: $mut;
+      margin-bottom: 0.6rem;
+    }
+  }
+
+  .loban-suggest-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .loban-pill {
+    border: 1px solid $primary;
+    color: $primary;
+    background: $white;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    text-align: left;
+    transition: all $dur $ease;
+
+    &:hover {
+      background: $primary;
+      color: $white;
+    }
+
+    b {
+      display: block;
+      font-size: 0.95rem;
+    }
+
+    small {
+      font-size: 0.68rem;
+      opacity: 0.85;
+    }
+  }
+
+  .loban-none {
+    font-size: 0.8rem;
+    color: $mut;
+  }
+
+  .loban-intro {
+    h2 {
+      font-family: $f-display;
+      font-weight: 600;
+      color: $text;
+      margin-bottom: 1.25rem;
+    }
+
+    p {
+      color: $mut;
+      line-height: 1.75;
+      margin-bottom: 1.1rem;
+    }
+
+    ul {
+      list-style: disc;
+      padding-left: 1.4rem;
+      margin-bottom: 1.1rem;
+      color: $mut;
+      line-height: 1.75;
+
+      li {
+        margin-bottom: 0.5rem;
+      }
+
+      strong {
+        color: $text;
+      }
+    }
+  }
+}

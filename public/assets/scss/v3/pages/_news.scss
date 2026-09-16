@@ -197,6 +197,25 @@
       color: $primary;
     }
   }
+
+  // Canh trái/phải cho ảnh (ImageStyle alignLeft/alignRight của CKEditor 5,
+  // tương đương "image2" cũ) — bọc chữ quanh ảnh. Site trước đây chưa có CSS
+  // cho các class này nên ảnh canh trái/phải không thật sự nổi bật trên site.
+  .image-style-align-left {
+    float: left;
+    margin: 0.3rem 1.75rem 1rem 0;
+  }
+
+  .image-style-align-right {
+    float: right;
+    margin: 0.3rem 0 1rem 1.75rem;
+  }
+
+  .image-style-align-center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 
 // Mục lục dính bên phải

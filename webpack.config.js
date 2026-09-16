@@ -44,6 +44,8 @@ Encore
     .addEntry('js/gallery-album-editor', './public/assets/js/admin/gallery-album-editor.js')
     .addStyleEntry('css/admin', ['./public/assets/scss/admin/admin.scss'])
     .addStyleEntry('css/ckeditor-content', ['./public/assets/scss/admin/ckeditor-content.scss'])
+    // CKEditor 5 (đang migrate dần từ CKEditor 4/ivoryckeditor — xem admin/ckeditor5.js)
+    .addStyleEntry('css/ckeditor5', ['./node_modules/ckeditor5/dist/ckeditor5.css'])
 
     // ---------- Front: theme v3 (Thiện Gia) ----------
     .addEntry('js/v3', './public/assets/js/v3/app.js')
@@ -56,6 +58,7 @@ Encore
     .addStyleEntry('css/v3-list', ['./public/assets/scss/v3/list.scss'])
     .addStyleEntry('css/v3-news', ['./public/assets/scss/v3/news.scss'])
     .addStyleEntry('css/v3-contact', ['./public/assets/scss/v3/contact.scss'])
+    .addStyleEntry('css/v3-loban', ['./public/assets/scss/v3/lo-ban.scss'])
 ;
 
 module.exports = Encore.getWebpackConfig();

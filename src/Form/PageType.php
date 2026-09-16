@@ -85,7 +85,7 @@ class PageType extends AbstractType
             ])
             ->add('contents', TextareaType::class, [
                 'required' => false,
-                'attr' => ['class' => 'txt-ckeditor', 'data-height' => '500'],
+                'attr' => ['class' => 'txt-ckeditor5', 'data-height' => '500'],
                 'label' => 'label.contents',
             ])
             ->add('pageTitle', TextType::class, [

@@ -35,11 +35,11 @@ class NewsCategoryType extends AbstractType
                 'label' => 'label.url',
             ])
             ->add('description', TextareaType::class, [
-                'attr' => ['class' => 'txt-ckeditor', 'data-height' => '200'],
+                'attr' => ['class' => 'txt-ckeditor5', 'data-height' => '200'],
                 'label' => 'label.description',
             ])
             ->add('content', TextareaType::class, [
-                'attr' => ['class' => 'txt-ckeditor', 'data-height' => '600'],
+                'attr' => ['class' => 'txt-ckeditor5', 'data-height' => '600'],
                 'label' => 'Nội dung',
             ])
             ->add('showPostRelated', CheckboxType::class, [

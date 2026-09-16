@@ -20,7 +20,7 @@ class CommentType extends AbstractType
     {
         $builder
             ->add('content', TextareaType::class, [
-                'attr' => ['class' => 'txt-ckeditor', 'data-height' => '300']
+                'attr' => ['class' => 'txt-ckeditor5', 'data-height' => '300']
             ])
             ->add('approved', CheckboxType::class, [
                 'required' => false,

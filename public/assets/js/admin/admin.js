@@ -4,6 +4,8 @@ import 'bootstrap-tagsinput';
 
 import 'bootstrap-sass/assets/javascripts/bootstrap/modal.js';
 
+import initCkeditor5 from './ckeditor5';
+
 $(function() {
     // Shared HTML escape helpers
     function escapeHtml(value) {
@@ -28,6 +30,10 @@ $(function() {
 
     // Init CkEditor and CKfinder
     initCkeditor();
+
+    // CKEditor 5 — đang migrate dần khỏi CKEditor 4 (xem admin/ckeditor5.js).
+    // Field nào đã chuyển thì đổi class txt-ckeditor -> txt-ckeditor5.
+    initCkeditor5();
 
     // Update object when change the enable button toggle
     initEnableToggleButton();
@@ -1442,6 +1448,9 @@ $(function() {
         }
 
         function insertIntoEditor(editorId, html) {
+            if (window.KIENTRUC_CKEDITOR5 && window.KIENTRUC_CKEDITOR5.insertHtml(editorId, html)) {
+                return;
+            }
             if (window.CKEDITOR && CKEDITOR.instances[editorId]) {
                 CKEDITOR.instances[editorId].insertHtml(html);
                 CKEDITOR.instances[editorId].updateElement();
@@ -1451,14 +1460,12 @@ $(function() {
             $textarea.val(($textarea.val() || '') + '\n' + html);
         }
 
+        // activeEditorBlock (khi sửa 1 block đã chèn) luôn có dạng {replace(html)}
+        // — CKEditor 5 gán trực tiếp qua window.KIENTRUC_CKEDITOR5.bindBlockClicks,
+        // CKEditor 4 (Page Builder, xem giai đoạn 3) tự bọc lại cho khớp shape này.
         function updateEditorBlock(editorId, html) {
-            if (activeEditorBlock && activeEditorBlock.setHtml) {
-                var $replacement = $('<div>').html(html).children().first();
-                activeEditorBlock.setHtml($replacement.html());
-                $.each($replacement[0].attributes, function(index, attr) {
-                    activeEditorBlock.setAttribute(attr.name, attr.value);
-                });
-                CKEDITOR.instances[editorId].updateElement();
+            if (activeEditorBlock && activeEditorBlock.replace) {
+                activeEditorBlock.replace(html);
                 return;
             }
             insertIntoEditor(editorId, html);
@@ -1473,21 +1480,10 @@ $(function() {
             };
         }
 
-        function findCmsBlockElement(element) {
-            if (element && element.type !== CKEDITOR.NODE_ELEMENT && element.getParent) {
-                element = element.getParent();
-            }
-            while (element && element.type === CKEDITOR.NODE_ELEMENT) {
-                if (element.hasAttribute && element.hasAttribute('data-cms-block')) {
-                    return element;
-                }
-                element = element.getParent();
-            }
-            return null;
-        }
-
         function extractPayloadFromBlock(element, type) {
-            var $block = $(element.$);
+            // element.$ là DOM node thật khi element là CKEDITOR.dom.element (CK4);
+            // CKEditor 5 truyền thẳng DOM node nên không có .$, dùng luôn element.
+            var $block = $(element.$ || element);
             var payloadType = type === 'related-posts' ? 'related' : type;
 
             if (payloadType === 'hero_section') {
@@ -1548,35 +1544,22 @@ $(function() {
             return null;
         }
 
-        function attachEditorBlockClicks(editor) {
-            if (editor._cmsBlockClickAttached) { return; }
-            editor._cmsBlockClickAttached = true;
+        // Bấm/double-click vào 1 block đã chèn để mở lại modal sửa — đăng ký qua
+        // window.KIENTRUC_CKEDITOR5.bindBlockClicks (CKEditor 5, xem admin/ckeditor5.js),
+        // callback nhận {element, replace(html)} nên showBlockForm không cần biết
+        // gì về CKEditor cả, chỉ cần activeEditorBlock có .replace().
+        function bindEditorBlockClicks(editorId) {
+            if (!window.KIENTRUC_CKEDITOR5) {
+                return;
+            }
 
-            editor.on('contentDom', function() {
-                editor.document.on('click', function(event) {
-                    var element = event.data.getTarget();
-                    var block = findCmsBlockElement(element);
-                    if (!block) { return; }
-                    var data = getBlockPayloadFromElement(block);
-                    if (!data.type || !data.payload) { return; }
-                    activeEditorId = editor.name;
-                    relatedSearchUrl = $('[data-cms-block-toolbar][data-target-editor="' + activeEditorId + '"]').data('related-search-url');
-                    relatedCurrentId = $('[data-cms-block-toolbar][data-target-editor="' + activeEditorId + '"]').data('current-id') || 0;
-                    event.data.preventDefault();
-                    showBlockForm(data.type, data.payload, block);
-                });
-            });
-
-            editor.on('doubleclick', function(event) {
-                var element = event.data.element;
-                var block = findCmsBlockElement(element);
-                if (!block) { return; }
-                var data = getBlockPayloadFromElement(block);
+            window.KIENTRUC_CKEDITOR5.bindBlockClicks(editorId, function(activated) {
+                var data = getBlockPayloadFromElement(activated.element);
                 if (!data.type || !data.payload) { return; }
-                activeEditorId = editor.name;
-                relatedSearchUrl = $('[data-cms-block-toolbar][data-target-editor="' + activeEditorId + '"]').data('related-search-url');
-                relatedCurrentId = $('[data-cms-block-toolbar][data-target-editor="' + activeEditorId + '"]').data('current-id') || 0;
-                showBlockForm(data.type, data.payload, block);
+                activeEditorId = editorId;
+                relatedSearchUrl = $('[data-cms-block-toolbar][data-target-editor="' + editorId + '"]').data('related-search-url');
+                relatedCurrentId = $('[data-cms-block-toolbar][data-target-editor="' + editorId + '"]').data('current-id') || 0;
+                showBlockForm(data.type, data.payload, activated);
             });
         }
 
@@ -1695,15 +1678,9 @@ $(function() {
             closeBlockModal();
         });
 
-        if (window.CKEDITOR) {
-            CKEDITOR.on('instanceReady', function(event) {
-                attachEditorBlockClicks(event.editor);
-            });
-            $.each(CKEDITOR.instances, function(id, editor) {
-                if (editor.status === 'ready') {
-                    attachEditorBlockClicks(editor);
-                }
-            });
+        var $blockToolbar = $('[data-cms-block-toolbar]');
+        if ($blockToolbar.length) {
+            bindEditorBlockClicks($blockToolbar.data('target-editor'));
         }
     }
 
@@ -1749,7 +1726,6 @@ $(function() {
      * The picker URL is read from data-picker-url on the trigger button.
      */
     function initMediaPicker() {
-
         // ── Legacy single-picker (NewsCategory) ─────────────────────────────
         // Kept for backward compatibility with #mediaPickerModal / #mediaPicker_open
         var $legacyModal = $('#mediaPickerModal');

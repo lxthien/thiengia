@@ -26,7 +26,7 @@ class TagType extends AbstractType
                 'label' => 'label.url',
             ])
             ->add('contents', TextareaType::class, [
-                'attr' => ['class' => 'txt-ckeditor', 'data-height' => '500'],
+                'attr' => ['class' => 'txt-ckeditor5', 'data-height' => '500'],
                 'label' => 'label.description',
             ])
             ->add('pageTitle', TextType::class, [

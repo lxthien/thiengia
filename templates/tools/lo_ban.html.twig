@@ -1,0 +1,112 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Tra cứu Thước Lỗ Ban — Máy tính kích thước cát hung online | {{ v3.company.shortName }}{% endblock %}
+{% block description %}Nhập kích thước (cm), xem ngay cung cát (tốt) hay hung (xấu) trên cả 3 loại thước Lỗ Ban (52,2cm / 42,9cm / 38,8cm) — công cụ miễn phí hỗ trợ thiết kế, thi công nhà ở.{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('build/css/v3-loban.css') }}">
+{% endblock %}
+
+{% block jsonld %}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Máy tính Thước Lỗ Ban",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Any",
+        "url": {{ app.request.uri|json_encode|raw }},
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "VND"
+        }
+    }
+    </script>
+{% endblock %}
+
+{% block body %}
+
+    {{ include('v3/components/_page_hero.html.twig', {
+        breadcrumb: [
+            { label: 'Trang chủ', path: path('homepage') },
+            { label: 'Công cụ tính thước Lỗ Ban' }
+        ],
+        title: 'Tra cứu <em>Thước Lỗ Ban</em> online',
+        description: 'Nhập kích thước cần kiểm tra — kết quả cát/hung trên cả 3 loại thước hiện ra ngay lập tức, kèm thước trực quan để dò tay.'
+    }) }}
+
+    <section class="loban-v3 py-20 lg:py-28" aria-labelledby="loban-h">
+        <div class="container max-w-5xl">
+
+            <div class="loban-tool" data-loban-tool>
+                <div class="loban-top">
+                    <div class="loban-field">
+                        <label for="loban-cm">Kích thước cần tra (cm)</label>
+                        <input
+                            type="number"
+                            id="loban-cm"
+                            data-loban-input
+                            inputmode="decimal"
+                            step="0.1"
+                            min="0"
+                            value="212"
+                            autocomplete="off">
+                    </div>
+                    <div class="loban-presets" data-loban-presets></div>
+                </div>
+
+                <p class="loban-hint">
+                    <span>Kéo ngang thước bên dưới để dò, hoặc gõ số/bấm gợi ý ở trên.</span>
+                    <span class="loban-key"><i class="is-cat"></i> chữ đỏ là cung tốt</span>
+                    <span class="loban-key"><i class="is-hung"></i> chữ đen là cung xấu</span>
+                </p>
+
+                <div class="loban-view" data-loban-view>
+                    <div class="loban-ruler-row">
+                        <div class="loban-ruler-name">Thước 52,2 cm <em>— thông thủy: cửa đi, cửa sổ, ô trống</em></div>
+                        <canvas data-loban-canvas="522"></canvas>
+                    </div>
+                    <div class="loban-ruler-row">
+                        <div class="loban-ruler-name">Thước 42,9 cm <em>— khối xây: bậc thềm, bệ bếp, tủ, kệ</em></div>
+                        <canvas data-loban-canvas="429"></canvas>
+                    </div>
+                    <div class="loban-ruler-row">
+                        <div class="loban-ruler-name">Thước 38,8 cm <em>— âm phần: bàn thờ, tủ thờ</em></div>
+                        <canvas data-loban-canvas="388"></canvas>
+                    </div>
+                    <div class="loban-pointer" data-loban-pointer></div>
+                    <div class="loban-pointer-label" data-loban-pointer-label></div>
+                </div>
+
+                <div class="loban-cards" data-loban-cards></div>
+
+                <div class="loban-suggest">
+                    <h3>Kích thước đẹp gần nhất</h3>
+                    <p>Các dải quanh giá trị bạn nhập mà cả ba cây thước đều rơi vào cung tốt. Bấm để lấy số giữa dải — an toàn nhất khi thi công có sai số.</p>
+                    <div class="loban-suggest-list" data-loban-suggest></div>
+                </div>
+            </div>
+
+            <div class="loban-intro">
+                <h2 id="loban-h" class="h-display text-2xl lg:text-3xl">Thước Lỗ Ban là gì?</h2>
+                <p>
+                    Thước Lỗ Ban là dụng cụ đo phong thủy được các kiến trúc sư, thợ xây dùng để xác định
+                    kích thước "hợp mệnh" khi thiết kế và thi công nhà ở — mỗi cung trên thước ứng với một ý
+                    nghĩa cát (tốt) hoặc hung (xấu). Có 3 loại thước Lỗ Ban phổ biến, dùng cho từng nhóm cấu
+                    kiện khác nhau:
+                </p>
+                <ul>
+                    <li><strong>Thước 52,2cm (thông thủy):</strong> đo kích thước lọt lòng cửa đi, cửa sổ, cổng, giếng trời.</li>
+                    <li><strong>Thước 42,9cm (khối xây):</strong> đo kích thước phủ bì các cấu kiện xây dựng như bậc thềm, bệ bếp, tủ, kệ.</li>
+                    <li><strong>Thước 38,8cm (âm phần):</strong> dùng riêng cho bàn thờ, tủ thờ và đồ nội thất mang tính tâm linh.</li>
+                </ul>
+                <p>
+                    Nhập đúng loại thước tương ứng với hạng mục cần đo ở công cụ phía trên để tra kết quả
+                    cát/hung nhanh chóng, chính xác.
+                </p>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
