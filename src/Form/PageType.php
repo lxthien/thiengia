@@ -21,6 +21,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use App\Service\PageBuilderService;
+use App\Form\DataTransformer\JsonLdMarkupTransformer;
 
 class PageType extends AbstractType
 {
@@ -31,7 +32,10 @@ class PageType extends AbstractType
     public function __construct(
         AuthorizationCheckerInterface $authorizationChecker,
         ManagerRegistry $doctrine,
-        PageBuilderService $pageBuilderService
+        PageBuilderService $pageBuilderService,
+        private readonly JsonLdMarkupTransformer $jsonLdMarkupTransformer,
+        #[\Symfony\Component\DependencyInjection\Attribute\Autowire(param: 'app.timezone')]
+        private readonly string $timezone,
     )
     {
         $this->authorizationChecker = $authorizationChecker;
@@ -64,6 +68,9 @@ class PageType extends AbstractType
                 'required' => false,
                 'widget' => 'single_text',
                 'label' => 'Ngày đặt lịch',
+                'help' => 'Dùng giờ Việt Nam. Chỉ cần nhập khi trạng thái là “Đặt lịch”.',
+                'model_timezone' => $this->timezone,
+                'view_timezone' => $this->timezone,
                 'attr' => ['class' => 'js-scheduled-at'],
             ])
             // Ảnh được chọn qua Media Library picker, ghi thẳng vào field này
@@ -98,7 +105,8 @@ class PageType extends AbstractType
             ])
             ->add('pageKeyword', TextType::class, [
                 'required' => false,
-                'label' => 'label.pageKeyword',
+                'label' => 'Từ khóa trọng tâm',
+                'help' => 'Dùng một cụm từ chính để kiểm tra SEO; không cần nhồi nhiều từ khóa.',
             ])
             ->add('metaIndex', CheckboxType::class, [
                 'required' => false,
@@ -126,7 +134,8 @@ class PageType extends AbstractType
             ->add('schemaMarkup', TextareaType::class, [
                 'required' => false,
                 'attr' => ['rows' => '10'],
-                'label' => 'Schema Markup',
+                'label' => 'JSON-LD override (Admin)',
+                'help' => 'Chỉ nhận JSON object/mảng; Page schema mặc định sẽ được ưu tiên khi không có override.',
             ])
             ->add('template', ChoiceType::class, [
                 'required' => false,
@@ -149,6 +158,7 @@ class PageType extends AbstractType
                 // Remove postType field for non-admin users
                 if (!$this->authorizationChecker->isGranted('ROLE_ADMIN')) {
                     $form->remove('postType');
+                    $form->remove('schemaMarkup');
                 }
             })
             ->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) {
@@ -164,9 +174,16 @@ class PageType extends AbstractType
 
                 if ($builderEnabled && !empty($builderData) && $contents === '') {
                     $data['contents'] = $this->pageBuilderService->buildLegacyHtmlFromJson($builderData);
-                    $event->setData($data);
                 }
+
+                if (($data['status'] ?? null) !== PostStatus::Scheduled->value) {
+                    $data['scheduledAt'] = '';
+                }
+
+                $event->setData($data);
             });
+
+        $builder->get('schemaMarkup')->addModelTransformer($this->jsonLdMarkupTransformer);
     }
 
     /**

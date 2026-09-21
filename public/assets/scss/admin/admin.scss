@@ -1,6 +1,7 @@
 @import "~bootswatch/flatly/variables";
 @import "bootstrap-tagsinput.scss";
 @import "menu-editor.scss";
+@import "seo-checker.scss";
 @import "../shared/content-blocks";
 
 // CKEditor 5 — chặn tràn ngang cả trang khi toolbar dài (nhiều nút hơn CKEditor 4).
@@ -749,6 +750,7 @@
 }
 
 // Grid rendered inside the picker modal body (via AJAX)
+@import "media-picker-refresh";
 .media-picker-wrap {
     .media-picker-search {
         margin-bottom: 8px;

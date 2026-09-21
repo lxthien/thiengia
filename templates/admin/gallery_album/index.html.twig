@@ -1,86 +1,25 @@
 {% extends 'admin/layout.html.twig' %}
-
+{% block title %}Quản lý album{% endblock %}
 {% block body_id 'admin_gallery_album_index' %}
-
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('build/css/gallery-album-index.css') }}">
+{% endblock %}
 {% block main %}
-    <div class="content mt-3">
-        <div class="animated fadeIn">
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="card add">
-                        <div class="card-body">
-                            <div class="stat-widget-one">
-                                <a href="{{ path('admin_gallery_album_new') }}">
-                                    <div class="stat-icon dib">
-                                        <i class="ti-plus text-success border-success"></i>
-                                    </div>
-                                    <div class="stat-content dib">
-                                        <div class="stat-text text-success">{{ 'menu.add_new'|trans }}</div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <strong class="card-title">Album hình ảnh hoạt động</strong>
-                        </div>
-                        <div class="card-body">
-                            <table id="bootstrap-data-table" class="table table-striped table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>Ảnh đại diện</th>
-                                        <th>Tên hoạt động</th>
-                                        <th>Số ảnh</th>
-                                        <th>Trạng thái</th>
-                                        <th>{{ 'label.published_at'|trans }}</th>
-                                        <th>{{ 'label.actions'|trans }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for row in objects %}
-                                        {% set cover = row.coverImage %}
-                                        {% set _thumb = asset('assets/images/no-image.png') %}
-                                        {% if cover %}
-                                            {% set _parts = cover.imageUrl|split('/') %}
-                                            {% set _thumb = (_parts|slice(0, -1)|join('/')) ~ '/thumbs/' ~ (_parts|last) %}
-                                        {% endif %}
-                                    <tr>
-                                        <td>
-                                            <div class="images-container">
-                                                <img src="{{ _thumb }}" alt="{{ row.getName() }}" style="width:80px;height:50px;object-fit:cover;" />
-                                            </div>
-                                        </td>
-                                        <td><strong>{{ row.getName() }}</strong></td>
-                                        <td>{{ row.images|length }}</td>
-                                        <td>
-                                            {% if row.getEnable() %}
-                                                <span class="text-success">Đang hiển thị</span>
-                                            {% else %}
-                                                <span class="text-muted">Đã ẩn</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>{{ row.getCreatedAt() | localizeddate('medium', 'none', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY') }}</td>
-                                        <td>
-                                            <div class="item-actions">
-                                                <a href="{{ path('admin_gallery_album_edit', {id: row.id}) }}" class="btn-sm">
-                                                    <i class="fa fa-edit" aria-hidden="true"></i>
-                                                </a>
-                                                {{ include('admin/gallery_album/_delete_form.html.twig', {object: row}, with_context = false) }}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    {{ include('admin/gallery_album/_manager.html.twig') }}
+    <dialog class="banner-editor-dialog" id="gallery-editor-dialog" aria-labelledby="gallery-editor-title">
+        <div class="banner-dialog__header"><h2 id="gallery-editor-title">Thông tin album</h2><button type="button" class="banner-dialog__close" data-gallery-panel-close aria-label="Đóng">&times;</button></div>
+        <p class="banner-panel-error" data-gallery-panel-error role="alert" hidden></p>
+        <div class="banner-editor-content" data-gallery-panel-content></div>
+    </dialog>
+    <dialog class="banner-delete-dialog" id="gallery-confirm-dialog" aria-labelledby="gallery-confirm-title" aria-describedby="gallery-confirm-description">
+        <div class="banner-dialog__header"><h2 id="gallery-confirm-title">Xóa album?</h2><button type="button" class="banner-dialog__close" data-gallery-confirm-close aria-label="Đóng">&times;</button></div>
+        <div class="banner-dialog__body"><p id="gallery-confirm-description"></p><p data-confirm-error role="alert" hidden></p></div>
+        <div class="banner-dialog__footer"><button type="button" class="banner-button" data-gallery-confirm-close autofocus>Hủy</button><button type="button" class="banner-button banner-button--danger" data-gallery-confirm-submit>Xóa album</button></div>
+    </dialog>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('build/js/menu-editor.js') }}"></script>
+    <script src="{{ asset('build/js/gallery-album-index.js') }}"></script>
 {% endblock %}

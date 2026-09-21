@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Utils\Slugger;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 use App\Repository\BannerCategoryRepository;
 use Doctrine\DBAL\Types\Types;
@@ -13,6 +13,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 
 #[ORM\Entity(repositoryClass: BannerCategoryRepository::class)]
 #[ORM\Table(name: 'bannercategory')]
+#[UniqueEntity(fields: ['url'], errorPath: 'url', message: 'Mã nhóm đã được sử dụng. Vui lòng chọn mã khác.')]
 class BannerCategory
 {
     // Zone constants — where a banner group is displayed on the site.

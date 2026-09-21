@@ -2,86 +2,144 @@
 
 namespace App\Service;
 
-use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\News;
 use App\Entity\NewsCategory;
 use App\Enum\PostStatus;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
+/**
+ * Creates standards-compliant, bounded sitemap files.
+ *
+ * Search engines allow up to 50,000 URLs in one sitemap. Keeping each file at
+ * 45,000 URLs leaves headroom and prevents one large CMS from loading every
+ * published entity into PHP memory on each sitemap request.
+ */
 class SitemapService
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    private $em;
+    public const URLS_PER_SITEMAP = 45000;
 
-    /**
-     * @var UrlGeneratorInterface
-     */
-    private $router;
+    public const MANIFEST_CACHE_KEY = 'app.seo.sitemap.manifest';
+    private const MANIFEST_TTL_SECONDS = 300;
 
-    /**
-     * Constructor
-     *
-     * @param EntityManagerInterface $em
-     * @param UrlGeneratorInterface $router
-     */
-    public function __construct(EntityManagerInterface $em, UrlGeneratorInterface $router)
-    {
-        $this->em = $em;
-        $this->router = $router;
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly UrlGeneratorInterface $router,
+        private readonly CacheInterface $cache,
+    ) {
     }
 
     /**
-     * Generate sitemap array with all URLs
+     * Backward-compatible aggregate API. Controllers should render one page
+     * at a time through generateSitemapPage() instead.
      *
-     * @return array
+     * @return array<int, array<string, string>>
      */
-    public function generateSitemap()
+    public function generateSitemap(): array
     {
         $urls = [];
 
-        // Add homepage
-        $urls[] = [
-            'url' => $this->router->generate('homepage', [], UrlGeneratorInterface::ABSOLUTE_URL),
-            'lastmod' => (new \DateTime())->format('Y-m-d'),
-            'changefreq' => 'daily',
-            'priority' => '1.0'
-        ];
+        for ($page = 1; $page <= $this->getSitemapPageCount(); $page++) {
+            $urls = array_merge($urls, $this->generateSitemapPage($page));
+        }
 
-        // Get all enabled categories
-        $categories = $this->em->getRepository(NewsCategory::class)
-            ->findBy(['enable' => true], ['createdAt' => 'DESC']);
+        return $urls;
+    }
 
-        foreach ($categories as $category) {
-            // Bỏ qua danh mục đang đặt noindex
-            if (!$category->isMetaIndex()) {
-                continue;
-            }
+    public function getSitemapPageCount(): int
+    {
+        return max(1, (int) ceil($this->getUrlCount() / self::URLS_PER_SITEMAP));
+    }
 
-            $urls[] = [
-                'url' => $this->generateCategoryUrl($category),
-                'lastmod' => $category->getUpdatedAt() ? $category->getUpdatedAt()->format('Y-m-d') : $category->getCreatedAt()->format('Y-m-d'),
-                'changefreq' => 'weekly',
-                'priority' => '0.8'
+    public function getUrlCount(): int
+    {
+        return $this->getManifest()['urlCount'];
+    }
+
+    /**
+     * A version for HTTP ETags. It changes after an eligible post/category is
+     * created, edited, published, disabled or toggled noindex.
+     */
+    public function getVersion(): string
+    {
+        return $this->getManifest()['version'];
+    }
+
+    /**
+     * @return array<int, array{url: string, lastmod: string}>
+     */
+    public function generateSitemapIndex(): array
+    {
+        $lastmod = $this->getManifest()['lastmod'];
+        $items = [];
+
+        for ($page = 1; $page <= $this->getSitemapPageCount(); $page++) {
+            $items[] = [
+                'url' => $this->router->generate('sitemap_page', ['page' => $page], UrlGeneratorInterface::ABSOLUTE_URL),
+                'lastmod' => $lastmod,
             ];
         }
 
-        // Get all published news articles
-        $news = $this->em->getRepository(News::class)
-            ->findBy(['status' => PostStatus::Published], ['createdAt' => 'DESC']);
+        return $items;
+    }
 
-        foreach ($news as $article) {
-            // Bỏ qua bài viết đang đặt noindex
-            if (!$article->isMetaIndex()) {
-                continue;
+    /**
+     * @return array<int, array<string, string>>
+     */
+    public function generateSitemapPage(int $page): array
+    {
+        if ($page < 1 || $page > $this->getSitemapPageCount()) {
+            return [];
+        }
+
+        $offset = ($page - 1) * self::URLS_PER_SITEMAP;
+        $remaining = self::URLS_PER_SITEMAP;
+        $urls = [];
+        $staticUrls = $this->getStaticUrls();
+
+        if ($offset < count($staticUrls)) {
+            $staticSlice = array_slice($staticUrls, $offset, $remaining);
+            $urls = $staticSlice;
+            $remaining -= count($staticSlice);
+        }
+
+        if ($remaining === 0) {
+            return $urls;
+        }
+
+        $contentOffset = max(0, $offset - count($staticUrls));
+        $manifest = $this->getManifest();
+
+        if ($contentOffset < $manifest['categoryCount']) {
+            $categories = $this->findSitemapCategories($contentOffset, $remaining);
+
+            foreach ($categories as $category) {
+                $urls[] = [
+                    'url' => $this->generateCategoryUrl($category),
+                    'lastmod' => $this->formatLastModified($category->getUpdatedAt(), $category->getCreatedAt()),
+                    'changefreq' => 'weekly',
+                    'priority' => '0.8',
+                ];
             }
 
+            $remaining -= count($categories);
+        }
+
+        if ($remaining === 0) {
+            return $urls;
+        }
+
+        $postOffset = max(0, $contentOffset - $manifest['categoryCount']);
+        $posts = $this->findSitemapPosts($postOffset, $remaining);
+
+        foreach ($posts as $article) {
             $entry = [
                 'url' => $this->generateNewsUrl($article),
-                'lastmod' => $article->getUpdatedAt() ? $article->getUpdatedAt()->format('Y-m-d') : $article->getCreatedAt()->format('Y-m-d'),
+                'lastmod' => $this->formatLastModified($article->getUpdatedAt(), $article->getCreatedAt()),
                 'changefreq' => 'weekly',
-                'priority' => '0.9'
+                'priority' => '0.9',
             ];
 
             if ($article->getImages()) {
@@ -91,78 +149,126 @@ class SitemapService
             $urls[] = $entry;
         }
 
-        $urls[] = [
-            'url' => $this->router->generate('caculator_cost_construction', [], UrlGeneratorInterface::ABSOLUTE_URL),
-            'lastmod' => (new \DateTime())->format('Y-m-d'),
-            'changefreq' => 'monthly',
-            'priority' => '0.5'
-        ];
-
-        $urls[] = [
-            'url' => $this->router->generate('contact', [], UrlGeneratorInterface::ABSOLUTE_URL),
-            'lastmod' => (new \DateTime())->format('Y-m-d'),
-            'changefreq' => 'monthly',
-            'priority' => '0.5'
-        ];
-
         return $urls;
     }
 
     /**
-     * Generate URL for a category page
-     *
-     * @param NewsCategory $category
-     * @return string
+     * @return array{urlCount: int, categoryCount: int, postCount: int, lastmod: string, version: string}
      */
-    private function generateCategoryUrl(NewsCategory $category)
+    private function getManifest(): array
     {
-        // Check if category has a parent
-        if ($category->getParentcat() !== null) {
-            // If it has parent, use two-level route
-            return $this->generateBaseUrl() . $category->getParentcat()->getUrl() . '/' . $category->getUrl() . '/';
-        } else {
-            // Single level category
-            return $this->generateBaseUrl() . $category->getUrl() . '/';
-        }
+        return $this->cache->get(self::MANIFEST_CACHE_KEY, function (ItemInterface $item): array {
+            $item->expiresAfter(self::MANIFEST_TTL_SECONDS);
+
+            $categoryCount = (int) $this->em->getRepository(NewsCategory::class)->createQueryBuilder('c')
+                ->select('COUNT(c.id)')
+                ->where('c.enable = :enabled')
+                ->andWhere('c.metaIndex = :indexable')
+                ->setParameter('enabled', true)
+                ->setParameter('indexable', true)
+                ->getQuery()
+                ->getSingleScalarResult();
+
+            $postCount = (int) $this->em->getRepository(News::class)->createQueryBuilder('n')
+                ->select('COUNT(n.id)')
+                ->where('n.status = :status')
+                ->andWhere('n.postType IN (:postTypes)')
+                ->andWhere('n.metaIndex = :indexable')
+                ->setParameter('status', PostStatus::Published)
+                ->setParameter('postTypes', ['post', 'page'])
+                ->setParameter('indexable', true)
+                ->getQuery()
+                ->getSingleScalarResult();
+
+            $latestCategory = (string) $this->em->getRepository(NewsCategory::class)->createQueryBuilder('c')
+                ->select('MAX(c.updatedAt)')
+                ->getQuery()
+                ->getSingleScalarResult();
+            $latestPost = (string) $this->em->getRepository(News::class)->createQueryBuilder('n')
+                ->select('MAX(n.updatedAt)')
+                ->getQuery()
+                ->getSingleScalarResult();
+            $lastmod = substr(max($latestCategory, $latestPost), 0, 10) ?: (new \DateTimeImmutable())->format('Y-m-d');
+            $urlCount = count($this->getStaticUrls()) + $categoryCount + $postCount;
+
+            return [
+                'urlCount' => $urlCount,
+                'categoryCount' => $categoryCount,
+                'postCount' => $postCount,
+                'lastmod' => $lastmod,
+                'version' => hash('sha256', implode('|', [$urlCount, $categoryCount, $postCount, $latestCategory, $latestPost])),
+            ];
+        });
     }
 
-    /**
-     * Generate URL for a news article
-     *
-     * @param News $article
-     * @return string
-     */
-    private function generateNewsUrl(News $article)
+    /** @return NewsCategory[] */
+    private function findSitemapCategories(int $offset, int $limit): array
     {
-        // Build URL based on category structure
-        $categories = $article->getCategory();
+        return $this->em->getRepository(NewsCategory::class)->createQueryBuilder('c')
+            ->where('c.enable = :enabled')
+            ->andWhere('c.metaIndex = :indexable')
+            ->setParameter('enabled', true)
+            ->setParameter('indexable', true)
+            ->orderBy('c.id', 'ASC')
+            ->setFirstResult($offset)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 
-        /* if ($categories && count($categories) > 0) {
-            $primaryCategory = $categories[0];
-            
-            if ($primaryCategory->getParentcat()) {
-                // Two-level category
-                return $this->generateBaseUrl() . 
-                    $primaryCategory->getParentcat()->getUrl() . '/' . 
-                    $primaryCategory->getUrl() . '/' . 
-                    $article->getUrl();
-            } else {
-                // Single-level category
-                return $this->generateBaseUrl() . $primaryCategory->getUrl() . '/' . $article->getUrl();
-            }
-        } */
+    /** @return News[] */
+    private function findSitemapPosts(int $offset, int $limit): array
+    {
+        return $this->em->getRepository(News::class)->createQueryBuilder('n')
+            ->where('n.status = :status')
+            ->andWhere('n.postType IN (:postTypes)')
+            ->andWhere('n.metaIndex = :indexable')
+            ->setParameter('status', PostStatus::Published)
+            ->setParameter('postTypes', ['post', 'page'])
+            ->setParameter('indexable', true)
+            ->orderBy('n.id', 'ASC')
+            ->setFirstResult($offset)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 
-        // Default fallback
+    /** @return array<int, array{url: string, lastmod: string, changefreq: string, priority: string}> */
+    private function getStaticUrls(): array
+    {
+        $today = (new \DateTimeImmutable())->format('Y-m-d');
+
+        return [
+            ['url' => $this->router->generate('homepage', [], UrlGeneratorInterface::ABSOLUTE_URL), 'lastmod' => $today, 'changefreq' => 'daily', 'priority' => '1.0'],
+            ['url' => $this->router->generate('caculator_cost_construction', [], UrlGeneratorInterface::ABSOLUTE_URL), 'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.5'],
+            ['url' => $this->router->generate('contact', [], UrlGeneratorInterface::ABSOLUTE_URL), 'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.5'],
+            ['url' => $this->router->generate('building_density_calculator', [], UrlGeneratorInterface::ABSOLUTE_URL), 'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.5'],
+            ['url' => $this->router->generate('building_age_calculator', [], UrlGeneratorInterface::ABSOLUTE_URL), 'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.5'],
+            ['url' => $this->router->generate('house_direction_calculator', [], UrlGeneratorInterface::ABSOLUTE_URL), 'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.5'],
+        ];
+    }
+
+    private function generateCategoryUrl(NewsCategory $category): string
+    {
+        if ($category->getParentcat() !== null) {
+            return $this->generateBaseUrl() . $category->getParentcat()->getUrl() . '/' . $category->getUrl() . '/';
+        }
+
+        return $this->generateBaseUrl() . $category->getUrl() . '/';
+    }
+
+    private function generateNewsUrl(News $article): string
+    {
         return $this->generateBaseUrl() . $article->getUrl() . '/';
     }
 
-    /**
-     * Generate base URL
-     *
-     * @return string
-     */
-    private function generateBaseUrl()
+    private function generateBaseUrl(): string
     {
-        return $this->router->generate('homepage', [], UrlGeneratorInterface::ABSOLUTE_URL);
+        return rtrim($this->router->generate('homepage', [], UrlGeneratorInterface::ABSOLUTE_URL), '/') . '/';
+    }
+
+    private function formatLastModified(?\DateTimeInterface $updatedAt, ?\DateTimeInterface $createdAt): string
+    {
+        return ($updatedAt ?: $createdAt ?: new \DateTimeImmutable())->format('Y-m-d');
     }
 }

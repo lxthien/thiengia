@@ -1,0 +1,32 @@
+{% set url = image.imageUrl|trim %}
+{% if not (url matches '~^(?:/(?!/)|https?://)~i') %}{% set url = '' %}{% endif %}
+{% set parts = url|split('/') %}
+{% set thumb = url ? (parts|slice(0, -1)|join('/')) ~ '/thumbs/' ~ (parts|last) : '' %}
+<li class="dd-item banner-row album-image-item" data-id="{{ image.id }}" data-image-url="{{ url }}" data-saved-caption="{{ image.caption }}" data-saved-alt="{{ image.alt }}"
+    data-update-url="{{ path('admin_gallery_album_image_update', {id: image.id}) }}" data-delete-url="{{ path('admin_gallery_album_image_delete', {id: image.id}) }}">
+    <div class="album-image-layout">
+        <div class="banner-order">
+            <span class="banner-position"></span>
+            <div class="dd-handle banner-grip" title="Kéo để sắp xếp ảnh"><i class="fa fa-arrows" aria-hidden="true"></i><span class="sr-only">Kéo ảnh để sắp xếp, hoặc dùng nút lên / xuống.</span></div>
+            <div class="banner-order__buttons dd-nodrag">
+                <button type="button" data-image-move="up" aria-label="Di chuyển ảnh {{ image.id }} lên"><i class="fa fa-angle-up" aria-hidden="true"></i></button>
+                <button type="button" data-image-move="down" aria-label="Di chuyển ảnh {{ image.id }} xuống"><i class="fa fa-angle-down" aria-hidden="true"></i></button>
+            </div>
+        </div>
+        <div class="album-image-preview dd-nodrag">
+            <button type="button" class="banner-preview" data-preview-url="{{ url }}" aria-label="Xem ảnh {{ image.id }} kích thước lớn" {% if not url %}disabled{% endif %}>
+                {% if url %}<img src="{{ thumb }}?v=2" data-album-image data-original-src="{{ url }}" alt="{{ image.alt ?: 'Ảnh trong album' }}" width="300" height="200" loading="lazy">{% endif %}
+                <span class="banner-preview__fallback" {% if url %}hidden{% endif %}>Không tải được ảnh</span>
+                <span class="banner-preview__caption">Xem ảnh lớn</span>
+            </button>
+            <span class="banner-badge banner-badge--visible" data-cover-badge hidden>Ảnh đại diện</span>
+            <button type="button" class="album-cover-button" data-image-cover>Đặt làm ảnh đại diện</button>
+        </div>
+        <form class="album-image-fields dd-nodrag" data-image-form>
+            <div><label for="image-caption-{{ image.id }}">Chú thích ảnh</label><input id="image-caption-{{ image.id }}" name="caption" maxlength="255" value="{{ image.caption }}" placeholder="Hoạt động, thời gian hoặc địa điểm..." autocomplete="off"></div>
+            <div><label for="image-alt-{{ image.id }}">Mô tả thay thế (alt)</label><input id="image-alt-{{ image.id }}" name="alt" maxlength="255" value="{{ image.alt }}" placeholder="Mô tả ngắn nội dung nhìn thấy trong ảnh" autocomplete="off" aria-describedby="image-alt-help-{{ image.id }}"><small id="image-alt-help-{{ image.id }}">Giúp người dùng trình đọc màn hình hiểu nội dung ảnh.</small></div>
+            <p data-image-status role="status" aria-live="polite" class="album-row-status"></p>
+            <div class="album-image-actions"><button type="submit" class="banner-button" data-image-save disabled>Lưu chú thích / alt</button><button type="button" class="banner-button banner-button--delete" data-image-delete aria-label="Gỡ ảnh {{ image.id }} khỏi album"><i class="fa fa-trash-o" aria-hidden="true"></i> Gỡ ảnh</button></div>
+        </form>
+    </div>
+</li>

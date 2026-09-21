@@ -22,8 +22,18 @@
 {% endblock %}
 
 {% block jsonld %}
-    {% if post.schemaMarkup %}
-        {{ post.schemaMarkup|raw }}
+    {% set schemaMarkup = post.schemaMarkup|safe_json_ld %}
+    {% if schemaMarkup %}
+        <script type="application/ld+json">{{ schemaMarkup }}</script>
+    {% else %}
+        <script type="application/ld+json">{{ {
+            '@context': 'https://schema.org',
+            '@type': 'WebPage',
+            'name': post.pageTitle ?: post.title,
+            'description': post.pageDescription ?: post.description,
+            'url': canonicalUrl,
+            'inLanguage': 'vi'
+        }|json_encode(constant('JSON_UNESCAPED_SLASHES') b-or constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_HEX_TAG') b-or constant('JSON_HEX_AMP') b-or constant('JSON_HEX_APOS') b-or constant('JSON_HEX_QUOT'))|raw }}</script>
     {% endif %}
 {% endblock %}
 

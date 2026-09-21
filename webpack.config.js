@@ -41,6 +41,15 @@ Encore
     .addEntry('js/search', './public/assets/js/admin/search.js')
     .addEntry('js/login', './public/assets/js/admin/login.js')
     .addEntry('js/menu-editor', './public/assets/js/admin/menu-editor.js')
+    .addEntry('js/banner-index', './public/assets/js/admin/banner-index.js')
+    .addStyleEntry('css/banner-index', ['./public/assets/scss/admin/banner-index.scss'])
+    .addEntry('js/testimonial-index', './public/assets/js/admin/testimonial-index.js')
+    .addEntry('js/media-index', './public/assets/js/admin/media-index.js')
+    .addStyleEntry('css/media-index', ['./public/assets/scss/admin/media-index.scss'])
+    .addStyleEntry('css/testimonial-index', ['./public/assets/scss/admin/testimonial-index.scss'])
+    .addEntry('js/gallery-album-index', './public/assets/js/admin/gallery-album-index.js')
+    .addStyleEntry('css/gallery-album-index', ['./public/assets/scss/admin/gallery-album-index.scss'])
+    .addStyleEntry('css/gallery-album-editor', ['./public/assets/scss/admin/gallery-album-editor.scss'])
     .addEntry('js/gallery-album-editor', './public/assets/js/admin/gallery-album-editor.js')
     .addStyleEntry('css/admin', ['./public/assets/scss/admin/admin.scss'])
     .addStyleEntry('css/ckeditor-content', ['./public/assets/scss/admin/ckeditor-content.scss'])
@@ -59,6 +68,12 @@ Encore
     .addStyleEntry('css/v3-news', ['./public/assets/scss/v3/news.scss'])
     .addStyleEntry('css/v3-contact', ['./public/assets/scss/v3/contact.scss'])
     .addStyleEntry('css/v3-loban', ['./public/assets/scss/v3/lo-ban.scss'])
+    .addEntry('js/v3-density', './public/assets/js/v3/building-density.js')
+    .addStyleEntry('css/v3-density', ['./public/assets/scss/v3/building-density.scss'])
+    .addEntry('js/v3-age', './public/assets/js/v3/building-age.js')
+    .addEntry('js/v3-direction', './public/assets/js/v3/house-direction.js')
+    .addStyleEntry('css/v3-direction', ['./public/assets/scss/v3/house-direction.scss'])
+    .addStyleEntry('css/v3-age', ['./public/assets/scss/v3/building-age.scss'])
 ;
 
 module.exports = Encore.getWebpackConfig();

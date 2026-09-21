@@ -1,0 +1,85 @@
+{% extends 'layout.html.twig' %}
+{% block bodyClass %}density-page direction-page{% endblock %}
+{% block title %}Xem hướng nhà theo tuổi, tra cung phi Bát trạch | {{ v3.company.shortName }}{% endblock %}
+{% block description %}Tra cung phi, Đông tứ mệnh, Tây tứ mệnh và tám hướng Bát trạch theo năm sinh âm lịch. Có sơ đồ hướng, giải thích cách tính và lưu ý tham khảo.{% endblock %}
+{% block stylesheets %}<link rel="stylesheet" href="{{ asset('build/css/v3-direction.css') }}">{% endblock %}
+{% block javascripts %}<script src="{{ asset('build/js/v3-direction.js') }}" defer></script>{% endblock %}
+{% block jsonld %}
+<script type="application/ld+json">{{ {
+ '@context':'https://schema.org','@type':'WebApplication','name':'Xem hướng nhà theo tuổi',
+ 'applicationCategory':'UtilitiesApplication','operatingSystem':'Any','url':url('house_direction_calculator'),
+ 'offers':{'@type':'Offer','price':'0','priceCurrency':'VND'}
+}|json_encode(constant('JSON_HEX_TAG'))|raw }}</script>
+{% endblock %}
+{% block body %}
+{{ include('v3/components/_page_hero.html.twig',{
+ breadcrumb:[{label:'Trang chủ',path:path('homepage')},{label:'Xem hướng nhà'}],
+ title:'Xem <em>hướng nhà</em> theo tuổi',
+ description:'Tra cung phi và tám hướng theo quy ước Bát trạch. Chọn hướng nhà để xem kết quả tương ứng.'
+}) }}
+<section class="density" aria-labelledby="direction-heading"><div class="container max-w-5xl">
+ <div class="density-note"><strong>Tham khảo theo quan niệm phong thủy truyền thống.</strong>
+ <p>Kết quả không dự báo sức khỏe, tài lộc hay vận hạn. Hướng nắng, gió, thông thoáng, công năng và an toàn công trình cần được đánh giá độc lập.</p></div>
+ <div class="density-workspace" data-direction-tool>
+  <form novalidate>
+   <h2 id="direction-heading">Thông tin tra cứu</h2>
+   <div class="density-field"><label for="direction-birth">Năm sinh âm lịch</label>
+    <input id="direction-birth" name="birth" type="text" inputmode="numeric" value="1990" maxlength="4" aria-describedby="direction-birth-help direction-birth-error">
+    <small id="direction-birth-help">Nhập năm 1900–2099. Năm 1990 điền sẵn là ví dụ. Nếu sinh trước Tết, hãy xác định lại năm âm lịch; công cụ không tự đổi ngày sinh.</small>
+    <p class="density-error" id="direction-birth-error" data-error="birth" hidden></p>
+   </div>
+   <div class="density-field"><label for="direction-sex">Giới tính theo bảng cung phi</label>
+    <select id="direction-sex" name="sex" aria-describedby="direction-sex-help direction-sex-error"><option value="male">Nam</option><option value="female">Nữ</option></select>
+    <small id="direction-sex-help">Hai lựa chọn tương ứng hai quy tắc tính truyền thống, không phải đánh giá vai trò hay năng lực của gia chủ.</small>
+    <p class="density-error" id="direction-sex-error" data-error="sex" hidden></p>
+   </div>
+   <div class="density-field"><label for="direction-current">Hướng nhà muốn kiểm tra (không bắt buộc)</label>
+    <select id="direction-current" name="direction" aria-describedby="direction-current-help direction-current-error">
+     <option value="">Chưa chọn hướng</option>
+     {% for id,label in {'n':'Bắc','ne':'Đông Bắc','e':'Đông','se':'Đông Nam','s':'Nam','sw':'Tây Nam','w':'Tây','nw':'Tây Bắc'} %}<option value="{{ id }}">{{ label }}</option>{% endfor %}
+    </select>
+    <small id="direction-current-help">Chọn hướng đã xác định tại công trình hoặc bấm trên sơ đồ. Công cụ không đọc la bàn, không xin vị trí thiết bị.</small>
+    <p class="density-error" id="direction-current-error" data-error="direction" hidden></p>
+   </div>
+   <div class="density-buttons"><button type="submit">Xem hướng nhà</button><button type="reset">Đặt lại</button></div>
+   <noscript><p>Bật JavaScript để tra kết quả. Hướng dẫn cách tính vẫn hiển thị bên dưới.</p></noscript>
+  </form>
+  <div class="density-results">
+   <p data-empty>Nhập thông tin hợp lệ để tra hướng nhà.</p>
+   <div data-results hidden>
+    <h2 class="density-primary" data-output="palace" tabindex="-1"></h2>
+    <p data-output="group"></p>
+    <p class="density-calculation" data-output="formula"></p>
+    <div class="direction-compass" data-compass role="group" aria-label="Sơ đồ tám hướng, Bắc ở trên"></div>
+    <p class="direction-caption">Sơ đồ cố định: Bắc ở trên, Đông bên phải. Đây không phải la bàn đo thực địa.</p>
+    <p class="direction-selected" data-selected data-output="selected"></p>
+    <div class="direction-lists"><p><strong>Nhóm thuận theo quy ước:</strong> <span data-output="favorable"></span>.</p>
+     <p><strong>Nhóm cần cân nhắc theo quy ước:</strong> <span data-output="caution"></span>.</p></div>
+   </div>
+   <p class="sr-only" data-status role="status" aria-live="polite" aria-atomic="true"></p>
+  </div>
+  <section class="direction-table" data-all-directions hidden aria-labelledby="direction-table-heading">
+   <h2 id="direction-table-heading">Chi tiết tám hướng</h2>
+   <div class="direction-table-wrap" tabindex="0" role="region" aria-label="Bảng chi tiết tám hướng">
+    <table><caption>Tên gọi theo bảng phối cung Bát trạch, không phải kết luận về chất lượng hoặc an toàn của ngôi nhà.</caption>
+    <thead><tr><th scope="col">Hướng</th><th scope="col">Tên gọi</th><th scope="col">Phân nhóm</th></tr></thead><tbody data-directions></tbody></table>
+   </div>
+  </section>
+ </div>
+ <div class="density-documentation">
+  <section aria-labelledby="direction-method"><h2 id="direction-method">Cách tính và quy ước</h2>
+   <p>Cộng các chữ số của năm sinh âm lịch, tiếp tục rút gọn còn một chữ số r. Nam dùng 11 − r, nữ dùng 4 + r, rồi tiếp tục rút gọn kết quả. Số 5 quy về Khôn (2) đối với nam và Cấn (8) đối với nữ.</p>
+   <p>Quái số: 1 Khảm, 2 Khôn, 3 Chấn, 4 Tốn, 6 Càn, 7 Đoài, 8 Cấn, 9 Ly. Khảm, Chấn, Tốn, Ly thuộc Đông tứ mệnh; Khôn, Càn, Đoài, Cấn thuộc Tây tứ mệnh.</p>
+   <p>Bốn tên gọi thuộc nhóm thuận là Sinh Khí, Thiên Y, Diên Niên và Phục Vị. Bốn tên gọi thuộc nhóm cần cân nhắc là Họa Hại, Lục Sát, Ngũ Quỷ và Tuyệt Mệnh. Đây là thuật ngữ truyền thống, không phải dự báo tai họa.</p>
+  </section>
+  <section aria-labelledby="direction-faq"><h2 id="direction-faq">Lưu ý khi sử dụng</h2>
+   <details><summary>Cung phi có phải mệnh nạp âm không?</summary><p>Không. Cung phi được tính theo năm sinh và giới tính trong bảng Bát trạch. Ngũ hành của cung phi có thể khác ngũ hành nạp âm; không dùng hai khái niệm thay thế nhau.</p></details>
+   <details><summary>Tính năm sinh theo Tết hay Lập Xuân?</summary><p>Công cụ này nhận năm sinh âm lịch mà bạn đã xác định theo Tết. Một số trường phái lấy mốc Lập Xuân, nên người sinh gần đầu năm có thể nhận kết quả khác. Công cụ không tự chuyển lịch hay trộn hai quy ước.</p></details>
+   <details><summary>Hướng nhà có luôn là hướng cửa chính không?</summary><p>Không nên mặc định hai hướng luôn trùng nhau. Cách xác định mặt hướng, vị trí đo và hiện trạng kiến trúc cần xem xét tại công trình. Nếu chưa chắc chắn, hãy nhờ người có chuyên môn khảo sát trước khi nhập hướng.</p></details>
+   <details><summary>Hướng thuộc nhóm cần cân nhắc có nghĩa phải đổi nhà không?</summary><p>Không. Kết quả chỉ phản ánh quy ước Bát trạch. Không nên mua bán, sửa nhà hoặc thay đổi kết cấu chỉ vì kết quả tra cứu. Ưu tiên nhu cầu sử dụng, môi trường sống, khả năng tài chính và an toàn kỹ thuật.</p></details>
+   <p>Dữ liệu được tính trên thiết bị của bạn, không gửi năm sinh hoặc lựa chọn giới tính đến dịch vụ tra cứu bên ngoài.</p>
+   <p><a href="{{ path('building_age_calculator') }}">Xem tuổi xây nhà</a> · <a href="{{ path('lo_ban_calculator') }}">Tra thước Lỗ Ban</a> · <a href="{{ path('building_density_calculator') }}">Tính mật độ xây dựng</a> · <a href="{{ path('contact') }}">Tư vấn thiết kế</a></p>
+  </section>
+ </div>
+</div></section>
+{% endblock %}

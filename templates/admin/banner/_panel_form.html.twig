@@ -1,0 +1,19 @@
+<div data-panel-heading="{{ panel_title }}">
+{{ form_start(form, {attr: {'data-banner-panel-form': '', 'novalidate': 'novalidate'}}) }}
+    {{ form_errors(form) }}
+    {{ form_row(form.name) }}
+    {{ form_row(form.bannercategory) }}
+    <div class="banner-form-image">
+        <label>Ảnh banner</label>
+        {{ form_errors(form.urlImage) }}
+        {% set current = form.urlImage.vars.value|default('') %}
+        <img data-panel-image-preview {% if current and (current matches '~^/(?!/)~') %}src="{{ current }}"{% else %}hidden{% endif %} alt="Ảnh banner đang chọn">
+        <p data-panel-image-empty {% if current %}hidden{% endif %}>Chưa chọn ảnh.</p>
+        <div class="banner-media-tools"><button type="button" class="banner-button" data-banner-choose-image>Chọn từ thư viện</button><button type="button" class="banner-button" data-banner-clear-image>Bỏ chọn</button></div>
+        {{ form_widget(form.urlImage, {attr: {'data-banner-image-field': ''}}) }}
+    </div>
+    {{ form_row(form.url) }}
+    {{ form_row(form.enable) }}
+    <div class="banner-form-footer"><button type="button" class="banner-button" data-banner-panel-close>Hủy</button><button type="submit" class="banner-button banner-button--primary">Lưu banner</button></div>
+{{ form_end(form) }}
+</div>

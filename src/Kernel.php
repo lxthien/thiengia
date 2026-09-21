@@ -15,6 +15,19 @@ class Kernel extends BaseKernel
 
     private const CONFIG_EXTS = '.{php,xml,yaml,yml}';
 
+    public function __construct(string $environment, bool $debug)
+    {
+        // DateTimeType, Gedmo timestampable and console commands all use PHP's
+        // default timezone. Keeping it explicit here prevents the web process
+        // and the scheduled-publishing command from disagreeing.
+        $timezone = $_SERVER['APP_TIMEZONE'] ?? $_ENV['APP_TIMEZONE'] ?? 'Asia/Ho_Chi_Minh';
+        if (in_array($timezone, \DateTimeZone::listIdentifiers(), true)) {
+            date_default_timezone_set($timezone);
+        }
+
+        parent::__construct($environment, $debug);
+    }
+
     public function registerBundles(): iterable
     {
         $contents = require $this->getProjectDir().'/config/bundles.php';

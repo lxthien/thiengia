@@ -1,23 +1,22 @@
 import { rulers } from './lo-ban-data.js';
-import { findCung } from './lo-ban-calculator.js';
+import { findCung, findGoodBands, parseMeasurement, MAX_MM } from './lo-ban-calculator.js';
 
 // Màu canvas không đọc được biến SCSS — giữ đồng bộ thủ công với
 // public/assets/scss/v3/_tokens.scss ($primary, $text, $accent, $mut, $line).
-const COLOR_CAT = '#b5462e'; // $primary — quy ước thước thật: đỏ = cung tốt
+const COLOR_CAT = '#b42318'; // $primary — quy ước thước thật: đỏ = cung tốt
 const COLOR_HUNG = '#2b2622'; // $text — đen/nâu than = cung xấu
-const COLOR_TICK = '#c3b8ab';
-const COLOR_LINE = '#e2d9cb';
-const COLOR_MUTE = '#8a8078';
+const COLOR_TICK = '#514b45';
+const COLOR_LINE = '#a89e93';
+const COLOR_MUTE = '#514b45';
 const FONT = '"Be Vietnam Pro", system-ui, sans-serif';
 
-const MAX_MM = 20000;
 const EDGE_WARN_MM = 2.5;
 const SCALE_H = 28;
 const BIG_TOP = 28;
 const BIG_BOTTOM = 55;
-const SMALL_BOTTOM = 88;
-const STRIP_BOTTOM = 93;
-const ROW_HEIGHT = 94;
+const SMALL_BOTTOM = 99;
+const STRIP_BOTTOM = 104;
+const ROW_HEIGHT = 105;
 
 const PRESETS = [
     { label: 'Rộng cửa phòng 81cm', cm: 81 },
@@ -41,33 +40,6 @@ function prepareRuler(ruler) {
 }
 
 const preparedRulers = rulers.map(prepareRuler);
-
-function isAllCat(mm) {
-    return preparedRulers.every((ruler) => findCung(ruler, mm / 10).cungLon.catHung === 'cat');
-}
-
-// Quét ±radius mm quanh 1 giá trị, tìm các dải liên tục mà cả 3 thước đều cát.
-function findGoodBands(mm, radius) {
-    const lo = Math.max(1, Math.round(mm - radius));
-    const hi = Math.round(mm + radius);
-    const out = [];
-    let start = null;
-
-    for (let v = lo; v <= hi + 1; v++) {
-        const ok = v <= hi && isAllCat(v);
-        if (ok && start === null) {
-            start = v;
-        } else if (!ok && start !== null) {
-            out.push({ lo: start, hi: v - 1, mid: Math.round((start + v - 1) / 2) });
-            start = null;
-        }
-    }
-
-    return out
-        .sort((a, b) => Math.abs(a.mid - mm) - Math.abs(b.mid - mm))
-        .slice(0, 6)
-        .sort((a, b) => a.mid - b.mid);
-}
 
 function drawBand(ctx, width, m0, m1, px, step, count, getMark, yTop, yBottom, font) {
     const i0 = Math.max(0, Math.floor(m0 / step));
@@ -93,16 +65,20 @@ function drawBand(ctx, width, m0, m1, px, step, count, getMark, yTop, yBottom, f
         ctx.lineTo(width, yBottom + 0.5);
         ctx.stroke();
 
-        const v0 = Math.max(xa, 2);
-        const v1 = Math.min(xb, width - 2);
-        if (v1 - v0 > 26) {
-            ctx.fillStyle = mark.cat ? COLOR_CAT : COLOR_HUNG;
-            let text = mark.ten;
-            while (text.length > 3 && ctx.measureText(text).width > v1 - v0 - 4) {
-                text = text.slice(0, -1);
-            }
-            ctx.fillText(text === mark.ten ? text : `${text}…`, (v0 + v1) / 2, (yTop + yBottom) / 2 + 1);
-        }
+        if (xb < 0 || xa > width) continue;
+        ctx.save();
+        ctx.beginPath(); ctx.rect(xa + 1, yTop, xb - xa - 2, yBottom - yTop); ctx.clip();
+        ctx.fillStyle = mark.cat ? COLOR_CAT : COLOR_HUNG;
+        const words = mark.ten.split(' '), lines = [''];
+        words.forEach(word => {
+            const last = lines.length - 1, next = (lines[last] + ' ' + word).trim();
+            if (ctx.measureText(next).width > xb - xa - 10 && lines[last]) lines.push(word);
+            else lines[last] = next;
+        });
+        const lineHeight = 14, start = (yTop + yBottom) / 2 - (lines.length - 1) * lineHeight / 2;
+        const labelX = yTop === BIG_TOP ? (Math.max(0, xa) + Math.min(width, xb)) / 2 : (xa + xb) / 2;
+        lines.forEach((line, index) => ctx.fillText(line, labelX, start + index * lineHeight));
+        ctx.restore();
     }
 }
 
@@ -122,7 +98,7 @@ function drawRuler(canvas, ruler, off, px) {
 
     const ctx = canvas.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = '#f8f6f2';
     ctx.fillRect(0, 0, width, ROW_HEIGHT);
 
     const m0 = off;
@@ -191,189 +167,116 @@ function drawRuler(canvas, ruler, off, px) {
     }
 }
 
+
+const format = value => new Intl.NumberFormat('vi-VN', {maximumFractionDigits: 4}).format(value);
+const interval = (start, end) => '(' + format(start) + '; ' + format(end) + '] mm';
+
 export default function initLoBanRuler() {
     const root = document.querySelector('[data-loban-tool]');
-    if (!root) {
-        return;
-    }
-
-    const input = root.querySelector('[data-loban-input]');
-    const view = root.querySelector('[data-loban-view]');
-    const presetsEl = root.querySelector('[data-loban-presets]');
-    const cardsEl = root.querySelector('[data-loban-cards]');
-    const suggestEl = root.querySelector('[data-loban-suggest]');
-    const pointerLabelEl = root.querySelector('[data-loban-pointer-label]');
-    if (!input || !view || !cardsEl) {
-        return;
-    }
-
-    const canvases = {};
-    preparedRulers.forEach((ruler) => {
-        canvases[ruler.id] = view.querySelector(`canvas[data-loban-canvas="${ruler.id}"]`);
-    });
-
-    let px = 7;
-    let off = 0;
-    let mm = Math.max(0, Math.round((parseFloat(input.value) || 0) * 10));
-
-    function fit() {
-        px = view.clientWidth < 520 ? 6 : 7;
-    }
-
-    function drawAll() {
-        preparedRulers.forEach((ruler) => {
-            const canvas = canvases[ruler.id];
-            if (canvas) {
-                drawRuler(canvas, ruler, off, px);
-            }
-        });
-    }
-
-    function renderCards() {
-        cardsEl.innerHTML = preparedRulers
-            .map((ruler) => {
-                const { cungLon, cungBe, r } = findCung(ruler, mm / 10);
-                const isCat = cungLon.catHung === 'cat';
-                const dist = Math.min(r - cungBe.mmStart, cungBe.mmEnd - r);
-                const warn = dist < EDGE_WARN_MM;
-                const useText = (ruler.label.split('—')[1] || '').trim();
-
-                return `
-                    <div class="loban-card ${isCat ? 'is-cat' : 'is-hung'}">
-                        <h3>Thước ${(ruler.cycleMm / 10).toFixed(1).replace('.', ',')} cm</h3>
-                        <p class="loban-card-use">${useText}</p>
-                        <span class="loban-verdict">${isCat ? 'Cung tốt' : 'Cung xấu'}</span>
-                        <div class="loban-cung">${cungLon.ten}${cungLon.alias ? ` (${cungLon.alias})` : ''}</div>
-                        <div class="loban-sub">${cungBe.ten}</div>
-                        ${warn ? '<div class="loban-warn">Sát mép cung — lệch vài milimet khi thi công có thể đổi kết quả, nên lùi vào giữa khoảng.</div>' : ''}
-                    </div>`;
-            })
-            .join('');
-    }
-
-    function renderSuggestions() {
-        if (!suggestEl) {
-            return;
-        }
-        const bandsFound = findGoodBands(mm, 500);
-        suggestEl.innerHTML = bandsFound.length
-            ? bandsFound
-                  .map(
-                      (band) => `
-                    <button type="button" class="loban-pill" data-mm="${band.mid}">
-                        <b>${(band.mid / 10).toFixed(1).replace('.', ',')} cm</b>
-                        <small>dải đẹp ${(band.lo / 10).toFixed(1)}–${(band.hi / 10).toFixed(1)} cm</small>
-                    </button>`
-                  )
-                  .join('')
-            : '<span class="loban-none">Không có dải nào trong khoảng ±50cm tốt trên cả ba thước. Hãy ưu tiên cây thước đúng với hạng mục đang đo.</span>';
-    }
-
-    function renderPointerLabel() {
-        if (pointerLabelEl) {
-            pointerLabelEl.textContent = `${(mm / 10).toFixed(1).replace('.', ',')} cm`;
-        }
-    }
-
+    if (!root) return;
+    const input = root.querySelector('[data-loban-input]'), unit = root.querySelector('[data-loban-unit]');
+    const view = root.querySelector('[data-loban-view]'), error = root.querySelector('[data-loban-error]');
+    const presetsEl = root.querySelector('[data-loban-presets]'), cardsEl = root.querySelector('[data-loban-cards]');
+    const suggestEl = root.querySelector('[data-loban-suggest]'), label = root.querySelector('[data-loban-pointer-label]');
+    const measurement = root.querySelector('[data-loban-measurement]'), summary = root.querySelector('[data-loban-summary]');
+    const results = root.querySelector('[data-loban-results]');
+    const canvases = preparedRulers.map(ruler => view.querySelector('canvas[data-loban-canvas="' + ruler.id + '"]'));
+    let mm = parseMeasurement(input.value, unit.value) ?? 2120, off = 0, frame = 0, announceTimer;
+    const px = 10; // Reference ruler: 10 CSS pixels/mm, identical at all viewport widths.
+    const width = () => canvases[0].clientWidth;
+    const syncInput = () => { input.value = String(unit.value === 'cm' ? mm / 10 : mm); };
     function render() {
-        renderPointerLabel();
-        renderCards();
-        renderSuggestions();
+        frame = 0;
+        if (input.getAttribute('aria-invalid') === 'true') return;
+        // Negative offset is intentional: zero stays under the central pointer.
+        off = mm - width() / (2 * px);
+        preparedRulers.forEach((ruler, index) => drawRuler(canvases[index], ruler, off, px));
+        label.textContent = format(mm) + ' mm';
+        measurement.textContent = format(mm) + ' mm = ' + format(mm / 10) + ' cm';
+        view.setAttribute('aria-valuenow', String(mm));
+        view.setAttribute('aria-valuetext', format(mm) + ' milimét');
+        const verdicts = [];
+        cardsEl.innerHTML = preparedRulers.map(ruler => {
+            const found = findCung(ruler, mm / 10), {cungLon, cungBe, r} = found;
+            const good = cungLon.catHung === 'cat';
+            const warn = Math.min(r - cungBe.mmStart, cungBe.mmEnd - r) < EDGE_WARN_MM;
+            verdicts.push(format(ruler.cycleMm / 10) + ' cm: ' + cungLon.ten + ', ' + cungBe.ten + ', ' + (good ? 'tốt' : 'xấu'));
+            return '<article class="loban-card ' + (good ? 'is-cat' : 'is-hung') + '">' +
+                '<h3>Thước ' + format(ruler.cycleMm / 10) + ' cm</h3>' +
+                '<p class="loban-card-use">' + ruler.label.split('—')[1].trim() + '</p>' +
+                '<span class="loban-verdict">' + (good ? 'Cung tốt' : 'Cung xấu') + '</span>' +
+                '<div class="loban-cung">' + cungLon.ten + '</div><div class="loban-sub">' + cungBe.ten + '</div>' +
+                '<dl class="loban-ranges"><dt>Khoảng cung lớn</dt><dd>' + interval(found.groupStart, found.groupEnd) + '</dd>' +
+                '<dt>Khoảng cung nhỏ</dt><dd>' + interval(found.markStart, found.markEnd) + '</dd></dl>' +
+                (warn ? '<p class="loban-warn">Sát ranh giới cung. Sai số đo hoặc thi công có thể đổi kết quả.</p>' : '') + '</article>';
+        }).join('');
+        const bands = findGoodBands(preparedRulers, mm);
+        suggestEl.innerHTML = bands.length ? bands.map(band =>
+            '<button type="button" class="loban-pill" data-mm="' + band.mid + '"><b>' + format(band.mid) +
+            ' mm</b><small>' + format(band.mid / 10) + ' cm · dải ' + format(band.lo) + '–' + format(band.hi) + ' mm</small></button>'
+        ).join('') : '<span class="loban-none">Không có dải phù hợp trong ±500 mm. Hãy ưu tiên thước đúng với hạng mục đang đo.</span>';
+        clearTimeout(announceTimer);
+        announceTimer = setTimeout(() => { summary.textContent = measurement.textContent + '. ' + verdicts.join('. '); }, 180);
     }
-
-    function center() {
-        off = Math.max(0, mm - view.clientWidth / 2 / px);
-        drawAll();
-    }
-
-    function setMm(value, syncInput) {
+    function schedule() { if (!frame) frame = requestAnimationFrame(render); }
+    function setMm(value) {
         mm = Math.max(0, Math.min(MAX_MM, Math.round(value)));
-        if (syncInput) {
-            input.value = +(mm / 10).toFixed(1);
-        }
-        center();
-        render();
+        input.removeAttribute('aria-invalid'); error.hidden = true; results.hidden = false;
+        view.removeAttribute('aria-disabled');
+        syncInput(); schedule();
     }
-
-    function syncFromOffset() {
-        mm = Math.max(0, Math.min(MAX_MM, Math.round(off + view.clientWidth / 2 / px)));
-        input.value = +(mm / 10).toFixed(1);
-        render();
-    }
-
     input.addEventListener('input', () => {
-        const cm = parseFloat(input.value.replace(',', '.'));
-        if (Number.isFinite(cm) && cm >= 0) {
-            setMm(cm * 10, false);
+        const value = parseMeasurement(input.value, unit.value);
+        if (value === null) {
+            input.setAttribute('aria-invalid', 'true'); error.hidden = false; results.hidden = true;
+            view.setAttribute('aria-disabled', 'true');
+            measurement.textContent = 'Chưa có số đo hợp lệ';
+            clearTimeout(announceTimer); summary.textContent = ''; return;
         }
+        // Preserve a decimal separator while the user is typing.
+        mm = value; input.removeAttribute('aria-invalid'); error.hidden = true; results.hidden = false;
+        view.removeAttribute('aria-disabled'); schedule();
     });
-
-    if (presetsEl) {
-        presetsEl.innerHTML = PRESETS.map((p) => `<button type="button" class="loban-chip" data-cm="${p.cm}">${p.label}</button>`).join('');
-        presetsEl.addEventListener('click', (event) => {
-            const chip = event.target.closest('.loban-chip');
-            if (chip) {
-                setMm(parseFloat(chip.dataset.cm) * 10, true);
-            }
-        });
-    }
-
-    if (suggestEl) {
-        suggestEl.addEventListener('click', (event) => {
-            const pill = event.target.closest('.loban-pill');
-            if (pill) {
-                setMm(parseFloat(pill.dataset.mm), true);
-            }
-        });
-    }
-
-    let dragging = false;
-    let dragStartX = 0;
-    let dragStartOff = 0;
-
-    view.addEventListener('pointerdown', (event) => {
-        dragging = true;
-        dragStartX = event.clientX;
-        dragStartOff = off;
-        view.setPointerCapture(event.pointerId);
-        view.classList.add('is-dragging');
+    unit.addEventListener('change', () => setMm(mm));
+    root.querySelectorAll('[data-loban-step]').forEach(button => button.addEventListener('click', () => setMm(mm + Number(button.dataset.lobanStep))));
+    presetsEl.innerHTML = PRESETS.map(p => '<button type="button" class="loban-chip" data-cm="' + p.cm + '">' + p.label + '</button>').join('');
+    presetsEl.addEventListener('click', event => { const button = event.target.closest('[data-cm]'); if (button) setMm(Number(button.dataset.cm) * 10); });
+    suggestEl.addEventListener('click', event => { const button = event.target.closest('[data-mm]'); if (button) setMm(Number(button.dataset.mm)); });
+    view.addEventListener('keydown', event => {
+        const moves = {ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1, PageDown: -100, PageUp: 100};
+        if (event.key === 'Home' || event.key === 'End') { event.preventDefault(); setMm(event.key === 'Home' ? 0 : MAX_MM); }
+        else if (moves[event.key]) { event.preventDefault(); setMm(mm + moves[event.key] * (event.shiftKey ? 10 : 1)); }
     });
-    view.addEventListener('pointermove', (event) => {
-        if (!dragging) {
-            return;
-        }
-        off = Math.max(0, Math.min(MAX_MM, dragStartOff - (event.clientX - dragStartX) / px));
-        drawAll();
-        syncFromOffset();
+    let drag = null;
+    view.addEventListener('pointerdown', event => {
+        if (!event.isPrimary || event.button !== 0) return;
+        drag = {id: event.pointerId, x: event.clientX, mm};
+        view.setPointerCapture(event.pointerId); view.classList.add('is-dragging');
     });
-    const stopDrag = () => {
-        dragging = false;
-        view.classList.remove('is-dragging');
-    };
+    view.addEventListener('pointermove', event => {
+        if (drag?.id === event.pointerId) setMm(drag.mm - (event.clientX - drag.x) / px);
+    });
+    function stopDrag() { drag = null; view.classList.remove('is-dragging'); }
     view.addEventListener('pointerup', stopDrag);
     view.addEventListener('pointercancel', stopDrag);
-
-    view.addEventListener(
-        'wheel',
-        (event) => {
-            const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
-            if (!delta) {
-                return;
-            }
-            event.preventDefault();
-            off = Math.max(0, Math.min(MAX_MM, off + delta / px));
-            drawAll();
-            syncFromOffset();
-        },
-        { passive: false }
-    );
-
-    window.addEventListener('resize', () => {
-        fit();
-        center();
-    });
-
-    fit();
-    center();
+    view.addEventListener('lostpointercapture', stopDrag);
+    // A vertical wheel must continue scrolling the page. Shift+wheel or trackpad horizontal pans the ruler.
+    view.addEventListener('wheel', event => {
+        const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.shiftKey ? event.deltaY : 0;
+        if (!delta) return;
+        event.preventDefault(); setMm(mm + delta / px);
+    }, {passive: false});
+    document.querySelector('[data-loban-tables]').innerHTML = preparedRulers.map(ruler =>
+        '<details><summary>Thước ' + format(ruler.cycleMm / 10) + ' cm · ' + ruler.cungLon.length + ' cung lớn / ' +
+        ruler.flatMarks.length + ' cung nhỏ</summary><div class="loban-table-scroll" tabindex="0" role="region" aria-label="Bảng cung thước ' +
+        format(ruler.cycleMm / 10) + ' cm"><table><caption>Khoảng số đo trong chu kỳ đầu (mm)</caption><thead><tr><th scope="col">Cung lớn</th>' +
+        '<th scope="col">Cung nhỏ</th><th scope="col">Khoảng (mm)</th><th scope="col">Cát / hung</th></tr></thead><tbody>' +
+        ruler.cungLon.map(group => group.cungBe.map(mark => '<tr class="' + (group.catHung === 'cat' ? 'is-cat' : 'is-hung') + '"><td>' +
+        group.ten + '</td><td>' + mark.ten + '</td><td>' + interval(mark.mmStart, mark.mmEnd) + '</td><td>' +
+        (group.catHung === 'cat' ? 'Tốt' : 'Xấu') + '</td></tr>').join('')).join('') + '</tbody></table></div></details>'
+    ).join('');
+    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(schedule).observe(view);
+    else window.addEventListener('resize', schedule);
+    document.fonts?.ready.then(schedule);
     render();
 }

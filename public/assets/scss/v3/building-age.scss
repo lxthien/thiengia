@@ -1,0 +1,16 @@
+@use "building-density";
+@use "tokens" as *;
+.age-page {
+  .age-check { border-left:3px solid #766c61; padding:.75rem 1rem; margin:1rem 0; background:$base; }
+  .age-check[data-caution=true]{border-color:#a84a1a;background:#fff3e9;}
+  .age-check h3{font-size:.95rem;margin-bottom:.4rem;}
+  .age-check p{font-size:.82rem;}
+  .age-future{grid-column:1 / -1;padding:1.75rem;border-top:1px solid $line;min-width:0;}
+  .age-table-scroll{overflow:auto;max-width:100%;}
+  .age-table-scroll table{min-width:780px;}
+  .age-table-scroll button{white-space:nowrap;}
+  .age-table-scroll th,.age-table-scroll td{vertical-align:top;}
+  .age-future>p{font-size:.9rem;margin-bottom:1rem;}
+  .age-disclaimer{font-size:.82rem;color:#514b45;margin-top:1rem;}
+  @media(max-width:767px){.age-future{padding:1.1rem;}}
+}

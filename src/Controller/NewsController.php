@@ -29,6 +29,7 @@ use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use WhiteOctober\BreadcrumbsBundle\Model\Breadcrumbs;
 use App\Service\SettingsManager;
+use App\Service\ContentMetrics;
 
 use App\Entity\NewsCategory;
 use App\Entity\News;
@@ -60,6 +61,7 @@ class NewsController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly Breadcrumbs $breadcrumbs,
         private readonly SettingsManager $settingsManager,
+        private readonly ContentMetrics $contentMetrics,
         private readonly FormFactoryInterface $formFactory,
         #[Autowire(service: 'limiter.public_comment')]
         private readonly RateLimiterFactory $publicCommentLimiter,
@@ -489,9 +491,12 @@ class NewsController extends AbstractController
 
         // Dữ liệu đặc thù cho Post/News
         $plainContent = $this->contentFormatter->stripTagsContent($contentsLazy);
+        $wordCount = $this->contentMetrics->countWords($plainContent);
+
         $viewData += [
             'articleBody' => $plainContent,
-            'wordCount' => str_word_count($plainContent),
+            'wordCount' => $wordCount,
+            'readingMinutes' => $this->contentMetrics->readingMinutesFromWordCount($wordCount),
             'relatedNews' => !empty($relatedNews) ? $relatedNews : null,
             'category' => $category,
             'categoryUrl' => $categoryUrl,
@@ -1459,4 +1464,3 @@ class NewsController extends AbstractController
     }
 
 }
-

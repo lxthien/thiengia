@@ -1,0 +1,18 @@
+<div data-panel-heading="{{ panel_title }}">
+{{ form_start(form, {attr: {'data-testimonial-panel-form': '', 'novalidate': 'novalidate'}}) }}
+    {{ form_errors(form) }}
+    {{ form_row(form.name) }}
+    {{ form_row(form.role) }}
+    <div class="banner-form-image"><label>Ảnh đại diện</label>{{ form_errors(form.avatarUrl) }}
+        {% set current = form.avatarUrl.vars.value|default('') %}
+        <img data-panel-image-preview {% if current matches '~^/uploads/media/~' %}src="{{ current }}"{% else %}hidden{% endif %} alt="Ảnh đại diện đang chọn">
+        <p data-panel-image-empty {% if current %}hidden{% endif %}>Chưa chọn ảnh.</p>
+        <div class="banner-media-tools"><button type="button" class="banner-button" data-testimonial-choose-image>Chọn từ thư viện</button><button type="button" class="banner-button" data-testimonial-clear-image>Bỏ chọn</button></div>
+        {{ form_widget(form.avatarUrl, {attr: {'data-testimonial-image-field': ''}}) }}
+    </div>
+    {{ form_row(form.text) }}
+    <div class="testimonial-rating-field">{{ form_row(form.rating) }}</div>
+    {{ form_row(form.enable) }}
+    <div class="banner-form-footer"><button type="button" class="banner-button" data-testimonial-panel-close>Hủy</button><button type="submit" class="banner-button banner-button--primary">Lưu đánh giá</button></div>
+{{ form_end(form) }}
+</div>

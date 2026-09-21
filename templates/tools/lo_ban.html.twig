@@ -1,7 +1,9 @@
 {% extends 'layout.html.twig' %}
 
+{% block bodyClass %}loban-page{% endblock %}
+
 {% block title %}Tra cứu Thước Lỗ Ban — Máy tính kích thước cát hung online | {{ v3.company.shortName }}{% endblock %}
-{% block description %}Nhập kích thước (cm), xem ngay cung cát (tốt) hay hung (xấu) trên cả 3 loại thước Lỗ Ban (52,2cm / 42,9cm / 38,8cm) — công cụ miễn phí hỗ trợ thiết kế, thi công nhà ở.{% endblock %}
+{% block description %}Nhập kích thước (mm hoặc cm), xem ngay cung cát (tốt) hay hung (xấu) trên cả 3 loại thước Lỗ Ban (52,2cm / 42,9cm / 38,8cm) — công cụ miễn phí hỗ trợ thiết kế, thi công nhà ở.{% endblock %}
 
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('build/css/v3-loban.css') }}">
@@ -42,57 +44,71 @@
             <div class="loban-tool" data-loban-tool>
                 <div class="loban-top">
                     <div class="loban-field">
-                        <label for="loban-cm">Kích thước cần tra (cm)</label>
-                        <input
-                            type="number"
-                            id="loban-cm"
-                            data-loban-input
-                            inputmode="decimal"
-                            step="0.1"
-                            min="0"
-                            value="212"
-                            autocomplete="off">
+                        <label for="loban-cm">Kích thước cần tra</label>
+                        <div class="loban-input-row">
+                            <input type="text" id="loban-cm" data-loban-input inputmode="decimal" value="2120"
+                                autocomplete="off" aria-describedby="loban-input-help loban-input-error">
+                            <label for="loban-unit" class="sr-only">Đơn vị đo</label>
+                            <select id="loban-unit" data-loban-unit><option value="mm">mm</option><option value="cm">cm</option></select>
+                        </div>
+                        <p id="loban-input-help">0–50.000 mm (5.000 cm), bước đo 1 mm.</p>
                     </div>
                     <div class="loban-presets" data-loban-presets></div>
                 </div>
 
-                <p class="loban-hint">
-                    <span>Kéo ngang thước bên dưới để dò, hoặc gõ số/bấm gợi ý ở trên.</span>
+                <p id="loban-input-error" class="loban-error" data-loban-error role="alert" hidden>Nhập số từ 0 đến 50.000 mm, tương đương 0–5.000 cm; độ phân giải 1 mm (0,1 cm).</p>
+                <div class="loban-readout">
+                    <output data-loban-measurement for="loban-cm loban-unit"></output>
+                    <div class="loban-step-buttons"><button type="button" data-loban-step="-1" aria-label="Giảm 1 milimét">−1 mm</button><button type="button" data-loban-step="1" aria-label="Tăng 1 milimét">+1 mm</button></div>
+                </div>
+                <p class="loban-hint" id="loban-controls-help">
+                    <span>Kéo ngang để dò. Khi chọn thước, dùng phím ← / → để đổi 1 mm; Shift để đổi 10 mm.</span>
                     <span class="loban-key"><i class="is-cat"></i> chữ đỏ là cung tốt</span>
                     <span class="loban-key"><i class="is-hung"></i> chữ đen là cung xấu</span>
                 </p>
 
-                <div class="loban-view" data-loban-view>
+                <div class="loban-view" data-loban-view role="slider" tabindex="0" aria-label="Kích thước trên thước Lỗ Ban" aria-orientation="horizontal" aria-valuemin="0" aria-valuemax="50000" aria-valuenow="2120" aria-describedby="loban-controls-help">
                     <div class="loban-ruler-row">
                         <div class="loban-ruler-name">Thước 52,2 cm <em>— thông thủy: cửa đi, cửa sổ, ô trống</em></div>
-                        <canvas data-loban-canvas="522"></canvas>
+                        <canvas aria-hidden="true" data-loban-canvas="522"></canvas>
                     </div>
                     <div class="loban-ruler-row">
-                        <div class="loban-ruler-name">Thước 42,9 cm <em>— khối xây: bậc thềm, bệ bếp, tủ, kệ</em></div>
-                        <canvas data-loban-canvas="429"></canvas>
+                        <div class="loban-ruler-name">Thước 42,9 cm <em>— dương trạch: khối xây, bếp, bệ, bậc</em></div>
+                        <canvas aria-hidden="true" data-loban-canvas="429"></canvas>
                     </div>
                     <div class="loban-ruler-row">
                         <div class="loban-ruler-name">Thước 38,8 cm <em>— âm phần: bàn thờ, tủ thờ</em></div>
-                        <canvas data-loban-canvas="388"></canvas>
+                        <canvas aria-hidden="true" data-loban-canvas="388"></canvas>
                     </div>
                     <div class="loban-pointer" data-loban-pointer></div>
                     <div class="loban-pointer-label" data-loban-pointer-label></div>
                 </div>
 
+                <p class="sr-only" data-loban-summary role="status" aria-live="polite" aria-atomic="true"></p>
+                <div data-loban-results>
                 <div class="loban-cards" data-loban-cards></div>
+                <p class="loban-boundary-note">Khoảng (a; b] không gồm đầu a, có gồm cuối b. Riêng 0 và số đo đúng bội chu kỳ được xếp vào cung đầu, theo quy ước của công cụ mẫu.</p>
 
                 <div class="loban-suggest">
                     <h3>Kích thước đẹp gần nhất</h3>
-                    <p>Các dải quanh giá trị bạn nhập mà cả ba cây thước đều rơi vào cung tốt. Bấm để lấy số giữa dải — an toàn nhất khi thi công có sai số.</p>
+                    <p>Các dải trong ±500 mm cùng thuộc cung tốt trên ba thước, lấy mẫu từng 1 mm. Bấm để chọn điểm giữa dải; ưu tiên loại thước phù hợp với hạng mục, không coi đây là yêu cầu kỹ thuật bắt buộc.</p>
                     <div class="loban-suggest-list" data-loban-suggest></div>
+                </div>
                 </div>
             </div>
 
+            <div class="loban-reference">
+                <h2>Thông số và bảng cung</h2>
+                <p>Chu kỳ 522 mm: 8 cung lớn × 5 cung nhỏ. Chu kỳ 429 mm: 8 × 4. Chu kỳ 388 mm: 10 × 4. Các khoảng được tính từ chu kỳ, không làm tròn trước khi tra.</p>
+                <div data-loban-tables></div>
+                <p>Dữ liệu đối chiếu theo <a href="https://kienanvinh.com/thuoc-lo-ban.html" target="_blank" rel="noopener noreferrer">công cụ thước Lỗ Ban Kiến An Vinh</a>. Tên cung giữ theo phần tra cứu tương tác của mẫu; các phiên bản thước có thể dùng tên khác nhau.</p>
+                <noscript>Bật JavaScript để xem thước tương tác và bảng cung.</noscript>
+            </div>
             <div class="loban-intro">
                 <h2 id="loban-h" class="h-display text-2xl lg:text-3xl">Thước Lỗ Ban là gì?</h2>
                 <p>
                     Thước Lỗ Ban là dụng cụ đo phong thủy được các kiến trúc sư, thợ xây dùng để xác định
-                    kích thước "hợp mệnh" khi thiết kế và thi công nhà ở — mỗi cung trên thước ứng với một ý
+                    kích thước theo quan niệm truyền thống khi thiết kế và thi công nhà ở — mỗi cung trên thước ứng với một ý
                     nghĩa cát (tốt) hoặc hung (xấu). Có 3 loại thước Lỗ Ban phổ biến, dùng cho từng nhóm cấu
                     kiện khác nhau:
                 </p>
@@ -102,8 +118,8 @@
                     <li><strong>Thước 38,8cm (âm phần):</strong> dùng riêng cho bàn thờ, tủ thờ và đồ nội thất mang tính tâm linh.</li>
                 </ul>
                 <p>
-                    Nhập đúng loại thước tương ứng với hạng mục cần đo ở công cụ phía trên để tra kết quả
-                    cát/hung nhanh chóng, chính xác.
+                    Chọn loại thước phù hợp với hạng mục cần đo. Kết quả cát/hung là thông tin tham khảo
+                    theo quan niệm phong thủy, không phải bảo đảm về tài lộc, sức khỏe hay độ an toàn công trình.
                 </p>
             </div>
         </div>

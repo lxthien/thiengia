@@ -8,6 +8,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
@@ -411,6 +412,51 @@ class News
     public function isScheduled(): bool
     {
         return $this->status === PostStatus::Scheduled;
+    }
+
+    /**
+     * This entity backs both /admin/news and /admin/page. Keep publishing
+     * invariants here so imports, APIs and both forms receive the same checks.
+     */
+    #[Assert\Callback]
+    public function validatePublicationSchedule(ExecutionContextInterface $context): void
+    {
+        if ($this->status !== PostStatus::Scheduled) {
+            return;
+        }
+
+        if ($this->scheduledAt === null) {
+            $context->buildViolation('Chọn ngày và giờ trước khi đặt lịch xuất bản.')
+                ->atPath('scheduledAt')
+                ->addViolation();
+
+            return;
+        }
+
+        $now = new \DateTimeImmutable('now', new \DateTimeZone(date_default_timezone_get()));
+        if ($this->scheduledAt <= $now) {
+            $context->buildViolation('Thời điểm đặt lịch phải nằm trong tương lai.')
+                ->atPath('scheduledAt')
+                ->addViolation();
+        }
+    }
+
+    #[Assert\Callback]
+    public function validatePrimaryCategory(ExecutionContextInterface $context): void
+    {
+        if (!$this->categoryPrimary) {
+            return;
+        }
+
+        foreach ($this->category as $category) {
+            if ($category->getId() === (int) $this->categoryPrimary) {
+                return;
+            }
+        }
+
+        $context->buildViolation('Danh mục chính phải thuộc các danh mục đã chọn.')
+            ->atPath('categoryPrimary')
+            ->addViolation();
     }
 
     public function getPublishedAt(): ?\DateTimeInterface

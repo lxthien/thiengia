@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\GalleryAlbum;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -16,7 +17,9 @@ class GalleryAlbumType extends AbstractType
     {
         $builder
             ->add('name', TextType::class, [
-                'label' => 'Tên hoạt động',
+                'label' => 'Tên album / hoạt động',
+                'constraints' => [new Assert\Length(max: 255)],
+                'attr' => ['maxlength' => 255],
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Mô tả',

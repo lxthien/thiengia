@@ -1,84 +1,26 @@
-{#
- Media Picker partial — loaded via AJAX into picker modal body.
- Styles: admin.scss (.media-picker-*)
- JS: admin.js (initMediaPicker / bindPickerItems / bindUpload)
-#}
 <div class="media-picker-wrap">
-
-    {# ── Dropzone upload area ── #}
-    <div id="mediaPickerDropzone"
-         style="position:relative;border:2px dashed #90bce8;border-radius:8px;padding:22px 16px;text-align:center;background:#f0f7ff;cursor:pointer;margin-bottom:14px;transition:background .2s,border-color .2s;">
-        <i class="fa fa-cloud-upload fa-2x" style="color:#5b9bd5;"></i>
-        <p style="margin:8px 0 2px;font-weight:600;color:#3a6ea5;">Kéo thả ảnh mới vào đây</p>
-        <p style="margin:0;font-size:12px;color:#888;">Hoặc bấm để chọn nhiều ảnh upload trực tiếp vào Media Library.</p>
-        <input type="file" id="mediaPickerFileInput" multiple accept="image/*"
-               style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;">
-    </div>
-
-    {# ── Folder controls for upload ── #}
-    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
-        <div style="flex:1;min-width:200px;">
-            <select id="mediaPickerUploadFolderSelect" class="form-control form-control-sm">
-                <option value="">Không chọn folder</option>
-                {% for folder in folders %}
-                    <option value="{{ folder }}" {% if currentFolder == folder %}selected{% endif %}>{{ folder }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div style="flex:1;min-width:200px;">
-            <input type="text" id="mediaPickerUploadNewFolder" class="form-control form-control-sm" placeholder="Folder mới...">
-        </div>
-    </div>
-
-    {# ── Upload controls ── #}
-    <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center;flex-wrap:wrap;">
-        <button type="button" id="mediaPickerUploadBtn" class="btn btn-success btn-sm" disabled>
-            <i class="fa fa-upload"></i> Upload tất cả
-        </button>
-        <span id="mediaPickerQueueCount" style="font-size:12px;color:#888;"></span>
-    </div>
-
-    {# ── Per-file queue ── #}
-    <div id="mediaPickerUploadQueue" style="margin-bottom:10px;"></div>
-
-    {# ── Search + Grid ── #}
-    {% if files|length > 0 or folders|length > 0 or currentFolder != '' %}
-        <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;">
-            <div style="width:180px;">
-                <select id="mediaPickerFilterFolderSelect" class="form-control form-control-sm">
-                    <option value="">Tất cả folder</option>
-                    {% for folder in folders %}
-                        <option value="{{ folder }}" {% if currentFolder == folder %}selected{% endif %}>{{ folder }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div style="flex:1;">
-                <input type="text" id="mediaPickerSearch" class="form-control form-control-sm"
-                       placeholder="Lọc theo tên file..." autocomplete="off">
-            </div>
-        </div>
-        <div class="media-picker-grid" id="mediaPickerGrid">
-            {% for file in files %}
-                <button type="button"
-                        class="media-picker-item"
-                        data-url="{{ file.url }}"
-                        data-filename="{{ file.filename }}"
-                        title="{{ file.filename }} ({{ file.size_formatted }})">
-                    <img src="{{ file.thumb }}" alt="{{ file.filename }}" loading="lazy">
-                    <span class="media-picker-item__name">
-                        {{ file.filename|slice(0, 22) }}{% if file.filename|length > 22 %}…{% endif %}
-                    </span>
-                    <span class="media-picker-item__size">{{ file.size_formatted }}</span>
-                </button>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="media-picker-empty">
-            <i class="fa fa-image fa-2x text-muted"></i>
-            <p class="text-muted mt-2">Chưa có ảnh nào trong thư viện.</p>
-            <a href="{{ path('admin_media_index') }}" target="_blank" class="btn btn-sm btn-primary">
-                <i class="fa fa-upload"></i> Tải ảnh lên
-            </a>
-        </div>
-    {% endif %}
+ <details class="media-picker-upload"><summary>Tải ảnh mới lên thư viện</summary>
+  <label id="mediaPickerDropzone">Chọn ảnh hoặc kéo thả vào đây
+   <input type="file" id="mediaPickerFileInput" multiple accept=".jpg,.jpeg,.png,.gif">
+  </label><p class="media-picker-help">JPG, PNG, GIF · Tối đa 10 MB/ảnh. Chọn tệp rồi bấm Tải ảnh đã chọn.</p>
+  <div class="media-picker-filters">
+   <label>Thư mục tải lên<select id="mediaPickerUploadFolderSelect" class="form-control"><option value="">Thư mục gốc</option>{% for folder in folders %}<option value="{{ folder }}" {{ currentFolder == folder ? 'selected' : '' }}>{{ folder }}</option>{% endfor %}</select></label>
+   <label>Hoặc tạo thư mục mới<input id="mediaPickerUploadNewFolder" class="form-control" placeholder="Ví dụ: du-an"></label>
+  </div>
+  <button type="button" id="mediaPickerUploadBtn" class="btn btn-primary" disabled>Tải ảnh đã chọn</button>
+  <span id="mediaPickerQueueCount" role="status" aria-live="polite"></span><div id="mediaPickerUploadQueue"></div>
+ </details>
+ <div class="media-picker-filters">
+  <label>Thư mục<select id="mediaPickerFilterFolderSelect" class="form-control"><option value="">Tất cả thư mục</option>{% for folder in folders %}<option value="{{ folder }}" {{ currentFolder == folder ? 'selected' : '' }}>{{ folder }}</option>{% endfor %}</select></label>
+  <label>Lọc ảnh đang hiển thị<input type="search" id="mediaPickerSearch" class="form-control" placeholder="Tên ảnh…" autocomplete="off"></label>
+ </div>
+ <p class="media-picker-help">Tối đa 48 ảnh mới nhất trong thư mục. Bấm ảnh để chọn, sau đó xác nhận ở cuối cửa sổ.</p>
+ <div class="media-picker-grid" id="mediaPickerGrid">
+ {% for file in files %}
+  <button type="button" class="media-picker-item" data-url="{{ file.url }}" data-filename="{{ file.filename }}" aria-pressed="false" title="{{ file.filename }}">
+   <img src="{{ file.thumb }}" alt="" loading="lazy"><span class="media-picker-item__name">{{ file.filename }}</span><span class="media-picker-item__size">{{ file.size_formatted }}</span>
+  </button>
+ {% endfor %}
+ </div>
+ <p data-picker-empty class="media-picker-help" {{ files|length ? 'hidden' : '' }}>Không có ảnh phù hợp. Thử thư mục khác hoặc tải ảnh mới.</p>
 </div>

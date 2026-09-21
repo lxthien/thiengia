@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\MediaAsset;
+use App\Service\MediaThumbnailGenerator;
 use App\Repository\MediaAssetRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,6 +28,7 @@ class MediaController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly MediaAssetRepository $mediaAssetRepository,
+        private readonly MediaThumbnailGenerator $thumbnailGenerator,
     ) {
     }
 
@@ -36,7 +38,8 @@ class MediaController extends AbstractController
     #[Route('/', name: 'admin_media_index', methods: ['GET'])]
     public function indexAction(Request $request)
     {
-        $page = $request->query->get('page', 1);
+        $page = max(1, $request->query->getInt('page', 1));
+        $search = trim((string) $request->query->get('q', ''));
         $folderFilter = trim((string) $request->query->get('folder', ''));
         $uploadDirPath = $this->getParameter('kernel.project_dir') . '/public/' . $this->uploadDir;
         
@@ -48,6 +51,9 @@ class MediaController extends AbstractController
         
         // Get media files
         $allFiles = $this->getMediaFiles($uploadDirPath, $folderFilter);
+        if ($search !== '') {
+            $allFiles = array_values(array_filter($allFiles, static fn (array $file): bool => mb_stripos($file['filename'], $search) !== false));
+        }
         
         // Sort by date
         usort($allFiles, function ($a, $b) {
@@ -57,12 +63,14 @@ class MediaController extends AbstractController
         // Paginate
         $itemsPerPage = 24;
         $totalFiles = count($allFiles);
-        $totalPages = ceil($totalFiles / $itemsPerPage);
+        $totalPages = max(1, (int) ceil($totalFiles / $itemsPerPage));
+        $page = min($page, $totalPages);
         $start = ($page - 1) * $itemsPerPage;
         $files = array_slice($allFiles, $start, $itemsPerPage);
 
         return $this->render('admin/media/index.html.twig', [
             'files' => $files,
+            'search' => $search,
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'totalFiles' => $totalFiles,
@@ -90,6 +98,10 @@ class MediaController extends AbstractController
 
         // Return at most 48 latest images for the picker
         $files = array_slice($allFiles, 0, 48);
+
+        if ($request->query->get('_format') === 'json') {
+            return $this->json(['files' => $files, 'folders' => $folders, 'currentFolder' => $folderFilter]);
+        }
 
         return $this->render('admin/media/_picker.html.twig', [
             'files' => $files,
@@ -180,7 +192,7 @@ class MediaController extends AbstractController
         }
 
         $uploadDirPath = $this->getParameter('kernel.project_dir') . '/public/' . $this->uploadDir;
-        $filepath = $uploadDirPath . $filename;
+        $filepath = $this->resolveMediaFile($filename);
         $thumbpath = dirname($filepath) . '/thumbs/' . basename($filepath);
 
         try {
@@ -219,8 +231,12 @@ class MediaController extends AbstractController
             return new JsonResponse(['status' => 'error', 'message' => 'File not found']);
         }
 
+        $this->resolveMediaFile($filename);
         $altText = trim((string) $request->request->get('alt', ''));
 
+        if (mb_strlen($altText) > 255) {
+            return $this->json(['status' => 'error', 'message' => 'Mô tả ALT tối đa 255 ký tự.'], 422);
+        }
         $asset = $this->mediaAssetRepository->findOneBy(['path' => $filename]);
         if (!$asset) {
             $asset = new MediaAsset();
@@ -249,7 +265,7 @@ class MediaController extends AbstractController
         $newFolder    = trim((string) $request->request->get('newFolder', ''));
 
         $baseUploadPath = $this->getParameter('kernel.project_dir') . '/public/' . $this->uploadDir;
-        $srcPath  = $baseUploadPath . $filename;
+        $srcPath  = $this->resolveMediaFile($filename);
         $srcThumb = dirname($srcPath) . '/thumbs/' . basename($srcPath);
 
         if (!file_exists($srcPath)) {
@@ -267,10 +283,19 @@ class MediaController extends AbstractController
             $uploadSubdir = '';
         }
 
+        if ($uploadSubdir !== '' && !preg_match('~^[a-zA-Z0-9_-]+/$~D', $uploadSubdir)) {
+            return $this->json(['status' => 'error', 'message' => 'Tên thư mục không hợp lệ.'], 422);
+        }
         $destDir   = $baseUploadPath . $uploadSubdir;
+        if (is_link(rtrim($destDir, '/'))) {
+            return $this->json(['status' => 'error', 'message' => 'Thư mục không hợp lệ.'], 422);
+        }
         $destPath  = $destDir . basename($srcPath);
         $destThumb = $destDir . 'thumbs/' . basename($srcPath);
 
+        if (file_exists($destPath)) {
+            return $this->json(['status' => 'error', 'message' => 'Thư mục đích đã có tệp cùng tên. Không ghi đè.'], 409);
+        }
         // Cannot move to same location
         if (realpath($srcPath) === realpath($destPath)) {
             return new JsonResponse(['status' => 'error', 'message' => 'File đã ở trong thư mục này']);
@@ -321,71 +346,80 @@ class MediaController extends AbstractController
     #[IsGranted('ROLE_EDITOR')]
     public function cropAction(Request $request, $filename)
     {
-        $uploadDirPath = $this->getParameter('kernel.project_dir') . '/public/' . $this->uploadDir;
-        $filepath = $uploadDirPath . $filename;
-
-        if (!file_exists($filepath)) {
-            return new JsonResponse(['status' => 'error', 'message' => 'File not found']);
-        }
-
-        $data = json_decode($request->getContent(), true);
-        $x = $data['x'] ?? 0;
-        $y = $data['y'] ?? 0;
-        $width = $data['width'] ?? 100;
-        $height = $data['height'] ?? 100;
-
-        try {
-            $image = imagecreatefromstring(file_get_contents($filepath));
-            $cropped = imagecrop($image, ['x' => $x, 'y' => $y, 'width' => $width, 'height' => $height]);
-            
-            imagejpeg($cropped, $filepath, 90);
-            imagedestroy($image);
-            imagedestroy($cropped);
-
-            // Refresh thumbnail
-            $this->createThumbnail($filepath);
-
-            return new JsonResponse(['status' => 'success', 'message' => 'Cắt ảnh thành công']);
-        } catch (\Exception $e) {
-            return new JsonResponse(['status' => 'error', 'message' => 'Lỗi cắt ảnh']);
-        }
+        return $this->transformImage($request, $filename, true);
     }
 
-    /**
-     * Resize image
-     */
     #[Route('/{filename}/resize', name: 'admin_media_resize', requirements: ['filename' => '.+'], methods: ['POST'])]
     #[IsGranted('ROLE_EDITOR')]
     public function resizeAction(Request $request, $filename)
     {
-        $uploadDirPath = $this->getParameter('kernel.project_dir') . '/public/' . $this->uploadDir;
-        $filepath = $uploadDirPath . $filename;
+        return $this->transformImage($request, $filename, false);
+    }
 
-        if (!file_exists($filepath)) {
-            return new JsonResponse(['status' => 'error', 'message' => 'File not found']);
+    private function transformImage(Request $request, string $filename, bool $crop): JsonResponse
+    {
+        $data = $request->request->all();
+        if (!$data) {
+            $data = json_decode($request->getContent(), true);
         }
-
-        $data = json_decode($request->getContent(), true);
-        $newWidth = (int)($data['width'] ?? 800);
-        $newHeight = (int)($data['height'] ?? 600);
-
+        if (!is_array($data) || !$this->isCsrfTokenValid('delete-media', (string) ($data['token'] ?? ''))) {
+            return $this->json(['status' => 'error', 'message' => 'Phiên thao tác không hợp lệ. Hãy tải lại trang.'], 403);
+        }
+        $path = $this->resolveMediaFile($filename);
+        $size = @getimagesize($path);
+        if (!$size || !in_array($size[2], [IMAGETYPE_JPEG, IMAGETYPE_PNG], true)) {
+            return $this->json(['status' => 'error', 'message' => 'Chỉ chỉnh kích thước/cắt ảnh JPG hoặc PNG. GIF được giữ nguyên để không mất chuyển động.'], 422);
+        }
+        $width = filter_var($data['width'] ?? null, FILTER_VALIDATE_INT);
+        $height = filter_var($data['height'] ?? null, FILTER_VALIDATE_INT);
+        $x = filter_var($data['x'] ?? 0, FILTER_VALIDATE_INT);
+        $y = filter_var($data['y'] ?? 0, FILTER_VALIDATE_INT);
+        if (!$width || !$height || $width < 1 || $height < 1 || $width > 10000 || $height > 10000 || $width * $height > 20000000
+            || $size[0] * $size[1] > 20000000
+            || ($crop && ($x === false || $y === false || $x < 0 || $y < 0 || $x + $width > $size[0] || $y + $height > $size[1]))) {
+            return $this->json(['status' => 'error', 'message' => 'Kích thước hoặc vùng cắt không hợp lệ (giới hạn 20 triệu pixel).'], 422);
+        }
+        $source = null;
+        $result = null;
+        $temporary = null;
         try {
-            list($origWidth, $origHeight) = getimagesize($filepath);
-            
-            $image = imagecreatefromstring(file_get_contents($filepath));
-            $resized = imagescale($image, $newWidth, $newHeight);
-            
-            imagejpeg($resized, $filepath, 90);
-            imagedestroy($image);
-            imagedestroy($resized);
-
-            // Refresh thumbnail
-            $this->createThumbnail($filepath);
-
-            return new JsonResponse(['status' => 'success', 'message' => 'Thay đổi kích thước thành công']);
-        } catch (\Exception $e) {
-            return new JsonResponse(['status' => 'error', 'message' => 'Lỗi thay đổi kích thước']);
+            $source = imagecreatefromstring(file_get_contents($path));
+            if (!$source) {
+                throw new \RuntimeException('Invalid image');
+            }
+            imagealphablending($source, false);
+            imagesavealpha($source, true);
+            $result = $crop ? imagecrop($source, ['x' => $x, 'y' => $y, 'width' => $width, 'height' => $height]) : imagescale($source, $width, $height);
+            if (!$result) {
+                throw new \RuntimeException('Transform failed');
+            }
+            imagealphablending($result, false);
+            imagesavealpha($result, true);
+            $temporary = tempnam(dirname($path), '.media-');
+            $saved = $size[2] === IMAGETYPE_PNG ? imagepng($result, $temporary) : imagejpeg($result, $temporary, 90);
+            if (!$saved || !rename($temporary, $path)) {
+                throw new \RuntimeException('Save failed');
+            }
+            $this->createThumbnail($path);
+            return $this->json(['status' => 'success', 'message' => 'Đã cập nhật ảnh.']);
+        } catch (\Throwable $e) {
+            return $this->json(['status' => 'error', 'message' => 'Không thể cập nhật ảnh. Hãy tải lại thư viện để kiểm tra trước khi thử lại.'], 500);
+        } finally {
+            if ($source) { imagedestroy($source); }
+            if ($result) { imagedestroy($result); }
+            if ($temporary && is_file($temporary)) { unlink($temporary); }
         }
+    }
+
+    private function resolveMediaFile(string $filename): string
+    {
+        $base = realpath($this->getParameter('kernel.project_dir') . '/public/' . $this->uploadDir);
+        $path = $base ? realpath($base . '/' . $filename) : false;
+        if (!$base || !$path || !is_file($path) || !str_starts_with(str_replace('\\', '/', $path), rtrim(str_replace('\\', '/', $base), '/') . '/')
+            || !in_array(strtolower(pathinfo($path, PATHINFO_EXTENSION)), $this->allowedExtensions, true)) {
+            throw $this->createNotFoundException('Không tìm thấy ảnh trong thư viện.');
+        }
+        return $path;
     }
 
     /**
@@ -423,6 +457,9 @@ class MediaController extends AbstractController
      */
     private function getMediaFiles($uploadDirPath, $folderFilter = '')
     {
+        if ($folderFilter !== '' && (!preg_match('~^[a-zA-Z0-9_-]+$~D', $folderFilter) || is_link($uploadDirPath . '/' . $folderFilter))) {
+            throw $this->createNotFoundException('Thư mục không hợp lệ.');
+        }
         if ($folderFilter === '') {
             $files = $this->scanFilesRecursive($uploadDirPath, $uploadDirPath);
         } else {
@@ -580,32 +617,7 @@ class MediaController extends AbstractController
      */
     private function createThumbnail($filepath)
     {
-        $uploadDirPath = dirname($filepath);
-        $thumbsDir = $uploadDirPath . '/thumbs';
-        
-        if (!is_dir($thumbsDir)) {
-            mkdir($thumbsDir, 0755, true);
-        }
-
-        $filename = basename($filepath);
-        $thumbpath = $thumbsDir . '/' . $filename;
-
-        try {
-            list($width, $height) = getimagesize($filepath);
-            $image = imagecreatefromstring(file_get_contents($filepath));
-            
-            $thumbWidth = 200;
-            $thumbHeight = 200;
-            
-            $thumbnail = imagecreatetruecolor($thumbWidth, $thumbHeight);
-            imagecopyresampled($thumbnail, $image, 0, 0, 0, 0, $thumbWidth, $thumbHeight, $width, $height);
-            
-            imagejpeg($thumbnail, $thumbpath, 80);
-            imagedestroy($image);
-            imagedestroy($thumbnail);
-        } catch (\Exception $e) {
-            // Silently fail
-        }
+        $this->thumbnailGenerator->generate($filepath);
     }
 
     /**

@@ -13,6 +13,7 @@ use App\Service\ActivityLogService;
 use App\Utils\Slugger;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -32,6 +33,7 @@ class NewsController extends AbstractController
         private readonly EntityManagerInterface $em,
         private readonly ActivityLogService $activityLogService,
         private readonly PaginatorInterface $paginator,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -183,14 +185,9 @@ class NewsController extends AbstractController
                 return $this->redirectToRoute('admin_news_edit', array(
                     'id' => $news->getId()
                 ));
-            } catch (\DBALException $e) {
-                $message = sprintf('DBALException [%d]: %s', $e->getCode(), $e->getMessage());
-            } catch (\PDOException $e) {
-                $message = sprintf('PDOException [%d]: %s', $e->getCode(), $e->getMessage());
-            } catch (\ORMException $e) {
-                $message = sprintf('ORMException [%d]: %s', $e->getCode(), $e->getMessage());
-            } catch (\Exception $e) {
-                $message = sprintf('Exception [%d]: %s', $e->getCode(), $e->getMessage());
+            } catch (\Throwable $e) {
+                $this->logger->error('Unable to create news.', ['exception' => $e]);
+                $message = 'Không thể lưu bài viết lúc này. Vui lòng thử lại hoặc liên hệ quản trị viên.';
             }
 
             $this->addFlash('error', $message);
@@ -267,14 +264,9 @@ class NewsController extends AbstractController
                 return $this->redirectToRoute('admin_news_edit', array(
                     'id' => $news->getId()
                 ));
-            } catch (\DBALException $e) {
-                $message = sprintf('DBALException [%d]: %s', $e->getCode(), $e->getMessage());
-            } catch (\PDOException $e) {
-                $message = sprintf('PDOException [%d]: %s', $e->getCode(), $e->getMessage());
-            } catch (\ORMException $e) {
-                $message = sprintf('ORMException [%d]: %s', $e->getCode(), $e->getMessage());
-            } catch (\Exception $e) {
-                $message = sprintf('Exception [%d]: %s', $e->getCode(), $e->getMessage());
+            } catch (\Throwable $e) {
+                $this->logger->error('Unable to update news.', ['exception' => $e, 'newsId' => $news->getId()]);
+                $message = 'Không thể cập nhật bài viết lúc này. Vui lòng thử lại hoặc liên hệ quản trị viên.';
             }
 
             $this->addFlash('error', $message);

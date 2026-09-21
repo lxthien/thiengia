@@ -5,6 +5,7 @@ import 'bootstrap-tagsinput';
 import 'bootstrap-sass/assets/javascripts/bootstrap/modal.js';
 
 import initCkeditor5 from './ckeditor5';
+import initSeoCheckers from './seo-checker';
 
 $(function() {
     // Shared HTML escape helpers
@@ -34,6 +35,8 @@ $(function() {
     // CKEditor 5 — đang migrate dần khỏi CKEditor 4 (xem admin/ckeditor5.js).
     // Field nào đã chuyển thì đổi class txt-ckeditor -> txt-ckeditor5.
     initCkeditor5();
+    initSeoCheckers();
+    initPublicationScheduleFields();
 
     // Update object when change the enable button toggle
     initEnableToggleButton();
@@ -64,6 +67,30 @@ $(function() {
             if (!$(this).attr('readonly')) {
                 $(":input.url").attr('readonly', 'readonly');
             }
+        });
+    }
+
+    // NewsType and PageType share News::$status/$scheduledAt. Keep the
+    // scheduling control focused on the state where it is meaningful; server
+    // validation still remains the authority for direct or forged requests.
+    function initPublicationScheduleFields() {
+        document.querySelectorAll('.js-scheduled-at').forEach(function(input) {
+            var form = input.closest('form');
+            var fieldGroup = input.closest('.form-group');
+            var status = form ? form.querySelector('select[name$="[status]"]') : null;
+
+            if (!fieldGroup || !status) {
+                return;
+            }
+
+            function sync() {
+                var isScheduled = status.value === 'scheduled';
+                fieldGroup.hidden = !isScheduled;
+                input.disabled = !isScheduled;
+            }
+
+            status.addEventListener('change', sync);
+            sync();
         });
     }
 
@@ -1753,7 +1780,16 @@ $(function() {
             var loaded    = false;
             var selectedUrl = null;
 
-            $modal.appendTo('body');
+            $modal.appendTo('body').attr('aria-modal', 'true');
+            var restoreFocus = null;
+            $modal.find('.close').attr('aria-label', 'Đóng thư viện');
+            $modal.on('keydown.pickerFocus', function (event) {
+                if (event.key !== 'Tab') return;
+                var items = $modal.find('button:visible:not(:disabled), input:visible:not(:disabled), select:visible:not(:disabled), summary:visible, a:visible');
+                var first = items[0], last = items[items.length - 1];
+                if (event.shiftKey && (document.activeElement === first || document.activeElement === $modal[0])) { event.preventDefault(); if(last)last.focus(); }
+                else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); if(first)first.focus(); }
+            });
             var pickerUrl = $modal.data('picker-url') || '';
 
             function cleanupModalBackdrop() {
@@ -1764,13 +1800,15 @@ $(function() {
             function hideModal() {
                 $modal.removeClass('in show').attr('aria-hidden', 'true').hide();
                 cleanupModalBackdrop();
+                if(restoreFocus)restoreFocus.focus();
             }
 
             function showModal() {
-                hideModal();
+                restoreFocus = document.activeElement;
                 $('<div class="modal-backdrop fade in show media-picker-backdrop"></div>').appendTo('body');
                 $('body').addClass('modal-open');
-                $modal.show().addClass('in show').attr('aria-hidden', 'false').focus();
+                $modal.show().addClass('in show').attr('aria-hidden', 'false');
+                $modal.find('.close').first().trigger('focus');
             }
 
             $(document).on('click', '#mediaPicker_close, #mediaPicker_cancel, .media-picker-backdrop', function (e) {
@@ -1784,9 +1822,9 @@ $(function() {
                 selectedUrl = null;
                 $confirm.prop('disabled', true);
                 $selName.text('');
-                $body.find('.media-picker-item').removeClass('is-selected');
+                $body.find('.media-picker-item').removeClass('is-selected').attr('aria-pressed', 'false');
                 showModal();
-                if (loaded) return;
+                // Refresh on reopen so newly uploaded images are visible.
                 loaded = true;
                 $.get(pickerUrl)
                     .done(function (html) { $body.html(html); bindLegacyItems(); })
@@ -1794,9 +1832,10 @@ $(function() {
             });
 
             function bindLegacyItems() {
+                selectedUrl = null; $confirm.prop('disabled', true); $selName.text('Chưa chọn ảnh');
                 $body.find('.media-picker-item').off('click').on('click', function () {
-                    $body.find('.media-picker-item').removeClass('is-selected');
-                    $(this).addClass('is-selected');
+                    $body.find('.media-picker-item').removeClass('is-selected').attr('aria-pressed', 'false');
+                    $(this).addClass('is-selected').attr('aria-pressed', 'true');
                     selectedUrl = $(this).data('url');
                     $selName.text($(this).data('filename'));
                     $confirm.prop('disabled', false);
@@ -1806,6 +1845,7 @@ $(function() {
                     $body.find('.media-picker-item').each(function () {
                         $(this).toggle(($(this).data('filename') || '').toLowerCase().indexOf(q) !== -1);
                     });
+                    $body.find('[data-picker-empty]').prop('hidden', $body.find('.media-picker-item:visible').length > 0);
                 });
                 $body.find('#mediaPickerFilterFolderSelect').off('change').on('change', function () {
                     var folder = $(this).val();
@@ -1819,7 +1859,7 @@ $(function() {
 
             $(document).on('click', '#mediaPickerConfirm', function () {
                 if (!selectedUrl) return;
-                $('.media-picker-input').val(selectedUrl);
+                $('.media-picker-input').val(selectedUrl).trigger('change');
                 $('#mediaPicker_display').val(selectedUrl);
                 $('#mediaPicker_preview_img').attr('src', selectedUrl);
                 $('#mediaPicker_preview_wrap').show();
@@ -1845,7 +1885,16 @@ $(function() {
             var loaded       = false;
             var selectedUrl  = null;
 
-            $modal.appendTo('body');
+            $modal.appendTo('body').attr('aria-modal', 'true');
+            var restoreFocus = null;
+            $modal.find('.close').attr('aria-label', 'Đóng thư viện');
+            $modal.on('keydown.pickerFocus', function (event) {
+                if (event.key !== 'Tab') return;
+                var items = $modal.find('button:visible:not(:disabled), input:visible:not(:disabled), select:visible:not(:disabled), summary:visible, a:visible');
+                var first = items[0], last = items[items.length - 1];
+                if (event.shiftKey && (document.activeElement === first || document.activeElement === $modal[0])) { event.preventDefault(); if(last)last.focus(); }
+                else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); if(first)first.focus(); }
+            });
             var pickerUrl = $modal.data('picker-url') || '';
 
             function cleanupBackdrop() {
@@ -1858,13 +1907,15 @@ $(function() {
             function hideModal() {
                 $modal.removeClass('in show').attr('aria-hidden', 'true').hide();
                 cleanupBackdrop();
+                if(restoreFocus)restoreFocus.focus();
             }
 
             function showModal() {
-                hideModal();
+                restoreFocus = document.activeElement;
                 $('<div class="modal-backdrop fade in show media-picker-backdrop media-picker-backdrop-' + pickerId + '"></div>').appendTo('body');
                 $('body').addClass('modal-open');
-                $modal.show().addClass('in show').attr('aria-hidden', 'false').focus();
+                $modal.show().addClass('in show').attr('aria-hidden', 'false');
+                $modal.find('.close').first().trigger('focus');
             }
 
             // Open button
@@ -1873,9 +1924,9 @@ $(function() {
                 selectedUrl = null;
                 $confirm.prop('disabled', true);
                 $selName.text('');
-                $body.find('.media-picker-item').removeClass('is-selected');
+                $body.find('.media-picker-item').removeClass('is-selected').attr('aria-pressed', 'false');
                 showModal();
-                if (loaded) return;
+                // Refresh on reopen so newly uploaded images are visible.
                 loaded = true;
                 $.get(pickerUrl)
                     .done(function (html) { $body.html(html); bindItems(); })
@@ -1893,9 +1944,10 @@ $(function() {
             });
 
             function bindItems() {
+                selectedUrl = null; $confirm.prop('disabled', true); $selName.text('Chưa chọn ảnh');
                 $body.find('.media-picker-item').off('click').on('click', function () {
-                    $body.find('.media-picker-item').removeClass('is-selected');
-                    $(this).addClass('is-selected');
+                    $body.find('.media-picker-item').removeClass('is-selected').attr('aria-pressed', 'false');
+                    $(this).addClass('is-selected').attr('aria-pressed', 'true');
                     selectedUrl = $(this).data('url');
                     $selName.text($(this).data('filename'));
                     $confirm.prop('disabled', false);
@@ -1905,6 +1957,7 @@ $(function() {
                     $body.find('.media-picker-item').each(function () {
                         $(this).toggle(($(this).data('filename') || '').toLowerCase().indexOf(q) !== -1);
                     });
+                    $body.find('[data-picker-empty]').prop('hidden', $body.find('.media-picker-item:visible').length > 0);
                 });
                 $body.find('#mediaPickerFilterFolderSelect').off('change').on('change', function () {
                     var folder = $(this).val();
@@ -1919,7 +1972,7 @@ $(function() {
             // Confirm selection — ghi full URL vào POST param riêng (_media_picker_url)
             $(document).on('click', '[data-media-picker-confirm][data-picker-id="' + pickerId + '"]', function () {
                 if (!selectedUrl) return;
-                $('#' + pickerId + '_url_input').val(selectedUrl);
+                $('#' + pickerId + '_url_input').val(selectedUrl).trigger('change');
                 $display.val(selectedUrl);
                 $previewImg.attr('src', selectedUrl).show();
                 $placeholder.hide();
@@ -1970,7 +2023,7 @@ $(function() {
                     var idx = fileQueue.length;
                     fileQueue.push(f);
                     var $item = $('<div class="mp-queue-item" style="display:flex;align-items:center;gap:8px;margin-bottom:5px;" data-queue-idx="' + idx + '">' +
-                        '<span style="flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + f.name + '</span>' +
+                        '<span style="flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + $('<span>').text(f.name).html() + '</span>' +
                         '<div class="progress" style="flex:2;height:7px;margin:0;min-width:80px;"><div class="progress-bar" style="width:0%;transition:width .3s;"></div></div>' +
                         '<span class="mp-queue-status" style="font-size:11px;color:#888;min-width:45px;text-align:right;">Chờ</span>' +
                         '<button type="button" class="mp-queue-remove" title="Xóa" style="background:none;border:none;color:#e74c3c;cursor:pointer;padding:0 4px;font-size:14px;line-height:1;">&#10005;</button>' +

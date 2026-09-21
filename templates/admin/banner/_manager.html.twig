@@ -1,0 +1,143 @@
+{% set active_count = objects|filter(banner => banner.enable)|length %}
+<main class="banner-manager" aria-labelledby="banner-heading" data-banner-manager>
+    <header class="banner-manager__header">
+        <div>
+            <h1 id="banner-heading">Quản lý banner</h1>
+            <p>Hình ảnh, nhóm banner và thứ tự hiển thị — quản lý tại một nơi.</p>
+        </div>
+        {% if categories is not empty %}
+            <a href="{{ path('admin_banner_new', selected_category ? {category: selected_category.id} : {}) }}" class="banner-button banner-button--primary" data-banner-panel data-panel-kind="banner">
+                <i class="fa fa-plus" aria-hidden="true"></i> Thêm banner
+            </a>
+        {% else %}
+            <a href="{{ path('admin_bannercategory_new', {zone: zone}) }}" class="banner-button banner-button--primary" data-banner-panel data-panel-kind="category">Thêm nhóm đầu tiên</a>
+        {% endif %}
+    </header>
+    <div class="banner-notice" data-banner-notice role="status" aria-live="polite" hidden></div>
+    <div class="banner-workspace">
+        <aside class="banner-groups" aria-label="Nhóm banner">
+            <div class="banner-groups__heading"><h2>Nhóm banner</h2><span>{{ categories|length }}</span></div>
+            <p class="banner-zone">Vị trí: <strong>{{ zones[zone] }}</strong></p>
+            {% if zones|length > 1 %}
+                <form method="get"><label for="banner-zone">Vị trí hiển thị</label><select name="zone" id="banner-zone" data-banner-filter-select>{% for value, label in zones %}<option value="{{ value }}" {{ zone == value ? 'selected' : '' }}>{{ label }}</option>{% endfor %}</select><button type="submit">Xem</button></form>
+            {% endif %}
+            <nav class="banner-groups__desktop" aria-label="Lọc theo nhóm">
+                <a class="banner-group-link {{ category_filter == '' ? 'is-active' : '' }}" href="{{ path('admin_banner_index', {zone: zone, q: query, status: status_filter}) }}" {% if category_filter == '' %}aria-current="page"{% endif %}><span>Tất cả nhóm</span><span>{{ zone_count }}</span></a>
+                {% for group in categories %}
+                    <div class="banner-group-row">
+                        <a class="banner-group-link {{ category_filter == group.id ~ '' ? 'is-active' : '' }}"
+                           href="{{ path('admin_banner_index', {zone: zone, category: group.id, q: query, status: status_filter}) }}" {% if category_filter == group.id ~ '' %}aria-current="page"{% endif %}>
+                            <span>{{ group.name }}</span><span>{{ category_counts[group.id] }}</span>
+                        </a>
+                        {{ include('admin/banner/_group_actions.html.twig', {group: group, count: category_counts[group.id]}, with_context = false) }}
+                    </div>
+                {% endfor %}
+                {% if unassigned_count %}
+                    <a class="banner-group-link {{ category_filter == 'none' ? 'is-active' : '' }}" href="{{ path('admin_banner_index', {zone: zone, category: 'none'}) }}"><span>Chưa phân nhóm</span><span>{{ unassigned_count }}</span></a>
+                {% endif %}
+            </nav>
+            <form method="get" class="banner-groups__mobile">
+                <input type="hidden" name="zone" value="{{ zone }}"><input type="hidden" name="q" value="{{ query }}"><input type="hidden" name="status" value="{{ status_filter }}">
+                <label for="banner-category-mobile">Chọn nhóm</label>
+                <select name="category" id="banner-category-mobile" data-banner-filter-select>
+                    <option value="">Tất cả nhóm ({{ zone_count }})</option>
+                    {% for group in categories %}<option value="{{ group.id }}" {{ category_filter == group.id ~ '' ? 'selected' : '' }}>{{ group.name }} ({{ category_counts[group.id] }})</option>{% endfor %}
+                    {% if unassigned_count %}<option value="none" {{ category_filter == 'none' ? 'selected' : '' }}>Chưa phân nhóm ({{ unassigned_count }})</option>{% endif %}
+                </select>
+                {% if selected_category %}{{ include('admin/banner/_group_actions.html.twig', {group: selected_category, count: category_counts[selected_category.id]}, with_context = false) }}{% endif %}
+            </form>
+            <a href="{{ path('admin_bannercategory_new', {zone: zone}) }}" class="banner-button banner-group-add" data-banner-panel data-panel-kind="category"><i class="fa fa-plus" aria-hidden="true"></i> Thêm nhóm</a>
+            <p class="banner-group-help">Nhóm giúp tổ chức nội dung. Thứ tự hiển thị được sắp xếp chung cho toàn bộ vị trí.</p>
+        </aside>
+
+        <section class="banner-panel" aria-labelledby="banner-list-heading">
+            <div class="banner-panel__toolbar">
+                <div><h2 id="banner-list-heading">{{ selected_category ? selected_category.name : (category_filter == 'none' ? 'Chưa phân nhóm' : zones[zone]) }}</h2>
+                    <p><strong>{{ objects|length }} banner</strong><span class="banner-summary">{{ active_count }} đang hiển thị · {{ objects|length - active_count }} đã ẩn</span></p>
+                </div>
+            </div>
+            <form method="get" action="{{ path('admin_banner_index') }}" class="banner-filters">
+                <input type="hidden" name="zone" value="{{ zone }}"><input type="hidden" name="category" value="{{ category_filter }}">
+                <div class="banner-filter-search"><label for="banner-search">Tìm banner</label><input id="banner-search" name="q" type="search" value="{{ query }}" placeholder="Nhập tên banner..." maxlength="150"></div>
+                <div><label for="banner-status">Trạng thái</label><select id="banner-status" name="status"><option value="">Tất cả trạng thái</option><option value="visible" {{ status_filter == 'visible' ? 'selected' : '' }}>Đang hiển thị</option><option value="hidden" {{ status_filter == 'hidden' ? 'selected' : '' }}>Đã ẩn</option></select></div>
+                <button type="submit" class="banner-button">Lọc</button>
+                {% if query or status_filter %}<a class="banner-filter-reset" href="{{ path('admin_banner_index', {zone: zone, category: category_filter}) }}">Xóa bộ lọc</a>{% endif %}
+            </form>
+            <div class="banner-reorder-note">
+                <p class="banner-save-status" data-banner-status role="status" aria-live="polite" aria-atomic="true">
+                    {% if reorder_enabled %}Kéo tay nắm hoặc dùng nút lên / xuống để sắp xếp.
+                    {% else %}Đang lọc danh sách. <a href="{{ path('admin_banner_index', {zone: zone}) }}">Xem toàn bộ vị trí để sắp xếp.</a>{% endif %}
+                </p>
+            </div>
+            <div class="dd banner-board" id="banner-nestable" data-reorder-enabled="{{ reorder_enabled ? 'true' : 'false' }}" data-zone="{{ zone }}"
+                 data-reorder-url="{{ path('admin_banner_reorder') }}" data-reorder-token="{{ csrf_token('reorder_banners') }}">
+                <ol class="dd-list" id="banner-list">
+                    {% for row in objects %}
+                        {% set image_url = row.urlImage|default('')|trim %}
+                        {% if not (image_url matches '~^(?:/(?!/)|https?://)~i') %}{% set image_url = '' %}{% endif %}
+                        {% set parts = image_url|split('/') %}
+                        {% set thumb = image_url ? (parts|slice(0, -1)|join('/')) ~ '/thumbs/' ~ (parts|last) : '' %}
+                        <li class="dd-item banner-row" data-id="{{ row.id }}">
+                            <div class="banner-row__layout">
+                                <div class="banner-order">
+                                    <span class="banner-position" aria-label="Vị trí {{ loop.index }}">#{{ loop.index }}</span>
+                                    <div class="{{ reorder_enabled ? 'dd-handle' : '' }} banner-grip" aria-hidden="{{ reorder_enabled ? 'false' : 'true' }}" title="Kéo để sắp xếp banner {{ row.name }}">
+                                        <i class="fa fa-arrows" aria-hidden="true"></i>
+                                        <span class="sr-only">Tay nắm kéo banner {{ row.name }}. Có thể dùng nút lên và xuống thay thế.</span>
+                                    </div>
+                                    <div class="banner-order__buttons dd-nodrag">
+                                        <button type="button" data-banner-move="up" title="Di chuyển lên" aria-label="Di chuyển {{ row.name }} lên" {% if not reorder_enabled or loop.first %}disabled{% endif %}><i class="fa fa-angle-up" aria-hidden="true"></i></button>
+                                        <button type="button" data-banner-move="down" title="Di chuyển xuống" aria-label="Di chuyển {{ row.name }} xuống" {% if not reorder_enabled or loop.last %}disabled{% endif %}><i class="fa fa-angle-down" aria-hidden="true"></i></button>
+                                    </div>
+                                </div>
+
+                                {% if image_url %}
+                                    <a class="banner-preview dd-nodrag" href="{{ image_url }}" target="_blank" rel="noopener"
+                                       aria-label="Xem ảnh gốc của {{ row.name }} (mở tab mới)">
+                                        {# Versioned after correcting the old 0 x 0 AVIF thumbnail cache. #}
+                                        <img src="{{ asset(thumb) }}?v=2" data-banner-image data-original-src="{{ image_url }}"
+                                             alt="{{ row.name }}" width="300" height="200" loading="lazy" decoding="async">
+                                        <span class="banner-preview__fallback" hidden><i class="fa fa-picture-o" aria-hidden="true"></i> Không tải được ảnh</span>
+                                        <span class="banner-preview__caption"><i class="fa fa-external-link" aria-hidden="true"></i> Xem ảnh gốc</span>
+                                    </a>
+                                {% else %}
+                                    <div class="banner-preview banner-preview--empty"><i class="fa fa-picture-o" aria-hidden="true"></i><span>Chưa có ảnh</span></div>
+                                {% endif %}
+
+                                <div class="banner-details dd-nodrag">
+                                    <div class="banner-details__title">
+                                        <h2><a href="{{ path('admin_banner_edit', {id: row.id}) }}" data-banner-panel data-panel-kind="banner">{{ row.name|default('Banner chưa đặt tên', true) }}</a></h2>
+                                        <span class="banner-badge {{ row.enable ? 'banner-badge--visible' : 'banner-badge--hidden' }}">
+                                            <i class="fa {{ row.enable ? 'fa-eye' : 'fa-eye-slash' }}" aria-hidden="true"></i>
+                                            {{ row.enable ? 'Đang hiển thị' : 'Đã ẩn' }}
+                                        </span>
+                                    </div>
+                                    <p class="banner-category"><i class="fa fa-folder-o" aria-hidden="true"></i> {{ row.bannerCategory|default('Chưa phân nhóm', true) }}</p>
+                                    <p class="banner-meta"><span>ID #{{ row.id }}</span><span>Tạo ngày {{ row.createdAt|date('d/m/Y', 'Asia/Ho_Chi_Minh') }}</span></p>
+                                    <p class="banner-destination"><span>Liên kết:</span> {{ row.url ?: 'Chưa gắn liên kết' }}</p>
+                                </div>
+
+                                <div class="banner-actions item-actions dd-nodrag">
+                                    <a href="{{ path('admin_banner_edit', {id: row.id}) }}" data-banner-panel data-panel-kind="banner" class="banner-button" aria-label="Chỉnh sửa {{ row.name }}">
+                                        <i class="fa fa-pencil" aria-hidden="true"></i> Chỉnh sửa
+                                    </a>
+                                    <button type="button" class="banner-button" role="switch" aria-checked="{{ row.enable ? 'true' : 'false' }}"
+                                            aria-label="Hiển thị banner {{ row.name }}" data-banner-visibility="{{ path('admin_banner_visibility', {id: row.id}) }}"
+                                            data-token="{{ csrf_token('banner_visibility_' ~ row.id) }}" data-enable="{{ row.enable ? '0' : '1' }}">{{ row.enable ? 'Ẩn' : 'Hiện' }}</button>
+                                    {{ include('admin/banner/_delete_form.html.twig', {object: row}, with_context = false) }}
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+
+                </ol>
+            </div>
+            {% if objects is empty %}
+                <div class="banner-empty"><i class="fa fa-picture-o" aria-hidden="true"></i>
+                    <h2>{{ query or status_filter ? 'Không tìm thấy banner' : 'Chưa có banner trong nhóm này' }}</h2>
+                    <p>{{ query or status_filter ? 'Thử thay đổi từ khóa hoặc xóa bộ lọc.' : 'Thêm banner và chọn ảnh từ thư viện để bắt đầu.' }}</p>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+</main>

@@ -105,21 +105,11 @@
 				</li>
 
 				{% if is_granted('ROLE_EDITOR') %}
-				<li class="menu-item-has-children dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				<li>
+					<a href="{{ path('admin_banner_index') }}">
 						<i class="menu-icon fa fa-flag"></i>
-						{{ 'menu.banners'|trans }}
+						Quản lý banner
 					</a>
-					<ul class="sub-menu children dropdown-menu">
-						<li>
-							<i class="fa fa-list-ul"></i>
-							<a href="{{ path('admin_banner_index') }}">{{ 'menu.banner_list'|trans }}</a>
-						</li>
-						<li>
-							<i class="fa fa-folder-open-o"></i>
-							<a href="{{ path('admin_bannercategory_index') }}">{{ 'menu.banner_category'|trans }}</a>
-						</li>
-					</ul>
 				</li>
 
 				<li>

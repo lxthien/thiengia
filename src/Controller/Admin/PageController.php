@@ -10,6 +10,7 @@ use App\Service\ActivityLogService;
 use App\Utils\Slugger;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,6 +28,7 @@ class PageController extends AbstractController
         private readonly EntityManagerInterface $em,
         private readonly ActivityLogService $activityLogService,
         private readonly PaginatorInterface $paginator,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -106,14 +108,9 @@ class PageController extends AbstractController
                 return $this->redirectToRoute('admin_page_edit', array(
                     'id' => $news->getId()
                 ));
-            } catch (\DBALException $e) {
-                $message = sprintf('DBALException [%d]: %s', $e->getCode(), $e->getMessage());
-            } catch (\PDOException $e) {
-                $message = sprintf('PDOException [%d]: %s', $e->getCode(), $e->getMessage());
-            } catch (\ORMException $e) {
-                $message = sprintf('ORMException [%d]: %s', $e->getCode(), $e->getMessage());
-            } catch (\Exception $e) {
-                $message = sprintf('Exception [%d]: %s', $e->getCode(), $e->getMessage());
+            } catch (\Throwable $e) {
+                $this->logger->error('Unable to create page.', ['exception' => $e]);
+                $message = 'Không thể lưu trang lúc này. Vui lòng thử lại hoặc liên hệ quản trị viên.';
             }
 
             $this->addFlash('error', $message);
@@ -184,14 +181,9 @@ class PageController extends AbstractController
                 return $this->redirectToRoute('admin_page_edit', array(
                     'id' => $news->getId()
                 ));
-            } catch (\DBALException $e) {
-                $message = sprintf('DBALException [%d]: %s', $e->getCode(), $e->getMessage());
-            } catch (\PDOException $e) {
-                $message = sprintf('PDOException [%d]: %s', $e->getCode(), $e->getMessage());
-            } catch (\ORMException $e) {
-                $message = sprintf('ORMException [%d]: %s', $e->getCode(), $e->getMessage());
-            } catch (\Exception $e) {
-                $message = sprintf('Exception [%d]: %s', $e->getCode(), $e->getMessage());
+            } catch (\Throwable $e) {
+                $this->logger->error('Unable to update page.', ['exception' => $e, 'pageId' => $news->getId()]);
+                $message = 'Không thể cập nhật trang lúc này. Vui lòng thử lại hoặc liên hệ quản trị viên.';
             }
 
             $this->addFlash('error', $message);

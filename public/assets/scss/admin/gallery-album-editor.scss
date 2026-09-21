@@ -1,0 +1,53 @@
+$media-workspace-scope: '#admin_gallery_album_edit';
+@import 'banner-index';
+
+#admin_gallery_album_edit {
+    .album-header-actions, .album-image-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .banner-manager__header h1 { overflow-wrap: anywhere; }
+    .album-breadcrumb { margin-bottom: 8px; }
+    .album-editor-layout { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 20px; align-items: start; }
+    .album-information summary { padding: 20px; color: var(--banner-ink); font-size: 16px; font-weight: 600; cursor: pointer; }
+    .album-information .banner-editor-content { padding: 0 20px 20px; }
+    .album-information textarea { min-height: 120px; resize: vertical; }
+    .album-help, .album-image-fields small { display: block; color: var(--banner-muted); font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+    .album-images { min-width: 0; }
+    .album-images .banner-reorder-note { padding-top: 14px; }
+    .album-images .banner-reorder-note > p { color: var(--banner-muted); }
+    .album-images .banner-reorder-note > [data-state="error"] { color: #a12525; }
+    .album-images .banner-reorder-note > [data-state="success"] { color: #17633c; }
+    .album-image-layout { display: grid; grid-template-columns: 36px 160px minmax(0, 1fr); gap: 14px; padding: 22px 0; align-items: start; }
+    .album-image-preview .banner-preview { padding: 0; width: 100%; cursor: zoom-in; }
+    .album-image-preview .banner-preview img { height: 140px; }
+    .album-image-preview [data-cover-badge] { margin-top: 8px; }
+    .album-cover-button { display: block; padding: 8px 0; border: 0; background: transparent; color: #195c9e; font-size: 13px; text-align: left; text-decoration: underline; cursor: pointer; }
+    .album-image-fields { min-width: 0; margin: 0; }
+    .album-image-fields label { color: var(--banner-ink); font-size: 13px; font-weight: 600; }
+    .album-image-fields input { width: 100%; box-sizing: border-box; padding: 9px 10px; min-height: 42px; border: 1px solid #b9c4d3; border-radius: 4px; font-size: 14px; color: var(--banner-ink); background: #fff; }
+    .album-image-fields > div { margin-bottom: 12px; }
+    .album-row-status { color: var(--banner-muted); font-size: 13px; min-height: 20px; margin: 6px 0 10px; }
+    .album-row-status[data-state="error"], [data-info-status][data-state="error"] { color: #a12525; }
+    .album-row-status[data-state="success"] { color: #17633c; }
+    .banner-button:disabled, .album-cover-button:disabled { cursor: default; opacity: .6; }
+    .album-image-item[data-dirty="true"] { border-left: 3px solid #b07c13; padding-left: 10px; }
+    .banner-media-item[aria-pressed="true"] { outline: 3px solid #195c9e; background: #e9f1fa; }
+    .banner-media-item:disabled { opacity: .55; cursor: default; }
+    .banner-dialog__footer { flex-wrap: wrap; align-items: center; }
+    [data-selected-name] { margin-right: auto; max-width: 100%; }
+    .album-lightbox { width: min(1000px, calc(100% - 24px)); }
+    .album-lightbox img { display: block; width: 100%; max-height: 70dvh; object-fit: contain; }
+    .album-editor :focus-visible, dialog :focus-visible { outline: 3px solid #195c9e; outline-offset: 2px; }
+    @media (max-width: 1399px) {
+        .album-editor-layout { grid-template-columns: minmax(0, 1fr); }
+        .album-image-layout { grid-template-columns: 40px 200px minmax(0, 1fr); }
+    }
+    @media (max-width: 900px) {
+        .album-image-layout { grid-template-columns: 36px minmax(0, 1fr); }
+        .album-image-fields { grid-column: 1 / -1; }
+        .album-image-preview .banner-preview img { height: 180px; }
+    }
+    @media (max-width: 767px) {
+        .album-header-actions { width: 100%; }
+        .album-header-actions > * { flex: 1; }
+        .album-image-actions > * { flex: 1 1 auto; }
+    }
+}

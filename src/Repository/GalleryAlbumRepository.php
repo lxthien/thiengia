@@ -18,7 +18,17 @@ class GalleryAlbumRepository extends ServiceEntityRepository
      */
     public function findAllOrdered(): array
     {
-        return $this->findBy([], ['position' => 'ASC']);
+        return $this->createQueryBuilder('a')->leftJoin('a.images', 'i')->addSelect('i')
+            ->orderBy('a.position', 'ASC')->addOrderBy('a.id', 'ASC')
+            ->addOrderBy('i.position', 'ASC')->addOrderBy('i.id', 'ASC')
+            ->getQuery()->getResult();
+    }
+
+    /** @return GalleryAlbum[] */
+    public function findForReorder(): array
+    {
+        return $this->createQueryBuilder('a')->orderBy('a.position', 'ASC')->addOrderBy('a.id', 'ASC')
+            ->getQuery()->setLockMode(\Doctrine\DBAL\LockMode::PESSIMISTIC_WRITE)->getResult();
     }
 
     /**
@@ -34,7 +44,8 @@ class GalleryAlbumRepository extends ServiceEntityRepository
             ->andWhere('a.enable = :enable')
             ->setParameter('enable', true)
             ->orderBy('a.position', 'ASC')
-            ->addOrderBy('i.position', 'ASC')
+            ->addOrderBy('a.id', 'ASC')
+            ->addOrderBy('i.position', 'ASC')->addOrderBy('i.id', 'ASC')
             ->getQuery()
             ->getResult();
     }

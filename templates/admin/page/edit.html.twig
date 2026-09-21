@@ -1,5 +1,13 @@
 {% extends 'admin/layout.html.twig' %}
 
+{% block admin_editor_stylesheets %}
+    <link rel="stylesheet" href="{{ asset('build/css/ckeditor5.css') }}">
+{% endblock %}
+
+{% block admin_legacy_editor_javascripts %}
+    {{ include('admin/components/_legacy_editor_scripts.html.twig', with_context = false) }}
+{% endblock %}
+
 {% block body_id 'admin_news_edit' %}
 
 {% block main %}
@@ -13,6 +21,7 @@
                             <a class="pull-right" target="_blank" href="{{ path('dynamic_post_page', {'slug': object.url, 'preview' : 'true', 'preview_id' : object.id }) }}">Xem trước</a>
                         </div>
                         <div class="card-body">
+                            {{ include('admin/components/seo-checker.html.twig', {form: form}, with_context = false) }}
                             <!-- Credit Card -->
                             <div id="pay-invoice">
                                 <div class="card-body">

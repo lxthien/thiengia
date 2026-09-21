@@ -1,0 +1,33 @@
+// Reuse the banner workspace's tokens and controls without affecting its page.
+$media-workspace-scope: '#admin_gallery_album_index';
+@import 'banner-index';
+
+#admin_gallery_album_index {
+    .gallery-row__layout { grid-template-columns: 40px 208px minmax(0, 1fr); }
+    .gallery-row__layout .banner-order, .gallery-row__layout .banner-preview { grid-row: span 2; }
+    .gallery-row__layout .banner-actions { grid-column: 3; flex-wrap: wrap; }
+    .banner-details h3 { margin: 0; font-size: 18px; line-height: 1.5; font-weight: 600; overflow-wrap: anywhere; }
+    .banner-details h3 a { color: var(--banner-ink); }
+    .banner-details h3 a:hover { color: var(--banner-primary); text-decoration: underline; }
+    .gallery-description { color: var(--banner-ink); font-size: 14px; line-height: 1.7; margin-bottom: 10px; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .gallery-cover-note { color: var(--banner-muted); font-size: 13px; line-height: 1.6; margin: 0; }
+    .banner-meta span { color: inherit; }
+    .banner-editor-content textarea { min-height: 140px; resize: vertical; }
+    .banner-button:disabled { cursor: wait; opacity: .65; }
+    .banner-button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid #195c9e; outline-offset: 2px; }
+    @media (max-width: 1100px) {
+        .gallery-row__layout { grid-template-columns: 40px 176px minmax(0, 1fr); }
+        .gallery-row__layout .banner-order, .gallery-row__layout .banner-preview { grid-row: 1; }
+        .gallery-row__layout .banner-actions { grid-column: 1 / -1; }
+    }
+    @media (max-width: 900px) {
+        .gallery-row__layout { grid-template-columns: 40px minmax(0, 1fr); }
+        .gallery-row__layout .banner-details { grid-column: 1 / -1; }
+        .banner-preview img { height: 160px; }
+        .banner-filters > div { flex: 1 1 100%; min-width: 0; }
+    }
+    @media (max-width: 767px) {
+        .banner-form-footer { flex-wrap: wrap; }
+        .banner-actions > a { flex: 1 1 auto; }
+    }
+}

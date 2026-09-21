@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Testimonial;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -21,11 +22,11 @@ class TestimonialType extends AbstractType
     {
         $builder
             ->add('name', TextType::class, [
-                'label' => 'Tên khách hàng',
+                'label' => 'Tên khách hàng', 'constraints' => [new Assert\Length(max: 255)], 'attr' => ['maxlength' => 255],
             ])
             ->add('role', TextType::class, [
                 'required' => false,
-                'label' => 'Mô tả ngắn',
+                'label' => 'Mô tả ngắn', 'constraints' => [new Assert\Length(max: 255)], 'attr' => ['maxlength' => 255],
             ])
             ->add('text', TextareaType::class, [
                 'label' => 'Nội dung đánh giá',
@@ -44,7 +45,7 @@ class TestimonialType extends AbstractType
                 'multiple' => false,
             ])
             // Ảnh được chọn qua Media Library picker, ghi thẳng vào field này (xem admin/testimonial/_form_media.html.twig)
-            ->add('avatarUrl', HiddenType::class)
+            ->add('avatarUrl', HiddenType::class, ['constraints' => [new Assert\Length(max: 255), new Assert\Regex(pattern: '~^/uploads/media/[^\\x00-\\x1f]+$~', message: 'Vui lòng chọn ảnh từ thư viện media.')]])
             ->add('enable', CheckboxType::class, [
                 'required' => false,
                 'label' => 'Hiển thị',

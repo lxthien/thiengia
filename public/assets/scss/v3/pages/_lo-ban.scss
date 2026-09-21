@@ -1,5 +1,11 @@
 @use "../tokens" as *;
 
+// Existing header component display rules override its responsive hidden utilities.
+// Keep this correction scoped to the ruler page.
+@media (max-width: 767px) {
+  .loban-page .hd .hd-hotline, .loban-page .hd .btn2 { display: none; }
+}
+
 .loban-v3 {
   .loban-tool {
     background: $white;
@@ -338,5 +344,58 @@
         color: $text;
       }
     }
+  }
+}
+
+.loban-v3 {
+  [hidden] { display: none !important; }
+  .loban-input-row { display: flex; gap: .5rem; }
+  .loban-input-row input { width: 170px; min-width: 0; }
+  .loban-input-row select { border: 1px solid $line; background: $white; padding: .5rem; color: $text; }
+  .loban-field #loban-input-help { font-size: .75rem; margin-top: .5rem; color: #514b45; }
+  .loban-readout { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+  .loban-readout output { font-size: 1.2rem; font-weight: 700; }
+  .loban-step-buttons { display: flex; gap: .5rem; }
+  .loban-step-buttons button { border: 1px solid $line; padding: .5rem .8rem; background: $white; color: $text; min-height: 44px; }
+  .loban-error { color: #9f2319; margin-top: .75rem; }
+  .loban-field input[aria-invalid=true] { border-color: #9f2319; }
+  .loban-view { padding-top: 2rem; touch-action: pan-y; }
+  .loban-view[aria-disabled=true] { opacity: .45; }
+  .loban-pointer { background: #ad5100; }
+  .loban-pointer-label { top: 2px; background: #a74900; }
+  .loban-key i.is-cat { background: #b42318; }
+  .loban-hint, .loban-chip, .loban-sub, .loban-card .loban-card-use, .loban-ruler-name em,
+  .loban-suggest p, .loban-none, .loban-intro p, .loban-intro ul { color: #514b45; }
+  .loban-card.is-cat { border-left-color: #b42318; }
+  .loban-card.is-cat .loban-verdict { background: #b42318; }
+  .loban-card.is-cat .loban-cung, .loban-warn { color: #b42318; }
+  .loban-ranges { margin-top: .8rem; font-size: .76rem; line-height: 1.6; }
+  .loban-ranges dt { color: #514b45; }
+  .loban-ranges dd { font-weight: 600; margin: 0 0 .5rem; }
+  .loban-boundary-note { font-size: .75rem; line-height: 1.6; color: #514b45; margin-top: .75rem; }
+  .loban-pill { color: #b42318; border-color: #b42318; }
+  .loban-pill:hover { background: #b42318; color: white; }
+  .loban-pill small { opacity: 1; }
+  button, select { cursor: pointer; }
+  :is(button, select, input, summary, [tabindex]):focus-visible { outline: 2px solid #9f2319; outline-offset: 3px; }
+  .loban-reference { margin-bottom: 3rem; color: $text; }
+  .loban-reference h2 { font-size: 1.5rem; margin-bottom: 1rem; }
+  .loban-reference p { font-size: .9rem; line-height: 1.7; margin: 1rem 0; }
+  .loban-reference a { color: #9f2319; text-decoration: underline; }
+  .loban-reference details { border-bottom: 1px solid $line; }
+  .loban-reference summary { cursor: pointer; padding: 1rem .5rem; font-weight: 600; }
+  .loban-table-scroll { overflow: auto; max-height: 400px; }
+  .loban-reference table { border-collapse: collapse; width: 100%; min-width: 540px; font-size: .8rem; background: $white; }
+  .loban-reference caption { text-align: left; padding: .75rem; color: #514b45; }
+  .loban-reference th, .loban-reference td { padding: .6rem; text-align: left; border: 1px solid $line; }
+  .loban-reference th { background: $base; }
+  .loban-reference .is-cat { color: #b42318; }
+  @media (max-width: 640px) {
+    .loban-tool { padding: 1rem; }
+    .loban-presets { min-width: 0; flex-basis: 100%; }
+    .loban-cards { grid-template-columns: minmax(0, 1fr); }
+    .loban-chip { min-height: 40px; }
+    .loban-ruler-name { font-size: .75rem; padding-inline: .5rem; }
+    .loban-ruler-name em { display: block; }
   }
 }

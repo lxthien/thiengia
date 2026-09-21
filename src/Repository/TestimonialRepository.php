@@ -18,14 +18,19 @@ class TestimonialRepository extends ServiceEntityRepository
      */
     public function findAllOrdered(): array
     {
-        return $this->findBy([], ['position' => 'ASC']);
+        return $this->findBy([], ['position' => 'ASC', 'id' => 'ASC']);
     }
 
-    /**
-     * @return Testimonial[]
-     */
+    /** @return Testimonial[] */
+    public function findForReorder(): array
+    {
+        return $this->createQueryBuilder('t')->orderBy('t.position', 'ASC')->addOrderBy('t.id', 'ASC')
+            ->getQuery()->setLockMode(\Doctrine\DBAL\LockMode::PESSIMISTIC_WRITE)->getResult();
+    }
+
+    /** @return Testimonial[] */
     public function findActiveOrdered(): array
     {
-        return $this->findBy(['enable' => true], ['position' => 'ASC']);
+        return $this->findBy(['enable' => true], ['position' => 'ASC', 'id' => 'ASC']);
     }
 }

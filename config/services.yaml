@@ -1,6 +1,7 @@
 parameters:
     locale: vi
     app.cache_version: '%env(CACHE_VERSION)%'
+    app.timezone: '%env(APP_TIMEZONE)%'
 
 services:
     _defaults:
@@ -68,6 +69,10 @@ services:
     App\Command\SyncViewCountsCommand:
         arguments:
             $logsDir: '%kernel.logs_dir%'
+
+    App\Command\PublishScheduledCommand:
+        arguments:
+            $timezone: '%app.timezone%'
 
     App\EventListener\LoginListener:
         arguments:

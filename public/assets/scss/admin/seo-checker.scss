@@ -1,0 +1,215 @@
+.seo-checker-container {
+    background: #f8fafc;
+    border: 1px solid #dce4ec;
+    border-radius: 8px;
+    margin: 0 0 20px;
+    padding: 16px;
+
+    h4,
+    p {
+        margin: 0;
+    }
+}
+
+.seo-checker__header,
+.seo-score-bar,
+.seo-score-indicator,
+.seo-density-bar {
+    align-items: center;
+    display: flex;
+}
+
+.seo-checker__header {
+    gap: 16px;
+    justify-content: space-between;
+
+    h4 {
+        color: #1f2937;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    p {
+        color: #6b7280;
+        font-size: 12px;
+        margin-top: 3px;
+    }
+}
+
+.seo-toggle-btn {
+    background: #fff;
+    border: 1px solid #b9c7d8;
+    border-radius: 5px;
+    color: #1f5d8f;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 10px;
+    white-space: nowrap;
+}
+
+.seo-content {
+    margin-top: 16px;
+}
+
+.seo-score-bar {
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.seo-score-label,
+.seo-density-label {
+    color: #4b5563;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.seo-score-indicator {
+    gap: 8px;
+}
+
+.seo-score-circle {
+    align-items: center;
+    border-radius: 999px;
+    color: #fff;
+    display: inline-flex;
+    font-size: 13px;
+    font-weight: 700;
+    height: 36px;
+    justify-content: center;
+    width: 36px;
+
+    &.excellent { background: #1f9d55; }
+    &.good { background: #2474b5; }
+    &.moderate { background: #d98200; }
+    &.poor { background: #d14343; }
+}
+
+.seo-score-text {
+    color: #374151;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.seo-serp-preview {
+    background: #fff;
+    border: 1px solid #e4e9ef;
+    border-radius: 6px;
+    display: grid;
+    gap: 4px;
+    margin: 14px 0;
+    padding: 13px;
+
+    &__label {
+        color: #6b7280;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+    }
+
+    strong {
+        color: #1a0dab;
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 1.3;
+    }
+
+    span:not(&__label) {
+        color: #188038;
+        font-size: 12px;
+    }
+
+    p {
+        color: #4d5156;
+        font-size: 12px;
+        line-height: 1.45;
+    }
+}
+
+.seo-focus-keyword-note {
+    color: #52606d;
+    font-size: 12px;
+    line-height: 1.45;
+    margin: 12px 0 !important;
+}
+
+.seo-checks {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.seo-check-item {
+    align-items: flex-start;
+    background: #fff;
+    border: 1px solid #e4e9ef;
+    border-radius: 6px;
+    display: flex;
+    gap: 9px;
+    padding: 10px;
+}
+
+.seo-check-icon {
+    align-items: center;
+    border-radius: 999px;
+    display: inline-flex;
+    flex: 0 0 21px;
+    font-size: 14px;
+    font-weight: 700;
+    height: 21px;
+    justify-content: center;
+
+    &.check { background: #e8f7ee; color: #187940; }
+    &.warning { background: #fff3d8; color: #ab6800; }
+    &.error { background: #fde8e8; color: #b42318; }
+}
+
+.seo-check-content { min-width: 0; }
+
+.seo-check-title {
+    color: #374151;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 3px !important;
+}
+
+.seo-check-desc,
+.seo-keyword-density-title {
+    color: #5c6777;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.seo-keyword-density {
+    border-top: 1px solid #dce4ec;
+    margin-top: 14px;
+    padding-top: 14px;
+}
+
+.seo-keyword-density-title { font-weight: 700; margin-bottom: 7px; }
+
+.seo-density-bar { gap: 10px; }
+.seo-density-label { flex: 0 0 55px; font-size: 12px; }
+.seo-density-progress { background: #e4e9ef; border-radius: 4px; flex: 1; height: 18px; overflow: hidden; }
+.seo-density-fill { align-items: center; background: #2474b5; color: #fff; display: flex; font-size: 10px; font-weight: 700; height: 100%; justify-content: center; min-width: 0; transition: width .2s ease; }
+
+.seo-tips {
+    background: #eaf4ff;
+    border-left: 3px solid #2474b5;
+    color: #334155;
+    font-size: 12px;
+    line-height: 1.45;
+    margin-top: 14px;
+    padding: 10px 12px;
+
+    ul { margin: 6px 0 0; padding-left: 18px; }
+}
+
+@media (max-width: 575px) {
+    .seo-checker__header,
+    .seo-score-bar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

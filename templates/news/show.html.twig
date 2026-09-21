@@ -18,9 +18,9 @@
     <meta property="og:title" content="{{ block('title') }}">
     <meta property="og:description" content="{{ block('description') }}">
     <meta property="og:image" content="{{ absolute_url(coverSrc) }}">
-    <meta property="article:published_time" content="{{ post.createdAt|date('Y-m-d') }}">
+    <meta property="article:published_time" content="{{ (post.publishedAt ?: post.createdAt)|date('c') }}">
     {% if post.updatedAt %}
-        <meta property="article:modified_time" content="{{ post.updatedAt|date('Y-m-d') }}">
+        <meta property="article:modified_time" content="{{ post.updatedAt|date('c') }}">
     {% endif %}
     {% if category %}
         <meta property="article:section" content="{{ category.name }}">
@@ -32,12 +32,12 @@
     {
         "@context": "https://schema.org",
         "@type": "Article",
-        "mainEntityOfPage": {{ app.request.uri|json_encode|raw }},
+        "mainEntityOfPage": {{ canonicalUrl|json_encode|raw }},
         "headline": {{ post.title|json_encode|raw }},
         "description": {{ (post.description ?: '')|json_encode|raw }},
         "image": {{ absolute_url(coverSrc)|json_encode|raw }},
-        "datePublished": {{ post.createdAt|date('Y-m-d')|json_encode|raw }},
-        {% if post.updatedAt %}"dateModified": {{ post.updatedAt|date('Y-m-d')|json_encode|raw }},{% endif %}
+        "datePublished": {{ (post.publishedAt ?: post.createdAt)|date('c')|json_encode|raw }},
+        {% if post.updatedAt %}"dateModified": {{ post.updatedAt|date('c')|json_encode|raw }},{% endif %}
         "inLanguage": "vi",
         {% if category %}"articleSection": {{ category.name|json_encode|raw }},{% endif %}
         "author": {

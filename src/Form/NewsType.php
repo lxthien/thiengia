@@ -6,6 +6,7 @@ use App\Entity\NewsCategory;
 use App\Entity\News;
 use App\Enum\PostStatus;
 use App\Form\Type\TagsInputType;
+use App\Form\DataTransformer\JsonLdMarkupTransformer;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -25,7 +26,12 @@ class NewsType extends AbstractType
 {
     private $authorizationChecker;
 
-    public function __construct(AuthorizationCheckerInterface $authorizationChecker)
+    public function __construct(
+        AuthorizationCheckerInterface $authorizationChecker,
+        private readonly JsonLdMarkupTransformer $jsonLdMarkupTransformer,
+        #[\Symfony\Component\DependencyInjection\Attribute\Autowire(param: 'app.timezone')]
+        private readonly string $timezone,
+    )
     {
         $this->authorizationChecker = $authorizationChecker;
     }
@@ -53,6 +59,9 @@ class NewsType extends AbstractType
                 'required' => false,
                 'widget' => 'single_text',
                 'label' => 'Ngày đặt lịch',
+                'help' => 'Dùng giờ Việt Nam. Chỉ cần nhập khi trạng thái là “Đặt lịch”.',
+                'model_timezone' => $this->timezone,
+                'view_timezone' => $this->timezone,
                 'attr' => ['class' => 'js-scheduled-at'],
             ])
             // Ảnh được chọn qua Media Library picker, ghi thẳng vào field này
@@ -102,7 +111,8 @@ class NewsType extends AbstractType
             ])
             ->add('pageKeyword', TextType::class, [
                 'required' => false,
-                'label' => 'label.pageKeyword',
+                'label' => 'Từ khóa trọng tâm',
+                'help' => 'Dùng một cụm từ chính để kiểm tra SEO; không cần nhồi nhiều từ khóa.',
             ])
             ->add('metaIndex', CheckboxType::class, [
                 'required' => false,
@@ -135,7 +145,8 @@ class NewsType extends AbstractType
             ->add('schemaMarkup', TextareaType::class, [
                 'required' => false,
                 'attr' => ['rows' => '10'],
-                'label' => 'Schema Markup',
+                'label' => 'JSON-LD override (Admin)',
+                'help' => 'Chỉ nhận JSON object/mảng; CMS tự tạo Article schema cho Post. Override được dùng khi mục này hiển thị như Page.',
             ])
             ->add('template', ChoiceType::class, [
                 'required' => false,
@@ -155,8 +166,22 @@ class NewsType extends AbstractType
                 // Remove postType field for non-admin users
                 if (!$this->authorizationChecker->isGranted('ROLE_ADMIN')) {
                     $form->remove('postType');
+                    $form->remove('schemaMarkup');
                 }
+            })
+            ->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) {
+                $data = $event->getData();
+                if (!is_array($data) || ($data['status'] ?? null) === PostStatus::Scheduled->value) {
+                    return;
+                }
+
+                // A stale date must not be carried into a draft or a published
+                // post when an editor changes the status.
+                $data['scheduledAt'] = '';
+                $event->setData($data);
             });
+
+        $builder->get('schemaMarkup')->addModelTransformer($this->jsonLdMarkupTransformer);
     }
 
     /**

@@ -1,0 +1,51 @@
+{% set active_count = objects|filter(item => item.enable)|length %}
+<main class="banner-manager testimonial-manager" data-testimonial-manager aria-labelledby="testimonial-heading">
+    <header class="banner-manager__header"><div><h1 id="testimonial-heading">Đánh giá khách hàng</h1><p>Quản lý nội dung, số sao và thứ tự hiển thị trên website.</p></div><a class="banner-button banner-button--primary" href="{{ path('admin_testimonial_new') }}" data-testimonial-panel><i class="fa fa-plus" aria-hidden="true"></i> Thêm đánh giá</a></header>
+    <div class="banner-notice" data-testimonial-notice role="status" aria-live="polite" hidden></div>
+    <section class="banner-panel" aria-labelledby="testimonial-list-heading">
+        <div class="banner-panel__toolbar"><div><h2 id="testimonial-list-heading">Khách hàng nói về chúng tôi</h2><p><strong>{{ objects|length }}{% if query or status_filter or rating_filter %} / {{ total_count }}{% endif %} đánh giá</strong><span class="banner-summary">{{ active_count }} đang hiển thị · {{ objects|length - active_count }} đã ẩn</span></p></div></div>
+        <form class="banner-filters" method="get" action="{{ path('admin_testimonial_index') }}">
+            <div class="banner-filter-search"><label for="testimonial-search">Tìm đánh giá</label><input id="testimonial-search" type="search" name="q" maxlength="150" value="{{ query }}" placeholder="Tên khách hàng hoặc nội dung..."></div>
+            <div><label for="testimonial-status">Trạng thái</label><select id="testimonial-status" name="status"><option value="">Tất cả trạng thái</option><option value="visible" {{ status_filter == 'visible' ? 'selected' : '' }}>Đang hiển thị</option><option value="hidden" {{ status_filter == 'hidden' ? 'selected' : '' }}>Đã ẩn</option></select></div>
+            <div><label for="testimonial-rating">Số sao</label><select id="testimonial-rating" name="rating"><option value="">Tất cả số sao</option>{% for rating in 5..1 %}<option value="{{ rating }}" {{ rating_filter == rating ~ '' ? 'selected' : '' }}>{{ rating }} sao</option>{% endfor %}</select></div>
+            <button type="submit" class="banner-button">Lọc</button>
+            {% if query or status_filter or rating_filter %}<a class="banner-filter-reset" href="{{ path('admin_testimonial_index') }}">Xóa bộ lọc</a>{% endif %}
+        </form>
+        <div class="banner-reorder-note"><p class="banner-save-status" data-testimonial-status role="status" aria-live="polite">{% if reorder_enabled %}Kéo tay nắm hoặc dùng nút lên / xuống để sắp xếp.{% else %}Đang lọc danh sách. <a href="{{ path('admin_testimonial_index') }}">Xem tất cả đánh giá để sắp xếp.</a>{% endif %}</p></div>
+        <div class="dd banner-board" id="testimonial-nestable" data-reorder-enabled="{{ reorder_enabled ? 'true' : 'false' }}" data-reorder-url="{{ path('admin_testimonial_reorder') }}" data-reorder-token="{{ csrf_token('reorder_testimonials') }}">
+            <ol class="dd-list" id="testimonial-list">
+                {% for row in objects %}
+                    {% set avatar = row.avatarUrl|default('')|trim %}
+                    {% if not (avatar matches '~^(?:/(?!/)|https?://)~i') %}{% set avatar = '' %}{% endif %}
+                    {% set parts = avatar|split('/') %}
+                    {% set thumb = avatar ? (parts|slice(0, -1)|join('/')) ~ '/thumbs/' ~ (parts|last) : '' %}
+                    <li class="dd-item banner-row" data-id="{{ row.id }}">
+                        <div class="banner-row__layout testimonial-row">
+                            <div class="banner-order"><span class="banner-position">{{ reorder_enabled ? '#' ~ loop.index : '—' }}</span>
+                                {% if reorder_enabled %}<div class="dd-handle banner-grip" title="Kéo đánh giá của {{ row.name }}"><i class="fa fa-arrows" aria-hidden="true"></i><span class="sr-only">Kéo để sắp xếp hoặc dùng nút lên / xuống.</span></div>{% endif %}
+                                <div class="banner-order__buttons dd-nodrag"><button type="button" data-testimonial-move="up" aria-label="Di chuyển đánh giá {{ row.name }} lên" {% if not reorder_enabled or loop.first %}disabled{% endif %}><i class="fa fa-angle-up" aria-hidden="true"></i></button><button type="button" data-testimonial-move="down" aria-label="Di chuyển đánh giá {{ row.name }} xuống" {% if not reorder_enabled or loop.last %}disabled{% endif %}><i class="fa fa-angle-down" aria-hidden="true"></i></button></div>
+                            </div>
+                            <a href="{{ path('admin_testimonial_edit', {id: row.id}) }}" class="banner-preview testimonial-avatar dd-nodrag" data-testimonial-panel aria-label="Sửa đánh giá của {{ row.name }}">
+                                {% if avatar %}<img src="{{ thumb }}?v=2" data-testimonial-image data-original-src="{{ avatar }}" alt="{{ row.name }}" width="112" height="112" loading="lazy">{% endif %}
+                                <span class="banner-preview__fallback" {% if avatar %}hidden{% endif %}><i class="fa fa-user" aria-hidden="true"></i> Chưa có ảnh</span>
+                            </a>
+                            <div class="banner-details dd-nodrag">
+                                <div class="banner-details__title"><h3><a href="{{ path('admin_testimonial_edit', {id: row.id}) }}" data-testimonial-panel>{{ row.name }}</a></h3><span class="banner-badge {{ row.enable ? 'banner-badge--visible' : 'banner-badge--hidden' }}">{{ row.enable ? 'Đang hiển thị' : 'Đã ẩn' }}</span></div>
+                                <p class="testimonial-role">{{ row.role ?: 'Chưa có mô tả ngắn' }}</p>
+                                <p class="testimonial-rating"><span aria-hidden="true">{% for star in 1..5 %}<i class="fa {{ star <= row.rating ? 'fa-star' : 'fa-star-o' }}"></i>{% endfor %}</span> {{ row.rating }}/5 sao</p>
+                                <p class="testimonial-quote">{{ row.text|striptags }}</p>
+                                <p class="banner-meta"><span>ID #{{ row.id }}</span><span>Tạo ngày {{ row.createdAt|date('d/m/Y', 'Asia/Ho_Chi_Minh') }}</span></p>
+                            </div>
+                            <div class="banner-actions dd-nodrag">
+                                <a class="banner-button" href="{{ path('admin_testimonial_edit', {id: row.id}) }}" data-testimonial-panel aria-label="Chỉnh sửa đánh giá của {{ row.name }}"><i class="fa fa-pencil" aria-hidden="true"></i> Chỉnh sửa</a>
+                                <button type="button" class="banner-button" role="switch" aria-checked="{{ row.enable ? 'true' : 'false' }}" aria-label="Hiển thị đánh giá của {{ row.name }}" data-testimonial-visibility="{{ path('admin_testimonial_visibility', {id: row.id}) }}" data-token="{{ csrf_token('testimonial_visibility_' ~ row.id) }}" data-enable="{{ row.enable ? '0' : '1' }}">{{ row.enable ? 'Ẩn' : 'Hiện' }}</button>
+                                {{ include('admin/testimonial/_delete_form.html.twig', {object: row}, with_context = false) }}
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ol>
+        </div>
+        {% if objects is empty %}<div class="banner-empty"><i class="fa fa-comments-o" aria-hidden="true"></i><h2>{{ query or status_filter or rating_filter ? 'Không tìm thấy đánh giá phù hợp' : 'Chưa có đánh giá khách hàng' }}</h2><p>{{ query or status_filter or rating_filter ? 'Thử từ khóa khác hoặc xóa bộ lọc.' : 'Thêm phản hồi thực tế của khách hàng để bắt đầu.' }}</p></div>{% endif %}
+    </section>
+</main>

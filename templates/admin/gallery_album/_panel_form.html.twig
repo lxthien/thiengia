@@ -1,0 +1,10 @@
+<div data-panel-heading="{{ panel_title }}">
+{{ form_start(form, {attr: {'data-gallery-panel-form': '', 'novalidate': 'novalidate'}}) }}
+    {{ form_errors(form) }}
+    {{ form_row(form.name) }}
+    {{ form_row(form.description) }}
+    {{ form_row(form.enable) }}
+    <p class="gallery-cover-note">{{ object.id ? 'Thay đổi thông tin không làm thay đổi ảnh trong album. Dùng Quản lý ảnh để thêm ảnh, sửa chú thích và sắp xếp ảnh.' : 'Sau khi tạo album, bạn sẽ được chuyển đến trình quản lý để thêm ảnh từ thư viện.' }}</p>
+    <div class="banner-form-footer"><button type="button" class="banner-button" data-gallery-panel-close>Hủy</button><button type="submit" class="banner-button banner-button--primary">{{ object.id ? 'Lưu thông tin' : 'Tạo album và thêm ảnh' }}</button></div>
+{{ form_end(form) }}
+</div>

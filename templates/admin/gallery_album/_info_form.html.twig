@@ -1,0 +1,9 @@
+{{ form_start(form, {attr: {'data-album-info-form': '', 'novalidate': 'novalidate'}}) }}
+    {{ form_errors(form) }}
+    {{ form_row(form.name) }}
+    {{ form_row(form.description) }}
+    {{ form_row(form.enable) }}
+    <p class="album-help">Thông tin album và chú thích từng ảnh được lưu riêng.</p>
+    <p data-info-status role="status" class="album-help" aria-live="polite"></p>
+    <button type="submit" class="banner-button banner-button--primary">Lưu thông tin album</button>
+{{ form_end(form) }}

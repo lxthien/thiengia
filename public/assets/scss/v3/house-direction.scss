@@ -1,0 +1,22 @@
+@use "building-density";
+@use "tokens" as *;
+.direction-page .density {
+ select{display:block;box-sizing:border-box;width:100%;min-height:48px;border:1px solid #9b9289;border-radius:3px;background:$white;color:$text;padding:.6rem .8rem;font-size:1rem;}
+ select:focus-visible{outline:3px solid #9b3825;outline-offset:3px;}
+ .direction-compass{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.4rem;margin:1rem 0;}
+ .direction-compass button{padding:.6rem .25rem;min-height:74px;font-size:.78rem;background:#f5f4ee;}
+ .direction-compass strong,.direction-compass span{display:block;}
+ .direction-compass span{font-size:.7rem;margin-top:.3rem;}
+ .direction-compass button[data-caution=true]{background:#fff1e6;}
+ .direction-compass button[aria-pressed=true]{outline:2px solid #9b3825;outline-offset:-2px;border-color:#9b3825;}
+ .direction-center{grid-area:2 / 2;display:flex;align-items:center;justify-content:center;font-weight:700;background:$base;}
+ .direction-selected{padding:1rem;border-left:3px solid #706658;background:$base;font-weight:600;font-size:.9rem;}
+ .direction-selected[data-caution=true]{background:#fff1e6;border-color:#a84a1a;}
+ .direction-lists p{font-size:.85rem;margin:.7rem 0;}
+ .direction-table{grid-column:1/-1;padding:1.75rem;border-top:1px solid $line;min-width:0;}
+ .direction-table th,.direction-table td{padding:.6rem;font-size:.82rem;}
+ .direction-table-wrap{overflow:auto;}
+ .direction-table table{min-width:280px;}
+ .direction-caption{font-size:.78rem;color:#514b45;}
+ @media(max-width:767px){.direction-table{padding:1rem;}}
+}

@@ -1,0 +1,98 @@
+{% extends 'layout.html.twig' %}
+{% block bodyClass %}density-page age-page{% endblock %}
+{% block title %}Xem tuổi xây nhà: Tam Tai, Kim Lâu, Hoang Ốc | {{ v3.company.shortName }}{% endblock %}
+{% block description %}Tra tuổi mụ, Can Chi, Tam Tai, Kim Lâu và Hoang Ốc theo năm sinh âm lịch. So sánh 10 năm tiếp theo, giải thích cách tính và giới hạn tham khảo.{% endblock %}
+{% block stylesheets %}<link rel="stylesheet" href="{{ asset('build/css/v3-age.css') }}">{% endblock %}
+{% block javascripts %}<script src="{{ asset('build/js/v3-age.js') }}" defer></script>{% endblock %}
+{% block jsonld %}
+<script type="application/ld+json">{{ {
+    '@context':'https://schema.org','@type':'WebApplication','name':'Xem tuổi xây nhà',
+    'applicationCategory':'UtilitiesApplication','operatingSystem':'Any',
+    'url':url('building_age_calculator'),'offers':{'@type':'Offer','price':'0','priceCurrency':'VND'}
+}|json_encode(constant('JSON_HEX_TAG'))|raw }}</script>
+{% endblock %}
+{% block body %}
+{{ include('v3/components/_page_hero.html.twig', {
+    breadcrumb:[{label:'Trang chủ',path:path('homepage')},{label:'Xem tuổi xây nhà'}],
+    title:'Xem <em>tuổi xây nhà</em>',
+    description:'Tra ba tiêu chí dân gian theo năm sinh âm lịch và năm dự kiến khởi công, kèm giải thích từng phép tính.'
+}) }}
+<section class="density" aria-labelledby="age-heading">
+<div class="container max-w-5xl">
+    <div class="density-note">
+        <strong>Thông tin tham khảo theo quan niệm dân gian.</strong>
+        <p>Kết quả không dự báo vận hạn, sức khỏe hay tài lộc; không thay thế yêu cầu pháp lý, kết cấu và an toàn xây dựng. Không nên quyết định thời điểm xây nhà chỉ dựa vào công cụ này.</p>
+    </div>
+    <div class="density-workspace" data-age-tool>
+        <form novalidate>
+            <h2 id="age-heading">Năm sinh và năm xây nhà</h2>
+            <div class="density-field">
+                <label for="age-birth">Năm sinh âm lịch (số năm)</label>
+                <input id="age-birth" name="birth" type="text" inputmode="numeric" value="1990" maxlength="4" aria-describedby="age-birth-help age-birth-error">
+                <small id="age-birth-help">Ví dụ 1990 là Canh Ngọ. Đây là dữ liệu mẫu, hãy thay bằng năm sinh âm lịch của bạn. Nếu sinh trước Tết, cần tra lịch để xác định năm âm lịch; không dùng ngay năm dương lịch trên giấy khai sinh.</small>
+                <p id="age-birth-error" class="density-error" data-error="birth" hidden></p>
+            </div>
+            <div class="density-field">
+                <label for="age-build">Năm dự kiến xây nhà (âm lịch)</label>
+                <input id="age-build" name="build" type="text" inputmode="numeric" value="{{ suggested_year }}" maxlength="4" aria-describedby="age-build-help age-build-error">
+                <small id="age-build-help">Nhập năm âm lịch của ngày dự định khởi công. Nếu khởi công trước Tết, có thể vẫn thuộc năm âm lịch trước. Số điền sẵn chỉ là gợi ý, không phải phép đổi lịch.</small>
+                <p id="age-build-error" class="density-error" data-error="build" hidden></p>
+            </div>
+            <p class="density-calculation">Phạm vi: năm 1900–2100, tuổi mụ 18–120. Công cụ không tự chuyển ngày sinh dương lịch sang âm lịch.</p>
+            <div class="density-buttons"><button type="submit">Xem kết quả</button><button type="reset">Đặt lại</button></div>
+            <noscript><p>Bật JavaScript để tra cứu. Bạn vẫn có thể đọc quy tắc tính ở bên dưới.</p></noscript>
+        </form>
+        <div class="density-results">
+            <p data-empty>Nhập năm sinh và năm xây nhà hợp lệ để xem kết quả.</p>
+            <div data-results hidden>
+                <h2 data-output="verdict" tabindex="-1"></h2>
+                <p class="density-primary" data-output="age"></p>
+                <dl><div><dt>Năm sinh</dt><dd data-output="birth"></dd></div><div><dt>Năm xây nhà</dt><dd data-output="build"></dd></div></dl>
+                <p class="density-calculation" data-output="formula"></p>
+                <section class="age-check" data-check="tam"><h3 data-output="tam"></h3><p data-output="tam-note"></p></section>
+                <section class="age-check" data-check="kim"><h3 data-output="kim"></h3><p data-output="kim-note"></p></section>
+                <section class="age-check" data-check="hoang"><h3 data-output="hoang"></h3><p data-output="hoang-note"></p></section>
+                <p class="age-disclaimer">“Không phạm” chỉ có nghĩa là không rơi vào ba tiêu chí theo quy ước đang dùng, không có nghĩa bảo đảm việc xây dựng thuận lợi.</p>
+            </div>
+            <p class="sr-only" data-status role="status" aria-live="polite" aria-atomic="true"></p>
+        </div>
+        <section class="age-future" data-future hidden aria-labelledby="age-future-heading">
+            <h2 id="age-future-heading">So sánh các năm tiếp theo</h2>
+            <p data-output="future"></p>
+            <div class="age-table-scroll" tabindex="0" role="region" aria-label="Bảng tuổi xây nhà, có thể cuộn ngang">
+                <table><caption>Bấm vào năm để xem chi tiết. Tra tối đa 10 năm sau năm đã chọn, trong phạm vi tuổi và năm hỗ trợ.</caption>
+                <thead><tr><th scope="col">Năm âm lịch</th><th scope="col">Tuổi mụ</th><th scope="col">Tam Tai</th><th scope="col">Kim Lâu</th><th scope="col">Hoang Ốc</th><th scope="col">Tổng hợp</th></tr></thead>
+                <tbody data-years></tbody></table>
+            </div>
+        </section>
+    </div>
+    <div class="density-documentation">
+        <section aria-labelledby="age-rules-heading">
+            <h2 id="age-rules-heading">Quy tắc tính được sử dụng</h2>
+            <p><strong>Tuổi mụ:</strong> năm xây nhà âm lịch − năm sinh âm lịch + 1. Can Chi được tính theo chu kỳ 60 năm; công cụ dùng mốc 1984 là Giáp Tý.</p>
+            <details><summary>Tam Tai: đối chiếu con giáp của hai năm</summary>
+                <p>Nhóm Thân, Tý, Thìn xét Dần, Mão, Thìn; nhóm Tỵ, Dậu, Sửu xét Hợi, Tý, Sửu; nhóm Dần, Ngọ, Tuất xét Thân, Dậu, Tuất; nhóm Hợi, Mão, Mùi xét Tỵ, Ngọ, Mùi.</p>
+            </details>
+            <details><summary>Kim Lâu: số dư khi chia tuổi mụ cho 9</summary>
+                <p>Các số dư 1, 3, 6, 8 lần lượt được gọi là Kim Lâu Thân, Thê, Tử, Súc. Bản tra này xét cả bốn trường hợp, không áp dụng ngoại lệ hoặc cách “hóa giải”.</p>
+            </details>
+            <details><summary>Hoang Ốc: đếm từ mốc chục tuổi</summary>
+                <p>Mốc 10, 20, 30, 40, 50, 60 lần lượt tương ứng Nhất Cát, Nhì Nghi, Tam Địa Sát, Tứ Tấn Tài, Ngũ Thọ Tử, Lục Hoang Ốc. Mốc 70 quay lại Nhất Cát; mỗi tuổi lẻ tiến một cung. Ví dụ 35 tuổi đi từ mốc 30 thêm 5 cung, đến Nhì Nghi.</p>
+                <p>Ba cung kiêng theo cách tra này là Tam Địa Sát, Ngũ Thọ Tử và Lục Hoang Ốc. Những cách tính dân gian khác có thể cho kết quả khác.</p>
+            </details>
+        </section>
+        <section aria-labelledby="age-faq-heading">
+            <h2 id="age-faq-heading">Lưu ý khi tra cứu</h2>
+            <details><summary>Sinh vào tháng 1 hoặc tháng 2 dương lịch thì nhập năm nào?</summary>
+                <p>Cần biết ngày sinh để đối chiếu Tết của năm đó. Nếu ngày sinh nằm trước Tết âm lịch, thường phải dùng số năm liền trước. Công cụ chỉ nhận năm âm lịch bạn đã xác định, không suy đoán từ tháng sinh.</p>
+            </details>
+            <details><summary>Có cần nhập giới tính hoặc xem hướng nhà không?</summary>
+                <p>Ba phép tra ở đây dựa trên năm sinh và tuổi mụ, không dùng giới tính. Xem hướng nhà, chọn ngày động thổ và mượn tuổi không nằm trong phạm vi công cụ này.</p>
+            </details>
+            <p>Công cụ áp dụng các quy ước dân gian được trình bày ở trên, không phải tiêu chuẩn khoa học hay quy chuẩn xây dựng.</p>
+            <p><a href="{{ path('lo_ban_calculator') }}">Tra thước Lỗ Ban</a> · <a href="{{ path('building_density_calculator') }}">Tính mật độ xây dựng</a> · <a href="{{ path('contact') }}">Tư vấn thiết kế</a></p>
+        </section>
+    </div>
+</div>
+</section>
+{% endblock %}

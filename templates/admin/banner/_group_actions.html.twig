@@ -1,0 +1,11 @@
+<div class="banner-group-actions">
+    <a href="{{ path('admin_bannercategory_edit', {id: group.id}) }}" data-banner-panel data-panel-kind="category"
+       class="banner-icon-button" title="Chỉnh sửa nhóm" aria-label="Chỉnh sửa nhóm {{ group.name }}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+    <button type="button" class="banner-icon-button" {% if count > 0 %}disabled{% endif %}
+            title="{{ count > 0 ? 'Chuyển hết banner sang nhóm khác trước khi xóa nhóm' : 'Xóa nhóm trống' }}"
+            aria-label="Xóa nhóm {{ group.name }}"
+            data-banner-delete-url="{{ path('admin_bannercategory_delete', {id: group.id}) }}"
+            data-delete-token="{{ csrf_token('delete') }}" data-delete-name="{{ group.name }}" data-delete-kind="category">
+        <i class="fa fa-trash-o" aria-hidden="true"></i>
+    </button>
+</div>

@@ -3,9 +3,15 @@
 namespace App\Seo;
 
 use App\Entity\News;
+use App\Service\ContentMetrics;
 
 class ContentDecayReporter
 {
+    public function __construct(
+        private readonly ContentMetrics $contentMetrics,
+    ) {
+    }
+
     public function analyze(News $post, \DateTimeInterface $now = null)
     {
         $now = $now ?: new \DateTime();
@@ -28,7 +34,7 @@ class ContentDecayReporter
             $recommendations[] = 'Nên rà soát lại nội dung sau 3 tháng';
         }
 
-        // 2. SEO (Basic mock simulation for kientruc)
+        // 2. SEO. ContentMetrics understands Unicode words, including Vietnamese.
         $seoScore = 100;
         if (empty($post->getPageTitle())) {
             $seoScore -= 15;
@@ -39,7 +45,7 @@ class ContentDecayReporter
             $reasons[] = 'Thiếu Meta Description';
         }
         
-        $wordCount = str_word_count(strip_tags((string) $post->getContents()));
+        $wordCount = $this->contentMetrics->countWords($post->getContents());
         if ($wordCount < 300) {
             $seoScore -= 20;
             $score += 12;
@@ -97,6 +103,7 @@ class ContentDecayReporter
             'decayStatus' => $this->getStatus($score),
             'ageDays' => $ageDays,
             'views' => $viewCounts,
+            'wordCount' => $wordCount,
             'seo' => [
                 'score' => $seoScore,
                 'status' => $seoStatus

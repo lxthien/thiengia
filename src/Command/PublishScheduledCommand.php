@@ -19,6 +19,7 @@ class PublishScheduledCommand extends Command
 {
     public function __construct(
         private readonly EntityManagerInterface $em,
+        private readonly string $timezone,
     ) {
         parent::__construct();
     }
@@ -32,7 +33,7 @@ class PublishScheduledCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $now = new \DateTime('now', new \DateTimeZone('Asia/Ho_Chi_Minh'));
+        $now = new \DateTime('now', new \DateTimeZone($this->timezone));
 
         $scheduled = $this->em->getRepository(News::class)->createQueryBuilder('n')
             ->where('n.status = :status')

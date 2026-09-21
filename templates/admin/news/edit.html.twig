@@ -1,5 +1,9 @@
 {% extends 'admin/layout.html.twig' %}
 
+{% block admin_editor_stylesheets %}
+    <link rel="stylesheet" href="{{ asset('build/css/ckeditor5.css') }}">
+{% endblock %}
+
 {% block body_id 'admin_news_edit' %}
 
 {% block main %}
@@ -13,8 +17,7 @@
                             <a class="pull-right" target="_blank" href="{{ path('dynamic_post_page', {'slug': news.url, 'preview' : 'true', 'preview_id' : news.id }) }}">Xem trước</a>
                         </div>
                         <div class="card-body">
-                            <!-- SEO Checker -->
-                            {{ include('admin/components/seo-checker.html.twig') }}
+                            {{ include('admin/components/seo-checker.html.twig', {form: form}, with_context = false) }}
 
                             <!-- Credit Card -->
                             <div id="pay-invoice">

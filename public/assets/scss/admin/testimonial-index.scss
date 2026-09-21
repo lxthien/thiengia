@@ -1,0 +1,37 @@
+$media-workspace-scope: '#admin_testimonial_index';
+@import 'banner-index';
+
+#admin_testimonial_index {
+    .testimonial-row { grid-template-columns: 40px 112px minmax(0, 1fr); align-items: start; }
+    .testimonial-row .banner-order, .testimonial-row .banner-preview { grid-row: span 2; }
+    .testimonial-row .banner-actions { grid-column: 3; flex-wrap: wrap; }
+    .testimonial-avatar { border-radius: 8px; }
+    .testimonial-avatar img { height: 112px; object-fit: cover; }
+    .testimonial-avatar .banner-preview__fallback { min-height: 112px; flex-direction: column; }
+    .banner-details h3 { margin: 0; font-size: 18px; line-height: 1.5; font-weight: 600; overflow-wrap: anywhere; }
+    .banner-details h3 a { color: var(--banner-ink); }
+    .testimonial-role { color: var(--banner-muted); font-size: 13px; margin-bottom: 8px; overflow-wrap: anywhere; }
+    .testimonial-rating, .testimonial-rating span { color: #875500; font-size: 14px; }
+    .testimonial-rating i { margin-right: 3px; }
+    .testimonial-quote { color: var(--banner-ink); font-size: 14px; line-height: 1.7; margin-bottom: 12px; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .banner-meta span { color: inherit; }
+    .banner-editor-content textarea { min-height: 150px; resize: vertical; }
+    .banner-editor-content .banner-form-image img { width: 112px; height: 112px; object-fit: cover; border-radius: 8px; }
+    .banner-editor-content .testimonial-rating-field input[type=radio] { min-height: 0; width: auto; height: auto; margin: 0 6px 0 0; }
+    .testimonial-rating-field #testimonial_rating { display: flex; flex-wrap: wrap; gap: 12px; }
+    .testimonial-rating-field .form-check { display: flex; align-items: center; padding: 0; }
+    .testimonial-rating-field .form-check-label { margin-bottom: 0; }
+    .testimonial-rating-field label { margin-right: 14px; }
+    .banner-button:disabled { opacity: .6; cursor: default; }
+    .banner-manager :focus-visible { outline: 3px solid #195c9e; outline-offset: 2px; }
+    @media (max-width: 1100px) {
+        .testimonial-row .banner-actions { grid-column: 1 / -1; }
+        .testimonial-row .banner-order, .testimonial-row .banner-preview { grid-row: 1; }
+    }
+    @media (max-width: 900px) {
+        .testimonial-row { grid-template-columns: 40px minmax(0, 1fr); }
+        .testimonial-row .banner-preview { width: 112px; }
+        .testimonial-row .banner-details { grid-column: 1 / -1; }
+        .banner-filters > div { flex: 1 1 100%; }
+    }
+}

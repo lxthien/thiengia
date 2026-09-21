@@ -1,0 +1,80 @@
+{% set active_count = objects|filter(album => album.enable)|length %}
+<main class="banner-manager gallery-manager" data-gallery-manager aria-labelledby="gallery-heading">
+    <header class="banner-manager__header">
+        <div><h1 id="gallery-heading">Quản lý album</h1><p>Hình ảnh hoạt động, trạng thái và thứ tự hiển thị trên trang chủ.</p></div>
+        <a href="{{ path('admin_gallery_album_new') }}" class="banner-button banner-button--primary" data-gallery-panel><i class="fa fa-plus" aria-hidden="true"></i> Thêm album</a>
+    </header>
+    <div class="banner-notice" data-gallery-notice role="status" aria-live="polite" hidden></div>
+    <section class="banner-panel" aria-labelledby="gallery-list-heading">
+        <div class="banner-panel__toolbar">
+            <div><h2 id="gallery-list-heading">Album hình ảnh hoạt động</h2>
+                <p><strong>{{ objects|length }}{% if query or status_filter %} / {{ total_count }}{% endif %} album</strong><span class="banner-summary">{{ active_count }} đang bật · {{ objects|length - active_count }} đã ẩn</span></p>
+            </div>
+        </div>
+        <form method="get" action="{{ path('admin_gallery_album_index') }}" class="banner-filters">
+            <div class="banner-filter-search"><label for="gallery-search">Tìm album</label><input id="gallery-search" type="search" name="q" maxlength="150" value="{{ query }}" placeholder="Nhập tên album hoặc hoạt động..."></div>
+            <div><label for="gallery-status">Trạng thái</label><select id="gallery-status" name="status">
+                <option value="">Tất cả album</option><option value="visible" {{ status_filter == 'visible' ? 'selected' : '' }}>Đang bật hiển thị</option>
+                <option value="hidden" {{ status_filter == 'hidden' ? 'selected' : '' }}>Đã ẩn</option><option value="empty" {{ status_filter == 'empty' ? 'selected' : '' }}>Chưa có ảnh</option>
+            </select></div>
+            <button type="submit" class="banner-button">Lọc</button>
+            {% if query or status_filter %}<a class="banner-filter-reset" href="{{ path('admin_gallery_album_index') }}">Xóa bộ lọc</a>{% endif %}
+        </form>
+        <div class="banner-reorder-note"><p class="banner-save-status" data-gallery-status role="status" aria-live="polite" aria-atomic="true">
+            {% if reorder_enabled %}Kéo tay nắm hoặc dùng nút lên / xuống để sắp xếp album.
+            {% else %}Đang lọc danh sách. <a href="{{ path('admin_gallery_album_index') }}">Xem tất cả album để sắp xếp.</a>{% endif %}
+        </p></div>
+        <div class="dd banner-board" id="gallery-nestable" data-reorder-enabled="{{ reorder_enabled ? 'true' : 'false' }}"
+             data-reorder-url="{{ path('admin_gallery_album_reorder') }}" data-reorder-token="{{ csrf_token('reorder_gallery_albums') }}">
+            <ol class="dd-list" id="gallery-list">
+                {% for row in objects %}
+                    {% set cover = row.coverImage %}
+                    {% set image_url = cover ? cover.imageUrl|trim : '' %}
+                    {% if not (image_url matches '~^(?:/(?!/)|https?://)~i') %}{% set image_url = '' %}{% endif %}
+                    {% set parts = image_url|split('/') %}
+                    {% set thumb = image_url ? (parts|slice(0, -1)|join('/')) ~ '/thumbs/' ~ (parts|last) : '' %}
+                    <li class="dd-item banner-row" data-id="{{ row.id }}">
+                        <div class="banner-row__layout gallery-row__layout">
+                            <div class="banner-order">
+                                <span class="banner-position">{{ reorder_enabled ? '#' ~ loop.index : '—' }}</span>
+                                {% if reorder_enabled %}<div class="dd-handle banner-grip" title="Kéo để sắp xếp album {{ row.name }}"><i class="fa fa-arrows" aria-hidden="true"></i><span class="sr-only">Kéo album {{ row.name }}, hoặc dùng nút lên và xuống.</span></div>{% endif %}
+                                <div class="banner-order__buttons dd-nodrag">
+                                    <button type="button" data-gallery-move="up" aria-label="Di chuyển {{ row.name }} lên" {% if not reorder_enabled or loop.first %}disabled{% endif %}><i class="fa fa-angle-up" aria-hidden="true"></i></button>
+                                    <button type="button" data-gallery-move="down" aria-label="Di chuyển {{ row.name }} xuống" {% if not reorder_enabled or loop.last %}disabled{% endif %}><i class="fa fa-angle-down" aria-hidden="true"></i></button>
+                                </div>
+                            </div>
+                            <a class="banner-preview dd-nodrag" href="{{ path('admin_gallery_album_edit', {id: row.id}) }}#album-image-list" aria-label="Quản lý {{ row.images|length }} ảnh của album {{ row.name }}">
+                                {% if image_url %}<img src="{{ asset(thumb) }}?v=2" data-gallery-image data-original-src="{{ image_url }}" alt="{{ cover.alt ?: row.name }}" width="300" height="200" loading="lazy" decoding="async">{% endif %}
+                                <span class="banner-preview__fallback" {% if image_url %}hidden{% endif %}><i class="fa fa-picture-o" aria-hidden="true"></i> {{ cover ? 'Không tải được ảnh' : 'Chưa có ảnh' }}</span>
+                                <span class="banner-preview__caption">{{ row.images|length }} ảnh · Quản lý ảnh</span>
+                            </a>
+                            <div class="banner-details dd-nodrag">
+                                <div class="banner-details__title">
+                                    <h3><a href="{{ path('admin_gallery_album_edit', {id: row.id}) }}" data-gallery-panel>{{ row.name }}</a></h3>
+                                    <span class="banner-badge {{ row.enable ? 'banner-badge--visible' : 'banner-badge--hidden' }}"><i class="fa {{ row.enable ? 'fa-eye' : 'fa-eye-slash' }}" aria-hidden="true"></i>{{ row.enable ? 'Đang bật hiển thị' : 'Đã ẩn' }}</span>
+                                </div>
+                                <p class="gallery-description">{{ row.description|default('Chưa có mô tả.', true)|striptags }}</p>
+                                <p class="banner-meta"><span>ID #{{ row.id }}</span><span>Tạo ngày {{ row.createdAt|date('d/m/Y', 'Asia/Ho_Chi_Minh') }}</span></p>
+                                <p class="gallery-cover-note">{{ row.images|length ? 'Ảnh đầu tiên trong album được dùng làm ảnh đại diện.' : 'Album chưa có ảnh. Thêm ảnh để có nội dung hiển thị trên trang chủ.' }}</p>
+                            </div>
+                            <div class="banner-actions dd-nodrag">
+                                <a href="{{ path('admin_gallery_album_edit', {id: row.id}) }}#album-image-list" class="banner-button"><i class="fa fa-picture-o" aria-hidden="true"></i> Quản lý ảnh</a>
+                                <a href="{{ path('admin_gallery_album_edit', {id: row.id}) }}" class="banner-button" data-gallery-panel aria-label="Sửa thông tin {{ row.name }}"><i class="fa fa-pencil" aria-hidden="true"></i> Sửa thông tin</a>
+                                <button type="button" class="banner-button" role="switch" aria-checked="{{ row.enable ? 'true' : 'false' }}" aria-label="Hiển thị album {{ row.name }}"
+                                    data-gallery-visibility="{{ path('admin_gallery_album_visibility', {id: row.id}) }}" data-token="{{ csrf_token('gallery_album_visibility_' ~ row.id) }}" data-enable="{{ row.enable ? '0' : '1' }}">{{ row.enable ? 'Ẩn' : 'Hiện' }}</button>
+                                {{ include('admin/gallery_album/_delete_form.html.twig', {object: row}, with_context = false) }}
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ol>
+        </div>
+        {% if objects is empty %}
+            <div class="banner-empty"><i class="fa fa-picture-o" aria-hidden="true"></i><h2>{{ query or status_filter ? 'Không tìm thấy album phù hợp' : 'Chưa có album hoạt động' }}</h2>
+                <p>{{ query or status_filter ? 'Thử từ khóa khác hoặc xóa bộ lọc để xem tất cả album.' : 'Tạo album, sau đó chọn ảnh từ thư viện để kể lại hoạt động của bạn.' }}</p>
+                {% if query or status_filter %}<a class="banner-button" href="{{ path('admin_gallery_album_index') }}">Xem tất cả album</a>
+                {% else %}<a class="banner-button banner-button--primary" href="{{ path('admin_gallery_album_new') }}" data-gallery-panel>Thêm album đầu tiên</a>{% endif %}
+            </div>
+        {% endif %}
+    </section>
+</main>

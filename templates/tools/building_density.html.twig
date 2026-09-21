@@ -1,0 +1,112 @@
+{% extends 'layout.html.twig' %}
+{% block bodyClass %}density-page{% endblock %}
+{% block title %}Tính mật độ xây dựng và hệ số sử dụng đất | {{ v3.company.shortName }}{% endblock %}
+{% block description %}Tra mật độ xây dựng nhà ở riêng lẻ theo diện tích đất, tính diện tích chiếm đất, tổng sàn và hệ số sử dụng đất dự kiến. Có nội suy và cảnh báo vượt chỉ tiêu.{% endblock %}
+{% block stylesheets %}<link rel="stylesheet" href="{{ asset('build/css/v3-density.css') }}">{% endblock %}
+{% block javascripts %}<script src="{{ asset('build/js/v3-density.js') }}" defer></script>{% endblock %}
+{% block jsonld %}
+<script type="application/ld+json">{{ {
+    '@context':'https://schema.org','@type':'WebApplication','name':'Tính mật độ xây dựng',
+    'applicationCategory':'UtilitiesApplication','operatingSystem':'Any',
+    'url':url('building_density_calculator'),'offers':{'@type':'Offer','price':'0','priceCurrency':'VND'}
+}|json_encode(constant('JSON_HEX_TAG'))|raw }}</script>
+{% endblock %}
+{% block body %}
+{{ include('v3/components/_page_hero.html.twig', {
+    breadcrumb:[{label:'Trang chủ',path:path('homepage')},{label:'Tính mật độ xây dựng'}],
+    title:'Tính <em>mật độ xây dựng</em>',
+    description:'Tra mật độ theo diện tích lô đất, ước tính diện tích chiếm đất và tổng sàn cho phương án nhà ở riêng lẻ.'
+}) }}
+<section class="density" aria-labelledby="density-heading">
+<div class="container max-w-5xl">
+    <div class="density-note"><strong>Phạm vi: tra Bảng 2.8, QCVN 01:2021/BXD cho nhà ở riêng lẻ.</strong>
+        <p>Không dùng để kết luận số tầng hoặc diện tích được cấp phép. Không tự áp dụng ngoại lệ cho khu vực đô thị hiện hữu; công trình cao trên 25 m cần đối chiếu quy định riêng.</p>
+    </div>
+    {% if needs_review %}
+    <p class="density-warning" role="note">Từ 01/01/2027, QCVN 01:2026/BXD có hiệu lực. Công cụ này vẫn tra bảng phiên bản 2021 để tham khảo; cần đối chiếu quy chuẩn mới và quy định chuyển tiếp trước khi sử dụng.</p>
+    {% endif %}
+    <div data-density-tool class="density-workspace">
+        <form novalidate>
+            <h2 id="density-heading">Thông tin lô đất</h2>
+            <div class="density-field">
+                <label for="density-area">Diện tích lô đất (m²)</label>
+                <input id="density-area" name="area" type="text" inputmode="decimal" value="100" maxlength="20" aria-describedby="density-area-help density-area-error">
+                <small id="density-area-help">Dùng dấu phẩy hoặc dấu chấm cho phần thập phân; không dùng dấu phân cách hàng nghìn.</small>
+                <p id="density-area-error" class="density-error" data-error="area" hidden></p>
+            </div>
+            <div class="density-field">
+                <label for="density-floors">Số tầng giả định</label>
+                <input id="density-floors" name="floors" type="text" inputmode="numeric" value="3" maxlength="3" aria-describedby="density-floors-help density-floors-error">
+                <small id="density-floors-help">Tính cả tầng trệt. Giả định diện tích các tầng bằng diện tích chiếm đất; chưa mô hình hóa tầng hầm, tầng lửng hoặc khoảng thông tầng.</small>
+                <p id="density-floors-error" class="density-error" data-error="floors" hidden></p>
+            </div>
+            <div class="density-field">
+                <label for="density-custom">Mật độ dự kiến (%)</label>
+                <input id="density-custom" name="density" type="text" inputmode="decimal" value="0" maxlength="20" aria-describedby="density-custom-help density-custom-error">
+                <small id="density-custom-help">Nhập 0 để dùng mức tra bảng. Nhập tỷ lệ khác để so sánh phương án của bạn.</small>
+                <p id="density-custom-error" class="density-error" data-error="density" hidden></p>
+            </div>
+            <div class="density-buttons"><button type="submit">Tính kết quả</button><button type="reset">Đặt lại</button></div>
+            <div class="density-presets" aria-label="Diện tích mẫu">
+                {% for area in [90,100,150,200,300,500,1000] %}<button type="button" data-preset="{{ area }}">{{ area }} m²</button>{% endfor %}
+            </div>
+            <noscript><p>Bật JavaScript để tính kết quả. Bảng tra và công thức vẫn có thể đọc bên dưới.</p></noscript>
+        </form>
+        <div class="density-results">
+            <p data-empty>Nhập số liệu hợp lệ để xem kết quả.</p>
+            <div data-results hidden>
+                <h2 data-result-title>Ước tính theo dữ liệu nhập</h2>
+                <p>Diện tích chiếm đất dự kiến</p>
+                <p class="density-primary" data-output="footprint"></p>
+                <dl>
+                    <div><dt>Mật độ tối đa tra bảng</dt><dd data-output="max"></dd></div>
+                    <div><dt>Mật độ dùng để tính</dt><dd data-output="used"></dd></div>
+                    <div><dt>Phần đất ngoài diện tích chiếm đất</dt><dd data-output="open"></dd></div>
+                    <div><dt>Tổng diện tích sàn giả định</dt><dd data-output="floorArea"></dd></div>
+                    <div><dt>Hệ số sử dụng đất ước tính</dt><dd data-output="far"></dd></div>
+                </dl>
+                <p class="density-warning" data-warning hidden></p>
+                <p class="density-calculation" data-interpolation></p>
+                <p class="density-calculation" data-formula></p>
+                <p class="density-calculation">Các tầng được giả định có cùng diện tích. Phần đất còn lại không đồng nghĩa với diện tích sân bắt buộc hoặc khoảng lùi đạt yêu cầu. Số hiển thị làm tròn 2 chữ số; tính toán và cảnh báo dùng giá trị chưa làm tròn.</p>
+            </div>
+            <p class="sr-only" data-status role="status" aria-live="polite" aria-atomic="true"></p>
+        </div>
+    </div>
+    <div class="density-documentation">
+        <section aria-labelledby="density-table-title">
+            <h2 id="density-table-title">Bảng mật độ xây dựng thuần</h2>
+            <table>
+                <caption>Bảng 2.8, QCVN 01:2021/BXD: lô đất xây dựng nhà ở riêng lẻ</caption>
+                <thead><tr><th scope="col">Diện tích lô đất</th><th scope="col">Mật độ tối đa</th></tr></thead>
+                <tbody>{% for row in [['≤ 90',100],['100',90],['200',70],['300',60],['500',50],['≥ 1.000',40]] %}
+                    <tr><th scope="row">{{ row[0] }} m²</th><td>{{ row[1] }}%</td></tr>
+                {% endfor %}</tbody>
+            </table>
+            <p>Giữa hai mốc, dùng nội suy tuyến tính: M = M₁ + (S − S₁) × (M₂ − M₁) / (S₂ − S₁).
+            Ví dụ lô 150 m² có mức tra bảng 80%, tương ứng 120 m² chiếm đất.</p>
+        </section>
+        <section aria-labelledby="density-limit-title">
+            <h2 id="density-limit-title">Hiểu đúng kết quả</h2>
+            <details><summary>Mật độ xây dựng khác hệ số sử dụng đất thế nào?</summary>
+                <p>Mật độ thuần so sánh diện tích chiếm đất của công trình kiến trúc chính với diện tích lô đất. Hệ số sử dụng đất so sánh diện tích sàn tính theo quy chuẩn với diện tích lô đất. Công cụ ước tính tổng sàn bằng diện tích chiếm đất nhân số tầng, không thay thế bảng tính diện tích trong hồ sơ thiết kế.</p>
+            </details>
+            <details><summary>Hệ số 7 có nghĩa là được xây 7 tầng không?</summary>
+                <p>Không. Chú thích Bảng 2.8 đặt giới hạn hệ số sử dụng đất 7 lần, không ấn định số tầng được cấp phép. Chiều cao, khoảng lùi, chỉ giới, an toàn cháy và quy hoạch địa phương phải được kiểm tra riêng. Công trình cao trên 25 m không nên tra riêng bảng này để quyết định phương án.</p>
+            </details>
+            <details><summary>Lô 100 m² có được xây 100% không?</summary>
+                <p>Bảng thông thường cho kết quả 90%. Mục 2.7.7 có trường hợp riêng tại khu vực hiện hữu trong đô thị đối với nhà ở riêng lẻ cao không quá 25 m, diện tích lô không quá 100 m²; vẫn phải đáp ứng khoảng lùi và khoảng cách công trình. Công cụ không tự xác nhận lô đất thuộc trường hợp đó.</p>
+            </details>
+        </section>
+        <section aria-labelledby="density-sources-title">
+            <h2 id="density-sources-title">Căn cứ và lưu ý áp dụng</h2>
+            <p>Phiên bản dữ liệu: QCVN 01:2021/BXD, Bảng 2.8 và các mục 2.6.3, 2.7.7. Đối chiếu ngày 20/09/2026.
+                <a href="https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=148068" target="_blank" rel="noopener noreferrer">Xem Thông tư 01/2021/TT-BXD</a>.</p>
+            <p><a href="https://moc.gov.vn/vn/Pages/chitiettin.aspx?ChuyenmucID=1196&amp;IDNews=95350" target="_blank" rel="noopener noreferrer">QCVN 01:2026/BXD có hiệu lực từ 01/01/2027</a>. Cần kiểm tra phiên bản quy chuẩn và quy định chuyển tiếp phù hợp với hồ sơ.</p>
+            <p>Chỉ tiêu áp dụng thực tế do quy hoạch được duyệt, quy chế quản lý kiến trúc, thông tin quy hoạch và cơ quan có thẩm quyền xác định. Công cụ chỉ hỗ trợ tham khảo sơ bộ, không phải tư vấn pháp lý hay xác nhận được phép xây dựng.</p>
+            <p><a href="{{ path('contact') }}">Liên hệ tư vấn phương án thiết kế</a> · <a href="{{ path('lo_ban_calculator') }}">Tra cứu thước Lỗ Ban</a></p>
+        </section>
+    </div>
+</div>
+</section>
+{% endblock %}

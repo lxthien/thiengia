@@ -1,5 +1,13 @@
 {% extends 'admin/layout.html.twig' %}
 
+{% block admin_datatables_stylesheets %}
+    <link rel="stylesheet" href="{{ asset('assets/sufeeadmin/assets/css/lib/datatable/dataTables.bootstrap.min.css') }}">
+{% endblock %}
+
+{% block admin_datatables_javascripts %}
+    {{ include('admin/components/_datatables_scripts.html.twig', with_context = false) }}
+{% endblock %}
+
 {% block body_id 'admin_news_index' %}
 
 {% block main %}

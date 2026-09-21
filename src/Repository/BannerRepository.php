@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Banner;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\LockMode;
 use Doctrine\Persistence\ManagerRegistry;
 
 class BannerRepository extends ServiceEntityRepository
@@ -13,29 +14,28 @@ class BannerRepository extends ServiceEntityRepository
         parent::__construct($registry, Banner::class);
     }
 
-    /**
-     * @return Banner[]
-     */
     public function findAllOrdered(): array
     {
-        return $this->findBy([], ['position' => 'ASC']);
+        return $this->createQueryBuilder('b')->leftJoin('b.bannercategory', 'c')->addSelect('c')
+            ->orderBy('b.position', 'ASC')->addOrderBy('b.id', 'ASC')->getQuery()->getResult();
     }
 
-    /**
-     * Active banners belonging to categories of the given display zone.
-     *
-     * @return Banner[]
-     */
+    public function findForZone(string $zone, bool $lock = false): array
+    {
+        $query = $this->createQueryBuilder('b')->join('b.bannercategory', 'c')->addSelect('c')
+            ->where('c.zone = :zone')->setParameter('zone', $zone)
+            ->orderBy('b.position', 'ASC')->addOrderBy('b.id', 'ASC')->getQuery();
+        if ($lock) {
+            $query->setLockMode(LockMode::PESSIMISTIC_WRITE);
+        }
+        return $query->getResult();
+    }
+
     public function findActiveByZone(string $zone): array
     {
-        return $this->createQueryBuilder('b')
-            ->join('b.bannercategory', 'c')
-            ->andWhere('c.zone = :zone')
-            ->andWhere('b.enable = :enable')
-            ->setParameter('zone', $zone)
-            ->setParameter('enable', true)
-            ->orderBy('b.position', 'ASC')
-            ->getQuery()
-            ->getResult();
+        return $this->createQueryBuilder('b')->join('b.bannercategory', 'c')
+            ->andWhere('c.zone = :zone')->andWhere('b.enable = :enable')
+            ->setParameter('zone', $zone)->setParameter('enable', true)
+            ->orderBy('b.position', 'ASC')->addOrderBy('b.id', 'ASC')->getQuery()->getResult();
     }
 }

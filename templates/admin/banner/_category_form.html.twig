@@ -1,0 +1,9 @@
+<div data-panel-heading="{{ panel_title }}">
+{{ form_start(form, {attr: {'data-banner-panel-form': '', 'novalidate': 'novalidate'}}) }}
+    {{ form_errors(form) }}
+    {{ form_row(form.name) }}
+    {{ form_row(form.zone) }}
+    <details class="banner-form-advanced" {% if form.url.vars.errors|length %}open{% endif %}><summary>Nâng cao: mã nhóm</summary>{{ form_row(form.url) }}</details>
+    <div class="banner-form-footer"><button type="button" class="banner-button" data-banner-panel-close>Hủy</button><button type="submit" class="banner-button banner-button--primary">Lưu nhóm</button></div>
+{{ form_end(form) }}
+</div>
