@@ -519,8 +519,11 @@ export default function initCkeditor5() {
     document.querySelectorAll('textarea.txt-ckeditor5').forEach((textarea) => {
         const minHeight = textarea.dataset.height ? `${textarea.dataset.height}px` : '500px';
 
+        const config = textarea.dataset.editorPreset === 'comment'
+            ? { ...baseConfig, toolbar: { items: ['undo', 'redo', '|', 'bold', 'italic', 'link', '|', 'bulletedList', 'numberedList', 'blockQuote', 'removeFormat'], shouldNotGroupWhenFull: false } }
+            : baseConfig;
         ClassicEditor
-            .create(textarea, baseConfig)
+            .create(textarea, config)
             .then((editor) => {
                 // data-height của CKEditor 4 cũ là chiều cao CỐ ĐỊNH; ở đây dùng
                 // làm chiều cao tối thiểu, khung tự dài thêm theo nội dung (xem

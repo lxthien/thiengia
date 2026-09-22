@@ -39,17 +39,25 @@ class CommentController extends AbstractController
     {
         $q = trim((string) $request->query->get('q', ''));
         $status = (string) $request->query->get('status', '');
+        if (!in_array($status, ['', 'approved', 'pending'], true)) {
+            $status = '';
+        }
 
         $qb = $this->em->getRepository(Comment::class)->search($q, $status);
 
         $pagination = $this->paginator->paginate(
             $qb,
-            $request->query->getInt('page', 1),
+            max(1, $request->query->getInt('page', 1)),
             20
         );
 
         return $this->render('admin/comment/index.html.twig', [
             'pagination' => $pagination,
+            'counts' => [
+                'all' => $this->em->getRepository(Comment::class)->count([]),
+                'pending' => $this->em->getRepository(Comment::class)->count(['approved' => false]),
+                'approved' => $this->em->getRepository(Comment::class)->count(['approved' => true]),
+            ],
             'filters' => [
                 'q' => $q,
                 'status' => $status,
@@ -85,7 +93,7 @@ class CommentController extends AbstractController
 
             $this->addFlash('success', 'action.updated_successfully');
 
-            return $this->redirectToRoute('admin_comment_index');
+            return $this->redirectToRoute('admin_comment_index', $request->query->all());
         }
 
         return $this->render('admin/comment/edit.html.twig', [
@@ -134,7 +142,7 @@ class CommentController extends AbstractController
 
             $this->addFlash('success', 'action.updated_successfully');
 
-            return $this->redirectToRoute('admin_comment_index');
+            return $this->redirectToRoute('admin_comment_index', $request->query->all());
         }
 
         return $this->render('admin/comment/reply.html.twig', [
@@ -150,7 +158,7 @@ class CommentController extends AbstractController
     public function deleteAction(Request $request, Comment $comment)
     {
         if (!$this->isCsrfTokenValid('delete', $request->request->get('token'))) {
-            return $this->redirectToRoute('admin_comment_index');
+            return $this->redirectToRoute('admin_comment_index', $request->query->all());
         }
 
         $commentAuthor = $comment->getAuthor();
@@ -169,7 +177,7 @@ class CommentController extends AbstractController
 
         $this->addFlash('success', 'action.deleted_successfully');
 
-        return $this->redirectToRoute('admin_comment_index');
+        return $this->redirectToRoute('admin_comment_index', $request->query->all());
     }
 
     /**

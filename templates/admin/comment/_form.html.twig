@@ -1,13 +1,8 @@
-{{ form_start(form, {attr: attr|default({})}) }}
-    {{ form_widget(form) }}
-
-    <button type="submit" class="{{ button_css|default("btn btn-primary") }}">
-        <i class="fa fa-save" aria-hidden="true"></i> {{ button_label|default('label.create_post'|trans) }}
-    </button>
-
-    {% if include_back_to_home_link|default(false) %}
-        <a href="{{ path('admin_comment_index') }}" class="btn btn-link">
-            <i class="fa fa-list-alt" aria-hidden="true"></i> {{ 'action.back_to_list'|trans }}
-        </a>
-    {% endif %}
+{# CKEditor hides the required textarea; Symfony validates after editor data is synced on submit. #}
+{{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
+    {{ form_errors(form) }}
+    {{ form_row(form.content, {label: isReply ? 'Nội dung trả lời' : 'Nội dung bình luận', attr: {class:'txt-ckeditor5', 'data-height':'260', 'data-editor-preset':'comment'}}) }}
+    <p class="comment-muted">Từ 5 đến 10.000 ký tự. Kiểm tra nội dung trước khi lưu.</p>
+    <div class="comment-approval">{{ form_row(form.approved, {label: isReply ? 'Hiển thị trả lời này trên website' : 'Đã duyệt · Hiển thị trên website'}) }}</div>
+    <div class="comment-actions"><button type="submit" class="banner-button banner-button--primary">{{ isReply ? 'Lưu trả lời' : 'Lưu thay đổi' }}</button><a class="banner-button" href="{{ path('admin_comment_index', returnQuery) }}">Hủy</a></div>
 {{ form_end(form) }}

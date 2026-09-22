@@ -1,59 +1,36 @@
 {% extends 'admin/layout.html.twig' %}
-
-{% block admin_datatables_stylesheets %}
-    <link rel="stylesheet" href="{{ asset('assets/sufeeadmin/assets/css/lib/datatable/dataTables.bootstrap.min.css') }}">
-{% endblock %}
-
-{% block admin_datatables_javascripts %}
-    {{ include('admin/components/_datatables_scripts.html.twig', with_context = false) }}
-{% endblock %}
-
+{% block title %}Đăng ký nhận bản tin{% endblock %}
 {% block body_id 'admin_newsletter_index' %}
-
+{% block flash_messages %}{% endblock %}
+{% block stylesheets %}{{ parent() }}<link rel="stylesheet" href="{{ asset('build/css/newsletter-index.css') }}">{% endblock %}
+{% block javascripts %}{{ parent() }}<script src="{{ asset('build/js/newsletter-index.js') }}" defer></script>{% endblock %}
 {% block main %}
-    <div class="content mt-3">
-        <div class="animated fadeIn">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <strong class="card-title">Đăng ký nhận bản tin</strong>
-                            <span class="badge badge-primary">{{ objects|length }}</span>
-                        </div>
-                        <div class="card-body">
-                            <table id="bootstrap-data-table" class="table table-striped table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>Email</th>
-                                        <th>IP</th>
-                                        <th>{{ 'label.published_at'|trans }}</th>
-                                        <th>{{ 'label.actions'|trans }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for row in objects %}
-                                        <tr>
-                                            <td>{{ row.getEmail() }}</td>
-                                            <td>{{ row.getIp() }}</td>
-                                            <td>{{ row.getCreatedAt() | localizeddate('medium', 'short', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY') }}</td>
-                                            <td>
-                                                <div class="item-actions">
-                                                    {{ include('admin/newsletter/_delete_form.html.twig', {object: row}, with_context = false) }}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    {% else %}
-                                        <tr>
-                                            <td colspan="4" class="text-center text-muted">Chưa có ai đăng ký.</td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- .animated -->
-    </div>
+{% set returnQuery = filters|merge({page:pagination.currentPageNumber}) %}
+<section class="banner-manager contact-manager newsletter-manager">
+<header class="banner-manager__header"><div><h1>Đăng ký nhận bản tin</h1><p>Quản lý địa chỉ email đăng ký từ website.</p></div></header>
+{% for type,messages in app.flashes %}{% for message in messages %}<div class="alert alert-{{ type in ['success','warning','danger','info'] ? type : 'info' }}" role="alert">{{ message|trans }}</div>{% endfor %}{% endfor %}
+<nav class="contact-tabs" aria-label="Lọc trạng thái đăng ký">{% for value,label in {'':'Tất cả','unread':'Chưa đọc','read':'Đã đọc'} %}<a href="{{ path('admin_newsletter_index',{q:filters.q,status:value}) }}" {{ filters.status == value ? 'aria-current="page"' : '' }}>{{ label }} <strong>{{ attribute(counts,value == '' ? 'all' : value) }}</strong></a>{% endfor %}</nav>
+<p class="contact-muted">Số lượng tính trên toàn bộ đăng ký. Mở danh sách không tự đánh dấu đã đọc.</p>
+<form class="banner-panel contact-filters" method="get" action="{{ path('admin_newsletter_index') }}">
+<label>Tìm đăng ký<input type="search" name="q" value="{{ filters.q }}" placeholder="Email hoặc địa chỉ IP…"></label>
+<label>Trạng thái<select name="status"><option value="">Tất cả trạng thái</option><option value="unread" {{ filters.status == 'unread' ? 'selected' : '' }}>Chưa đọc</option><option value="read" {{ filters.status == 'read' ? 'selected' : '' }}>Đã đọc</option></select></label>
+<button type="submit" class="banner-button banner-button--primary">Tìm kiếm</button><a class="banner-button" href="{{ path('admin_newsletter_index') }}">Xóa bộ lọc</a>
+</form>
+<section class="banner-panel" aria-labelledby="newsletter-results">
+<header class="banner-panel__toolbar"><h2 id="newsletter-results">Danh sách đăng ký</h2><span>{{ pagination.totalItemCount }} kết quả · Mới nhất trước · Trang {{ pagination.currentPageNumber }}</span></header>
+{% for row in pagination %}
+<article class="contact-row newsletter-row {{ not row.isRead ? 'contact-row--unread' : '' }}">
+<div class="contact-sender"><h3>{{ row.email }}</h3><span class="contact-status {{ row.isRead ? 'is-read' : 'is-unread' }}">{{ row.isRead ? 'Đã đọc' : 'Chưa đọc' }}</span><p class="contact-muted">#{{ row.id }} · Đăng ký {{ row.createdAt|date('d/m/Y H:i','Asia/Ho_Chi_Minh') }}</p><p class="contact-muted">IP: {{ row.ip ?: 'Không có thông tin' }}</p></div>
+<div class="newsletter-tools"><div class="contact-actions">
+<button type="button" class="banner-button" data-copy-email="{{ row.email }}">Sao chép email</button>
+<form method="post" action="{{ path('admin_newsletter_read',returnQuery|merge({id:row.id})) }}"><input type="hidden" name="token" value="{{ csrf_token('newsletter_read_' ~ row.id) }}"><input type="hidden" name="is_read" value="{{ row.isRead ? '0' : '1' }}"><button type="submit" class="banner-button {{ not row.isRead ? 'banner-button--primary' : '' }}">{{ row.isRead ? 'Đánh dấu chưa đọc' : 'Đánh dấu đã đọc' }}</button></form>
+<form method="post" action="{{ path('admin_newsletter_delete',returnQuery|merge({id:row.id})) }}" data-newsletter-delete data-email="{{ row.email }}"><input type="hidden" name="token" value="{{ csrf_token('delete') }}"><button type="submit" class="banner-button banner-button--delete">Xóa</button></form>
+</div><p class="newsletter-feedback" role="status" aria-live="polite"></p></div>
+</article>
+{% else %}<div class="contact-empty"><h3>{{ filters.q or filters.status ? 'Không có đăng ký phù hợp' : 'Chưa có người đăng ký' }}</h3><p>{{ filters.q or filters.status ? 'Thử từ khóa khác hoặc xóa bộ lọc.' : 'Các đăng ký nhận tin mới sẽ xuất hiện tại đây.' }}</p>{% if filters.q or filters.status %}<a class="banner-button" href="{{ path('admin_newsletter_index') }}">Xóa bộ lọc</a>{% endif %}</div>{% endfor %}
+{% if pagination.pageCount > 1 %}<nav class="contact-pagination" aria-label="Phân trang đăng ký">{{ knp_pagination_render(pagination,'@KnpPaginator/Pagination/twitter_bootstrap_v4_pagination.html.twig') }}</nav>{% endif %}
+</section>
+<p class="contact-help">Đã đọc/Chưa đọc chỉ dùng để theo dõi đăng ký mới, không thể hiện việc đã gửi bản tin. Trang này không gửi email hàng loạt.</p>
+<dialog id="newsletter-confirm" aria-labelledby="newsletter-confirm-title" aria-describedby="newsletter-confirm-message"><h2 id="newsletter-confirm-title">Xóa đăng ký?</h2><p id="newsletter-confirm-message"></p><p>Địa chỉ này sẽ bị xóa khỏi danh sách đăng ký. Không thể hoàn tác.</p><div class="contact-actions"><button type="button" class="banner-button" id="newsletter-cancel" autofocus>Hủy</button><button type="button" class="banner-button banner-button--danger" id="newsletter-confirm-delete">Xóa đăng ký</button></div></dialog>
+</section>
 {% endblock %}

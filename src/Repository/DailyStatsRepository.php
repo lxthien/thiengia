@@ -46,7 +46,10 @@ class DailyStatsRepository extends ServiceEntityRepository
 
         foreach ($results as $result) {
             $dateStr = $result['date']->format('Y-m-d');
-            $trends[$dateStr] = (int) $result['viewCount'];
+            // Keep exactly the requested window, including today; ignore older/future rows.
+            if (array_key_exists($dateStr, $trends)) {
+                $trends[$dateStr] = (int) $result['viewCount'];
+            }
         }
 
         return $trends;

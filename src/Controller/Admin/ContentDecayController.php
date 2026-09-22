@@ -92,8 +92,9 @@ class ContentDecayController extends AbstractController
 
         $pagination = $this->paginator->paginate(
             $qb,
-            $request->query->getInt('page', 1),
-            30
+            max(1, $request->query->getInt('page', 1)),
+            30,
+            ['sortFieldParameterName' => 'decay_paginator_sort', 'sortDirectionParameterName' => 'decay_paginator_direction']
         );
 
         $items = [];
@@ -103,12 +104,16 @@ class ContentDecayController extends AbstractController
         $pagination->setItems($items);
 
         $categories = $this->em->getRepository(NewsCategory::class)->findBy([], ['name' => 'ASC']);
+        $reportMeta = $this->em->getRepository(ContentDecaySnapshot::class)->createQueryBuilder('meta')
+            ->select('COUNT(meta.id) AS total, MAX(meta.generatedAt) AS latest')
+            ->getQuery()->getSingleResult();
 
         return $this->render('admin/content_decay/index.html.twig', [
             'pagination' => $pagination,
             'summary' => $this->summarize($qb),
             'categories' => $categories,
             'filters' => $filters,
+            'reportMeta' => $reportMeta,
         ]);
     }
 
@@ -120,6 +125,7 @@ class ContentDecayController extends AbstractController
     {
         return [
             'post' => $snapshot->getNews(),
+            'generatedAt' => $snapshot->getGeneratedAt(),
             'decayScore' => $snapshot->getDecayScore(),
             'decayStatus' => $snapshot->getDecayStatus(),
             'ageDays' => $snapshot->getAgeDays(),
@@ -141,6 +147,11 @@ class ContentDecayController extends AbstractController
      */
     private function summarize($qb): array
     {
+        // Display categories multiply rows; summaries must count each snapshot once.
+        $qb = (clone $qb)->resetDQLPart('join')->innerJoin('s.news', 'n');
+        if ($qb->getParameter('categoryId') !== null) {
+            $qb->leftJoin('n.category', 'catFilter');
+        }
         $countQb = (clone $qb)
             ->resetDQLPart('orderBy')
             ->select('COUNT(s.news) as totalCount', 'AVG(s.decayScore) as avgScore')

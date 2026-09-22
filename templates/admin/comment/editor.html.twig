@@ -1,0 +1,26 @@
+{% extends 'admin/layout.html.twig' %}
+{% block title %}{{ isReply ? 'Trả lời bình luận' : 'Sửa bình luận' }}{% endblock %}
+{% block body_id %}{{ isReply ? 'admin_comment_new' : 'admin_comment_edit' }}{% endblock %}
+{% block admin_editor_stylesheets %}<link rel="stylesheet" href="{{ asset('build/css/ckeditor5.css') }}">{% endblock %}
+{% block stylesheets %}{{ parent() }}<link rel="stylesheet" href="{{ asset('build/css/comment-index.css') }}">{% endblock %}
+{% block flash_messages %}{% endblock %}
+{% block main %}
+{% set source = isReply ? comment.parent : comment %}
+<section class="banner-manager comment-manager comment-editor">
+    <header class="banner-manager__header"><div><h1>{{ isReply ? 'Trả lời bình luận' : 'Sửa bình luận #' ~ comment.id }}</h1><p>{{ isReply ? 'Xem nội dung gốc và viết phản hồi cho khách hàng.' : 'Chỉnh sửa nội dung và trạng thái hiển thị của bình luận.' }}</p></div><a class="banner-button" href="{{ path('admin_comment_index', app.request.query.all) }}">Quay lại danh sách</a></header>
+    {{ include('admin/comment/_messages.html.twig') }}
+    <aside class="banner-panel comment-context" aria-labelledby="comment-context-title">
+        <h2 id="comment-context-title">{{ isReply ? 'Bình luận đang trả lời' : 'Thông tin bình luận' }}</h2>
+        <p><strong>{{ source.author }}</strong> · #{{ source.id }} · {{ source.createdAt|date('d/m/Y H:i', 'Asia/Ho_Chi_Minh') }}</p>
+        {% if source.news %}<p>{{ source.news.isPage ? 'Trang' : 'Bài viết' }}: <a href="{{ path(source.news.isPage ? 'admin_page_edit' : 'admin_news_edit', {id:source.news.id}) }}">{{ source.news.title }}</a></p>{% endif %}
+        {% if isReply %}
+            <blockquote>{{ source.content|striptags }}</blockquote>
+            <p class="comment-muted">Trả lời với tên: <strong>{{ comment.author }}</strong>.</p>
+            {% if not source.approved %}<p class="comment-editor-warning">Lưu trả lời sẽ đồng thời duyệt bình luận gốc, theo quy trình hiện tại.</p>{% endif %}
+        {% endif %}
+    </aside>
+    <section class="banner-panel comment-compose" aria-label="Soạn nội dung bình luận">
+        {{ include('admin/comment/_form.html.twig', {form:form, isReply:isReply, returnQuery:app.request.query.all}, with_context=false) }}
+    </section>
+</section>
+{% endblock %}

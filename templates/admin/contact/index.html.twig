@@ -1,60 +1,58 @@
 {% extends 'admin/layout.html.twig' %}
-
-{% block admin_datatables_stylesheets %}
-    <link rel="stylesheet" href="{{ asset('assets/sufeeadmin/assets/css/lib/datatable/dataTables.bootstrap.min.css') }}">
-{% endblock %}
-
-{% block admin_datatables_javascripts %}
-    {{ include('admin/components/_datatables_scripts.html.twig', with_context = false) }}
-{% endblock %}
-
-{% block body_id 'admin_comment_index' %}
-
+{% block title %}Quản lý liên hệ{% endblock %}
+{% block body_id 'admin_contact_index' %}
+{% block flash_messages %}{% endblock %}
+{% block stylesheets %}{{ parent() }}<link rel="stylesheet" href="{{ asset('build/css/contact-index.css') }}">{% endblock %}
+{% block javascripts %}{{ parent() }}<script src="{{ asset('build/js/contact-index.js') }}" defer></script>{% endblock %}
 {% block main %}
-    <div class="content mt-3">
-        <div class="animated fadeIn">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <strong class="card-title">{{ 'contact.title.list'|trans }}</strong>
-                        </div>
-                        <div class="card-body">
-                            <table id="bootstrap-data-table" class="table table-striped table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>{{ 'label.author'|trans }}</th>
-                                        <th>{{ 'label.email'|trans }}</th>
-                                        <th>{{ 'label.published_at'|trans }}</th>
-                                        <th>{{ 'label.actions'|trans }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for row in objects %}
-                                        <tr>
-                                            <td>{{ row.getName() }}</td>
-                                            <td>{{ row.getEmail() }}</td>
-                                            <td>{{ row.getCreatedAt() | localizeddate('medium', 'short', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY') }}</td>
-                                            <td>
-                                                <div class="item-actions">
-                                                    {{ include('admin/contact/show.html.twig', {object: row}, with_context = false) }}
-                                                    
-                                                    <a href="#" class="btn-sm" data-toggle="modal" data-target="#showContact{{row.id}}">
-                                                        <i class="fa fa-eye" aria-hidden="true"></i>
-                                                    </a>
-
-                                                    {{ include('admin/contact/_delete_form.html.twig', {object: row}, with_context = false) }}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+{% set returnQuery = filters|merge({page: pagination.currentPageNumber}) %}
+<section class="banner-manager contact-manager">
+    <header class="banner-manager__header"><div><h1>Quản lý liên hệ</h1><p>Theo dõi lời nhắn và thông tin khách hàng gửi từ website.</p></div></header>
+    {% for type, messages in app.flashes %}{% for message in messages %}<div class="alert alert-{{ type in ['success','danger','warning','info'] ? type : 'info' }}" role="alert">{{ message|trans }}</div>{% endfor %}{% endfor %}
+    <nav class="contact-tabs" aria-label="Lọc trạng thái liên hệ">
+    {% for value,label in {'':'Tất cả','unread':'Chưa đọc','read':'Đã đọc'} %}<a href="{{ path('admin_contact_index', {q:filters.q,status:value}) }}" {{ filters.status == value ? 'aria-current="page"' : '' }}>{{ label }} <strong>{{ attribute(counts,value == '' ? 'all' : value) }}</strong></a>{% endfor %}
+    </nav>
+    <p class="contact-muted">Số lượng tính trên toàn bộ liên hệ. Xem nội dung không tự đánh dấu đã đọc.</p>
+    <form method="get" action="{{ path('admin_contact_index') }}" class="banner-panel contact-filters">
+        <label>Tìm liên hệ<input type="search" name="q" value="{{ filters.q }}" placeholder="Tên, email, điện thoại, tiêu đề hoặc nội dung…"></label>
+        <label>Trạng thái<select name="status"><option value="">Tất cả trạng thái</option><option value="unread" {{ filters.status == 'unread' ? 'selected' : '' }}>Chưa đọc</option><option value="read" {{ filters.status == 'read' ? 'selected' : '' }}>Đã đọc</option></select></label>
+        <button type="submit" class="banner-button banner-button--primary">Tìm kiếm</button><a class="banner-button" href="{{ path('admin_contact_index') }}">Xóa bộ lọc</a>
+    </form>
+    <section class="banner-panel" aria-labelledby="contact-results">
+        <header class="banner-panel__toolbar"><h2 id="contact-results">Danh sách liên hệ</h2><span>{{ pagination.totalItemCount }} kết quả · Mới nhất trước · Trang {{ pagination.currentPageNumber }}</span></header>
+        {% for row in pagination %}
+        <article class="contact-row {{ not row.isRead ? 'contact-row--unread' : '' }}" id="contact-{{ row.id }}">
+            <div class="contact-sender">
+                <h3>{{ row.name }}</h3><span class="contact-status {{ row.isRead ? 'is-read' : 'is-unread' }}">{{ row.isRead ? 'Đã đọc' : 'Chưa đọc' }}</span>
+                <p class="contact-muted">#{{ row.id }} · {{ row.createdAt|date('d/m/Y H:i','Asia/Ho_Chi_Minh') }}</p>
+                <dl><dt>Điện thoại</dt><dd>{% if row.phone %}<a href="tel:{{ row.phone|replace({' ':'','-':'','(':'',')':''}) }}">{{ row.phone }}</a>{% else %}Chưa cung cấp{% endif %}</dd>
+                <dt>Email</dt><dd>{% if row.email %}<a href="mailto:{{ row.email }}">{{ row.email }}</a>{% else %}Chưa cung cấp{% endif %}</dd></dl>
+            </div>
+            <div class="contact-message">
+                <h3>{{ row.title ?: 'Lời nhắn từ khách hàng' }}</h3>
+                {% set content = row.contents|striptags %}
+                <p class="contact-excerpt">{{ content|length > 240 ? content|slice(0,240) ~ '…' : content }}</p>
+                {% if content|length > 240 %}<details><summary>Xem toàn bộ nội dung</summary><p class="contact-full">{{ content }}</p></details>{% endif %}
+                <div class="contact-actions">
+                    <form method="post" action="{{ path('admin_contact_read',returnQuery|merge({id:row.id})) }}">
+                        <input type="hidden" name="token" value="{{ csrf_token('contact_read_' ~ row.id) }}">
+                        <input type="hidden" name="is_read" value="{{ row.isRead ? '0' : '1' }}">
+                        <button type="submit" class="banner-button {{ not row.isRead ? 'banner-button--primary' : '' }}">{{ row.isRead ? 'Đánh dấu chưa đọc' : 'Đánh dấu đã đọc' }}</button>
+                    </form>
+                    {% if row.email %}<a class="banner-button" href="mailto:{{ row.email }}">Gửi email</a>{% endif %}
+                    <form method="post" action="{{ path('admin_contact_delete',returnQuery|merge({id:row.id})) }}" data-contact-delete data-contact-name="{{ row.name }}">
+                        <input type="hidden" name="token" value="{{ csrf_token('delete') }}"><button type="submit" class="banner-button banner-button--delete">Xóa</button>
+                    </form>
                 </div>
             </div>
-        </div>
-        <!-- .animated -->
-    </div>
+        </article>
+        {% else %}<div class="contact-empty"><h3>{{ filters.q or filters.status ? 'Không có liên hệ phù hợp' : 'Chưa có liên hệ' }}</h3><p>{{ filters.q or filters.status ? 'Thử từ khóa khác hoặc xóa bộ lọc.' : 'Lời nhắn của khách hàng sẽ xuất hiện tại đây.' }}</p>{% if filters.q or filters.status %}<a class="banner-button" href="{{ path('admin_contact_index') }}">Xóa bộ lọc</a>{% endif %}</div>{% endfor %}
+        {% if pagination.pageCount > 1 %}<nav class="contact-pagination" aria-label="Phân trang liên hệ">{{ knp_pagination_render(pagination,'@KnpPaginator/Pagination/twitter_bootstrap_v4_pagination.html.twig') }}</nav>{% endif %}
+    </section>
+    <p class="contact-help">“Gửi email” mở ứng dụng email của bạn, không tự gửi thư. “Đã đọc” không đồng nghĩa đã phản hồi khách hàng.</p>
+    <dialog id="contact-confirm" aria-labelledby="contact-confirm-title" aria-describedby="contact-confirm-message">
+        <h2 id="contact-confirm-title">Xóa liên hệ?</h2><p id="contact-confirm-message"></p><p>Thông tin và lời nhắn sẽ bị xóa. Không thể hoàn tác thao tác này.</p>
+        <div class="contact-actions"><button type="button" id="contact-cancel" class="banner-button" autofocus>Hủy</button><button type="button" id="contact-confirm-delete" class="banner-button banner-button--danger">Xóa liên hệ</button></div>
+    </dialog>
+</section>
 {% endblock %}

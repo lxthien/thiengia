@@ -46,6 +46,7 @@ class HealthAuditManager
 
         return [
             'generatedAt' => new \DateTime(),
+            'auditVersion' => 2,
             'summary' => [
                 'brokenLinks' => count($brokenLinks),
                 'missingImages' => count($missingImages),
@@ -204,6 +205,7 @@ class HealthAuditManager
     private function getUploadUsage()
     {
         $paths = [
+            'Thư viện media' => 'uploads/media',
             'Ảnh bài viết (featured)' => 'uploads/images/news',
             'Ảnh danh mục' => 'uploads/images/newscategory',
             'CKFinder uploads' => 'uploads/ckfinder',
@@ -272,32 +274,10 @@ class HealthAuditManager
         return array_values(array_filter($values));
     }
 
-    private function normalizeLocalUrl($url)
+    public function normalizeLocalUrl($url): ?string
     {
-        $url = trim((string) $url);
-
-        if ($url === '' || $url[0] === '#' || preg_match('/^(mailto:|tel:|javascript:|data:)/i', $url)) {
-            return null;
-        }
-
-        $parts = @parse_url($url);
-
-        if (!$parts || !empty($parts['host'])) {
-            $host = isset($parts['host']) ? strtolower($parts['host']) : '';
-            $requestHost = isset($_SERVER['HTTP_HOST']) ? strtolower($_SERVER['HTTP_HOST']) : '';
-
-            if ($host && $requestHost && $host !== $requestHost) {
-                return null;
-            }
-        }
-
-        $path = isset($parts['path']) ? $parts['path'] : $url;
-
-        if ($path === '') {
-            return null;
-        }
-
-        return '/' . ltrim(rawurldecode($path), '/');
+        // Router context is available both in HTTP and in cron/CLI.
+        return InternalUrlNormalizer::normalize((string) $url, $this->router->getContext()->getHost());
     }
 
     private function isInternalPathHealthy($path)

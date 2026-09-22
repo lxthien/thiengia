@@ -1,0 +1,13 @@
+@use "contact-index" with ($contact-workspace-scope: '#admin_newsletter_index');
+#admin_newsletter_index {
+    .newsletter-row { grid-template-columns: minmax(0,1fr) minmax(0,1fr); align-items: center; }
+    .newsletter-row .contact-actions { margin-top: 0; justify-content: flex-end; }
+    .newsletter-row .contact-muted:last-child { margin-bottom: 0; }
+    .newsletter-feedback { min-height: 21px; margin: 8px 0 0; text-align: right; font-size: 13px; }
+    .newsletter-row .is-copied { background: #e7f5ed; color: #12633c; border-color: #12633c; }
+    #newsletter-confirm { position: fixed; inset: 0; margin: auto; width: min(520px,calc(100% - 32px)); max-height: 90dvh; overflow: auto; padding: 26px; border: 1px solid #dce2eb; border-radius: 8px; color: #253246; background: white; overflow-wrap: anywhere; }
+    #newsletter-confirm::backdrop { background: rgb(15 23 42 / .55); }
+    #newsletter-confirm h2 { margin-bottom: 16px; }
+    #newsletter-confirm .contact-actions { justify-content: flex-end; }
+    @media(max-width:991px) { .newsletter-row { grid-template-columns: minmax(0,1fr); gap: 14px; } .newsletter-row .contact-actions { justify-content: flex-start; } .newsletter-feedback { text-align: left; } }
+}

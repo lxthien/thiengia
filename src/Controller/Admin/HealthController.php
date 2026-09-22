@@ -17,7 +17,7 @@ class HealthController extends AbstractController
      * request.
      */
     #[Route('/', name: 'admin_health_index', methods: ['GET'])]
-    public function indexAction(HealthReportRepository $healthReportRepository)
+    public function indexAction(HealthReportRepository $healthReportRepository, \App\Health\HealthAuditManager $healthAudit)
     {
         $latest = $healthReportRepository->findLatest();
 
@@ -29,6 +29,9 @@ class HealthController extends AbstractController
 
         $data = $latest->getData();
         $data['generatedAt'] = $latest->getGeneratedAt();
+        // Old snapshots may contain external URLs misclassified by the CLI audit.
+        $data['brokenLinks'] = array_values(array_filter($data['brokenLinks'] ?? [], static fn (array $item): bool => $healthAudit->normalizeLocalUrl($item['url'] ?? $item['path'] ?? '') !== null));
+        $data['summary']['brokenLinks'] = count($data['brokenLinks']);
 
         return $this->render('admin/health/index.html.twig', [
             'report' => $data,

@@ -1,0 +1,33 @@
+@use "banner-index" with ($media-workspace-scope: '#admin_health_index');
+#admin_health_index {
+ #right-panel {min-width:0;}
+ .health-manager {max-width:1600px;margin:auto;}
+ .health-updated,.health-hint {font-size:14px;color:#596579;line-height:1.7;}
+ .health-notice {border-left:3px solid #98611b;background:#fff8e8;padding:14px 18px;color:#684210;}
+ .health-summary {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin:22px 0;}
+ .health-summary a {display:flex;flex-direction:column;gap:10px;padding:18px;background:#fff;border:1px solid #dce2eb;border-radius:8px;color:#253246;}
+ .health-summary a:hover {border-color:#195c9e;background:#f6faff;}
+ .health-summary span {font-size:13px;min-height:40px;}
+ .health-summary strong {font-size:27px;}
+ .health-summary small {color:#195c9e;}
+ .health-guide {padding:16px 20px;margin-bottom:24px;font-size:14px;}
+ .health-guide summary {cursor:pointer;font-weight:600;}
+ .health-guide p {margin:14px 0 0;color:#46536a;}
+ .health-section {margin:20px 0;scroll-margin-top:20px;overflow:hidden;}
+ .health-hint {padding:14px 20px;margin:0;}
+ .health-table-wrap {overflow:auto;}
+ table {width:100%;border-collapse:collapse;table-layout:fixed;}
+ th,td {padding:14px 20px;border-bottom:1px solid #e5e9ef;text-align:left;vertical-align:top;font-size:14px;overflow-wrap:anywhere;}
+ th {background:#f8fafc;color:#46536a;font-weight:600;}
+ th:last-child,td:last-child {width:170px;}
+ td small {display:block;color:#596579;margin-top:6px;}
+ td strong {font-weight:600;}
+ code {color:#304b6c;overflow-wrap:anywhere;white-space:normal;}
+ tbody tr:hover {background:#fafcff;}
+ .health-empty {padding:24px;color:#596579;margin:0;}
+ .health-empty h2 {font-size:20px;color:#253246;}
+ summary:focus-visible,.health-table-wrap:focus-visible {outline:3px solid #195c9e;outline-offset:-3px;}
+ @media(max-width:1100px){.health-summary{grid-template-columns:repeat(3,minmax(0,1fr));}}
+ @media(max-width:767px){.health-manager{padding:18px 12px;}.health-summary{grid-template-columns:repeat(2,minmax(0,1fr));}.health-summary a{padding:14px;}th,td{padding:12px;}}
+ @media(max-width:575px){table{min-width:620px;}}
+}
