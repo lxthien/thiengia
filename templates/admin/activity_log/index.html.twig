@@ -1,297 +1,49 @@
 {% extends 'admin/layout.html.twig' %}
-
-{% block body_id 'admin-activity-log-index' %}
-
+{% block title %}Nhật ký hoạt động{% endblock %}
+{% block body_id 'admin_activity_log_index' %}
+{% block flash_messages %}{% endblock %}
+{% block stylesheets %}{{ parent() }}<link rel="stylesheet" href="{{ asset('build/css/activity-log.css') }}">{% endblock %}
+{% block javascripts %}{{ parent() }}<script src="{{ asset('build/js/activity-log.js') }}" defer></script>{% endblock %}
 {% block main %}
-    <div class="content mt-3">
-        <div class="animated fadeIn">
-            {# Page Header #}
-            <div class="row mb-3">
-                <div class="col-md-12">
-                    <h4 class="mb-0">
-                        <i class="fa fa-history text-primary"></i>
-                        Nhật ký hoạt động
-                        <span class="badge badge-primary ml-1">{{ total }}</span>
-                    </h4>
-                </div>
-            </div>
-
-            {# Filter Bar #}
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-body py-3">
-                            <form method="GET" action="{{ path('admin_activity_log_index') }}" id="filter-form">
-                                <div class="row">
-                                    <div class="col-md-2">
-                                        <div class="form-group mb-0">
-                                            <label class="small text-muted mb-1">Người dùng</label>
-                                            <select name="user" class="form-control form-control-sm">
-                                                <option value="">-- Tất cả --</option>
-                                                {% for user in users %}
-                                                    <option value="{{ user.id }}" {% if filters.userId == user.id %}selected{% endif %}>
-                                                        {{ user.username }}
-                                                    </option>
-                                                {% endfor %}
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group mb-0">
-                                            <label class="small text-muted mb-1">Hành động</label>
-                                            <select name="action" class="form-control form-control-sm">
-                                                <option value="">-- Tất cả --</option>
-                                                <option value="create" {% if filters.action == 'create' %}selected{% endif %}>Tạo mới</option>
-                                                <option value="update" {% if filters.action == 'update' %}selected{% endif %}>Cập nhật</option>
-                                                <option value="delete" {% if filters.action == 'delete' %}selected{% endif %}>Xóa</option>
-                                                <option value="toggle" {% if filters.action == 'toggle' %}selected{% endif %}>Thay đổi trạng thái</option>
-                                                <option value="settings" {% if filters.action == 'settings' %}selected{% endif %}>Cài đặt</option>
-                                                <option value="login" {% if filters.action == 'login' %}selected{% endif %}>Đăng nhập</option>
-                                                <option value="login_failed" {% if filters.action == 'login_failed' %}selected{% endif %}>Đăng nhập thất bại</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group mb-0">
-                                            <label class="small text-muted mb-1">Đối tượng</label>
-                                            <select name="entity_type" class="form-control form-control-sm">
-                                                <option value="">-- Tất cả --</option>
-                                                <option value="news" {% if filters.entityType == 'news' %}selected{% endif %}>Bài viết</option>
-                                                <option value="page" {% if filters.entityType == 'page' %}selected{% endif %}>Trang</option>
-                                                <option value="user" {% if filters.entityType == 'user' %}selected{% endif %}>Người dùng</option>
-                                                <option value="category" {% if filters.entityType == 'category' %}selected{% endif %}>Danh mục</option>
-                                                <option value="comment" {% if filters.entityType == 'comment' %}selected{% endif %}>Bình luận</option>
-                                                <option value="banner" {% if filters.entityType == 'banner' %}selected{% endif %}>Banner</option>
-                                                <option value="menu" {% if filters.entityType == 'menu' %}selected{% endif %}>Menu</option>
-                                                <option value="tag" {% if filters.entityType == 'tag' %}selected{% endif %}>Tag</option>
-                                                <option value="settings" {% if filters.entityType == 'settings' %}selected{% endif %}>Cài đặt</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group mb-0">
-                                            <label class="small text-muted mb-1">Từ ngày</label>
-                                            <input type="date" name="date_from" class="form-control form-control-sm" value="{{ filters.dateFrom }}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group mb-0">
-                                            <label class="small text-muted mb-1">Đến ngày</label>
-                                            <input type="date" name="date_to" class="form-control form-control-sm" value="{{ filters.dateTo }}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group mb-0">
-                                            <label class="small text-muted mb-1">&nbsp;</label>
-                                            <div>
-                                                <button type="submit" class="btn btn-sm btn-primary">
-                                                    <i class="fa fa-search"></i> Lọc
-                                                </button>
-                                                <a href="{{ path('admin_activity_log_index') }}" class="btn btn-sm btn-secondary">
-                                                    <i class="fa fa-times"></i> Xóa lọc
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {# Activity Log Table #}
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-sm table-striped table-hover" id="activity-log-table">
-                                    <thead class="thead-light">
-                                        <tr>
-                                            <th style="width: 15%;">Thời gian</th>
-                                            <th style="width: 12%;">Người dùng</th>
-                                            <th style="width: 12%;">Hành động</th>
-                                            <th style="width: 10%;">Đối tượng</th>
-                                            <th style="width: 25%;">Tên</th>
-                                            <th style="width: 16%;">Chi tiết</th>
-                                            <th style="width: 10%;">IP</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for log in logs %}
-                                        <tr class="activity-row activity-{{ log.action }}">
-                                            <td>
-                                                <small class="text-muted">
-                                                    <i class="fa fa-clock-o"></i>
-                                                    {{ log.createdAt|localizeddate('short', 'medium', null, 'Asia/Ho_Chi_Minh', 'dd/MM/yyyy HH:mm:ss') }}
-                                                </small>
-                                            </td>
-                                            <td>
-                                                <strong>{{ log.username ?: 'Hệ thống' }}</strong>
-                                            </td>
-                                            <td>
-                                                <span class="badge {{ log.actionBadgeClass }}">
-                                                    <i class="fa {{ log.actionIcon }}"></i>
-                                                    {{ log.actionLabel }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="entity-type-label">{{ log.entityTypeLabel }}</span>
-                                            </td>
-                                            <td>
-                                                {% if log.entityTitle %}
-                                                    <span title="{{ log.entityTitle }}">
-                                                        {{ log.entityTitle|length > 50 ? log.entityTitle|slice(0, 50) ~ '...' : log.entityTitle }}
-                                                    </span>
-                                                {% else %}
-                                                    <span class="text-muted">—</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                {% if log.details %}
-                                                    {% if log.details|length > 60 or "\n" in log.details %}
-                                                        <div class="mt-1">
-                                                            <button type="button" class="btn btn-sm btn-outline-info" data-toggle="modal" data-target="#detailModal{{ log.id }}">
-                                                                <i class="fa fa-eye"></i> Xem chi tiết
-                                                            </button>
-                                                        </div>
-                                                    {% else %}
-                                                        <small class="text-muted" title="{{ log.details }}">
-                                                            {{ log.details }}
-                                                        </small>
-                                                    {% endif %}
-                                                {% else %}
-                                                    <span class="text-muted">—</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <small class="text-muted d-block">{{ log.ipAddress ?: '—' }}</small>
-                                                {% if log.userAgent %}
-                                                    <small class="text-muted" title="{{ log.userAgent }}"><i class="fa fa-globe"></i> {{ log.userAgent|slice(0, 20) }}...</small>
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                        {% else %}
-                                        <tr>
-                                            <td colspan="7" class="text-center text-muted py-4">
-                                                <i class="fa fa-inbox fa-2x mb-2 d-block"></i>
-                                                Không có dữ liệu nhật ký
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            {# Pagination #}
-                            {% if pages > 1 %}
-                            <nav aria-label="Phân trang" class="mt-3">
-                                <ul class="pagination pagination-sm justify-content-center">
-                                    {# Previous #}
-                                    <li class="page-item {% if currentPage <= 1 %}disabled{% endif %}">
-                                        <a class="page-link" href="{{ path('admin_activity_log_index', filters|merge({page: currentPage - 1})) }}">
-                                            <i class="fa fa-chevron-left"></i>
-                                        </a>
-                                    </li>
-
-                                    {# Page numbers #}
-                                    {% set startPage = max(1, currentPage - 3) %}
-                                    {% set endPage = min(pages, currentPage + 3) %}
-
-                                    {% if startPage > 1 %}
-                                        <li class="page-item">
-                                            <a class="page-link" href="{{ path('admin_activity_log_index', filters|merge({page: 1})) }}">1</a>
-                                        </li>
-                                        {% if startPage > 2 %}
-                                            <li class="page-item disabled"><span class="page-link">...</span></li>
-                                        {% endif %}
-                                    {% endif %}
-
-                                    {% for p in startPage..endPage %}
-                                        <li class="page-item {% if p == currentPage %}active{% endif %}">
-                                            <a class="page-link" href="{{ path('admin_activity_log_index', filters|merge({page: p})) }}">{{ p }}</a>
-                                        </li>
-                                    {% endfor %}
-
-                                    {% if endPage < pages %}
-                                        {% if endPage < pages - 1 %}
-                                            <li class="page-item disabled"><span class="page-link">...</span></li>
-                                        {% endif %}
-                                        <li class="page-item">
-                                            <a class="page-link" href="{{ path('admin_activity_log_index', filters|merge({page: pages})) }}">{{ pages }}</a>
-                                        </li>
-                                    {% endif %}
-
-                                    {# Next #}
-                                    <li class="page-item {% if currentPage >= pages %}disabled{% endif %}">
-                                        <a class="page-link" href="{{ path('admin_activity_log_index', filters|merge({page: currentPage + 1})) }}">
-                                            <i class="fa fa-chevron-right"></i>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </nav>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {# Render Modals at the bottom to avoid z-index overlay issues #}
-    {% for log in logs %}
-        {% if log.details and (log.details|length > 60 or "\n" in log.details) %}
-        <!-- Modal for Log {{ log.id }} -->
-        <div class="modal fade" id="detailModal{{ log.id }}" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Chi tiết thay đổi - {{ log.entityTitle ?: '—' }}</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <pre style="white-space: pre-wrap; font-family: monospace; background: #f8f9fa; padding: 15px; border-radius: 4px;">{{ log.details }}</pre>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-    {% endfor %}
-
-    <style>
-        .activity-row.activity-delete {
-            background-color: rgba(220, 53, 69, 0.03) !important;
-        }
-        .activity-row.activity-create {
-            background-color: rgba(40, 167, 69, 0.03) !important;
-        }
-        .entity-type-label {
-            font-size: 0.85em;
-            color: #555;
-            font-weight: 500;
-        }
-        .badge {
-            font-size: 0.78em;
-            padding: 4px 8px;
-        }
-        #activity-log-table th {
-            font-weight: 600;
-            border-bottom: 2px solid #dee2e6;
-            font-size: 0.9em;
-            white-space: nowrap;
-        }
-        #activity-log-table td {
-            vertical-align: middle;
-            font-size: 0.9em;
-        }
-        .pagination .page-link {
-            padding: 0.35rem 0.65rem;
-        }
-    </style>
+{% set query = {user:filters.userId,action:filters.action,entity_type:filters.entityType,date_from:filters.dateFrom,date_to:filters.dateTo,q:filters.search,per_page:perPage} %}
+<section class="audit-manager">
+<header class="audit-header"><h1>Nhật ký hoạt động</h1><p>Lịch sử thao tác quản trị · Mới nhất trước · Giờ Việt Nam (UTC+7)</p></header>
+{% if filterError %}<p class="audit-warning" role="alert">{{ filterError }}</p>{% endif %}
+<form class="audit-filters" method="get" action="{{ path('admin_activity_log_index') }}">
+<label class="audit-search">Tìm kiếm<input type="search" name="q" value="{{ filters.search }}" placeholder="Tên đối tượng hoặc chi tiết…"></label>
+<label>Người dùng<select name="user"><option value="">Tất cả</option>{% for user in users %}<option value="{{ user.id }}" {{ filters.userId == user.id ? 'selected' : '' }}>{{ user.username }}</option>{% endfor %}</select></label>
+<label>Hành động<select name="action"><option value="">Tất cả</option>{% for value,label in {'create':'Tạo mới','update':'Cập nhật','delete':'Xóa','toggle':'Đổi trạng thái','settings':'Cài đặt','login':'Đăng nhập','login_failed':'Đăng nhập thất bại'} %}<option value="{{ value }}" {{ filters.action == value ? 'selected' : '' }}>{{ label }}</option>{% endfor %}</select></label>
+<label>Đối tượng<select name="entity_type"><option value="">Tất cả</option>{% for value,label in {'news':'Bài viết','page':'Trang','user':'Người dùng','category':'Danh mục','comment':'Bình luận','banner':'Banner','banner_category':'Nhóm banner','gallery_album':'Album','menu':'Menu','menu_item':'Mục menu','tag':'Tag','settings':'Cài đặt','testimonial':'Đánh giá','newsletter':'Bản tin','homepage_section':'Khối trang chủ','service':'Dịch vụ','project':'Công trình','Redirect':'Chuyển hướng'} %}<option value="{{ value }}" {{ filters.entityType == value ? 'selected' : '' }}>{{ label }}</option>{% endfor %}</select></label>
+<label>Từ ngày<input type="date" name="date_from" value="{{ filters.dateFrom }}"></label>
+<label>Đến ngày<input type="date" name="date_to" value="{{ filters.dateTo }}"></label>
+<label>Số dòng<select name="per_page">{% for size in [30,50,100] %}<option value="{{ size }}" {{ perPage == size ? 'selected' : '' }}>{{ size }} / trang</option>{% endfor %}</select></label>
+<div class="audit-filter-actions"><button type="submit">Lọc</button><a href="{{ path('admin_activity_log_index') }}">Xóa lọc</a></div>
+</form>
+<div class="audit-results"><strong>{{ total }} bản ghi</strong><span>Trang {{ currentPage }} / {{ max(1,pages) }} · {{ logs|length }} dòng đang hiển thị</span></div>
+<div class="audit-table-wrap" tabindex="0" role="region" aria-label="Bảng nhật ký, cuộn ngang trên màn hình nhỏ">
+<table class="audit-table"><caption class="sr-only">Nhật ký hoạt động theo bộ lọc</caption>
+<colgroup><col style="width:15%"><col style="width:13%"><col style="width:16%"><col style="width:13%"><col style="width:24%"><col style="width:11%"><col style="width:8%"></colgroup>
+<thead><tr><th scope="col">Thời gian</th><th scope="col">Người dùng</th><th scope="col">Hành động</th><th scope="col">Đối tượng</th><th scope="col">Tên / Nội dung</th><th scope="col">IP</th><th scope="col"><span class="sr-only">Chi tiết</span></th></tr></thead>
+<tbody>{% for log in logs %}
+<tr class="audit-row">
+<td><time datetime="{{ log.createdAt|date('c') }}">{{ log.createdAt|date('d/m/Y H:i:s','Asia/Ho_Chi_Minh') }}</time></td>
+<td><span class="audit-truncate" title="{{ log.username ?: 'Hệ thống / không xác định' }}">{{ log.username ?: 'Hệ thống / không xác định' }}</span></td>
+<td><span class="audit-action {{ log.action in ['delete','login_failed'] ? 'audit-action--danger' : '' }}">{{ log.actionLabel }}</span></td>
+<td><span class="audit-truncate">{{ log.entityTypeLabel }}{% if log.entityId %} #{{ log.entityId }}{% endif %}</span></td>
+<td><span class="audit-truncate" title="{{ log.entityTitle }}">{{ log.entityTitle ?: 'Không có tên đối tượng' }}</span></td>
+<td><span class="audit-truncate" title="{{ log.ipAddress }}">{{ log.ipAddress ?: '—' }}</span></td>
+<td><button type="button" class="audit-detail-button" aria-expanded="false" aria-controls="audit-detail-{{ log.id }}" aria-label="Xem chi tiết nhật ký #{{ log.id }}" data-audit-detail>Chi tiết</button></td>
+</tr>
+<tr id="audit-detail-{{ log.id }}" class="audit-detail" hidden><td colspan="7">
+<dl><div><dt>Bản ghi</dt><dd>#{{ log.id }} · {{ log.entityTypeLabel }}{% if log.entityId %} #{{ log.entityId }}{% endif %}</dd></div><div><dt>Người dùng</dt><dd>{{ log.username ?: 'Hệ thống / không xác định' }}</dd></div><div><dt>Tên đối tượng</dt><dd>{{ log.entityTitle ?: 'Không có' }}</dd></div><div><dt>IP</dt><dd>{{ log.ipAddress ?: 'Không có' }}</dd></div><div><dt>Trình duyệt / User-Agent</dt><dd>{{ log.userAgent ?: 'Không có thông tin' }}</dd></div></dl>
+<pre>{{ log.details ?: 'Không có chi tiết bổ sung.' }}</pre>
+</td></tr>
+{% else %}<tr><td colspan="7" class="audit-empty">Không có nhật ký phù hợp. Thử điều chỉnh bộ lọc.</td></tr>{% endfor %}</tbody></table>
+</div>
+{% if pages > 1 %}<nav class="audit-pagination" aria-label="Phân trang nhật ký">
+{% if currentPage > 1 %}<a href="{{ path('admin_activity_log_index',query|merge({page:1})) }}" aria-label="Trang đầu">«</a><a href="{{ path('admin_activity_log_index',query|merge({page:currentPage-1})) }}">Trước</a>{% endif %}
+{% for p in max(1,currentPage-2)..min(pages,currentPage+2) %}{% if p == currentPage %}<span aria-current="page">{{ p }}</span>{% else %}<a href="{{ path('admin_activity_log_index',query|merge({page:p})) }}">{{ p }}</a>{% endif %}{% endfor %}
+{% if currentPage < pages %}<a href="{{ path('admin_activity_log_index',query|merge({page:currentPage+1})) }}">Sau</a><a href="{{ path('admin_activity_log_index',query|merge({page:pages})) }}" aria-label="Trang cuối">»</a>{% endif %}
+</nav>{% endif %}
+</section>
 {% endblock %}

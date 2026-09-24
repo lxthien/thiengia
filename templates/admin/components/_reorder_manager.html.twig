@@ -1,0 +1,117 @@
+{#
+ # Khung màn hình quản lý có kéo-thả sắp xếp + bật/tắt.
+ #
+ # Dùng bằng {% embed %} và cài đè các block bên dưới, ví dụ:
+ #   {% embed 'admin/components/_reorder_manager.html.twig' with {
+ #       objects: objects, heading: 'Dịch vụ', ...
+ #   } %}{% block row %}...{% endblock %}{% endembed %}
+ #
+ # Tham số:
+ #   - objects: danh sách entity, đã sắp theo position
+ #   - heading / intro: tiêu đề và mô tả ở đầu trang
+ #   - list_heading: tiêu đề khối danh sách
+ #   - unit: danh từ đếm, vd 'dịch vụ'
+ #   - reorder_path / reorder_token_id: endpoint và CSRF id cho việc sắp xếp
+ #   - new_path / new_label: nút thêm mới (tùy chọn)
+ #   - empty_title / empty_text: trạng thái rỗng
+ #   - can_toggle: có hiện nút bật/tắt không
+ #
+ # Block cài đè được: row (bắt buộc), row_actions, header_actions.
+ # Hợp đồng với public/assets/js/admin/reorder-manager.js: data-manager,
+ # data-manager-notice, data-manager-status, data-manager-move,
+ # data-manager-visibility, và board mang data-reorder-url/token.
+ #}
+{% set active_count = objects|filter(item => item.enable)|length %}
+<main class="banner-manager" data-manager aria-labelledby="manager-heading">
+    <header class="banner-manager__header">
+        <div>
+            <h1 id="manager-heading">{{ heading }}</h1>
+            <p>{{ intro }}</p>
+        </div>
+        <div class="banner-manager__actions">
+            {% block header_actions %}
+                {% if new_path is defined and new_path %}
+                    <a class="banner-button banner-button--primary" href="{{ new_path }}">
+                        <i class="fa fa-plus" aria-hidden="true"></i> {{ new_label|default('Thêm mới') }}
+                    </a>
+                {% endif %}
+            {% endblock %}
+        </div>
+    </header>
+
+    <div class="banner-notice" data-manager-notice role="status" aria-live="polite" hidden></div>
+
+    <section class="banner-panel" aria-labelledby="manager-list-heading">
+        <div class="banner-panel__toolbar">
+            <div>
+                <h2 id="manager-list-heading">{{ list_heading|default('Thứ tự hiển thị từ trên xuống') }}</h2>
+                <p>
+                    <strong>{{ objects|length }} {{ unit }}</strong>
+                    <span class="banner-summary">{{ active_count }} đang hiển thị · {{ objects|length - active_count }} đã ẩn</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="banner-reorder-note">
+            <p class="banner-save-status" data-manager-status role="status" aria-live="polite">
+                Kéo tay nắm hoặc dùng nút lên / xuống để sắp xếp. Thứ tự lưu ngay khi thả.
+            </p>
+        </div>
+
+        <div class="dd banner-board" id="manager-nestable"
+             data-reorder-url="{{ reorder_path }}"
+             data-reorder-token="{{ csrf_token(reorder_token_id) }}">
+            <ol class="dd-list" id="manager-list">
+                {% for row in objects %}
+                    <li class="dd-item banner-row" data-id="{{ row.id }}">
+                        <div class="banner-row__layout manager-row">
+                            <div class="banner-order">
+                                <span class="banner-position">#{{ loop.index }}</span>
+                                <div class="dd-handle banner-grip" title="Kéo {{ unit }} này">
+                                    <i class="fa fa-arrows" aria-hidden="true"></i>
+                                    <span class="sr-only">Kéo để sắp xếp hoặc dùng nút lên / xuống.</span>
+                                </div>
+                                <div class="banner-order__buttons dd-nodrag">
+                                    <button type="button" data-manager-move="up" aria-label="Di chuyển lên" {% if loop.first %}disabled{% endif %}>
+                                        <i class="fa fa-angle-up" aria-hidden="true"></i>
+                                    </button>
+                                    <button type="button" data-manager-move="down" aria-label="Di chuyển xuống" {% if loop.last %}disabled{% endif %}>
+                                        <i class="fa fa-angle-down" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {% block row %}{% endblock %}
+
+                            <div class="banner-actions dd-nodrag">
+                                {% block row_actions %}
+                                    {% if edit_path_name is defined %}
+                                        <a class="banner-button" href="{{ path(edit_path_name, {id: row.id}) }}">
+                                            <i class="fa fa-pencil" aria-hidden="true"></i> Chỉnh sửa
+                                        </a>
+                                    {% endif %}
+                                    {% if can_toggle|default(false) and visibility_path_name is defined %}
+                                        <button type="button" class="banner-button" role="switch"
+                                                aria-checked="{{ row.enable ? 'true' : 'false' }}"
+                                                aria-label="Hiển thị mục này"
+                                                data-manager-visibility="{{ path(visibility_path_name, {id: row.id}) }}"
+                                                data-token="{{ csrf_token(visibility_token_prefix ~ row.id) }}"
+                                                data-enable="{{ row.enable ? '0' : '1' }}">{{ row.enable ? 'Ẩn' : 'Hiện' }}</button>
+                                    {% endif %}
+                                {% endblock %}
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ol>
+        </div>
+
+        {% if objects is empty %}
+            <div class="banner-empty">
+                <i class="fa fa-th-list" aria-hidden="true"></i>
+                <h2>{{ empty_title }}</h2>
+                <p>{{ empty_text }}</p>
+            </div>
+        {% endif %}
+    </section>
+</main>

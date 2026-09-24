@@ -1,0 +1,21 @@
+@use "contact-index" with ($contact-workspace-scope: ':is(#admin_user_index, #admin_user_editor)');
+:is(#admin_user_index, #admin_user_editor) {
+ .user-row { grid-template-columns: minmax(0,1fr) minmax(0,1fr); }
+ .user-row h3 small { color: #195c9e; font-size: 13px; }
+ .user-email { overflow-wrap: anywhere; }
+ .user-roles { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 12px; }
+ .user-roles span { color: #35465c; background: #eef2f7; border: 1px solid #dce2eb; border-radius: 4px; padding: 4px 8px; font-size: 13px; }
+ .user-editor { max-width: 850px; padding: 24px; }
+ .user-editor p { color: #596579; font-size: 14px; }
+ .user-editor label { color: #253246; font-size: 14px; font-weight: 600; }
+ .user-editor .form-control { box-sizing: border-box; min-height: 42px; height: auto; width: 100%; border: 1px solid #b9c4d3; border-radius: 5px; color: #253246; }
+ .user-editor input[readonly] { background: #f1f4f8; }
+ .user-permissions { padding: 18px; background: #f7f9fc; border: 1px solid #dce2eb; border-radius: 6px; margin: 20px 0; }
+ .user-permissions legend { width: auto; padding: 0 8px; color: #253246; font-size: 16px; }
+ .user-editor .form-error-message { color: #a12525; }
+ #user-confirm { position: fixed; inset: 0; margin: auto; width: min(520px,calc(100% - 32px)); max-height: 90dvh; overflow: auto; padding: 26px; border: 1px solid #dce2eb; border-radius: 8px; color: #253246; background: white; overflow-wrap: anywhere; }
+ #user-confirm::backdrop { background: rgb(15 23 42 / .55); }
+ #user-confirm h2 { margin-bottom: 16px; }
+ #user-confirm .contact-actions { justify-content: flex-end; }
+ @media(max-width:767px) { .user-row { grid-template-columns: minmax(0,1fr); } .user-editor { padding: 16px; } }
+}

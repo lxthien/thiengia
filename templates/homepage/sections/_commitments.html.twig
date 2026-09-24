@@ -1,0 +1,23 @@
+<section id="cam-ket" class="commits py-20 lg:py-24" aria-labelledby="cam-ket-h">
+    <div class="container max-w-7xl">
+        <div class="max-w-2xl mx-auto text-center">
+            <p class="sec-label sec-label--center fade">{{ section.label|default('Vì sao chọn ' ~ v3.company.shortNameOnly)|raw }}</p>
+            <h2 id="cam-ket-h" class="h-display text-3xl lg:text-4xl mt-5 fade">{{ section.title|default('6 cam kết <em>bằng văn bản</em>')|raw }}</h2>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mt-12">
+            {% for commit in section.getConfigValue('items') ?: v3.commitments %}
+                {# icon: config lưu KEY an toàn (xem SectionIcons); YAML mặc định lưu thẳng markup #}
+                <div class="commit fade">
+                    <span class="commit-icon" aria-hidden="true">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">{{ commit.icon starts with '<' ? commit.icon|raw : section_icon(commit.icon) }}</svg>
+                    </span>
+                    <div>
+                        <h3 class="commit-name">{{ commit.name }}</h3>
+                        <p class="commit-desc">{{ commit.desc }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>

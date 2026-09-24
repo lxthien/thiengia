@@ -1,0 +1,11 @@
+{% extends 'admin/layout.html.twig' %}
+{% block title %}{{ isNew ? 'Thêm chuyển hướng' : 'Sửa chuyển hướng' }}{% endblock %}
+{% block body_id 'admin_redirect_editor' %}
+{% block flash_messages %}{% endblock %}
+{% block stylesheets %}{{ parent() }}<link rel="stylesheet" href="{{ asset('build/css/redirect-manager.css') }}">{% endblock %}
+{% block main %}
+<section class="banner-manager contact-manager redirect-manager"><header class="banner-manager__header"><div><h1>{{ isNew ? 'Thêm chuyển hướng' : 'Sửa chuyển hướng #' ~ object.id }}</h1><p>Kiểm tra URL đích trước khi bật quy tắc.</p></div><a class="banner-button" href="{{ path('admin_redirect_index') }}">Quay lại danh sách</a></header>
+{{ include('admin/redirect/_messages.html.twig') }}
+<section class="banner-panel redirect-guide"><h2>Cách cấu hình</h2><p>URL nguồn là đường dẫn như /bai-viet-cu. Wildcard dùng * để khớp nhiều ký tự; Regex dành cho người hiểu biểu thức chính quy. URL đích hiện là giá trị cố định, không tự thay thế nhóm bắt hoặc ký tự *.</p><p>301/308: chuyển vĩnh viễn. 302/307: chuyển tạm thời. Số ưu tiên nhỏ hơn được xét trước. Tránh đặt nguồn và đích giống nhau.</p></section>
+<section class="banner-panel redirect-editor">{{ include('admin/redirect/_form.html.twig') }}</section></section>
+{% endblock %}

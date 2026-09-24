@@ -1,0 +1,8 @@
+{% extends 'admin/layout.html.twig' %}
+{% block title %}Khối trang chủ{% endblock %}
+{% block body_id 'admin_homepage_section_index' %}
+{% block stylesheets %}{{ parent() }}<link rel="stylesheet" href="{{ asset('build/css/homepage-section-index.css') }}">{% endblock %}
+{% block main %}
+    {{ include('admin/homepage_section/_manager.html.twig') }}
+{% endblock %}
+{% block javascripts %}{{ parent() }}<script src="{{ asset('build/js/menu-editor.js') }}"></script><script src="{{ asset('build/js/reorder-manager.js') }}"></script>{% endblock %}

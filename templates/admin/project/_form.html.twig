@@ -1,0 +1,53 @@
+{#
+ # Form công trình, dùng chung cho màn thêm mới và chỉnh sửa.
+ # Tham số: form, heading, back_path
+ #}
+<div class="content mt-3">
+    <div class="animated fadeIn">
+        <div class="row">
+            <div class="col-lg-9">
+                <div class="card">
+                    <div class="card-header">
+                        <strong class="card-title">{{ heading }}</strong>
+                    </div>
+                    <div class="card-body">
+                        {{ form_errors(form) }}
+                        {{ form_start(form) }}
+                            {{ form_row(form.name) }}
+                            {{ include('admin/components/_image_picker.html.twig', {field: form.coverImage, picker_id: 'projectPicker'}) }}
+                            {{ form_row(form.spec) }}
+                            {{ form_row(form.linkUrl) }}
+
+                            <div class="row">
+                                <div class="col-sm-4">{{ form_row(form.area) }}</div>
+                                <div class="col-sm-4">{{ form_row(form.floors) }}</div>
+                                <div class="col-sm-4">{{ form_row(form.location) }}</div>
+                            </div>
+
+                            {{ form_row(form.album) }}
+                            {{ form_row(form.featuredOnHome) }}
+                            {{ form_row(form.enable) }}
+
+                            <details class="mt-3">
+                                <summary>SEO &amp; trang chi tiết (chưa dùng tới)</summary>
+                                <div class="mt-2">
+                                    {{ form_row(form.slug) }}
+                                    {{ form_row(form.metaTitle) }}
+                                    {{ form_row(form.metaDescription) }}
+                                </div>
+                            </details>
+
+                            <button type="submit" class="btn btn-primary mt-3">
+                                <i class="fa fa-save" aria-hidden="true"></i> {{ 'action.save'|trans }}
+                            </button>
+                            <a href="{{ back_path }}" class="btn btn-link">
+                                <i class="fa fa-list-alt" aria-hidden="true"></i> {{ 'action.back_to_list'|trans }}
+                            </a>
+                            {{ form_widget(form._token) }}
+                        {{ form_end(form, {render_rest: false}) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

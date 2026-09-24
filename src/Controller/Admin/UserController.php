@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\ActivityLog;
 use App\Entity\User;
+use Knp\Component\Pager\PaginatorInterface;
 use App\Security\Voter\UserVoter;
 use App\Service\ActivityLogService;
 
@@ -39,13 +40,24 @@ class UserController extends AbstractController
      * Lists all users entities.
      */
     #[Route('/', name: 'admin_user_index', methods: ['GET'])]
-    public function indexAction()
+    public function indexAction(Request $request, PaginatorInterface $paginator)
     {
         $userRepository = $this->em->getRepository(User::class);
         $userRepository->markAllRegistrationNotificationsAsRead();
-        $users = $userRepository->findBy([], ['createdAt' => 'DESC', 'id' => 'DESC']);
-
-        return $this->render('admin/user/index.html.twig', ['objects' => $users]);
+        $q = trim((string) $request->query->get('q', ''));
+        $status = (string) $request->query->get('status', '');
+        $status = in_array($status, ['active', 'locked'], true) ? $status : '';
+        $qb = $userRepository->createQueryBuilder('u')->orderBy('u.createdAt', 'DESC')->addOrderBy('u.id', 'DESC');
+        if ($q !== '') {
+            $qb->andWhere('u.username LIKE :q OR u.name LIKE :q OR u.email LIKE :q')->setParameter('q', '%' . $q . '%');
+        }
+        if ($status !== '') {
+            $qb->andWhere('u.enabled = :enabled')->setParameter('enabled', $status === 'active');
+        }
+        return $this->render('admin/user/index.html.twig', [
+            'pagination' => $paginator->paginate($qb, max(1, $request->query->getInt('page', 1)), 20),
+            'filters' => ['q' => $q, 'status' => $status],
+        ]);
     }
 
     /**

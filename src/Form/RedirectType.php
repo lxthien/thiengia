@@ -18,23 +18,23 @@ class RedirectType extends AbstractType
     {
         $builder
             ->add('sourceUrl', TextType::class, [
-                'label' => 'Source URL',
-                'attr' => ['placeholder' => '/old-url or pattern']
+                'label' => 'URL nguồn',
+                'attr' => ['placeholder' => '/duong-dan-cu']
             ])
             ->add('destinationUrl', TextType::class, [
-                'label' => 'Destination URL',
+                'label' => 'URL đích',
                 'attr' => ['placeholder' => '/new-url']
             ])
             ->add('matchType', ChoiceType::class, [
-                'label' => 'Match Type',
+                'label' => 'Kiểu khớp',
                 'choices' => [
-                    'Exact' => 'exact',
-                    'Wildcard' => 'wildcard',
-                    'Regex' => 'regex'
+                    'Chính xác' => 'exact',
+                    'Wildcard (*)' => 'wildcard',
+                    'Biểu thức chính quy (Regex)' => 'regex'
                 ]
             ])
             ->add('statusCode', ChoiceType::class, [
-                'label' => 'Status Code',
+                'label' => 'Mã HTTP',
                 'choices' => [
                     '301 (Moved Permanently)' => 301,
                     '302 (Found / Temporary)' => 302,
@@ -43,15 +43,14 @@ class RedirectType extends AbstractType
                 ]
             ])
             ->add('isActive', CheckboxType::class, [
-                'label' => 'Active',
+                'label' => 'Bật chuyển hướng',
                 'required' => false
             ])
             ->add('orderNum', IntegerType::class, [
-                'label' => 'Order',
-                'data' => 0
+                'label' => 'Thứ tự ưu tiên'
             ])
             ->add('note', TextareaType::class, [
-                'label' => 'Note',
+                'label' => 'Ghi chú',
                 'required' => false
             ])
         ;

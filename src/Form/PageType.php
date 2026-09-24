@@ -230,7 +230,10 @@ class PageType extends AbstractType
             },
             'required' => false,
             'label' => 'label.parent_page',
-            'placeholder' => 'Chọn trang cha (tùy chọn)',
+            'placeholder' => 'Không có trang cha (trang gốc)',
+            'help' => count($orderedPages) === 0
+                ? 'Không có trang cha hợp lệ để chọn. Danh sách không bao gồm chính trang đang sửa và các trang con của nó, để tránh vòng lặp. Bạn có thể tạo một trang gốc khác hoặc chuyển trang con thành trang gốc trước.'
+                : 'Chọn trang cha để tạo phân cấp, hoặc chọn “Không có trang cha” để đặt trang ở cấp gốc. Chính trang đang sửa và các trang con của nó không xuất hiện trong danh sách.',
         ]);
     }
 

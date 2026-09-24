@@ -1,0 +1,28 @@
+@use "contact-index" with ($contact-workspace-scope: ':is(#admin_redirect_index, #admin_redirect_editor)');
+:is(#admin_redirect_index, #admin_redirect_editor) {
+ .redirect-tools, .redirect-filter-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+ .redirect-tools { margin-bottom: 18px; }
+ .redirect-tools span { color: #596579; font-size: 14px; }
+ .redirect-import, .redirect-guide, .redirect-editor { padding: 22px; margin-bottom: 20px; }
+ .redirect-import summary, .redirect-row summary { color: #195c9e; cursor: pointer; }
+ .redirect-import p, .redirect-guide p { margin: 12px 0; font-size: 14px; line-height: 1.65; }
+ .redirect-import form { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; }
+ .redirect-import input { max-width: 100%; }
+ .redirect-filters { grid-template-columns: minmax(0,1fr) 170px 150px; }
+ .redirect-filter-actions { grid-column: 1 / -1; }
+ .redirect-row { grid-template-columns: minmax(0,1fr) minmax(220px,.45fr); }
+ .redirect-urls dd { font-family: Consolas, monospace; color: #253246; font-size: 14px; }
+ .redirect-row details p { white-space: pre-wrap; }
+ .redirect-order { margin: 0; padding: 14px 22px; background: #f7f9fc; font-size: 14px; }
+ .redirect-fields { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 18px; }
+ .redirect-editor label { color: #253246; font-size: 14px; font-weight: 600; }
+ .redirect-editor .form-control { box-sizing: border-box; width: 100%; min-width: 0; min-height: 42px; height: auto; border: 1px solid #b9c4d3; color: #253246; border-radius: 5px; }
+ .redirect-editor .form-control::placeholder { color: #596579; opacity: 1; }
+ .redirect-editor .form-error-message { color: #a12525; }
+ #redirect-confirm { position: fixed; inset: 0; margin: auto; width: min(520px,calc(100% - 32px)); max-height: 90dvh; overflow: auto; padding: 26px; border: 1px solid #dce2eb; border-radius: 8px; color: #253246; background: white; overflow-wrap: anywhere; }
+ #redirect-confirm::backdrop { background: rgb(15 23 42 / .55); }
+ #redirect-confirm h2 { margin-bottom: 16px; }
+ #redirect-confirm .contact-actions { justify-content: flex-end; }
+ @media(max-width:991px) { .redirect-filters, .redirect-row { grid-template-columns: minmax(0,1fr); } }
+ @media(max-width:575px) { .redirect-fields { grid-template-columns: minmax(0,1fr); } .redirect-import, .redirect-guide, .redirect-editor { padding: 16px; } }
+}

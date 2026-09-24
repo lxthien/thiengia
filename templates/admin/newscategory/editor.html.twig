@@ -1,0 +1,25 @@
+{% extends 'admin/layout.html.twig' %}
+{% block admin_editor_stylesheets %}
+    <link rel="stylesheet" href="{{ asset('build/css/ckeditor5.css') }}">
+    <link rel="stylesheet" href="{{ asset('build/css/page-editor.css') }}">
+{% endblock %}
+{% block flash_messages %}{% endblock %}
+{% block main %}
+<section class="page-editor">
+    <header class="page-editor__header"><div>
+        <a href="{{ path('admin_newscategory_index') }}">← Danh sách danh mục</a>
+        <h1>{{ category.id ? 'Sửa danh mục bài viết' : 'Thêm danh mục bài viết' }}</h1>
+        <p>{{ category.id ? category.name : 'Tổ chức nội dung, thiết lập hiển thị và thông tin SEO cho danh mục.' }}</p>
+    </div></header>
+    {{ include('admin/redirect/_messages.html.twig') }}
+    <nav class="page-editor__nav" aria-label="Các phần của danh mục">
+        <a href="#category-general">Thông tin chung</a><a href="#category-content">Nội dung</a>
+        <a href="#category-display">Hiển thị</a><a href="#category-image">Ảnh đại diện</a>
+        <a href="#category-seo">SEO</a><a href="#category-schema">Schema</a>
+    </nav>
+    {{ include('admin/newscategory/_form.html.twig', {
+        form: form, button_label: category.id ? 'Lưu thay đổi' : 'Tạo danh mục',
+        include_back_to_home_link: true
+    }, with_context = false) }}
+</section>
+{% endblock %}

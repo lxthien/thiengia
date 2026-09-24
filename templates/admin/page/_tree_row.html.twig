@@ -1,60 +1,22 @@
-<tr>
-    <td><input type="checkbox" name="ids[]" value="{{ page.id }}" form="admin-page-bulk-form" data-bulk-check></td>
-    <td>
-        <div class="images-container">
-            <img src="{{ (page.getImages() ? page.getImages() : asset('assets/images/no-image.png')) | imagine_filter('admin_thumb') }}" alt="{{ page.getTitle() }}" />
-        </div>
-    </td>
-    <td>
-        <span>
-            {% if level > 0 %}
-                <span class="text-muted">
-                    {% for i in 1..level %}------ {% endfor %}
-                </span>
-            {% endif %}
-            {% if page.getChildren().count() > 0 %}
-                <i class="fa fa-folder text-primary"></i>
-            {% else %}
-                <i class="fa fa-file-text text-gray"></i>
-            {% endif %}
-            <a class="btn-link" href="{{ path('admin_page_edit', {id: page.id}) }}">{{ page.getTitle() }}</a>
-
-            {% if page.getChildren().count() > 0 %}
-                <span class="badge badge-primary ml-1">Trang cha</span>
-            {% elseif page.getParent() %}
-                <span class="badge badge-info ml-1">Trang con</span>
-            {% else %}
-                <span class="badge badge-light ml-1">Độc lập</span>
-            {% endif %}
-
-            <small class="d-block text-muted" style="margin-left: {{ level > 0 ? (level * 28) : 0 }}px;">
-                URL: {{ page.getUrl() }}
-            </small>
-        </span>
-    </td>
-    <td>
-        <span class="badge {{ page.getStatus().badgeClass() }}">{{ page.getStatus().label() }}</span>
-        {% if page.isScheduled() and page.getScheduledAt() %}
-            <small class="d-block text-muted mt-1">
-                <i class="fa fa-clock-o"></i> {{ page.getScheduledAt() | localizeddate('medium', 'short', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY HH:mm') }}
-            </small>
-        {% endif %}
-    </td>
-    <td>{{ page.getPublishedAt() ? page.getPublishedAt() | localizeddate('medium', 'none', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY') : '—' }}</td>
-    <td>{{ page.getUpdatedAt() | localizeddate('medium', 'none', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY') }}</td>
-    <td>
-        <div class="item-actions">
-            <a href="{{ path('admin_page_edit', {id: page.id}) }}" class="btn-sm">
-                <i class="fa fa-edit" aria-hidden="true"></i>
-            </a>
-            
-            {{ include('admin/page/_delete_form.html.twig', {news: page}, with_context = false) }}
-        </div>
-    </td>
+{% set seen = seen|default([]) %}
+{% if page.id not in seen %}
+{% set seen = seen|merge([page.id]) %}
+{% set children = page.children|filter(child => child.isPage) %}
+<tr class="page-row {{ level > 0 ? 'page-row--child' : '' }}">
+<td><input type="checkbox" name="ids[]" value="{{ page.id }}" form="admin-page-bulk-form" data-page-check aria-label="Chọn trang {{ page.title }}"></td>
+<td><a class="page-thumbnail" href="{{ path('admin_page_edit',{id:page.id}) }}" aria-label="Sửa ảnh đại diện: {{ page.title }}">
+{% if page.images|default('') %}<img data-page-thumbnail src="{{ asset(page.images) }}" alt="" width="72" height="54" loading="lazy"><span data-page-image-fallback hidden>Ảnh không tải được</span>{% else %}<span>Chưa có ảnh</span>{% endif %}
+</a></td>
+<td><div class="page-node {{ level > 0 ? 'page-node--child' : '' }}" style="--page-level:{{ min(level,6) }}">
+<div class="page-node-content"><a class="page-title" href="{{ path('admin_page_edit',{id:page.id}) }}">{{ page.title }}</a><span class="page-level">{{ level == 0 ? 'Trang gốc' : 'Cấp ' ~ (level + 1) }}{% if children|length %} · {{ children|length }} trang con trực tiếp{% endif %}</span>
+<p class="page-url">{{ page.url }}</p>
+{% if page.parent %}<p class="page-parent">Thuộc: <a href="{{ path('admin_page_edit',{id:page.parent.id}) }}">{{ page.parent.title }}</a></p>{% endif %}
+</div></div></td>
+<td><span class="page-status">{{ page.status.label() }}</span>{% if page.isScheduled and page.scheduledAt %}<small>{{ page.scheduledAt|date('d/m/Y H:i','Asia/Ho_Chi_Minh') }}</small>{% endif %}<small>Xuất bản: {{ page.publishedAt ? page.publishedAt|date('d/m/Y','Asia/Ho_Chi_Minh') : 'Chưa có' }}</small></td>
+<td><time>{{ page.updatedAt|date('d/m/Y H:i','Asia/Ho_Chi_Minh') }}</time></td>
+<td><div class="page-actions"><a class="banner-button" href="{{ path('admin_page_edit',{id:page.id}) }}">Sửa</a>
+{% if page.children|length == 0 %}<form method="post" action="{{ path('admin_page_delete',{id:page.id}) }}" data-page-delete data-title="{{ page.title }}"><input type="hidden" name="token" value="{{ csrf_token('delete') }}"><button class="banner-button banner-button--delete" type="submit">Xóa</button></form>{% else %}<small>Chuyển trang con sang cha khác trước khi xóa.</small>{% endif %}
+</div></td>
 </tr>
-
-{% if render_children|default(true) %}
-    {% for child in page.getChildren() %}
-        {{ include('admin/page/_tree_row.html.twig', {'page': child, 'level': level + 1, 'render_children': true}, with_context = false) }}
-    {% endfor %}
+{% if render_children is not defined or render_children %}{% for child in children %}{{ include('admin/page/_tree_row.html.twig',{page:child,level:level+1,render_children:true,seen:seen},with_context=false) }}{% endfor %}{% endif %}
 {% endif %}

@@ -9,7 +9,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 
-#[ORM\Table(name: 'contact', options: ['collate' => 'utf8_general_ci'])]
+#[ORM\Table(name: 'contact')]
 #[ORM\Entity(repositoryClass: ContactRepository::class)]
 class Contact
 {

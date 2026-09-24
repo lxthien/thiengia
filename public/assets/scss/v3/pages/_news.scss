@@ -151,6 +151,18 @@
     }
   }
 
+  // CKEditor 5 bọc mọi bảng trong <figure class="table"> (data format của table
+  // widget, không tắt được bằng config) — reset margin mặc định của <figure> và
+  // cho cuộn ngang trên mobile; style bảng vẫn do rule "table" bên dưới lo.
+  figure.table {
+    margin: 2.25rem 0;
+    overflow-x: auto;
+
+    > table {
+      margin: 0;
+    }
+  }
+
   table {
     width: 100%;
     margin: 2.25rem 0;

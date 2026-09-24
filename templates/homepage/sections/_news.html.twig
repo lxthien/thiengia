@@ -1,0 +1,34 @@
+{# Bài viết do App\Service\Homepage\NewsSectionResolver lấy theo cấu hình
+   "Danh mục hiển thị trang chủ" trong Cài đặt chung. #}
+{% if latestNews|default([])|length %}
+    <section id="cam-nang" class="news2 py-20 lg:py-24" aria-labelledby="cam-nang-h">
+        <div class="container max-w-7xl">
+            <div class="flex flex-wrap items-end justify-between gap-6">
+                <div>
+                    <p class="sec-label fade">{{ section.label|default('Cẩm nang xây nhà')|raw }}</p>
+                    <h2 id="cam-nang-h" class="h-display text-3xl lg:text-4xl mt-5 fade">{{ section.title|default('Đọc trước khi <em>xây</em>')|raw }}</h2>
+                </div>
+                <a href="{{ path('news_category', { level1: v3.newsCategorySlug }) }}" class="btn2 btn2--dark !py-3 !px-5 fade">Xem tất cả bài viết</a>
+            </div>
+
+            <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-5 mt-12">
+                {% for post in latestNews %}
+                    {% set imageSrc = post.images
+                        ? post.images|imagine_filter('news_277_220')
+                        : asset('assets/images/no-image.png') %}
+                    <article class="news2-card fade">
+                        <a href="{{ path('dynamic_post_page', { slug: post.url }) }}" tabindex="-1" aria-hidden="true">
+                            <figure><img src="{{ imageSrc }}" width="277" height="220" alt="{{ media_alt(post.images) ?: post.title }}" loading="lazy" decoding="async"></figure>
+                        </a>
+                        <div class="news2-body">
+                            <time datetime="{{ post.createdAt|date('Y-m-d') }}">{{ post.createdAt|date('d/m/Y') }}</time>
+                            <h3 class="news2-title">
+                                <a href="{{ path('dynamic_post_page', { slug: post.url }) }}">{{ post.title }}</a>
+                            </h3>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endif %}

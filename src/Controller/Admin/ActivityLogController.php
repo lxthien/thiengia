@@ -42,7 +42,23 @@ class ActivityLogController extends AbstractController
 
         $page = max(1, (int) $request->query->get('page', 1));
 
-        $result = $repository->findByFilters($filters, $page, 30);
+        $filterError = null;
+        foreach (['dateFrom', 'dateTo'] as $key) {
+            if ($filters[$key]) {
+                $date = \DateTimeImmutable::createFromFormat('!Y-m-d', (string) $filters[$key]);
+                if (!$date || $date->format('Y-m-d') !== $filters[$key]) {
+                    $filters[$key] = null;
+                    $filterError = 'Ngày lọc không hợp lệ đã được bỏ qua. Vui lòng chọn lại ngày.';
+                }
+            }
+        }
+        if ($filters['dateFrom'] && $filters['dateTo'] && $filters['dateFrom'] > $filters['dateTo']) {
+            [$filters['dateFrom'], $filters['dateTo']] = [$filters['dateTo'], $filters['dateFrom']];
+            $filterError = 'Đã đổi thứ tự khoảng ngày để ngày bắt đầu không lớn hơn ngày kết thúc.';
+        }
+        $perPage = $request->query->getInt('per_page', 30);
+        $perPage = in_array($perPage, [30, 50, 100], true) ? $perPage : 30;
+        $result = $repository->findByFilters($filters, $page, $perPage);
 
         // Get all users for filter dropdown
         $users = $this->em->getRepository(User::class)->findBy([], ['username' => 'ASC']);
@@ -54,6 +70,8 @@ class ActivityLogController extends AbstractController
             'currentPage' => $result['currentPage'],
             'filters' => $filters,
             'users' => $users,
+            'perPage' => $perPage,
+            'filterError' => $filterError,
         ]);
     }
 }

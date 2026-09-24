@@ -1,0 +1,42 @@
+#admin_activity_log_index {
+ .audit-manager { padding: 22px 26px; color: #253246; min-width: 0; }
+ .audit-header h1 { font-size: 24px; font-weight: 700; margin: 0 0 6px; }
+ .audit-header p { font-size: 13px; color: #596579; margin-bottom: 18px; }
+ .audit-filters { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; padding: 16px; background: white; border: 1px solid #dce2eb; border-radius: 6px; }
+ .audit-filters label { color: #253246; font-size: 13px; font-weight: 600; margin: 0; min-width: 0; }
+ .audit-filters input, .audit-filters select { display: block; box-sizing: border-box; width: 100%; min-width: 0; height: 36px; margin-top: 5px; border: 1px solid #b9c4d3; border-radius: 4px; padding: 6px 8px; color: #253246; background: white; font: inherit; }
+ .audit-filters input::placeholder { color: #596579; opacity: 1; }
+ .audit-filter-actions { display: flex; align-items: flex-end; gap: 12px; }
+ .audit-filter-actions button { height: 36px; padding: 6px 20px; border: 1px solid #195c9e; border-radius: 4px; color: white; background: #195c9e; font-size: 13px; cursor: pointer; }
+ .audit-filter-actions a { color: #195c9e; padding: 8px 0; font-size: 13px; }
+ .audit-results { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin: 16px 0 8px; font-size: 13px; }
+ .audit-results span { color: #596579; }
+ .audit-table-wrap { width: 100%; overflow-x: auto; border: 1px solid #dce2eb; border-radius: 5px; background: white; }
+ .audit-table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 13px; line-height: 1.4; }
+ .audit-table th { padding: 10px 8px; background: #eef2f7; color: #35465c; font-weight: 600; white-space: nowrap; }
+ .audit-table td { padding: 6px 8px; border-top: 1px solid #e4e8ee; vertical-align: middle; }
+ .audit-row:nth-of-type(4n+3) { background: #fafbfd; }
+ .audit-row:hover, .audit-row:focus-within { background: #eef5fd; }
+ .audit-truncate { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: inherit; }
+ .audit-table time { font-size: 12px; white-space: nowrap; }
+ .audit-action { display: inline-block; color: #35465c; font-size: 12px; }
+ .audit-action--danger { color: #a12525; }
+ .audit-detail-button { background: white; color: #195c9e; border: 1px solid #b9c4d3; border-radius: 4px; padding: 4px 6px; min-height: 26px; font-size: 12px; white-space: nowrap; cursor: pointer; }
+ .audit-detail-button[aria-expanded=true] { color: #253246; background: #eaf2fb; }
+ .audit-detail[hidden] { display: none !important; }
+ .audit-detail td { padding: 16px; background: #f4f7fb; }
+ .audit-detail dl { margin: 0 0 12px; }
+ .audit-detail dl > div { display: grid; grid-template-columns: 165px minmax(0,1fr); gap: 10px; }
+ .audit-detail dt { font-weight: 600; }
+ .audit-detail dd { overflow-wrap: anywhere; margin-bottom: 6px; }
+ .audit-detail pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 360px; overflow: auto; margin: 0; padding: 12px; background: white; border: 1px solid #dce2eb; color: #253246; font: 13px/1.6 Consolas,monospace; }
+ .audit-table .audit-empty { text-align: center; padding: 28px; color: #596579; }
+ .audit-pagination { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
+ .audit-pagination a, .audit-pagination span { padding: 6px 10px; border: 1px solid #b9c4d3; border-radius: 4px; background: white; color: #195c9e; font-size: 13px; }
+ .audit-pagination [aria-current] { background: #195c9e; border-color: #195c9e; color: white; }
+ .audit-warning { background: #fff2d7; color: #805000; padding: 12px; }
+ .audit-manager :focus-visible { outline: 3px solid #195c9e; outline-offset: 2px; }
+ @media(max-width:1199px) { .audit-table { font-size: 12px; } .audit-table th,.audit-table td { padding-left: 5px; padding-right: 5px; } .audit-table time { font-size: 11px; white-space: normal; } }
+ @media(max-width:767px) { .audit-filters { grid-template-columns: repeat(2,minmax(0,1fr)); } .audit-manager { padding: 18px 12px; } }
+ @media(max-width:575px) { .audit-manager { max-width: 100vw; box-sizing: border-box; } .audit-table-wrap { max-width: calc(100vw - 24px); } .audit-table { min-width: 850px; } .audit-filters { grid-template-columns: minmax(0,1fr); } }
+}

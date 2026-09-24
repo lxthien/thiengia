@@ -1,0 +1,28 @@
+@use "banner-index" with ($media-workspace-scope: '#admin_settings_global');
+#admin_settings_global {
+ .settings-manager { min-width: 0; }
+ .settings-layout { display: grid; grid-template-columns: 210px minmax(0,1fr); gap: 22px; align-items: start; }
+ .settings-nav { position: sticky; top: 18px; padding: 8px; display: grid; gap: 3px; }
+ .settings-nav a { display: block; color: #253246; padding: 11px 12px; border-radius: 4px; font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+ .settings-nav a:hover, .settings-nav a:focus { color: #195c9e; background: #eaf2fb; }
+ .settings-section { padding: 22px; margin-bottom: 20px; scroll-margin-top: 18px; }
+ .settings-section h2 { color: #253246; font-size: 20px; font-weight: 700; margin: 0 0 8px; }
+ .settings-section header p, .settings-manager .settings-hint { color: #596579; font-size: 14px; line-height: 1.6; }
+ .settings-fields { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 18px; margin-top: 22px; }
+ .settings-field { min-width: 0; }
+ .settings-field--wide { grid-column: 1 / -1; }
+ .settings-field .form-group { margin: 0; }
+ .settings-field label { color: #253246; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+ .settings-field .form-control { box-sizing: border-box; width: 100%; min-width: 0; min-height: 42px; height: auto; padding: 10px 12px; border: 1px solid #b9c4d3; border-radius: 5px; color: #253246; background: white; font-size: 15px; }
+ .settings-field textarea { resize: vertical; max-width: 100%; }
+ .settings-field .settings-code { font-family: Consolas, monospace; font-size: 13px; line-height: 1.6; }
+ .settings-manager .settings-hint { margin: 8px 0 0; }
+ .settings-hint code { color: #8a234a; background: #f7f0f3; padding: 2px 4px; }
+ .settings-field .invalid-feedback, .settings-field .form-error-message { color: #a12525; }
+ .settings-save { position: sticky; bottom: 38px; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 20px; box-shadow: 0 -4px 16px rgb(20 35 55 / .08); }
+ #settings-save-status { color: #596579; font-size: 14px; }
+ .settings-save.is-dirty #settings-save-status { color: #805000; font-weight: 600; }
+ .settings-manager :focus-visible { outline: 3px solid #195c9e; outline-offset: 3px; }
+ @media(max-width:991px) { .settings-layout { grid-template-columns: minmax(0,1fr); } .settings-nav { position: static; display: flex; flex-wrap: wrap; } }
+ @media(max-width:575px) { .banner-manager { padding: 20px 14px; } .settings-fields { grid-template-columns: minmax(0,1fr); } .settings-section { padding: 16px; } .settings-save { padding: 12px; flex-wrap: wrap; } }
+}

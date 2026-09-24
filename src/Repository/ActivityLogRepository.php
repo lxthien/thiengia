@@ -93,7 +93,10 @@ class ActivityLogRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
 
         // Paginate
+        $pages = max(1, (int) ceil($total / $perPage));
+        $page = min(max(1, $page), $pages);
         $qb->orderBy('a.createdAt', 'DESC')
+            ->addOrderBy('a.id', 'DESC')
             ->setFirstResult(($page - 1) * $perPage)
             ->setMaxResults($perPage);
 
@@ -102,7 +105,7 @@ class ActivityLogRepository extends ServiceEntityRepository
         return [
             'items' => $items,
             'total' => (int) $total,
-            'pages' => (int) ceil($total / $perPage),
+            'pages' => $pages,
             'currentPage' => $page,
         ];
     }

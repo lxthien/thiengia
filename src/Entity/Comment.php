@@ -13,7 +13,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use EWZ\Bundle\RecaptchaBundle\Validator\Constraints as Recaptcha;
 
 #[ORM\Entity(repositoryClass: CommentRepository::class)]
-#[ORM\Table(name: 'comment', options: ['collate' => 'utf8_general_ci'])]
+#[ORM\Table(name: 'comment')]
 class Comment
 {
     #[ORM\Id]

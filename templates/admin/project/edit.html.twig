@@ -1,0 +1,9 @@
+{% extends 'admin/layout.html.twig' %}
+{% block title %}Sửa công trình: {{ object.name }}{% endblock %}
+{% block main %}
+    {{ include('admin/project/_form.html.twig', {
+        form: form,
+        heading: 'Sửa công trình: ' ~ object.name,
+        back_path: path('admin_project_index'),
+    }) }}
+{% endblock %}

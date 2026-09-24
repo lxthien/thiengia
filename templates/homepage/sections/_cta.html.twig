@@ -1,0 +1,21 @@
+{% set cta_title_default = 'Bạn đang chuẩn bị <em>xây nhà</em>?<br>Đừng ký hợp đồng khi chưa gọi ' ~ v3.company.shortNameOnly ~ '.' %}
+<section class="cta2 py-20 lg:py-24" aria-labelledby="cta-h">
+    <div class="cta2-bg">
+        <img src="{{ asset(section.getConfigValue('image') ?: v3.ctaImage) }}" alt="" loading="lazy" decoding="async" aria-hidden="true">
+    </div>
+    <div class="container max-w-7xl flex flex-wrap items-center justify-between gap-10">
+        <div class="max-w-2xl">
+            <h2 id="cta-h" class="cta2-title fade">
+                {{ section.title|default(cta_title_default)|raw }}
+            </h2>
+            <p class="cta2-note fade">{{ section.subtitle|default('Khảo sát và dự toán sơ bộ hoàn toàn miễn phí — so sánh rồi hãy quyết định.')|raw }}</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-5 fade">
+            <a href="tel:{{ v3.company.phoneRaw }}" class="btn2 !text-base !px-8 !py-4">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                {{ v3.company.phone }}
+            </a>
+            <a href="#bao-gia-nhanh" class="btn2 btn2--ghost">Nhận báo giá miễn phí</a>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,16 @@
+$media-workspace-scope: '#admin_homepage_section_index';
+@import 'banner-index';
+
+#admin_homepage_section_index {
+    .manager-row { grid-template-columns: 40px minmax(0, 1fr); align-items: start; }
+    .manager-row .banner-order { grid-row: span 2; }
+    .manager-row .banner-actions { grid-column: 2; flex-wrap: wrap; }
+    .banner-details h3 { margin: 0; font-size: 18px; line-height: 1.5; font-weight: 600; overflow-wrap: anywhere; }
+    .banner-details h3 a { color: var(--banner-ink); }
+    .section-hint { color: var(--banner-muted); font-size: 13px; margin-bottom: 8px; overflow-wrap: anywhere; }
+    .section-copy { color: var(--banner-ink); font-size: 14px; line-height: 1.7; margin-bottom: 12px; overflow-wrap: anywhere; }
+    .section-copy__label { display: block; color: var(--banner-muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+    .section-copy__sub { display: block; color: var(--banner-muted); }
+    .section-copy--default { color: var(--banner-muted); font-style: italic; }
+    .banner-meta span { color: inherit; }
+}

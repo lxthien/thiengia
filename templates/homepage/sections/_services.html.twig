@@ -1,0 +1,40 @@
+{# Nội dung lấy từ entity Service (admin: Dịch vụ). Khi chưa có dịch vụ nào
+   trong DB thì dùng danh sách mặc định của theme để khối không bị trống. #}
+{% set cards = [] %}
+{% for service in services|default([]) %}
+    {% set cards = cards|merge([{
+        name: service.name,
+        image: service.image,
+        desc: service.description,
+        price: service.priceFrom,
+    }]) %}
+{% endfor %}
+{% if cards is empty %}
+    {% for service in v3.services %}
+        {% set cards = cards|merge([{name: service.name, image: service.image, desc: service.desc, price: null}]) %}
+    {% endfor %}
+{% endif %}
+
+<section id="dich-vu" class="svc py-20 lg:py-24" aria-labelledby="dich-vu-h">
+    <div class="container max-w-7xl">
+        <div class="max-w-2xl mx-auto text-center">
+            <p class="sec-label sec-label--center fade">{{ section.label|default('Dịch vụ')|raw }}</p>
+            <h2 id="dich-vu-h" class="h-display text-3xl lg:text-4xl mt-5 fade">{{ section.title|default('Trọn gói từ móng đến <em>nội thất</em>')|raw }}</h2>
+        </div>
+
+        <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-5 mt-12">
+            {% for card in cards %}
+                <article class="svc-card fade">
+                    <figure>
+                        <img src="{{ asset(card.image) }}" alt="{{ card.name }}" loading="lazy" decoding="async">
+                    </figure>
+                    <div class="svc-body">
+                        <h3 class="svc-name">{{ card.name }}</h3>
+                        <p class="svc-desc">{{ card.desc }}{% if card.price %} Đơn giá {{ card.price }}.{% endif %}</p>
+                        <a href="{{ path('contact') }}" class="svc-link">Xem báo giá <span aria-hidden="true">→</span></a>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>

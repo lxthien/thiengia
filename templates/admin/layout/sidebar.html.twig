@@ -106,9 +106,30 @@
 
 				{% if is_granted('ROLE_EDITOR') %}
 				<li>
+					<a href="{{ path('admin_homepage_section_index') }}">
+						<i class="menu-icon fa fa-th-list"></i>
+						Khối trang chủ
+					</a>
+				</li>
+
+				<li>
 					<a href="{{ path('admin_banner_index') }}">
 						<i class="menu-icon fa fa-flag"></i>
 						Quản lý banner
+					</a>
+				</li>
+
+				<li>
+					<a href="{{ path('admin_service_index') }}">
+						<i class="menu-icon fa fa-cogs"></i>
+						Dịch vụ
+					</a>
+				</li>
+
+				<li>
+					<a href="{{ path('admin_project_index') }}">
+						<i class="menu-icon fa fa-building-o"></i>
+						Công trình
 					</a>
 				</li>
 

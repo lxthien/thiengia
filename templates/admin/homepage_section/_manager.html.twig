@@ -1,0 +1,56 @@
+{% embed 'admin/components/_reorder_manager.html.twig' with {
+    objects: objects,
+    heading: 'Khối trang chủ',
+    intro: 'Sắp thứ tự, bật/tắt và sửa phần chữ của từng khối trên trang chủ.',
+    unit: 'khối',
+    reorder_path: path('admin_homepage_section_reorder'),
+    reorder_token_id: 'reorder_homepage_sections',
+    edit_path_name: 'admin_homepage_section_edit',
+    visibility_path_name: 'admin_homepage_section_visibility',
+    visibility_token_prefix: 'homepage_section_visibility_',
+    can_toggle: is_granted('ROLE_ADMIN'),
+    empty_title: 'Chưa có khối trang chủ nào',
+    empty_text: 'Chạy php bin/console app:homepage:seed-sections để tạo đủ khối theo thứ tự mặc định.',
+} %}
+    {% block header_actions %}
+        <a class="banner-button" href="{{ path('homepage') }}" target="_blank" rel="noopener">
+            <i class="fa fa-external-link" aria-hidden="true"></i> Xem trang chủ
+        </a>
+    {% endblock %}
+
+    {% block row %}
+        <div class="banner-details dd-nodrag">
+            <div class="banner-details__title">
+                <h3><a href="{{ path('admin_homepage_section_edit', {id: row.id}) }}">{{ row.name }}</a></h3>
+                <span class="banner-badge {{ row.enable ? 'banner-badge--visible' : 'banner-badge--hidden' }}">
+                    {{ row.enable ? 'Đang hiển thị' : 'Đã ẩn' }}
+                </span>
+            </div>
+            <p class="section-hint">{{ row.type.hint }}</p>
+            {% if row.label or row.title or row.subtitle %}
+                <p class="section-copy">
+                    {% if row.label %}<span class="section-copy__label">{{ row.label|striptags }}</span>{% endif %}
+                    {% if row.title %}<strong>{{ row.title|striptags }}</strong>{% endif %}
+                    {% if row.subtitle %}<span class="section-copy__sub">{{ row.subtitle|striptags|slice(0, 120) }}</span>{% endif %}
+                </p>
+            {% else %}
+                <p class="section-copy section-copy--default">Đang dùng nội dung mặc định của theme.</p>
+            {% endif %}
+            <p class="banner-meta"><span>Mã khối: {{ row.type.value }}</span><span>Cập nhật {{ row.updatedAt|date('d/m/Y H:i', 'Asia/Ho_Chi_Minh') }}</span></p>
+        </div>
+    {% endblock %}
+
+    {% block row_actions %}
+        <a class="banner-button" href="{{ path('admin_homepage_section_edit', {id: row.id}) }}">
+            <i class="fa fa-pencil" aria-hidden="true"></i> Sửa nội dung
+        </a>
+        {% if is_granted('ROLE_ADMIN') %}
+            <button type="button" class="banner-button" role="switch"
+                    aria-checked="{{ row.enable ? 'true' : 'false' }}"
+                    aria-label="Hiển thị khối {{ row.name }}"
+                    data-manager-visibility="{{ path('admin_homepage_section_visibility', {id: row.id}) }}"
+                    data-token="{{ csrf_token('homepage_section_visibility_' ~ row.id) }}"
+                    data-enable="{{ row.enable ? '0' : '1' }}">{{ row.enable ? 'Ẩn' : 'Hiện' }}</button>
+        {% endif %}
+    {% endblock %}
+{% endembed %}

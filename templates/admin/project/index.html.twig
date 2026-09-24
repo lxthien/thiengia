@@ -1,0 +1,71 @@
+{% extends 'admin/layout.html.twig' %}
+{% block title %}Công trình{% endblock %}
+{% block body_id 'admin_project_index' %}
+{% block stylesheets %}{{ parent() }}<link rel="stylesheet" href="{{ asset('build/css/catalog-index.css') }}">{% endblock %}
+
+{% block main %}
+    {% embed 'admin/components/_reorder_manager.html.twig' with {
+        objects: objects,
+        heading: 'Công trình thực tế',
+        intro: 'Khối "Công trình thực tế" trên trang chủ đọc từ danh sách này.',
+        unit: 'công trình',
+        reorder_path: path('admin_project_reorder'),
+        reorder_token_id: 'reorder_projects',
+        edit_path_name: 'admin_project_edit',
+        visibility_path_name: 'admin_project_visibility',
+        visibility_token_prefix: 'project_visibility_',
+        can_toggle: true,
+        new_path: path('admin_project_new'),
+        new_label: 'Thêm công trình',
+        empty_title: 'Chưa có công trình nào',
+        empty_text: 'Thêm công trình đầu tiên, hoặc chạy php bin/console app:homepage:import-content để nhập sẵn nội dung của theme.',
+    } %}
+        {% block row %}
+            <a href="{{ path('admin_project_edit', {id: row.id}) }}" class="banner-preview catalog-thumb dd-nodrag" aria-label="Sửa công trình {{ row.name }}">
+                {% if availableCovers[row.id]|default(false) %}
+                    <img src="{{ asset(row.coverImage) }}" alt="{{ row.name }}" loading="lazy">
+                {% else %}
+                    <span class="banner-preview__fallback"><i class="fa fa-image" aria-hidden="true"></i> {{ row.coverImage ? 'Không tìm thấy ảnh' : 'Chưa có ảnh' }}</span>
+                {% endif %}
+            </a>
+
+            <div class="banner-details dd-nodrag">
+                <div class="banner-details__title">
+                    <h3><a href="{{ path('admin_project_edit', {id: row.id}) }}">{{ row.name }}</a></h3>
+                    <span class="banner-badge {{ row.enable ? 'banner-badge--visible' : 'banner-badge--hidden' }}">
+                        {{ row.enable ? 'Đang hiển thị' : 'Đã ẩn' }}
+                    </span>
+                    {% if not row.featuredOnHome %}
+                        <span class="banner-badge banner-badge--hidden">Không lên trang chủ</span>
+                    {% endif %}
+                </div>
+                <p class="catalog-desc">{{ row.spec }}</p>
+                {% if row.location %}<p class="catalog-price">{{ row.location }}</p>{% endif %}
+                <p class="banner-meta"><span>ID #{{ row.id }}</span><span>Cập nhật {{ row.updatedAt|date('d/m/Y H:i', 'Asia/Ho_Chi_Minh') }}</span></p>
+            </div>
+        {% endblock %}
+
+        {% block row_actions %}
+            <a class="banner-button" href="{{ path('admin_project_edit', {id: row.id}) }}">
+                <i class="fa fa-pencil" aria-hidden="true"></i> Chỉnh sửa
+            </a>
+            <button type="button" class="banner-button" role="switch"
+                    aria-checked="{{ row.enable ? 'true' : 'false' }}"
+                    aria-label="Hiển thị công trình {{ row.name }}"
+                    data-manager-visibility="{{ path('admin_project_visibility', {id: row.id}) }}"
+                    data-token="{{ csrf_token('project_visibility_' ~ row.id) }}"
+                    data-enable="{{ row.enable ? '0' : '1' }}">{{ row.enable ? 'Ẩn' : 'Hiện' }}</button>
+            {% if is_granted('ROLE_ADMIN') %}
+                <form method="post" action="{{ path('admin_project_delete', {id: row.id}) }}"
+                      onsubmit="return confirm('Xóa công trình {{ row.name|e('js') }}?');">
+                    <input type="hidden" name="token" value="{{ csrf_token('delete_project_' ~ row.id) }}">
+                    <button type="submit" class="banner-button banner-button--danger">
+                        <i class="fa fa-trash" aria-hidden="true"></i> Xóa
+                    </button>
+                </form>
+            {% endif %}
+        {% endblock %}
+    {% endembed %}
+{% endblock %}
+
+{% block javascripts %}{{ parent() }}<script src="{{ asset('build/js/menu-editor.js') }}"></script><script src="{{ asset('build/js/reorder-manager.js') }}"></script>{% endblock %}

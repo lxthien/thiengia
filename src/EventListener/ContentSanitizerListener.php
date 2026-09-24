@@ -82,19 +82,54 @@ class ContentSanitizerListener
 
             $config = HTMLPurifier_Config::createDefault();
             $config->set('Cache.SerializerPath', $cacheDir);
+            // Giữ nguyên class/id và các thẻ khối mà CKEditor 5 (GeneralHtmlSupport,
+            // xem htmlSupport.allow trong public/assets/js/admin/ckeditor5.js) cố ý
+            // cho phép: geo-blocks (div.key-takeaways, div.stat-box, div.definition),
+            // mục lục (div.ka-table-of-contents + id trên heading để link "#id" trỏ
+            // đúng chỗ), content-block tool (section.cms-block-* kèm data-cms-block/
+            // data-cms-payload để mở lại block mà sửa) và Page Builder (ka-builder-*).
+            // Trước đây HTML.Allowed chỉ có 'div[style]' nên mọi class/id/section bị
+            // xoá sạch khi lưu, dù editor đã giữ đúng.
+            $config->set('Attr.EnableID', true);
             $config->set('HTML.Allowed', implode(',', [
-                'p', 'br', 'strong', 'b', 'em', 'i', 'u', 's', 'sub', 'sup',
-                'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-                'ul', 'ol', 'li',
-                'a[href|title|target|rel]',
-                'img[src|alt|title|width|height]',
-                'blockquote', 'q',
-                'table', 'thead', 'tbody', 'tr', 'th', 'td',
-                'span[style]', 'div[style]',
+                'p[class|id|style]', 'br', 'strong', 'b', 'em', 'i', 'u', 's', 'sub', 'sup',
+                'h1[class|id]', 'h2[class|id]', 'h3[class|id]', 'h4[class|id]', 'h5[class|id]', 'h6[class|id]',
+                'ul[class]', 'ol[class]', 'li[class]',
+                'a[href|title|target|rel|class|id|data-fancybox|data-caption]',
+                'img[src|alt|title|width|height|class|loading]',
+                'blockquote[class]', 'q',
+                'table[class]', 'thead', 'tbody', 'tr[class]', 'th[class|colspan|rowspan]', 'td[class|colspan|rowspan]',
+                'span[style|class]',
+                'div[style|class|id|data-cms-block|data-cms-payload]',
+                'section[style|class|id|data-cms-block|data-cms-payload]',
+                'figure[class]', 'figcaption[class]',
                 'hr',
             ]));
             $config->set('CSS.AllowedProperties', ['text-align', 'color', 'background-color', 'font-weight', 'font-style']);
             $config->set('Attr.AllowedFrameTargets', ['_blank']);
+
+            // Doctype mặc định (HTML 4.01) không biết section/figure/figcaption và
+            // không cho attribute data-* — phải khai báo thêm. DefinitionRev PHẢI
+            // tăng mỗi khi sửa khối dưới đây, nếu không bản cache cũ vẫn được dùng.
+            $config->set('HTML.DefinitionID', 'thiengia-cms-content');
+            $config->set('HTML.DefinitionRev', 1);
+
+            // maybeGetRawHTMLDefinition() "finalize" config, nên mọi ->set() phải
+            // nằm TRƯỚC dòng này; trả về null khi definition đã có sẵn trong cache.
+            if ($def = $config->maybeGetRawHTMLDefinition()) {
+                $def->addElement('section', 'Block', 'Flow', 'Common');
+                $def->addElement('figure', 'Block', 'Flow', 'Common');
+                $def->addElement('figcaption', 'Block', 'Flow', 'Common');
+
+                foreach (['div', 'section'] as $element) {
+                    $def->addAttribute($element, 'data-cms-block', 'Text');
+                    $def->addAttribute($element, 'data-cms-payload', 'Text');
+                }
+
+                $def->addAttribute('a', 'data-fancybox', 'Text');
+                $def->addAttribute('a', 'data-caption', 'Text');
+                $def->addAttribute('img', 'loading', 'Enum#lazy,eager');
+            }
 
             $this->purifier = new HTMLPurifier($config);
         }

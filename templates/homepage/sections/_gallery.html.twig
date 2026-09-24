@@ -1,0 +1,51 @@
+{# Nội dung lấy từ entity GalleryAlbum (admin: Thư viện ảnh) #}
+<section id="hoat-dong" class="gallery py-20 lg:py-24" aria-labelledby="hoat-dong-h">
+    <div class="container max-w-7xl">
+        <div class="flex flex-wrap items-end justify-between gap-6">
+            <div>
+                <p class="sec-label fade">{{ section.label|default('Hình ảnh hoạt động')|raw }}</p>
+                <h2 id="hoat-dong-h" class="h-display text-3xl lg:text-4xl mt-5 fade">
+                    {{ section.title|default(v3.company.shortNameOnly ~ ' trên <em>từng công trường</em>')|raw }}
+                </h2>
+            </div>
+            <div class="flex gap-3 fade">
+                <button class="gallery-nav" data-gallery-prev aria-label="Ảnh trước">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </button>
+                <button class="gallery-nav" data-gallery-next aria-label="Ảnh tiếp theo">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="gallery-track mt-10 fade" data-gallery-track>
+            {% for album in galleryAlbums %}
+                {% set cover = album.coverImage %}
+                {% if cover %}
+                    <button type="button" class="gallery-item"
+                            data-album-images="{{ album.images|map(i => {src: i.imageUrl, caption: i.caption ?: album.name, alt: i.alt ?: album.name})|json_encode|e('html_attr') }}">
+                        <figure>
+                            <img src="{{ cover.imageUrl }}" alt="{{ cover.alt ?: album.name }}" loading="lazy" decoding="async">
+                            <figcaption>{{ album.name }}</figcaption>
+                        </figure>
+                    </button>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{# Popup phóng to ảnh — đi kèm khối thư viện #}
+<div class="lightbox" role="dialog" aria-modal="true" aria-label="Xem ảnh phóng to" aria-hidden="true">
+    <button class="lightbox-close" aria-label="Đóng">✕</button>
+    <button class="lightbox-prev" aria-label="Ảnh trước">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="lightbox-body">
+        <img alt="">
+        <p class="lightbox-caption"></p>
+    </div>
+    <button class="lightbox-next" aria-label="Ảnh tiếp theo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+</div>

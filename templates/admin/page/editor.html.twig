@@ -1,0 +1,27 @@
+{% extends 'admin/layout.html.twig' %}
+{% block admin_editor_stylesheets %}
+    <link rel="stylesheet" href="{{ asset('build/css/ckeditor5.css') }}">
+    <link rel="stylesheet" href="{{ asset('build/css/page-editor.css') }}">
+{% endblock %}
+{% block admin_legacy_editor_javascripts %}
+    {{ include('admin/components/_legacy_editor_scripts.html.twig', with_context = false) }}
+{% endblock %}
+{% block flash_messages %}{% endblock %}
+{% block main %}
+<section class="page-editor">
+    <header class="page-editor__header">
+        <div><a href="{{ path('admin_page_index') }}">← Danh sách trang</a>
+            <h1>{{ object.id ? 'Sửa trang' : 'Thêm trang' }}</h1>
+            <p>{{ object.id ? object.title : 'Soạn nội dung, thiết lập phân cấp và kiểm tra trước khi xuất bản.' }}</p>
+        </div>
+        {% if object.id %}<a class="btn btn-default" target="_blank" rel="noopener" href="{{ path('dynamic_post_page', {slug: object.url, preview: 'true', preview_id: object.id}) }}">Xem trước <span class="sr-only">(mở tab mới)</span></a>{% endif %}
+    </header>
+    {{ include('admin/redirect/_messages.html.twig') }}
+    <nav class="page-editor__nav" aria-label="Các phần chỉnh sửa trang">
+        <a href="#page-general">Thông tin chung</a><a href="#page-image">Ảnh đại diện</a>
+        <a href="#page-content">Nội dung</a><a href="#page-seo">SEO</a>
+        <a href="#page-publishing">Xuất bản &amp; giao diện</a><a href="#page-advanced">Nâng cao</a>
+    </nav>
+    {{ include('admin/page/_form.html.twig', {form: form, button_label: object.id ? 'Lưu thay đổi' : 'Tạo trang', include_back_to_home_link: true}, with_context = false) }}
+</section>
+{% endblock %}

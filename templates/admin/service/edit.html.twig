@@ -1,0 +1,9 @@
+{% extends 'admin/layout.html.twig' %}
+{% block title %}Sửa dịch vụ: {{ object.name }}{% endblock %}
+{% block main %}
+    {{ include('admin/service/_form.html.twig', {
+        form: form,
+        heading: 'Sửa dịch vụ: ' ~ object.name,
+        back_path: path('admin_service_index'),
+    }) }}
+{% endblock %}

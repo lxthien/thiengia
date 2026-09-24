@@ -53,7 +53,7 @@ class PageController extends AbstractController
 
         $pagination = $this->paginator->paginate(
             $qb,
-            $request->query->getInt('page', 1),
+            max(1, $request->query->getInt('page', 1)),
             20
         );
 
@@ -211,6 +211,10 @@ class PageController extends AbstractController
         }
 
         $pageTitle = $page->getTitle();
+        if (!$page->getChildren()->isEmpty()) {
+            $this->addFlash('warning', 'Trang vẫn có nội dung con. Hãy chuyển các trang con sang trang cha khác trước khi xóa.');
+            return $this->redirectToRoute('admin_page_index');
+        }
         $pageId = $page->getId();
 
         $this->em->remove($page);
@@ -283,8 +287,13 @@ class PageController extends AbstractController
     {
         $level = 0;
         $currentParent = $page->getParent();
+        $visited = [$page->getId() => true];
 
         while (null !== $currentParent) {
+            if (isset($visited[$currentParent->getId()])) {
+                break;
+            }
+            $visited[$currentParent->getId()] = true;
             ++$level;
             $currentParent = $currentParent->getParent();
         }

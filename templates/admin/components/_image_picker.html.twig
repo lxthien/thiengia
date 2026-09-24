@@ -1,0 +1,105 @@
+{#
+ # Ô chọn ảnh cho khối trang chủ — dùng Media Library, không qua Vich.
+ #
+ # Tham số:
+ #   - field: form field (HiddenType, unmapped) giữ URL ảnh
+ #   - picker_id: tiền tố id cho JS picker trong admin.js, vd 'sectionPicker'
+ #
+ # Hợp đồng với admin.js: JS ghi URL vào #<picker_id>_url_input, nên widget
+ # của field phải mang đúng id đó.
+ #}
+{% set _img_url = field.vars.value|default('') %}
+{% set picker_id = picker_id|default('sectionPicker') %}
+
+<div class="form-group">
+    <label class="control-label">{{ field.vars.label }}</label>
+
+    <div class="image-manager-card"
+         data-media-picker-block
+         data-picker-id="{{ picker_id }}"
+         data-upload-path="/uploads/media/"
+         style="border:1px solid #e0e4ef;border-radius:6px;margin-bottom:20px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+
+        <div style="padding:16px;">
+            <div class="row" style="margin:0;">
+                <div class="col-sm-4" style="padding-right:16px;">
+                    <div style="border:2px dashed #d5d9ef;border-radius:6px;background:#f9faff;min-height:150px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+                        <img id="{{ picker_id }}_preview_img"
+                             src="{{ _img_url }}"
+                             alt="Preview"
+                             style="max-width:100%;max-height:190px;display:{{ _img_url ? 'block' : 'none' }};object-fit:cover;">
+                        <div id="{{ picker_id }}_placeholder"
+                             style="text-align:center;color:#b0b8d4;display:{{ _img_url ? 'none' : 'flex' }};flex-direction:column;align-items:center;gap:8px;padding:20px;">
+                            <i class="fa fa-image fa-3x"></i>
+                            <small style="font-size:11px;">Chưa chọn ảnh — đang dùng ảnh mặc định của theme</small>
+                        </div>
+                        <button type="button"
+                                id="{{ picker_id }}_clear_btn"
+                                data-media-picker-clear data-picker-id="{{ picker_id }}"
+                                title="Bỏ chọn ảnh"
+                                style="position:absolute;top:5px;right:5px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;border:none;cursor:pointer;font-size:13px;line-height:22px;padding:0;display:{{ _img_url ? 'block' : 'none' }};">&times;</button>
+                    </div>
+                </div>
+
+                <div class="col-sm-8" style="padding-left:8px;">
+                    <div style="background:#f7f9ff;border:1px solid #d5d9ef;border-radius:5px;padding:11px 14px;">
+                        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#5b7aff;margin-bottom:8px;display:block;">
+                            <i class="fa fa-th-large"></i> Chọn từ Media Library
+                        </label>
+                        <div class="input-group">
+                            <input type="text" id="{{ picker_id }}_display" class="form-control input-sm" readonly
+                                   value="{{ _img_url }}"
+                                   placeholder="Chưa chọn ảnh từ thư viện..."
+                                   style="font-size:12px;background:#fff;color:#555;">
+                            <span class="input-group-btn">
+                                <button type="button" class="btn btn-default btn-sm"
+                                        data-media-picker-open data-picker-id="{{ picker_id }}"
+                                        style="background:#5b7aff;color:#fff;border-color:#5b7aff;white-space:nowrap;">
+                                    <i class="fa fa-image"></i> Chọn
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if field.vars.errors|length %}
+        <div class="form-error" style="color:#b3261e;font-size:12px;margin-top:6px;">{{ form_errors(field) }}</div>
+    {% endif %}
+
+    {{ form_widget(field, {id: picker_id ~ '_url_input'}) }}
+</div>
+
+<div class="modal fade" id="{{ picker_id }}Modal" tabindex="-1" role="dialog"
+     data-picker-url="{{ path('admin_media_picker') }}"
+     data-picker-id="{{ picker_id }}"
+     aria-labelledby="{{ picker_id }}ModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-media-picker-close data-picker-id="{{ picker_id }}">
+                    <span>&times;</span>
+                </button>
+                <h4 class="modal-title" id="{{ picker_id }}ModalLabel">
+                    <i class="fa fa-image"></i> Chọn ảnh từ thư viện
+                </h4>
+            </div>
+            <div class="modal-body" id="{{ picker_id }}_body">
+                <div class="text-center text-muted" style="padding:30px;">
+                    <i class="fa fa-spinner fa-spin fa-2x"></i>
+                    <p class="mt-2">Đang tải thư viện...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <span id="{{ picker_id }}_selName" class="text-muted pull-left" style="font-size:13px;line-height:34px;"></span>
+                <button type="button" class="btn btn-default" data-media-picker-close data-picker-id="{{ picker_id }}">Hủy</button>
+                <button type="button" class="btn btn-primary" id="{{ picker_id }}_confirm" disabled
+                        data-media-picker-confirm data-picker-id="{{ picker_id }}">
+                    <i class="fa fa-check"></i> Chọn ảnh này
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

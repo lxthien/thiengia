@@ -1,67 +1,39 @@
 {{ form_start(form, {attr: attr|default({})}) }}
-{{ form_row(form.parent) }}
+{% if not form.vars.valid %}<div class="page-editor__errors" role="alert"><strong>Chưa thể lưu trang.</strong> Kiểm tra các trường được đánh dấu bên dưới.{{ form_errors(form) }}</div>{% endif %}
+<section class="page-editor__section" id="page-general" aria-labelledby="page-general-heading">
+<h2 id="page-general-heading">Thông tin chung</h2>
+<p class="page-editor__hint">Đặt tên trang và chọn vị trí trong cây nội dung. Để trống trang cha nếu đây là trang gốc.</p>
 {{ form_row(form.title) }}
+{{ form_row(form.parent) }}
 {{ form_row(form.url) }}
-{{ form_row(form.status) }}
-{{ form_row(form.scheduledAt) }}
+<p class="page-editor__hint">Bấm vào ô URL để chỉnh sửa. Đổi URL của trang đã xuất bản có thể ảnh hưởng các liên kết hiện có.</p>
+{{ form_row(form.description) }}
+</section>
+<section class="page-editor__section" id="page-image" aria-labelledby="page-image-heading">
+<h2 id="page-image-heading">Ảnh đại diện</h2>
 
-{% set _img_url = (form.vars.value and form.vars.value.images) ? form.vars.value.images : '' %}
-
-{# ── Image Manager Card ── #}
-<div class="image-manager-card" data-media-picker-block data-picker-id="pagePicker" data-upload-path="/uploads/media/" style="border:1px solid #e0e4ef;border-radius:6px;margin-bottom:20px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);">
-
-	<div style="background:linear-gradient(135deg,#f7f9ff 0%,#eef1fb 100%);padding:10px 15px;border-bottom:1px solid #e0e4ef;display:flex;align-items:center;gap:8px;">
-		<i class="fa fa-image" style="color:#5b7aff;font-size:15px;"></i>
-		<strong style="font-size:13px;color:#3a3f5c;">Hình ảnh đại diện</strong>
-	</div>
-
-	<div style="padding:16px;">
-		<div class="row" style="margin:0;">
-
-			<div class="col-sm-4" style="padding-right:16px;">
-				<div style="border:2px dashed #d5d9ef;border-radius:6px;background:#f9faff;min-height:150px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
-					<img id="pagePicker_preview_img" src="{{ _img_url }}" alt="Preview" style="max-width:100%;max-height:190px;display:{{ _img_url ? 'block' : 'none' }};object-fit:cover;">
-					<div id="pagePicker_placeholder" style="text-align:center;color:#b0b8d4;display:{{ _img_url ? 'none' : 'flex' }};flex-direction:column;align-items:center;gap:8px;padding:20px;">
-						<i class="fa fa-image fa-3x"></i>
-						<small style="font-size:11px;">Chưa có ảnh</small>
-					</div>
-					<button type="button" id="pagePicker_clear_btn" data-media-picker-clear data-picker-id="pagePicker" title="Bỏ chọn ảnh thư viện" style="position:absolute;top:5px;right:5px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;border:none;cursor:pointer;font-size:13px;line-height:22px;padding:0;display:{{ _img_url ? 'block' : 'none' }};">&times;</button>
-				</div>
-				{% if _img_url %}
-					<p style="font-size:10px;color:#aaa;margin-top:5px;word-break:break-all;text-align:center;">{{ _img_url }}</p>
-				{% endif %}
-			</div>
-
-			<div class="col-sm-8" style="padding-left:8px;">
-
-				<div style="background:#f7f9ff;border:1px solid #d5d9ef;border-radius:5px;padding:11px 14px;">
-					<label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#5b7aff;margin-bottom:8px;display:block;">
-						<i class="fa fa-th-large"></i>
-						Chọn từ Media Library
-					</label>
-					<div class="input-group">
-						<input type="text" id="pagePicker_display" class="form-control input-sm" readonly value="{{ _img_url }}" placeholder="Chưa chọn ảnh từ thư viện..." style="font-size:12px;background:#fff;color:#555;">
-						<span class="input-group-btn">
-							<button type="button" class="btn btn-default btn-sm" data-media-picker-open data-picker-id="pagePicker" style="background:#5b7aff;color:#fff;border-color:#5b7aff;white-space:nowrap;">
-								<i class="fa fa-image"></i>
-								Chọn
-							</button>
-						</span>
-					</div>
-				</div>
-
-			</div>
-		</div>
-	</div>
+{% set _img_url = form.images.vars.value|default('') %}
+<div class="page-editor__media" data-media-picker-block data-picker-id="pagePicker" data-upload-path="/uploads/media/">
+    <div class="page-editor__preview">
+        <img id="pagePicker_preview_img" {% if _img_url %}src="{{ _img_url }}"{% endif %} alt="Ảnh đại diện đang chọn" style="display:{{ _img_url ? 'block' : 'none' }};">
+        <div id="pagePicker_placeholder" style="display:{{ _img_url ? 'none' : 'flex' }};">Chưa có ảnh</div>
+        <button type="button" id="pagePicker_clear_btn" data-media-picker-clear data-picker-id="pagePicker" aria-label="Bỏ chọn ảnh đại diện" title="Bỏ chọn ảnh đại diện" style="display:{{ _img_url ? 'block' : 'none' }};">&times;</button>
+    </div>
+    <div class="page-editor__media-controls">
+        <label for="pagePicker_display">Ảnh từ thư viện media</label>
+        <input type="text" id="pagePicker_display" class="form-control" readonly value="{{ _img_url }}" placeholder="Chưa chọn ảnh từ thư viện">
+        <button type="button" class="btn btn-default" data-media-picker-open data-picker-id="pagePicker"><i class="fa fa-image" aria-hidden="true"></i> Chọn / đổi ảnh</button>
+        <p class="page-editor__hint">Bỏ chọn chỉ gỡ ảnh khỏi trang, không xóa tệp trong thư viện.</p>
+    </div>
 </div>
-
 {{ form_widget(form.images, {id: 'pagePicker_url_input', attr: {'data-picker-id': 'pagePicker'}}) }}
+{{ form_errors(form.images) }}
 
 <div class="modal fade" id="pagePickerModal" tabindex="-1" role="dialog" data-picker-url="{{ path('admin_media_picker') }}" data-picker-id="pagePicker" aria-labelledby="pagePickerModalLabel" aria-hidden="true">
 	<div class="modal-dialog modal-lg" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<button type="button" class="close" data-media-picker-close data-picker-id="pagePicker">
+				<button type="button" class="close" aria-label="Đóng thư viện ảnh" data-media-picker-close data-picker-id="pagePicker">
 					<span>&times;</span>
 				</button>
 				<h4 class="modal-title" id="pagePickerModalLabel">
@@ -86,7 +58,10 @@
 	</div>
 </div>
 
-{{ form_row(form.description) }}
+</section>
+<section class="page-editor__section" id="page-content" aria-labelledby="page-content-heading">
+<h2 id="page-content-heading">Nội dung trang</h2>
+<p class="page-editor__hint">Soạn nội dung bằng trình biên tập hoặc bật Page Builder. Các công cụ chèn Content blocks được giữ nguyên.</p>
 <div class="page-builder-admin" data-page-builder>
 	<div class="page-builder-admin__toggle">
 		{{ form_row(form.pageBuilderEnabled) }}
@@ -125,26 +100,46 @@
 	</div>
 </div>
 
+</section>
+<section class="page-editor__section" id="page-seo" aria-labelledby="page-seo-heading">
+<h2 id="page-seo-heading">SEO &amp; kết quả tìm kiếm</h2>
+{{ include('admin/components/seo-checker.html.twig', {form: form}, with_context = false) }}
 {{ form_row(form.pageTitle) }}
 {{ form_row(form.pageDescription) }}
 {{ form_row(form.pageKeyword) }}
+{{ form_row(form.breadcrumbTitle) }}
+<div class="page-editor__checks">
 {{ form_row(form.metaIndex) }}
 {{ form_row(form.metaFollow) }}
-{{ form_row(form.postType) }}
-{{ form_row(form.breadcrumbTitle) }}
-{{ form_row(form.schemaMarkup) }}
+</div>
+<p class="page-editor__hint">Index cho phép lập chỉ mục trang; Follow cho phép theo các liên kết trên trang.</p>
+</section>
+<section class="page-editor__section" id="page-publishing" aria-labelledby="page-publishing-heading">
+<h2 id="page-publishing-heading">Xuất bản &amp; giao diện</h2>
+<div class="page-editor__grid">
+{{ form_row(form.status) }}
+{{ form_row(form.scheduledAt) }}
 {{ form_row(form.template) }}
+{% if form.postType is defined %}{{ form_row(form.postType) }}{% endif %}
+</div>
+<p class="page-editor__hint">Nút lưu áp dụng trạng thái đã chọn. Nếu chọn “Đặt lịch”, hãy nhập ngày giờ xuất bản.</p>
+</section>
+<section class="page-editor__section" id="page-advanced" aria-labelledby="page-advanced-heading">
+<h2 id="page-advanced-heading">Thiết lập nâng cao &amp; ghi chú</h2>
+{% if form.schemaMarkup is defined %}{{ form_row(form.schemaMarkup) }}{% endif %}
 {{ form_row(form.note) }}
+</section>
+<footer class="page-editor__savebar">
+<span class="page-editor__hint">Kiểm tra nội dung và trạng thái trước khi lưu.</span>
+<div class="page-editor__save-actions">
 
 {% if form.save is defined %}
-	{{ form_widget(form.save, {label: 'action.create_post', attr: {class: 'btn btn-primary'}}) }}
+	{{ form_widget(form.save, {label: button_label|default('Lưu thay đổi'), translation_domain: false, attr: {class: 'btn btn-primary'}}) }}
 {% endif %}
 
 {% if form.saveAndCreateNew is defined %}
-	{{ form_widget(form.saveAndCreateNew, {label: 'label.save_and_create_new', attr: {class: 'btn btn-primary'}}) }}
+	{{ form_widget(form.saveAndCreateNew, {label: 'Lưu và thêm trang mới', translation_domain: false, attr: {class: 'btn btn-default'}}) }}
 {% endif %}
-
-{{ form_rest(form) }}
 
 {% if include_back_to_home_link|default(false) %}
 	<a href="{{ path('admin_page_index') }}" class="btn btn-link">
@@ -152,4 +147,7 @@
 		{{ 'action.back_to_list'|trans }}
 	</a>
 {% endif %}
+</div>
+</footer>
+{{ form_rest(form) }}
 {{ form_end(form) }}

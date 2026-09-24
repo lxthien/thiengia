@@ -1,0 +1,24 @@
+// Màn quản lý Dịch vụ và Công trình — dùng chung khung
+// templates/admin/components/_reorder_manager.html.twig.
+$media-workspace-scope: ':is(#admin_service_index, #admin_project_index)';
+@import 'banner-index';
+
+#admin_service_index, #admin_project_index {
+    .manager-row { grid-template-columns: 40px 140px minmax(0, 1fr); align-items: start; }
+    .manager-row .banner-order, .manager-row .catalog-thumb { grid-row: span 2; }
+    .manager-row .banner-actions { grid-column: 3; flex-wrap: wrap; align-items: flex-start; }
+    .manager-row .banner-actions form { margin: 0; }
+    .catalog-thumb { border-radius: 8px; overflow: hidden; }
+    .catalog-thumb img { width: 140px; height: 100px; object-fit: cover; display: block; }
+    .catalog-thumb .banner-preview__fallback { min-height: 100px; flex-direction: column; }
+    .banner-details h3 { margin: 0; font-size: 18px; line-height: 1.5; font-weight: 600; overflow-wrap: anywhere; }
+    .banner-details h3 a { color: var(--banner-ink); }
+    .catalog-price { color: #875500; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .catalog-desc { color: var(--banner-ink); font-size: 14px; line-height: 1.7; margin-bottom: 10px; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .banner-meta span { color: inherit; }
+    @media (max-width: 767px) {
+        .manager-row { grid-template-columns: 32px minmax(0, 1fr); }
+        .manager-row .catalog-thumb { grid-column: 2; grid-row: auto; }
+        .manager-row .banner-details, .manager-row .banner-actions { grid-column: 2; }
+    }
+}

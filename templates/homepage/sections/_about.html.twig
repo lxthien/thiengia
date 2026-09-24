@@ -1,0 +1,55 @@
+<section id="gioi-thieu" class="about2 py-20 lg:py-28" aria-labelledby="gioi-thieu-h">
+    <div class="container max-w-7xl grid lg:grid-cols-2 gap-14 lg:gap-20 items-center">
+        <div class="about2-media fade">
+            <img src="{{ asset(section.getConfigValue('image') ?: v3.about.image) }}" alt="{{ section.getConfigValue('imageAlt') ?: v3.about.imageAlt }}" loading="lazy" decoding="async">
+
+            {# Con dấu cam kết #}
+            <div class="seal" role="img" aria-label="Con dấu: {{ v3.company.slogan }} — {{ v3.company.shortName }}">
+                <svg class="seal-ring" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <defs>
+                        <path id="v3-seal-circle" d="M 64,64 m -46,0 a 46,46 0 1,1 92,0 a 46,46 0 1,1 -92,0"/>
+                    </defs>
+                    <circle cx="64" cy="64" r="60" fill="none" stroke="{{ v3.colors.gold }}" stroke-width="2"/>
+                    <circle cx="64" cy="64" r="34" fill="none" stroke="{{ v3.colors.gold }}" stroke-width="1"/>
+                    <text fill="{{ v3.colors.primary }}" font-size="9.5" font-weight="700" letter-spacing="1.4">
+                        <textPath href="#v3-seal-circle">{{ v3.company.slogan|upper }} • {{ v3.company.shortNameOnly|upper }} •</textPath>
+                    </text>
+                </svg>
+                <svg class="seal-core" width="34" height="30" viewBox="0 0 100 88" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path fill="currentColor" fill-rule="evenodd" d="M50 4 L96 84 L4 84 Z M50 46 L72 84 L28 84 Z"/>
+                    <path fill="currentColor" d="M50 58 L64 84 L36 84 Z"/>
+                </svg>
+            </div>
+        </div>
+
+        <div>
+            <p class="sec-label fade">{{ section.label|default('Về ' ~ v3.company.shortName)|raw }}</p>
+            <h2 id="gioi-thieu-h" class="h-display text-3xl lg:text-4xl mt-5 fade">
+                {{ section.title|default('Xây nhà là xây <em>tổ ấm</em> cho cả một đời người')|raw }}
+            </h2>
+            <p class="about2-lead fade">{{ section.subtitle|default(v3.about.lead)|raw }}</p>
+
+            <ul class="mt-7 fade">
+                {% for item in section.getConfigValue('checks') ?: v3.about.checks %}
+                    <li class="about2-check">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                        <p><strong>{{ item.title }}:</strong> {{ item.text }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <div class="mt-9 flex flex-wrap items-center gap-5 fade">
+                <a href="{{ path('contact') }}" class="btn2 btn2--dark">Tìm hiểu về chúng tôi</a>
+                <a href="tel:{{ v3.company.phoneRaw }}" class="hd-hotline">
+                    <span class="hd-hotline-icon">
+                        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    </span>
+                    <span>
+                        <span class="hd-hotline-label">Gọi ngay</span>
+                        <span class="hd-hotline-number">{{ v3.company.phone }}</span>
+                    </span>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

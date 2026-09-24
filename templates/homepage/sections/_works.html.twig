@@ -1,0 +1,45 @@
+{# Nội dung lấy từ entity Project (admin: Công trình). Khi chưa có công trình
+   nào trong DB thì dùng danh sách mặc định của theme. #}
+{% set cards = [] %}
+{% for project in projects|default([]) %}
+    {% set cards = cards|merge([{
+        name: project.name,
+        spec: project.spec,
+        image: project.coverImage,
+        link: project.linkUrl,
+    }]) %}
+{% endfor %}
+{% if cards is empty %}
+    {% for work in v3.works %}
+        {% set cards = cards|merge([{name: work.name, spec: work.spec, image: work.image, link: work.path|default(null)}]) %}
+    {% endfor %}
+{% endif %}
+
+<section id="cong-trinh" class="works py-20 lg:py-24" aria-labelledby="cong-trinh-h">
+    <div class="container max-w-7xl">
+        <div class="flex flex-wrap items-end justify-between gap-6">
+            <div>
+                <p class="sec-label fade">{{ section.label|default('Công trình thực tế')|raw }}</p>
+                <h2 id="cong-trinh-h" class="h-display text-3xl lg:text-4xl mt-5 fade">
+                    {{ section.title|default(v3.company.projectsCount ~ ' mái ấm đã <em>bàn giao</em>')|raw }}
+                </h2>
+            </div>
+            <a href="{{ path('news_category', { level1: v3.newsCategorySlug }) }}" class="btn2 btn2--dark !py-3 !px-5 fade">Xem tất cả công trình</a>
+        </div>
+
+        <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-5 mt-12">
+            {% for card in cards %}
+                <a href="{{ card.link|default('#') }}" class="work-card fade">
+                    <img src="{{ asset(card.image) }}" alt="{{ card.name }}" loading="lazy" decoding="async">
+                    <span class="work-arrow" aria-hidden="true">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M7 7h10v10"/></svg>
+                    </span>
+                    <div class="work-meta">
+                        <h3 class="work-name">{{ card.name }}</h3>
+                        <p class="work-spec">{{ card.spec }}</p>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>

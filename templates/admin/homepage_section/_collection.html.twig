@@ -1,0 +1,40 @@
+{#
+ # Danh sách dòng lặp (CollectionType) có nút thêm/xóa.
+ #
+ # Tham số:
+ #   - field: form field kiểu CollectionType
+ #   - add_label: chữ trên nút thêm
+ #
+ # Hợp đồng với public/assets/js/admin/homepage-section-edit.js:
+ #   [data-collection] giữ data-prototype, [data-collection-rows] chứa các dòng,
+ #   [data-collection-add] thêm dòng, [data-collection-remove] xóa dòng.
+ #}
+<div class="form-group section-collection"
+     data-collection
+     data-prototype="{{ form_widget(field.vars.prototype)|e('html_attr') }}"
+     data-index="{{ field|length }}">
+
+    <label class="control-label">{{ field.vars.label }}</label>
+    {% if field.vars.help %}<p class="help-block">{{ field.vars.help }}</p>{% endif %}
+    {{ form_errors(field) }}
+
+    <div data-collection-rows>
+        {% for row in field %}
+            <div class="section-collection__row" data-collection-row>
+                <div class="section-collection__fields">{{ form_widget(row) }}</div>
+                <button type="button" class="btn btn-default btn-sm section-collection__remove"
+                        data-collection-remove aria-label="Xóa dòng này">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                </button>
+            </div>
+        {% endfor %}
+    </div>
+
+    <p class="section-collection__empty" data-collection-empty {% if field|length %}hidden{% endif %}>
+        Chưa có dòng nào — trang chủ đang dùng nội dung mặc định của theme.
+    </p>
+
+    <button type="button" class="btn btn-default btn-sm" data-collection-add>
+        <i class="fa fa-plus" aria-hidden="true"></i> {{ add_label|default('Thêm dòng') }}
+    </button>
+</div>

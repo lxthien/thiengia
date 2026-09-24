@@ -42,6 +42,9 @@ class ActivityLog
     const ENTITY_SETTINGS = 'settings';
     const ENTITY_TESTIMONIAL = 'testimonial';
     const ENTITY_NEWSLETTER = 'newsletter';
+    const ENTITY_HOMEPAGE_SECTION = 'homepage_section';
+    const ENTITY_SERVICE = 'service';
+    const ENTITY_PROJECT = 'project';
 
     #[ORM\Column(name: 'id', type: Types::INTEGER)]
     #[ORM\Id]
@@ -240,6 +243,9 @@ class ActivityLog
             self::ENTITY_SETTINGS => 'Cài đặt',
             self::ENTITY_TESTIMONIAL => 'Đánh giá khách hàng',
             self::ENTITY_NEWSLETTER => 'Đăng ký bản tin',
+            self::ENTITY_HOMEPAGE_SECTION => 'Khối trang chủ',
+            self::ENTITY_SERVICE => 'Dịch vụ',
+            self::ENTITY_PROJECT => 'Công trình',
         ];
 
         return isset($labels[$this->entityType]) ? $labels[$this->entityType] : $this->entityType;

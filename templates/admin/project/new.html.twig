@@ -1,0 +1,9 @@
+{% extends 'admin/layout.html.twig' %}
+{% block title %}Thêm công trình{% endblock %}
+{% block main %}
+    {{ include('admin/project/_form.html.twig', {
+        form: form,
+        heading: 'Thêm công trình',
+        back_path: path('admin_project_index'),
+    }) }}
+{% endblock %}

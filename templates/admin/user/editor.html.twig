@@ -1,0 +1,23 @@
+{% extends 'admin/layout.html.twig' %}
+{% block title %}{{ mode == 'new' ? 'Thêm người dùng' : (mode == 'password' ? 'Đổi mật khẩu' : 'Sửa hồ sơ') }}{% endblock %}
+{% block body_id 'admin_user_editor' %}
+{% block flash_messages %}{% endblock %}
+{% block stylesheets %}{{ parent() }}<link rel="stylesheet" href="{{ asset('build/css/user-manager.css') }}">{% endblock %}
+{% block main %}
+<section class="banner-manager contact-manager user-manager"><header class="banner-manager__header"><div><h1>{{ block('title') }}</h1><p>{{ mode == 'new' ? 'Nhập thông tin và chọn quyền phù hợp cho tài khoản mới.' : 'Tài khoản: ' ~ user.username }}</p></div><a class="banner-button" href="{{ path('admin_user_index') }}">Quay lại danh sách</a></header>
+{{ include('admin/redirect/_messages.html.twig') }}
+<section class="banner-panel user-editor">
+{{ form_start(form) }}{{ form_errors(form) }}
+{% if mode == 'password' %}
+<p>Mật khẩu mới cần ít nhất 6 ký tự. Thay đổi chỉ có hiệu lực sau khi lưu.</p>
+{{ form_row(form.plainPassword,{attr:{autocomplete:'new-password'}}) }}{{ form_row(form.confirmPassword,{attr:{autocomplete:'new-password'}}) }}
+{% else %}
+{{ form_row(form.username) }}{{ form_row(form.name) }}{{ form_row(form.email) }}
+{% if form.plainPassword is defined %}{{ form_row(form.plainPassword,{attr:{autocomplete:'new-password'}}) }}{% endif %}
+<fieldset class="user-permissions"><legend>Vai trò và trạng thái</legend><p>Chỉ cấp các quyền cần thiết. Danh sách lựa chọn phụ thuộc quyền quản trị của bạn.</p>{{ form_row(form.roles) }}{{ form_row(form.enabled) }}</fieldset>
+{% if mode == 'edit' %}<a class="banner-button" href="{{ path('admin_user_change_password',{id:user.id}) }}">Đổi mật khẩu</a>{% endif %}
+{% endif %}
+<div class="contact-actions">{{ form_widget(form.save,{attr:{class:'banner-button banner-button--primary'}}) }}<a class="banner-button" href="{{ path('admin_user_index') }}">Hủy</a></div>
+{{ form_end(form) }}
+</section></section>
+{% endblock %}

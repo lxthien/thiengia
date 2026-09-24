@@ -15,6 +15,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Cache\CacheInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 
 #[Route('/admin/redirect')]
 #[IsGranted('ROLE_ADMIN')]
@@ -28,7 +29,7 @@ class RedirectController extends AbstractController
     }
 
     #[Route('/', name: 'admin_redirect_index', methods: ['GET'])]
-    public function indexAction(Request $request)
+    public function indexAction(Request $request, PaginatorInterface $paginator)
     {
         $queryBuilder = $this->em->getRepository(Redirect::class)->createQueryBuilder('r');
 
@@ -42,7 +43,8 @@ class RedirectController extends AbstractController
                 ->setParameter('type', $type);
         }
 
-        if ($isActive = $request->query->get('is_active')) {
+        $isActive = $request->query->get('is_active', '');
+        if (in_array($isActive, ['0', '1'], true)) {
             $queryBuilder->andWhere('r.isActive = :isActive')
                 ->setParameter('isActive', $isActive === '1');
         }
@@ -50,11 +52,10 @@ class RedirectController extends AbstractController
         $queryBuilder->orderBy('r.orderNum', 'ASC')
             ->addOrderBy('r.id', 'DESC');
 
-        // Without pagination bundle, we just fetch all or we can limit
-        $redirects = $queryBuilder->getQuery()->getResult();
-
         return $this->render('admin/redirect/index.html.twig', [
-            'objects' => $redirects
+            'pagination' => $paginator->paginate($queryBuilder, max(1, $request->query->getInt('page', 1)), 20),
+            'total' => $this->em->getRepository(Redirect::class)->count([]),
+            'filters' => ['search' => (string) $request->query->get('search', ''), 'type' => (string) $request->query->get('type', ''), 'is_active' => in_array($isActive, ['0', '1'], true) ? $isActive : ''],
         ]);
     }
 
@@ -146,8 +147,11 @@ class RedirectController extends AbstractController
     }
 
     #[Route('/{id}/toggle-status', name: 'admin_redirect_toggle_status', methods: ['POST'])]
-    public function toggleStatusAction(Redirect $redirect)
+    public function toggleStatusAction(Request $request, Redirect $redirect)
     {
+        if (!$this->isCsrfTokenValid('redirect_toggle_' . $redirect->getId(), $request->request->get('token'))) {
+            return $this->json(['message' => 'Phiên thao tác không hợp lệ.'], 403);
+        }
         $redirect->setIsActive(!$redirect->getIsActive());
         $this->em->flush();
         $this->cache->delete(RedirectSubscriber::CACHE_KEY);
@@ -157,7 +161,10 @@ class RedirectController extends AbstractController
     #[Route('/bulk-delete', name: 'admin_redirect_bulk_delete', methods: ['POST'])]
     public function bulkDeleteAction(Request $request)
     {
-        $ids = $request->request->get('ids', []);
+        if (!$this->isCsrfTokenValid('redirect_bulk_delete', $request->request->get('token'))) {
+            return $this->json(['message' => 'Phiên thao tác không hợp lệ.'], 403);
+        }
+        $ids = $request->request->all('ids');
         if (is_array($ids) && count($ids) > 0) {
             $repository = $this->em->getRepository(Redirect::class);
             foreach ($ids as $id) {
@@ -212,6 +219,10 @@ class RedirectController extends AbstractController
     #[Route('/import-csv', name: 'admin_redirect_import_csv', methods: ['POST'])]
     public function importCsvAction(Request $request)
     {
+        if (!$this->isCsrfTokenValid('redirect_import', $request->request->get('token'))) {
+            $this->addFlash('warning', 'Phiên nhập CSV không hợp lệ. Vui lòng thử lại.');
+            return $this->redirectToRoute('admin_redirect_index');
+        }
         $file = $request->files->get('csv_file');
         if ($file && in_array($file->getClientOriginalExtension(), ['csv', 'txt'])) {
             $handle = fopen($file->getRealPath(), 'r');

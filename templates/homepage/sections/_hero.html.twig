@@ -1,0 +1,64 @@
+{# Hero + form báo giá. Ảnh nền: Banner nhóm hero. Form: App\Form\QuickQuoteType #}
+<section class="hero2" aria-label="Giới thiệu tổng quan">
+    <div class="hero2-bg" data-hero-slides>
+        {% for slide in heroBanners %}
+            <img {{ loop.first ? 'class="is-active"' : '' }}
+                 src="{{ slide.urlImage }}"
+                 alt="{{ slide.name }}"
+                 {{ loop.first ? 'fetchpriority="high"' : 'loading="lazy"' }}
+                 decoding="async">
+        {% endfor %}
+    </div>
+
+    <div class="container max-w-7xl grid lg:grid-cols-[1fr_350px] gap-12 items-center">
+        <div>
+            <p class="sec-label sec-label--light fade">{{ section.label|default('Xây nhà trọn gói tại TP.HCM')|raw }}</p>
+            <h1 class="hero2-title mt-6 fade">{{ section.title|default('Xây tổ ấm bằng <em>cái tâm</em>')|raw }}</h1>
+            <p class="hero2-sub mt-6 fade">{{ section.subtitle|default(v3.company.heroIntro)|raw }}</p>
+
+            <ul class="hero2-points mt-7 fade">
+                {% for point in section.getConfigValue('points') ?: v3.heroPoints %}
+                    <li>
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                        {{ point }}
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <div class="mt-9 flex flex-wrap items-center gap-8 fade">
+                <a href="#cong-trinh" class="btn2 btn2--ghost">Xem công trình thực tế</a>
+                <div class="hero2-dots" role="tablist" aria-label="Chọn ảnh công trình">
+                    {% for slide in heroBanners %}
+                        <button data-hero-dot="{{ loop.index0 }}"
+                                {{ loop.first ? 'aria-current="true"' : '' }}
+                                aria-label="Ảnh công trình {{ loop.index }}"></button>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        {# Form báo giá nhanh — gửi AJAX tới contact_ajax, xem public/assets/js/v3/modules/forms.js #}
+        {{ form_start(form, {
+            attr: { id: 'bao-gia-nhanh', class: 'quick-quote fade', 'data-quote': '', 'data-ajax-form': '' }
+        }) }}
+            <h2 class="qq-title">Nhận báo giá <em>miễn phí</em></h2>
+            <p class="qq-note">Kiến trúc sư gọi lại trong 30 phút giờ làm việc.</p>
+
+            <div class="mt-5 space-y-4">
+                <div>
+                    <label for="{{ form.name.vars.id }}">Họ và tên</label>
+                    {{ form_widget(form.name) }}
+                </div>
+                <div>
+                    <label for="{{ form.phone.vars.id }}">Số điện thoại</label>
+                    {{ form_widget(form.phone) }}
+                </div>
+                <div>
+                    <label for="{{ form.title.vars.id }}">Nhu cầu</label>
+                    {{ form_widget(form.title) }}
+                </div>
+                <button type="submit" class="btn2">Gửi — nhận báo giá ngay</button>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</section>

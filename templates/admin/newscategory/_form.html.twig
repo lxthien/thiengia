@@ -1,35 +1,53 @@
-{{ form_start(form, {attr: attr|default({})}) }}
-    {{ form_errors(form) }}
+{{ form_start(form, {attr: attr|default({})|merge({novalidate: 'novalidate'})}) }}
+    {% if not form.vars.valid %}<div class="page-editor__errors" role="alert"><strong>Chưa thể lưu danh mục.</strong> Kiểm tra các trường được đánh dấu bên dưới.{{ form_errors(form) }}</div>{% endif %}
+    <section class="page-editor__section" id="category-general" aria-labelledby="category-general-title">
+    <h2 id="category-general-title">Thông tin chung</h2>
+    <p class="page-editor__hint">Đặt tên và chọn danh mục cha để tổ chức nội dung.</p>
     {{ form_row(form.parentcat) }}
     {{ form_row(form.name) }}
     {{ form_row(form.url) }}
+    <p class="page-editor__hint">Bấm vào ô URL để chỉnh sửa. URL đã được sử dụng cần được cân nhắc trước khi thay đổi.</p>
+    </section>
+    <section class="page-editor__section" id="category-content" aria-labelledby="category-content-title">
+    <h2 id="category-content-title">Mô tả &amp; nội dung</h2>
     {{ form_row(form.description) }}
     {{ form_row(form.content) }}
+    </section>
+    <section class="page-editor__section" id="category-display" aria-labelledby="category-display-title">
+    <h2 id="category-display-title">Hiển thị &amp; sắp xếp</h2>
+    <div class="page-editor__checks">
     {{ form_row(form.showPostRelated) }}
     {{ form_row(form.enable) }}
+    </div>
+    <div class="page-editor__grid">
     {{ form_row(form.sortBy) }}
     {{ form_row(form.cardFormat) }}
+    </div>
+    </section>
+    <section class="page-editor__section" id="category-image" aria-labelledby="category-image-title">
+    <h2 id="category-image-title">Ảnh đại diện</h2>
 
     {# ── Thumbnail ─────────────────────────────────────────── #}
     <div class="form-group media-picker-field">
-        <label class="control-label">Ảnh đại diện danh mục</label>
+        <label class="control-label" for="mediaPicker_display">Ảnh đại diện danh mục</label>
 
         {# Preview + clear #}
         <div class="media-picker-preview-wrap" id="mediaPicker_preview_wrap"
-             style="margin-bottom:10px; position:relative; {% if form.vars.data and form.vars.data.thumbnail %}display:inline-block;{% else %}display:none;{% endif %}">
+             style="margin-bottom:10px; position:relative; {% if form.thumbnail.vars.value %}display:inline-block;{% else %}display:none;{% endif %}">
             <img id="mediaPicker_preview_img"
-                 src="{{ form.vars.data and form.vars.data.thumbnail ? form.vars.data.thumbnail : '' }}"
-                 alt="Thumbnail preview">
-            <button type="button" id="mediaPicker_clear" title="Xóa ảnh">&times;</button>
+                 src="{{ form.thumbnail.vars.value ? form.thumbnail.vars.value : '' }}"
+                 alt="Ảnh đại diện đang chọn">
+            <button type="button" id="mediaPicker_clear" title="Bỏ chọn ảnh" aria-label="Bỏ chọn ảnh đại diện">&times;</button>
         </div>
 
         {# Real hidden input Symfony maps to the entity field #}
         {{ form_widget(form.thumbnail, {attr: {class: 'media-picker-input', style: 'display:none;'}}) }}
 
+        {{ form_errors(form.thumbnail) }}
         {# Display input + open button #}
-        <div class="input-group">
-            <input type="text" id="mediaPicker_display" class="form-control" readonly
-                   value="{{ form.vars.data and form.vars.data.thumbnail ? form.vars.data.thumbnail : '' }}"
+        <div class="page-editor__save-actions">
+            <input type="text" id="mediaPicker_display" class="form-control" style="flex:1 1 220px;" readonly
+                   value="{{ form.thumbnail.vars.value ? form.thumbnail.vars.value : '' }}"
                    placeholder="Chưa chọn ảnh...">
             <span class="input-group-btn">
                 <button type="button" class="btn btn-default" id="mediaPicker_open">
@@ -39,10 +57,12 @@
         </div>
         <p class="help-block">
             Chọn ảnh từ thư viện media hoặc
-            <a href="{{ path('admin_media_index') }}" target="_blank">tải ảnh mới lên</a>.
+            <a href="{{ path('admin_media_index') }}" target="_blank" rel="noopener">tải ảnh mới lên</a>.
         </p>
     </div>
 
+    <p class="page-editor__hint">Bỏ chọn ảnh không xóa tệp khỏi thư viện media.</p>
+    </section>
     {# ── Media Picker Modal (JS in admin.js reads data-picker-url) ── #}
     <div class="modal fade" id="mediaPickerModal" tabindex="-1" role="dialog"
          aria-labelledby="mediaPickerModalLabel" aria-hidden="true"
@@ -74,23 +94,29 @@
         </div>
     </div>
 
-    <div class="card-title">
-        <h3>{{ 'label.seo'|trans }}</h3>
-    </div>
-    <hr>
+    <section class="page-editor__section" id="category-seo" aria-labelledby="category-seo-title">
+    <h2 id="category-seo-title">SEO &amp; lập chỉ mục</h2>
     {{ form_row(form.pageTitle) }}
     {{ form_row(form.pageDescription) }}
     {{ form_row(form.pageKeyword) }}
+    <div class="page-editor__checks">
     {{ form_row(form.metaIndex) }}
     {{ form_row(form.metaFollow) }}
+    </div>
+    <p class="page-editor__hint">Index cho phép lập chỉ mục; Follow cho phép theo các liên kết trong danh mục.</p>
+    </section>
+    <section class="page-editor__section" id="category-schema" aria-labelledby="category-schema-title">
+    <h2 id="category-schema-title">Schema Markup</h2>
     {{ form_row(form.schemaMarkup) }}
+    </section>
+    <footer class="page-editor__savebar"><span class="page-editor__hint">Kiểm tra nội dung và tùy chọn hiển thị trước khi lưu.</span><div class="page-editor__save-actions">
 
     <button type="submit" class="{{ button_css|default("btn btn-primary") }}">
         <i class="fa fa-save" aria-hidden="true"></i> {{ button_label|default('label.create_post'|trans) }}
     </button>
 
     {% if form.saveAndCreateNew is defined %}
-        {{ form_widget(form.saveAndCreateNew, {label: 'label.save_and_create_new', attr: {class: 'btn btn-primary'}}) }}
+        {{ form_widget(form.saveAndCreateNew, {label: 'label.save_and_create_new', attr: {class: 'btn btn-default'}}) }}
     {% endif %}
 
     {% if include_back_to_home_link|default(false) %}
@@ -98,4 +124,5 @@
             <i class="fa fa-list-alt" aria-hidden="true"></i> {{ 'action.back_to_list'|trans }}
         </a>
     {% endif %}
+    </div></footer>
 {{ form_end(form) }}

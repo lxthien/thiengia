@@ -1,112 +1,26 @@
 {% extends 'admin/layout.html.twig' %}
-
+{% block title %}Quản lý trang{% endblock %}
 {% block body_id 'admin_page_index' %}
-
-{% block stylesheets %}
-    {{ parent() }}
-
-    <style>
-        #admin_page_index .page-search-form .input-group {
-            align-items: stretch;
-        }
-
-        #admin_page_index .page-search-form .btn {
-            min-width: 110px;
-        }
-    </style>
-{% endblock %}
-
+{% block flash_messages %}{% endblock %}
+{% block stylesheets %}{{ parent() }}<link rel="stylesheet" href="{{ asset('build/css/page-index.css') }}">{% endblock %}
+{% block javascripts %}{{ parent() }}<script src="{{ asset('build/js/page-index.js') }}" defer></script>{% endblock %}
 {% block main %}
-    <div class="content mt-3">
-        <div class="animated fadeIn">
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="card add">
-                        <div class="card-body">
-                            <div class="stat-widget-one">
-                                <a href="{{ path('admin_page_new') }}">
-                                    <div class="stat-icon dib">
-                                        <i class="ti-plus text-success border-success"></i>
-                                    </div>
-                                    <div class="stat-content dib">
-                                        <div class="stat-text text-success">{{ 'menu.add_new'|trans }}</div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <strong class="card-title">{{ 'title.page_list'|trans }}</strong>
-                        </div>
-                        <div class="card-body">
-                            <form method="get" class="form-inline mb-3 page-search-form">
-                                <div class="input-group w-100">
-                                    <input
-                                        type="text"
-                                        name="q"
-                                        value="{{ search_query|default('') }}"
-                                        class="form-control"
-                                        placeholder="Tìm theo tiêu đề, URL, mô tả, nội dung, SEO title, SEO description, keyword..."
-                                    >
-                                    <div class="input-group-append">
-                                        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
-                                        {% if search_query is not empty %}
-                                            <a href="{{ path('admin_page_index') }}" class="btn btn-secondary">Xóa lọc</a>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </form>
-                            <form id="admin-page-bulk-form" method="post" action="{{ path('admin_page_bulk') }}" data-bulk-form>
-                                <input type="hidden" name="token" value="{{ csrf_token('bulk_page') }}">
-                                <div class="admin-bulk-toolbar">
-                                    <select name="bulk_action" class="form-control">
-                                        <option value="">Chọn thao tác</option>
-                                        <option value="publish">Xuất bản đã chọn</option>
-                                        <option value="pending_review">Chuyển chờ duyệt</option>
-                                        <option value="draft">Chuyển về bản nháp</option>
-                                        <option value="archive">Lưu trữ đã chọn</option>
-                                    </select>
-                                    <button type="submit" class="btn btn-primary">Áp dụng</button>
-                                    <span class="text-muted">{{ pagination.getTotalItemCount }} trang</span>
-                                </div>
-                            </form>
-
-                            <table class="table table-striped table-bordered admin-list-table">
-                                <thead>
-                                    <tr>
-                                        <th class="admin-list-check"><input type="checkbox" data-bulk-check-all></th>
-                                        <th>{{ 'label.images'|trans }}</th>
-                                        <th>{{ 'label.title'|trans }}</th>
-                                        <th>{{ 'label.status'|trans }}</th>
-                                        <th>{{ 'label.published_at'|trans }}</th>
-                                        <th>{{ 'Updated' }}</th>
-                                        <th>{{ 'label.actions'|trans }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for page in pagination %}
-                                        {{ include('admin/page/_tree_row.html.twig', {
-                                            'page': page,
-                                            'level': page_levels[page.id]|default(0),
-                                            'render_children': search_query is empty
-                                        }, with_context = false) }}
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-
-                            <div class="admin-pagination">
-                                {{ knp_pagination_render(pagination, '@KnpPaginator/Pagination/twitter_bootstrap_v4_pagination.html.twig', {}, {'align': 'center'}) }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- .animated -->
-    </div>
+<section class="banner-manager page-manager">
+<header class="banner-manager__header"><div><h1>Quản lý trang</h1><p>Sắp xếp nội dung theo quan hệ trang cha và trang con.</p></div><a class="banner-button banner-button--primary" href="{{ path('admin_page_new') }}">Thêm trang</a></header>
+{{ include('admin/redirect/_messages.html.twig') }}
+<form class="banner-panel page-search" method="get" action="{{ path('admin_page_index') }}"><label>Tìm trang<input type="search" name="q" value="{{ search_query }}" placeholder="Tiêu đề, URL, nội dung hoặc thông tin SEO…"></label><button class="banner-button banner-button--primary" type="submit">Tìm kiếm</button><a class="banner-button" href="{{ path('admin_page_index') }}">Xóa bộ lọc</a></form>
+<section class="banner-panel"><header class="banner-panel__toolbar"><h2>Danh sách trang</h2><span>{{ pagination.totalItemCount }} {{ search_query ? 'kết quả phù hợp' : 'trang gốc' }} · Trang {{ pagination.currentPageNumber }}</span></header>
+<p class="page-guide">{{ search_query ? 'Chỉ hiển thị trang khớp tìm kiếm; thông tin trang cha giúp xác định vị trí trong cây.' : 'Trang con nằm ngay dưới trang cha và thụt vào theo cấp. Phân trang theo trang gốc, giữ trọn các trang con.' }}</p>
+<form id="admin-page-bulk-form" class="page-bulk" method="post" action="{{ path('admin_page_bulk') }}">
+<input type="hidden" name="token" value="{{ csrf_token('bulk_page') }}">
+<label>Thao tác hàng loạt<select name="bulk_action"><option value="">Chọn thao tác</option><option value="publish">Xuất bản</option><option value="pending_review">Chuyển chờ duyệt</option><option value="draft">Chuyển về bản nháp</option><option value="archive">Lưu trữ</option></select></label>
+<button class="banner-button" id="page-bulk-apply" type="submit" disabled>Áp dụng</button><span id="page-selection" role="status" aria-live="polite">Đã chọn 0 trang</span>
+</form>
+<div class="page-table-wrap" role="region" aria-label="Danh sách trang phân cấp" tabindex="0"><table class="page-table"><colgroup><col style="width:4%"><col style="width:92px"><col><col style="width:16%"><col style="width:14%"><col style="width:13%"></colgroup><thead><tr><th scope="col"><input type="checkbox" id="page-check-all" aria-label="Chọn tất cả trang đang hiển thị"></th><th scope="col">Ảnh</th><th scope="col">Tiêu đề / Phân cấp</th><th scope="col">Trạng thái</th><th scope="col">Cập nhật</th><th scope="col">Thao tác</th></tr></thead><tbody>
+{% for page in pagination %}{{ include('admin/page/_tree_row.html.twig',{page:page,level:page_levels[page.id]|default(0),render_children:search_query is empty,seen:[]},with_context=false) }}{% else %}<tr><td colspan="6" class="page-empty">Không có trang phù hợp. Thử từ khóa khác hoặc thêm trang mới.</td></tr>{% endfor %}
+</tbody></table></div>
+<div class="page-pagination">{{ knp_pagination_render(pagination,'@KnpPaginator/Pagination/twitter_bootstrap_v4_pagination.html.twig') }}</div>
+</section>
+<dialog id="page-confirm" aria-labelledby="page-confirm-title"><h2 id="page-confirm-title">Xóa trang?</h2><p id="page-confirm-message"></p><p>Thao tác không thể hoàn tác. Hãy kiểm tra các liên kết đang trỏ tới trang này trước khi xóa.</p><div class="page-actions"><button class="banner-button" type="button" id="page-cancel" autofocus>Hủy</button><button class="banner-button banner-button--danger" type="button" id="page-delete">Xóa trang</button></div></dialog>
+</section>
 {% endblock %}

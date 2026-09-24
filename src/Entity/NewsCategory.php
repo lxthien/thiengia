@@ -12,7 +12,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * NewsCategory
  */
-#[ORM\Table(name: 'newscategory', options: ['collate' => 'utf8_general_ci'])]
+#[ORM\Table(name: 'newscategory')]
 // Routing công khai tra cứu danh mục theo url+enable nhiều lần mỗi request
 // (handleSingleSegment/handleTwoSegments/handleThreeSegments/listAction) mà
 // trước đây bảng này không có index nào ngoài khóa chính/khóa ngoại.
@@ -116,7 +116,10 @@ class NewsCategory
 
     public function __construct()
     {
-        $this->parentcat = new ArrayCollection();
+        // parentcat là quan hệ ManyToOne (1 danh mục cha), không phải
+        // collection — khởi tạo bằng ArrayCollection làm flush() lỗi ngay khi
+        // persist một NewsCategory chưa gán danh mục cha.
+        $this->children = new ArrayCollection();
         $this->news = new ArrayCollection();
     }
 
