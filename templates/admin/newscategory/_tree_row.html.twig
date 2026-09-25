@@ -1,40 +1,23 @@
-<tr>
-    <td class="text-center">
-        {% if category.getThumbnail() %}
-            <img src="{{ category.getThumbnail() }}" alt="{{ category.getName() }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
-        {% else %}
-            <div style="width: 50px; height: 50px; background: #f0f0f0; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; color: #aaa; margin: 0 auto;">
-                <i class="fa fa-image"></i>
-            </div>
-        {% endif %}
-    </td>
-    <td>
-        <span style="margin-left: {{ level * 30 }}px;">
-            {% if category.getChildren() and category.getChildren().count() > 0 %}
-                <i class="fa fa-folder text-primary"></i>
-            {% else %}
-                <i class="fa fa-file-text text-gray"></i>
-            {% endif %}
-            <a class="btn-link" href="{{ path('admin_news_list_by_category', {categoryId: category.id}) }}">{{ category.getName() }}</a>
-        </span>
-    </td>
-    <td>{{ category.getParentcat() != 'root' ? category.getParentcat() : '-' }}</td>
-    <td>{{ category.getUrl() }}</td>
-    <td>{{ category.getCreatedAt() | localizeddate('medium', 'none', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY') }}</td>
-    <td>{{ category.getUpdatedAt() | localizeddate('medium', 'none', null, 'Asia/Ho_Chi_Minh', 'd/M/YYYY') }}</td>
-    <td>
-        <div class="item-actions">
-            <a href="{{ path('admin_newscategory_edit', {id: category.id}) }}" class="btn-sm btn-edit">
-                <i class="fa fa-edit" aria-hidden="true"></i>
-            </a>
-
-            {{ include('admin/newscategory/_delete_form.html.twig', {category: category}, with_context = false) }}
-        </div>
-    </td>
+{% set seen = seen|default([]) %}
+{% if category.id not in seen %}
+{% set seen = seen|merge([category.id]) %}
+{% set children = category.children %}
+{% set news_count = news_counts[category.id]|default(0) %}
+<tr class="category-row {{ level > 0 ? 'category-row--child' : '' }}">
+<td><a class="category-thumbnail" href="{{ path('admin_newscategory_edit',{id:category.id}) }}" aria-label="Sửa ảnh đại diện: {{ category.name }}">
+{% if category.thumbnail %}<img data-category-thumbnail src="{{ asset(category.thumbnail) }}" alt="" width="72" height="54" loading="lazy"><span data-category-image-fallback hidden>Ảnh không tải được</span>{% else %}<span>Chưa có ảnh</span>{% endif %}
+</a></td>
+<td><div class="category-node {{ level > 0 ? 'category-node--child' : '' }}" style="--category-level:{{ min(level,6) }}">
+<a class="category-title" href="{{ path('admin_newscategory_edit',{id:category.id}) }}">{{ category.name }}</a><span class="category-level">{{ level == 0 ? 'Danh mục gốc' : 'Cấp ' ~ (level + 1) }}{% if children|length %} · {{ children|length }} danh mục con{% endif %}</span>
+<p class="category-url">{{ category.url }}</p>
+{% if category.parentcat %}<p class="category-parent">Thuộc: <a href="{{ path('admin_newscategory_edit',{id:category.parentcat.id}) }}">{{ category.parentcat.name }}</a></p>{% endif %}
+</div></td>
+<td><span class="category-status {{ category.enable ? 'is-enabled' : 'is-disabled' }}">{{ category.enable ? 'Đang hiển thị' : 'Đang ẩn' }}</span>{% if not category.metaIndex %}<small>Không index (noindex)</small>{% endif %}</td>
+<td><a class="category-count" href="{{ path('admin_news_list_by_category',{categoryId:category.id}) }}" aria-label="Xem {{ news_count }} bài viết thuộc {{ category.name }}">{{ news_count }} bài</a></td>
+<td><time>{{ category.updatedAt|date('d/m/Y H:i','Asia/Ho_Chi_Minh') }}</time><small>Tạo: {{ category.createdAt|date('d/m/Y','Asia/Ho_Chi_Minh') }}</small></td>
+<td><div class="category-actions"><a class="banner-button" href="{{ path('admin_newscategory_edit',{id:category.id}) }}">Sửa</a>
+{% if children|length == 0 %}<form method="post" action="{{ path('admin_newscategory_delete',{id:category.id}) }}" data-category-delete data-title="{{ category.name }}" data-news="{{ news_count }}"><input type="hidden" name="token" value="{{ csrf_token('delete') }}"><button class="banner-button banner-button--delete" type="submit">Xóa</button></form>{% else %}<small>Chuyển danh mục con sang cha khác trước khi xóa.</small>{% endif %}
+</div></td>
 </tr>
-
-{% if category.getChildren() and category.getChildren().count() > 0 %}
-    {% for child in category.getChildren() %}
-        {{ include('admin/newscategory/_tree_row.html.twig', {'category': child, 'level': level + 1}, with_context = false) }}
-    {% endfor %}
+{% if render_children %}{% for child in children %}{{ include('admin/newscategory/_tree_row.html.twig',{category:child,level:level+1,render_children:true,news_counts:news_counts,seen:seen},with_context=false) }}{% endfor %}{% endif %}
 {% endif %}

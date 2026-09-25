@@ -1,152 +1,137 @@
 {{ form_start(form, {attr: attr|default({})}) }}
+{% if not form.vars.valid %}<div class="page-editor__errors" role="alert"><strong>Chưa thể lưu bài viết.</strong> Kiểm tra các trường được đánh dấu bên dưới.{{ form_errors(form) }}</div>{% endif %}
+<section class="page-editor__section" id="news-general" aria-labelledby="news-general-heading">
+<h2 id="news-general-heading">Thông tin chung</h2>
+<p class="page-editor__hint">Tiêu đề tự tạo URL. Mô tả ngắn hiển thị ở danh sách bài và làm mô tả SEO dự phòng.</p>
+{{ form_row(form.title) }}
+{{ form_row(form.url) }}
+<p class="page-editor__hint">Bấm vào ô URL để chỉnh sửa. Đổi URL của bài đã xuất bản có thể làm hỏng các liên kết hiện có.</p>
+{{ form_row(form.description) }}
+</section>
+<section class="page-editor__section" id="news-image" aria-labelledby="news-image-heading">
+<h2 id="news-image-heading">Ảnh đại diện</h2>
 
-{% set _img_url = (form.vars.value and form.vars.value.images) ? form.vars.value.images : '' %}
-
-{# Render title, url, status, scheduledAt before image card #}
-{% for child in form %}
-    {% if child.vars.name in ['title', 'url', 'status', 'scheduledAt'] %}
-        {{ form_row(child) }}
-    {% endif %}
-{% endfor %}
-
-{# ── Image Manager Card ── #}
-<div class="image-manager-card"
-     data-media-picker-block
-     data-picker-id="newsPicker"
-     data-upload-path="/uploads/media/"
-     style="border:1px solid #e0e4ef;border-radius:6px;margin-bottom:20px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);">
-
-    <div style="background:linear-gradient(135deg,#f7f9ff 0%,#eef1fb 100%);padding:10px 15px;border-bottom:1px solid #e0e4ef;display:flex;align-items:center;gap:8px;">
-        <i class="fa fa-image" style="color:#5b7aff;font-size:15px;"></i>
-        <strong style="font-size:13px;color:#3a3f5c;">Hình ảnh đại diện</strong>
+{% set _img_url = form.images.vars.value|default('') %}
+<div class="page-editor__media" data-media-picker-block data-picker-id="newsPicker" data-upload-path="/uploads/media/">
+    <div class="page-editor__preview">
+        <img id="newsPicker_preview_img" {% if _img_url %}src="{{ _img_url }}"{% endif %} alt="Ảnh đại diện đang chọn" style="display:{{ _img_url ? 'block' : 'none' }};">
+        <div id="newsPicker_placeholder" style="display:{{ _img_url ? 'none' : 'flex' }};">Chưa có ảnh</div>
+        <button type="button" id="newsPicker_clear_btn" data-media-picker-clear data-picker-id="newsPicker" aria-label="Bỏ chọn ảnh đại diện" title="Bỏ chọn ảnh đại diện" style="display:{{ _img_url ? 'block' : 'none' }};">&times;</button>
     </div>
-
-    <div style="padding:16px;">
-        <div class="row" style="margin:0;">
-
-            {# Left: Preview box #}
-            <div class="col-sm-4" style="padding-right:16px;">
-                <div style="border:2px dashed #d5d9ef;border-radius:6px;background:#f9faff;min-height:150px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
-                    <img id="newsPicker_preview_img"
-                         src="{{ _img_url }}"
-                         alt="Preview"
-                         style="max-width:100%;max-height:190px;display:{{ _img_url ? 'block' : 'none' }};object-fit:cover;">
-                    <div id="newsPicker_placeholder"
-                         style="text-align:center;color:#b0b8d4;display:{{ _img_url ? 'none' : 'flex' }};flex-direction:column;align-items:center;gap:8px;padding:20px;">
-                        <i class="fa fa-image fa-3x"></i>
-                        <small style="font-size:11px;">Chưa có ảnh</small>
-                    </div>
-                    <button type="button"
-                            id="newsPicker_clear_btn"
-                            data-media-picker-clear data-picker-id="newsPicker"
-                            title="Bỏ chọn ảnh thư viện"
-                            style="position:absolute;top:5px;right:5px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;border:none;cursor:pointer;font-size:13px;line-height:22px;padding:0;display:{{ _img_url ? 'block' : 'none' }};">&times;</button>
-                </div>
-                {% if _img_url %}
-                    <p style="font-size:10px;color:#aaa;margin-top:5px;word-break:break-all;text-align:center;">{{ _img_url }}</p>
-                {% endif %}
-            </div>
-
-            {# Right: Options #}
-            <div class="col-sm-8" style="padding-left:8px;">
-
-                <div style="background:#f7f9ff;border:1px solid #d5d9ef;border-radius:5px;padding:11px 14px;">
-                    <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#5b7aff;margin-bottom:8px;display:block;">
-                        <i class="fa fa-th-large"></i> Chọn từ Media Library
-                    </label>
-                    <div class="input-group">
-                        <input type="text" id="newsPicker_display" class="form-control input-sm" readonly
-                               value="{{ _img_url }}"
-                               placeholder="Chưa chọn ảnh từ thư viện..."
-                               style="font-size:12px;background:#fff;color:#555;">
-                        <span class="input-group-btn">
-                            <button type="button" class="btn btn-default btn-sm"
-                                    data-media-picker-open data-picker-id="newsPicker"
-                                    style="background:#5b7aff;color:#fff;border-color:#5b7aff;white-space:nowrap;">
-                                <i class="fa fa-image"></i> Chọn
-                            </button>
-                        </span>
-                    </div>
-                </div>
-
-            </div>
-        </div>
+    <div class="page-editor__media-controls">
+        <label for="newsPicker_display">Ảnh từ thư viện media</label>
+        <input type="text" id="newsPicker_display" class="form-control" readonly value="{{ _img_url }}" placeholder="Chưa chọn ảnh từ thư viện">
+        <button type="button" class="btn btn-default" data-media-picker-open data-picker-id="newsPicker"><i class="fa fa-image" aria-hidden="true"></i> Chọn / đổi ảnh</button>
+        <p class="page-editor__hint">Ảnh dùng cho thẻ bài viết và chia sẻ mạng xã hội. Bỏ chọn chỉ gỡ ảnh khỏi bài, không xóa tệp trong thư viện.</p>
     </div>
 </div>
-
-{# Render qua form_widget (không tự viết <input> tay) để field được đánh dấu
-   "đã render" — tránh form_rest() ở cuối render trùng thêm 1 input images nữa. #}
+{# form_widget (không tự viết <input>) để form_rest() không render trùng field images. #}
 {{ form_widget(form.images, {id: 'newsPicker_url_input', attr: {'data-picker-id': 'newsPicker'}}) }}
+{{ form_errors(form.images) }}
 
-{# Media Picker Modal #}
-<div class="modal fade" id="newsPickerModal" tabindex="-1" role="dialog"
-     data-picker-url="{{ path('admin_media_picker') }}"
-     data-picker-id="newsPicker"
-     aria-labelledby="newsPickerModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-media-picker-close data-picker-id="newsPicker">
-                    <span>&times;</span>
-                </button>
-                <h4 class="modal-title" id="newsPickerModalLabel">
-                    <i class="fa fa-image"></i> Chọn ảnh từ thư viện
-                </h4>
-            </div>
-            <div class="modal-body" id="newsPicker_body">
-                <div class="text-center text-muted" style="padding:30px;">
-                    <i class="fa fa-spinner fa-spin fa-2x"></i>
-                    <p class="mt-2">Đang tải thư viện...</p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <span id="newsPicker_selName" class="text-muted pull-left" style="font-size:13px;line-height:34px;"></span>
-                <button type="button" class="btn btn-default" data-media-picker-close data-picker-id="newsPicker">Hủy</button>
-                <button type="button" class="btn btn-primary" id="newsPicker_confirm" disabled
-                        data-media-picker-confirm data-picker-id="newsPicker">
-                    <i class="fa fa-check"></i> Chọn ảnh này
-                </button>
-            </div>
-        </div>
-    </div>
+<div class="modal fade" id="newsPickerModal" tabindex="-1" role="dialog" data-picker-url="{{ path('admin_media_picker') }}" data-picker-id="newsPicker" aria-labelledby="newsPickerModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" aria-label="Đóng thư viện ảnh" data-media-picker-close data-picker-id="newsPicker">
+					<span>&times;</span>
+				</button>
+				<h4 class="modal-title" id="newsPickerModalLabel">
+					<i class="fa fa-image"></i>
+					Chọn ảnh từ thư viện</h4>
+			</div>
+			<div class="modal-body" id="newsPicker_body">
+				<div class="text-center text-muted" style="padding:30px;">
+					<i class="fa fa-spinner fa-spin fa-2x"></i>
+					<p class="mt-2">Đang tải thư viện...</p>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<span id="newsPicker_selName" class="text-muted pull-left" style="font-size:13px;line-height:34px;"></span>
+				<button type="button" class="btn btn-default" data-media-picker-close data-picker-id="newsPicker">Hủy</button>
+				<button type="button" class="btn btn-primary" id="newsPicker_confirm" disabled data-media-picker-confirm data-picker-id="newsPicker">
+					<i class="fa fa-check"></i>
+					Chọn ảnh này
+				</button>
+			</div>
+		</div>
+	</div>
 </div>
 
-{# Remaining fields — skip title/url/enable/imageFile and submit buttons #}
-{% for child in form %}
-    {% if child.vars.name not in ['title', 'url', 'status', 'scheduledAt', 'images', 'save', 'saveAndCreateNew'] %}
-        {% if child.vars.name == 'contents' %}
-            <div class="cms-block-editor-layout">
-                {{ include('admin/content_block/_toolbar.html.twig', {
-                    target_editor: child.vars.id,
-                    current_id: form.vars.value.id|default(0),
-                }, with_context = false) }}
-                <div class="cms-block-editor-layout__field">
-                    {{ form_row(child) }}
-                </div>
-            </div>
-        {% else %}
-            {{ form_row(child) }}
-        {% endif %}
-    {% endif %}
-{% endfor %}
+</section>
+<section class="page-editor__section" id="news-content" aria-labelledby="news-content-heading">
+<h2 id="news-content-heading">Nội dung bài viết</h2>
+<p class="page-editor__hint">Dùng công cụ Content blocks bên cạnh để chèn khối dựng sẵn (bài liên quan, CTA…) vào vị trí con trỏ.</p>
+<div class="cms-block-editor-layout">
+	{{ include('admin/content_block/_toolbar.html.twig', {
+        target_editor: form.contents.vars.id,
+        current_id: form.vars.value.id|default(0),
+    }, with_context = false) }}
+	<div class="cms-block-editor-layout__field">
+		{{ form_row(form.contents) }}
+	</div>
+</div>
+</section>
+<section class="page-editor__section" id="news-category" aria-labelledby="news-category-heading">
+<h2 id="news-category-heading">Danh mục</h2>
+<p class="page-editor__hint">Chọn một hoặc nhiều danh mục. Khi chọn nhiều, đánh dấu “Chọn làm danh mục chính” cho danh mục dùng ở breadcrumb và mục bài liên quan; nếu bỏ trống, hệ thống dùng danh mục đầu tiên.</p>
+<div class="news-editor__category-filter" data-category-filter hidden>
+    <label for="news-category-search">Lọc danh mục</label>
+    <input type="search" id="news-category-search" class="form-control" placeholder="Nhập tên danh mục…" autocomplete="off">
+    <p class="page-editor__hint" id="news-category-summary" role="status" aria-live="polite"></p>
+</div>
+{{ form_row(form.category) }}
+{{ form_widget(form.categoryPrimary) }}
+</section>
+<section class="page-editor__section" id="news-seo" aria-labelledby="news-seo-heading">
+<h2 id="news-seo-heading">SEO &amp; kết quả tìm kiếm</h2>
+{{ include('admin/components/seo-checker.html.twig', {form: form}, with_context = false) }}
+{{ form_row(form.pageTitle) }}
+{{ form_row(form.pageDescription) }}
+{{ form_row(form.pageKeyword) }}
+<div class="page-editor__checks">
+{{ form_row(form.metaIndex) }}
+{{ form_row(form.metaFollow) }}
+</div>
+<p class="page-editor__hint">Index cho phép lập chỉ mục bài viết; Follow cho phép theo các liên kết trong bài.</p>
+</section>
+<section class="page-editor__section" id="news-publishing" aria-labelledby="news-publishing-heading">
+<h2 id="news-publishing-heading">Xuất bản &amp; hiển thị</h2>
+<div class="page-editor__grid">
+{{ form_row(form.status) }}
+{{ form_row(form.scheduledAt) }}
+{{ form_row(form.template) }}
+{{ form_row(form.ordering) }}
+{% if form.postType is defined %}{{ form_row(form.postType) }}{% endif %}
+</div>
+<p class="page-editor__hint">Nút lưu áp dụng trạng thái đã chọn. Nếu chọn “Đặt lịch”, hãy nhập ngày giờ xuất bản.{% if form.postType is defined %} Đổi loại sang “Page” sẽ gỡ toàn bộ danh mục của bài.{% endif %}</p>
+</section>
+<section class="page-editor__section" id="news-advanced" aria-labelledby="news-advanced-heading">
+<h2 id="news-advanced-heading">Thiết lập nâng cao &amp; ghi chú</h2>
+{{ form_row(form.relatedNews, {help: 'Nhập ID bài viết hiển thị ở sidebar, phân tách bằng dấu phẩy. Ví dụ: 12,45,78.'}) }}
+{{ form_row(form.contactHotline) }}
+{% if form.schemaMarkup is defined %}{{ form_row(form.schemaMarkup) }}{% endif %}
+{{ form_row(form.note) }}
+</section>
+<footer class="page-editor__savebar">
+<span class="page-editor__hint">Kiểm tra nội dung, danh mục và trạng thái trước khi lưu.</span>
+<div class="page-editor__save-actions">
 
 {% if form.save is defined %}
-    {{ form_widget(form.save, {label: button_label|default('label.create_post'|trans), attr: {class: button_css|default("btn btn-primary")}}) }}
-{% else %}
-    <button type="submit" class="{{ button_css|default("btn btn-primary") }}">
-        <i class="fa fa-save" aria-hidden="true"></i> {{ button_label|default('label.create_post'|trans) }}
-    </button>
+	{{ form_widget(form.save, {label: button_label|default('Lưu thay đổi'), translation_domain: false, attr: {class: 'btn btn-primary'}}) }}
 {% endif %}
 
 {% if form.saveAndCreateNew is defined %}
-    {{ form_widget(form.saveAndCreateNew, {label: 'label.save_and_create_new', attr: {class: button_css|default("btn btn-primary")}}) }}
+	{{ form_widget(form.saveAndCreateNew, {label: 'Lưu và thêm bài mới', translation_domain: false, attr: {class: 'btn btn-default'}}) }}
 {% endif %}
-
-{{ form_rest(form) }}
 
 {% if include_back_to_home_link|default(false) %}
-    <a href="{{ path('admin_news_index') }}" class="btn btn-link">
-        <i class="fa fa-list-alt" aria-hidden="true"></i> {{ 'action.back_to_list'|trans }}
-    </a>
+	<a href="{{ path('admin_news_index') }}" class="btn btn-link">
+		<i class="fa fa-list-alt" aria-hidden="true"></i>
+		{{ 'action.back_to_list'|trans }}
+	</a>
 {% endif %}
+</div>
+</footer>
+{{ form_rest(form) }}
 {{ form_end(form) }}

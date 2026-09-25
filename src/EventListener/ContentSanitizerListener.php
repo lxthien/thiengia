@@ -102,17 +102,20 @@ class ContentSanitizerListener
                 'span[style|class]',
                 'div[style|class|id|data-cms-block|data-cms-payload]',
                 'section[style|class|id|data-cms-block|data-cms-payload]',
-                'figure[class]', 'figcaption[class]',
+                'figure[class|style]', 'figcaption[class]',
                 'hr',
             ]));
-            $config->set('CSS.AllowedProperties', ['text-align', 'color', 'background-color', 'font-weight', 'font-style']);
+            $config->set('CSS.AllowedProperties', ['text-align', 'color', 'background-color', 'font-weight', 'font-style', 'width', 'height']);
             $config->set('Attr.AllowedFrameTargets', ['_blank']);
+            // Mặc định HTMLPurifier không cho giá trị rel nào (Attr.AllowedRel rỗng)
+            // nên "nofollow"/"sponsored"/"ugc" đặt ở "Thuộc tính liên kết" bị xoá khi lưu.
+            $config->set('Attr.AllowedRel', ['nofollow', 'noopener', 'noreferrer', 'sponsored', 'ugc']);
 
             // Doctype mặc định (HTML 4.01) không biết section/figure/figcaption và
             // không cho attribute data-* — phải khai báo thêm. DefinitionRev PHẢI
             // tăng mỗi khi sửa khối dưới đây, nếu không bản cache cũ vẫn được dùng.
             $config->set('HTML.DefinitionID', 'thiengia-cms-content');
-            $config->set('HTML.DefinitionRev', 1);
+            $config->set('HTML.DefinitionRev', 2);
 
             // maybeGetRawHTMLDefinition() "finalize" config, nên mọi ->set() phải
             // nằm TRƯỚC dòng này; trả về null khi definition đã có sẵn trong cache.

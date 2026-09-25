@@ -12,6 +12,7 @@ jQuery(document).ready(function($) {
 
 
 	$('#menuToggle').on('click', function(event) {
+		if (this.hasAttribute('data-sidebar-managed')) return;
 		$('body').toggleClass('open');
 	});
 

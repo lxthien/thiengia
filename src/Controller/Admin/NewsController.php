@@ -44,67 +44,69 @@ class NewsController extends AbstractController
     public function indexAction(Request $request)
     {
         $repository = $this->em->getRepository(News::class);
-        $searchQuery = trim((string) $request->query->get('q', ''));
+        $filters = $this->readFilters($request);
 
         // ROLE_AUTHOR chỉ thấy bài viết của chính mình; ROLE_EDITOR trở lên thấy tất cả.
         $authorFilter = $this->isGranted('ROLE_EDITOR') ? null : $this->getUser();
 
-        if ($searchQuery !== '') {
-            $qb = $repository->searchPosts($searchQuery, null, $authorFilter);
-        } else {
-            $qb = $repository->findAllPosts($authorFilter);
-        }
-
         $pagination = $this->paginator->paginate(
-            $qb,
-            $request->query->getInt('page', 1),
+            $repository->filterPosts([
+                'q' => $filters['q'],
+                'status' => PostStatus::tryFrom($filters['status']),
+                'category' => $filters['category'],
+            ], $authorFilter),
+            max(1, $request->query->getInt('page', 1)),
             20
         );
 
+        $statusCounts = $repository->countPostsByStatus($authorFilter);
+
         return $this->render('admin/news/index.html.twig', [
             'pagination' => $pagination,
-            'search_query' => $searchQuery,
+            'filters' => $filters,
+            'statuses' => PostStatus::cases(),
+            'status_counts' => $statusCounts,
+            'total_posts' => array_sum($statusCounts),
+            'categories' => $this->em->getRepository(NewsCategory::class)->findBy([], ['name' => 'ASC']),
         ]);
     }
 
     /**
-     * Lists all News entities by category.
+     * Link cũ theo danh mục — nay là bộ lọc "Danh mục" của danh sách bài viết.
      */
-    #[Route('/list/{categoryId}', name: 'admin_news_list_by_category', methods: ['GET'])]
-    public function listAction(Request $request, $categoryId)
+    #[Route('/list/{categoryId}', name: 'admin_news_list_by_category', requirements: ['categoryId' => '\d+'], methods: ['GET'])]
+    public function listAction(Request $request, int $categoryId)
     {
-        $repository = $this->em->getRepository(News::class);
-        $searchQuery = trim((string) $request->query->get('q', ''));
+        return $this->redirectToRoute('admin_news_index', array_filter([
+            'category' => $categoryId,
+            'q' => trim((string) $request->query->get('q', '')),
+        ]));
+    }
 
-        // ROLE_AUTHOR chỉ thấy bài viết của chính mình; ROLE_EDITOR trở lên thấy tất cả.
-        $authorFilter = $this->isGranted('ROLE_EDITOR') ? null : $this->getUser();
+    /**
+     * @return array{q: string, status: string, category: ?int}
+     */
+    private function readFilters(Request $request): array
+    {
+        $status = (string) $request->query->get('status', '');
+        $category = $request->query->getInt('category');
 
-        if ($searchQuery !== '') {
-            $qb = $repository->searchPosts($searchQuery, $categoryId, $authorFilter);
-        } else {
-            $qb = $repository
-                ->createQueryBuilder('n')
-                ->leftJoin('n.category', 'c')
-                ->where('c.id = :categoryId')
-                ->setParameter('categoryId', $categoryId)
-                ->orderBy('n.createdAt', 'DESC');
+        return [
+            'q' => trim((string) $request->query->get('q', '')),
+            'status' => null !== PostStatus::tryFrom($status) ? $status : '',
+            'category' => $category > 0 ? $category : null,
+        ];
+    }
 
-            if ($authorFilter) {
-                $qb->andWhere('n.author = :author')->setParameter('author', $authorFilter);
-            }
-        }
+    /**
+     * Quay lại danh sách, giữ nguyên bộ lọc và trang đang xem (truyền qua query của action).
+     */
+    private function redirectToIndex(Request $request)
+    {
+        $filters = $this->readFilters($request);
+        $page = $request->query->getInt('page', 1);
 
-        $pagination = $this->paginator->paginate(
-            $qb,
-            $request->query->getInt('page', 1),
-            20
-        );
-
-        return $this->render('admin/news/list.html.twig', [
-            'pagination' => $pagination,
-            'search_query' => $searchQuery,
-            'category_id' => $categoryId,
-        ]);
+        return $this->redirectToRoute('admin_news_index', array_filter($filters + ['page' => $page > 1 ? $page : null]));
     }
 
     /**
@@ -155,6 +157,7 @@ class NewsController extends AbstractController
         $news->setAuthor($this->getUser());
 
         $form = $this->createForm(NewsType::class, $news)
+            ->add('save', SubmitType::class)
             ->add('saveAndCreateNew', SubmitType::class);
 
         $form->handleRequest($request);
@@ -212,7 +215,8 @@ class NewsController extends AbstractController
     {
         $this->denyAccessUnlessGranted(NewsVoter::EDIT, $news);
 
-        $form = $this->createForm(NewsType::class, $news);
+        $form = $this->createForm(NewsType::class, $news)
+            ->add('save', SubmitType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -292,7 +296,7 @@ class NewsController extends AbstractController
         $this->denyAccessUnlessGranted(NewsVoter::DELETE, $news);
 
         if (!$this->isCsrfTokenValid('delete', $request->request->get('token'))) {
-            return $this->redirectToRoute('admin_news_index');
+            return $this->redirectToIndex($request);
         }
 
         $newsTitle = $news->getTitle();
@@ -313,7 +317,7 @@ class NewsController extends AbstractController
 
         $this->addFlash('success', 'action.deleted_successfully');
 
-        return $this->redirectToRoute('admin_news_index');
+        return $this->redirectToIndex($request);
     }
 
     /**
@@ -327,7 +331,7 @@ class NewsController extends AbstractController
     {
         if (!$this->isCsrfTokenValid('bulk_news', $request->request->get('token'))) {
             $this->addFlash('error', 'Phiên làm việc đã hết hạn, vui lòng thử lại.');
-            return $this->redirectToRoute('admin_news_index');
+            return $this->redirectToIndex($request);
         }
 
         $ids = $request->request->all('ids');
@@ -342,7 +346,7 @@ class NewsController extends AbstractController
 
         if (empty($ids) || !isset($statusMap[$bulkAction])) {
             $this->addFlash('error', 'Vui lòng chọn bài viết và thao tác hợp lệ.');
-            return $this->redirectToRoute('admin_news_index');
+            return $this->redirectToIndex($request);
         }
 
         $newStatus = $statusMap[$bulkAction];
@@ -370,6 +374,6 @@ class NewsController extends AbstractController
 
         $this->addFlash('success', sprintf('Đã cập nhật %d bài viết sang "%s".', $count, $newStatus->label()));
 
-        return $this->redirectToRoute('admin_news_index');
+        return $this->redirectToIndex($request);
     }
 }

@@ -1,0 +1,26 @@
+{% extends 'admin/layout.html.twig' %}
+{% block admin_editor_stylesheets %}
+    <link rel="stylesheet" href="{{ asset('build/css/ckeditor5-editor.css') }}">
+    <link rel="stylesheet" href="{{ asset('build/css/ckeditor-content.css') }}">
+    <link rel="stylesheet" href="{{ asset('build/css/page-editor.css') }}">
+{% endblock %}
+{% block javascripts %}{{ parent() }}<script src="{{ asset('build/js/news-editor.js') }}" defer></script>{% endblock %}
+{% block flash_messages %}{% endblock %}
+{% block main %}
+<section class="page-editor news-editor">
+    <header class="page-editor__header">
+        <div><a href="{{ path('admin_news_index') }}">← Danh sách bài viết</a>
+            <h1>{{ news.id ? 'Sửa bài viết' : 'Thêm bài viết' }}</h1>
+            <p>{{ news.id ? news.title : 'Soạn nội dung, gắn danh mục và kiểm tra SEO trước khi xuất bản.' }}</p>
+        </div>
+        {% if news.id %}<a class="btn btn-default" target="_blank" rel="noopener" href="{{ path('dynamic_post_page', {slug: news.url, preview: 'true', preview_id: news.id}) }}">Xem trước <span class="sr-only">(mở tab mới)</span></a>{% endif %}
+    </header>
+    {{ include('admin/redirect/_messages.html.twig') }}
+    <nav class="page-editor__nav" aria-label="Các phần chỉnh sửa bài viết">
+        <a href="#news-general">Thông tin chung</a><a href="#news-image">Ảnh đại diện</a>
+        <a href="#news-content">Nội dung</a><a href="#news-category">Danh mục</a>
+        <a href="#news-seo">SEO</a><a href="#news-publishing">Xuất bản &amp; hiển thị</a><a href="#news-advanced">Nâng cao</a>
+    </nav>
+    {{ include('admin/news/_form.html.twig', {form: form, button_label: news.id ? 'Lưu thay đổi' : 'Tạo bài viết', include_back_to_home_link: true}, with_context = false) }}
+</section>
+{% endblock %}

@@ -41,6 +41,11 @@ Encore
     .addEntry('js/page-index', './public/assets/js/admin/page-index.js')
     .addStyleEntry('css/page-index', './public/assets/scss/admin/page-index.scss')
     .addStyleEntry('css/page-editor', './public/assets/scss/admin/page-editor.scss')
+    .addEntry('js/newscategory-index', './public/assets/js/admin/newscategory-index.js')
+    .addStyleEntry('css/newscategory-index', './public/assets/scss/admin/newscategory-index.scss')
+    .addEntry('js/news-index', './public/assets/js/admin/news-index.js')
+    .addStyleEntry('css/news-index', './public/assets/scss/admin/news-index.scss')
+    .addEntry('js/news-editor', './public/assets/js/admin/news-editor.js')
     .addEntry('js/activity-log', './public/assets/js/admin/activity-log.js')
     .addStyleEntry('css/activity-log', './public/assets/scss/admin/activity-log.scss')
     .addEntry('js/user-manager', './public/assets/js/admin/user-manager.js')
@@ -80,6 +85,8 @@ Encore
     .addStyleEntry('css/ckeditor-content', ['./public/assets/scss/admin/ckeditor-content.scss'])
     // CKEditor 5 (đang migrate dần từ CKEditor 4/ivoryckeditor — xem admin/ckeditor5.js)
     .addStyleEntry('css/ckeditor5', ['./node_modules/ckeditor5/dist/ckeditor5.css'])
+    // Chỉ giao diện editor (không có style nội dung mặc định) — cho form có ckeditor-content.css giống website
+    .addStyleEntry('css/ckeditor5-editor', ['./node_modules/ckeditor5/dist/ckeditor5-editor.css'])
 
     // ---------- Front: theme v3 (Thiện Gia) ----------
     .addEntry('js/v3', './public/assets/js/v3/app.js')

@@ -1,0 +1,24 @@
+.cms-properties {
+    position: fixed; inset: 0; margin: auto; width: min(640px, calc(100vw - 24px)); max-height: calc(100dvh - 32px);
+    padding: 0; border: 1px solid #b9c4d3; border-radius: 8px; background: #fff; color: #253246; overflow: auto; box-sizing: border-box;
+    &::backdrop { background: rgb(15 23 42 / .55); }
+    &:not([open]) { display: none; }
+    h2 { margin: 0; padding: 18px 22px; font-size: 20px; font-weight: 700; border-bottom: 1px solid #dce2eb; }
+    &__body { padding: 18px 22px; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 14px; }
+    &__field { display: flex; flex-direction: column; grid-column: 1 / -1; gap: 6px; margin: 0; font-size: 14px; color: #253246; }
+    &__field span { color: #253246; font-weight: 600; }
+    &__field:has(input[type=number]) { grid-column: auto; }
+    &__field input, &__field select, &__field textarea { box-sizing: border-box; width: 100%; min-width: 0; min-height: 42px; padding: 8px 10px; border: 1px solid #aab8ca; border-radius: 4px; color: #253246; background: #fff; font-size: 15px; }
+    &__check { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; color: #253246; font-size: 14px; margin: 0; }
+    &__check input { width: 18px; height: 18px; accent-color: #195c9e; }
+    &__preview { max-width: 100%; max-height: 170px; object-fit: contain; grid-column: 1 / -1; justify-self: center; }
+    &__hint { grid-column: 1 / -1; color: #596579; font-size: 13px; margin: 0; }
+    &__error { color: #a51d25; margin: 0; padding: 12px 22px; }
+    button { border: 1px solid #aab8ca; border-radius: 4px; background: #fff; color: #253246; min-height: 42px; padding: 9px 12px; cursor: pointer; font-size: 14px; }
+    &__body > button { grid-column: 1 / -1; justify-self: start; }
+    &__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; padding: 14px 22px; background: #f7f9fc; border-top: 1px solid #dce2eb; position: sticky; bottom: 0; }
+    button.cms-properties__primary { background: #195c9e; color: #fff; border-color: #195c9e; }
+    :focus-visible { outline: 3px solid #195c9e; outline-offset: 2px; }
+    [hidden] { display: none; }
+    @media(max-width: 400px) { &__body { padding: 14px; gap: 10px; } }
+}

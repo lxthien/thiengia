@@ -30,6 +30,18 @@
 
     <body id="{% block body_id %}{% endblock %}" class="{% block body_class %}{% endblock %}{% if app.request.cookies.get('kientruc_admin_sidebar_open') == '1' %} open{% endif %}">
 
+        <script>
+            // Restore this tab before layout paints; mobile never consumes the desktop layout.
+            (function () {
+                var collapsed = document.body.classList.contains('open');
+                try {
+                    var saved = sessionStorage.getItem('kientruc_admin_sidebar_open');
+                    if (saved === '0' || saved === '1') collapsed = saved === '1';
+                } catch (e) {}
+                document.body.classList.toggle('open', collapsed && !window.matchMedia('(max-width: 575.99px)').matches);
+                document.body.dataset.sidebarCollapsed = collapsed ? '1' : '0';
+            }());
+        </script>
         {% block sidebar %}
             {{ include('admin/layout/sidebar.html.twig') }}
         {% endblock %}

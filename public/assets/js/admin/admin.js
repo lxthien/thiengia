@@ -6,6 +6,7 @@ import 'bootstrap-sass/assets/javascripts/bootstrap/modal.js';
 
 import initCkeditor5 from './ckeditor5';
 import initSeoCheckers from './seo-checker';
+import initAdminSidebarState from './sidebar';
 
 $(function() {
     // Shared HTML escape helpers
@@ -1711,41 +1712,6 @@ $(function() {
         }
     }
 
-    function initAdminSidebarState() {
-        var storageKey = 'kientruc_admin_sidebar_open';
-
-        function setSessionCookie(value) {
-            document.cookie = storageKey + '=' + value + '; path=/; SameSite=Lax';
-        }
-
-        function persistSidebarState() {
-            var isCollapsed = $('body').hasClass('open');
-            var value = isCollapsed ? '1' : '0';
-
-            try {
-                sessionStorage.setItem(storageKey, value);
-            } catch (error) {}
-
-            setSessionCookie(value);
-        }
-
-        try {
-            if (sessionStorage.getItem(storageKey) === '1') {
-                $('body').addClass('open');
-                setSessionCookie('1');
-            }
-        } catch (error) {}
-
-        var menuToggle = document.getElementById('menuToggle');
-
-        if (!menuToggle) {
-            return;
-        }
-
-        menuToggle.addEventListener('click', function() {
-            setTimeout(persistSidebarState, 0);
-        });
-    }
 
     /**
      * Media Picker — allows selecting an image from the Media Library

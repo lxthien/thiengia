@@ -17,6 +17,7 @@ import {
     BlockQuote,
     Alignment,
     Link,
+    LinkImage,
     Image,
     ImageUpload,
     ImageToolbar,
@@ -40,6 +41,7 @@ import {
     IconTableOfContents,
 } from 'ckeditor5';
 import coreTranslations from 'ckeditor5/translations/vi.js';
+import ContentProperties from './content-properties';
 // CSS nạp riêng qua addStyleEntry('css/ckeditor5', ...) trong webpack.config.js,
 // <link> ở templates/admin/layout.html.twig — theo đúng quy ước hiện có của
 // project (css/admin, css/ckeditor-content cũng tách riêng khỏi JS entry).
@@ -390,6 +392,8 @@ const baseConfig = {
         BlockQuote,
         Alignment,
         Link,
+        LinkImage,
+        ContentProperties,
         Image,
         ImageUpload,
         ImageToolbar,
@@ -433,7 +437,7 @@ const baseConfig = {
             'bold', 'italic', 'underline', 'strikethrough', 'subscript', 'superscript', 'removeFormat', '|',
             'fontFamily', 'fontSize', 'fontColor', 'fontBackgroundColor', '|',
             'alignment', 'bulletedList', 'numberedList', 'outdent', 'indent', '|',
-            'link', 'blockQuote', 'insertTable', 'horizontalLine', 'specialCharacters', 'toc', '|',
+            'link', 'linkProperties', 'blockQuote', 'insertTable', 'horizontalLine', 'specialCharacters', 'toc', '|',
             'uploadImage', 'ckfinder', '|',
             'sourceEditing',
         ],
@@ -453,7 +457,7 @@ const baseConfig = {
             options: ['alignLeft', 'alignCenter', 'alignRight'],
         },
         toolbar: [
-            'imageTextAlternative', '|',
+            'imageProperties', 'linkProperties', '|', 'imageTextAlternative', '|',
             'toggleImageCaption', '|',
             'imageStyle:alignLeft', 'imageStyle:alignCenter', 'imageStyle:alignRight', '|',
             'resizeImage',
@@ -487,7 +491,7 @@ const baseConfig = {
             { name: 'figure', attributes: true, classes: true },
             { name: 'figcaption', attributes: true, classes: true },
             { name: 'img', attributes: true, classes: true },
-            { name: 'a', attributes: ['data-fancybox', 'data-caption'] },
+            { name: 'a', attributes: ['data-fancybox', 'data-caption', 'title', 'target', 'rel'] },
         ],
     },
 };

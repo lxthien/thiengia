@@ -1,233 +1,60 @@
-<!-- Left Panel -->
-<aside id="left-panel" class="left-panel">
-	<nav class="navbar navbar-expand-sm navbar-default">
-		<div class="navbar-header">
-			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-menu" aria-controls="main-menu" aria-expanded="false" aria-label="Toggle navigation">
-				<i class="fa fa-bars"></i>
-			</button>
-			<a class="navbar-brand" href="{{ path('homepage') }}" target="_blank" style="color: white; font-weight: bold; font-size: 20px; text-transform: uppercase;">{{ get_setting('siteName')|default('KIM ANH') }}</a>
-			<a class="navbar-brand hidden" href="{{ path('homepage') }}" target="_blank" style="color: white; font-weight: bold; font-size: 20px;">{{ get_setting('siteName')|default('KA')|slice(0, 2)|upper }}</a>
-		</div>
-
-		<div id="main-menu" class="main-menu collapse navbar-collapse">
-			<ul class="nav navbar-nav">
-				<li>
-					<a href="{{ path('admin_dashboard_index') }}">
-						<i class="menu-icon fa fa-dashboard"></i>
-						{{ 'menu.dashboard'|trans }}
-					</a>
-				</li>
-				<!-- /.menu-title -->
-				<li class="menu-item-has-children dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						<i class="menu-icon fa fa-pencil-square-o"></i>
-						{{ 'menu.news'|trans }}</a>
-					<ul class="sub-menu children dropdown-menu">
-						<li>
-							<i class="fa fa-list-ul"></i>
-							<a href="{{ path('admin_news_index') }}">{{ 'menu.news_list'|trans }}</a>
-						</li>
-						<li>
-							<i class="fa fa-plus-circle"></i>
-							<a href="{{ path('admin_news_new') }}">{{ 'menu.add_new'|trans }}</a>
-						</li>
-						{% if is_granted('ROLE_EDITOR') %}
-							<li>
-								<i class="fa fa-folder-open-o"></i>
-								<a href="{{ path('admin_newscategory_index') }}">{{ 'menu.category_list'|trans }}</a>
-							</li>
-							<li>
-								<i class="fa fa-tags"></i>
-								<a href="{{ path('admin_tag_index') }}">{{ 'menu.tags'|trans }}</a>
-							</li>
-						{% endif %}
-					</ul>
-				</li>
-
-				{% if is_granted('ROLE_EDITOR') %}
-				<li class="menu-item-has-children dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						<i class="menu-icon fa fa-file-text-o"></i>
-						{{ 'menu.pages'|trans }}
-					</a>
-					<ul class="sub-menu children dropdown-menu">
-						<li>
-							<i class="fa fa-list-ul"></i>
-							<a href="{{ path('admin_page_index') }}">{{ 'menu.page_list'|trans }}</a>
-						</li>
-						<li>
-							<i class="fa fa-plus-circle"></i>
-							<a href="{{ path('admin_page_new') }}">{{ 'menu.add_new'|trans }}</a>
-						</li>
-					</ul>
-				</li>
-				{% endif %}
-
-				{% if is_granted('ROLE_ADMIN') %}
-				<li>
-					<a href="{{ path('admin_menu_index') }}">
-						<i class="menu-icon fa fa-sitemap"></i>
-						Quản lý Menu
-					</a>
-				</li>
-				{% endif %}
-
-				{% if is_granted('ROLE_EDITOR') %}
-				<li>
-					<a href="{{ path('admin_comment_index') }}">
-						<i class="menu-icon fa fa-comments"></i>
-						{{ 'menu.comments'|trans }}
-					</a>
-				</li>
-				{% endif %}
-
-				{% if is_granted('ROLE_ADMIN') %}
-				<li>
-					<a href="{{ path('admin_contact_index') }}">
-						<i class="menu-icon fa fa-envelope-o"></i>
-						{{ 'menu.contact'|trans }}
-					</a>
-				</li>
-
-				<li>
-					<a href="{{ path('admin_newsletter_index') }}">
-						<i class="menu-icon fa fa-paper-plane"></i>
-						Đăng ký bản tin
-					</a>
-				</li>
-				{% endif %}
-
-				<li>
-					<a href="{{ path('admin_media_index') }}">
-						<i class="menu-icon fa fa-image"></i>
-						Quản lý media
-					</a>
-				</li>
-
-				{% if is_granted('ROLE_EDITOR') %}
-				<li>
-					<a href="{{ path('admin_homepage_section_index') }}">
-						<i class="menu-icon fa fa-th-list"></i>
-						Khối trang chủ
-					</a>
-				</li>
-
-				<li>
-					<a href="{{ path('admin_banner_index') }}">
-						<i class="menu-icon fa fa-flag"></i>
-						Quản lý banner
-					</a>
-				</li>
-
-				<li>
-					<a href="{{ path('admin_service_index') }}">
-						<i class="menu-icon fa fa-cogs"></i>
-						Dịch vụ
-					</a>
-				</li>
-
-				<li>
-					<a href="{{ path('admin_project_index') }}">
-						<i class="menu-icon fa fa-building-o"></i>
-						Công trình
-					</a>
-				</li>
-
-				<li>
-					<a href="{{ path('admin_gallery_album_index') }}">
-						<i class="menu-icon fa fa-picture-o"></i>
-						Hình ảnh hoạt động
-					</a>
-				</li>
-
-				<li>
-					<a href="{{ path('admin_testimonial_index') }}">
-						<i class="menu-icon fa fa-quote-right"></i>
-						Đánh giá khách hàng
-					</a>
-				</li>
-				{% endif %}
-
-				{% if is_granted('ROLE_ADMIN') %}
-				<li class="menu-item-has-children dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						<i class="menu-icon fa fa-users"></i>
-						{{ 'menu.users'|trans }}
-					</a>
-					<ul class="sub-menu children dropdown-menu">
-						<li>
-							<i class="fa fa-list-ul"></i>
-							<a href="{{ path('admin_user_index') }}">{{ 'menu.users_list'|trans }}</a>
-						</li>
-						<li>
-							<i class="fa fa-user-plus"></i>
-							<a href="{{ path('admin_user_new') }}">{{ 'menu.add_new'|trans }}</a>
-						</li>
-						<li>
-							<i class="fa fa-user"></i>
-							<a href="{{ path('admin_user_edit', {id: app.user.id}) }}">{{ 'menu.users_profile'|trans }}</a>
-						</li>
-					</ul>
-				</li>
-				{% else %}
-				<li>
-					<a href="{{ path('admin_user_edit', {id: app.user.id}) }}">
-						<i class="menu-icon fa fa-user"></i>
-						{{ 'menu.users_profile'|trans }}
-					</a>
-				</li>
-				{% endif %}
-
-				{% if is_granted('ROLE_ADMIN') %}
-				<li>
-					<a href="{{ path('admin_health_index') }}">
-						<i class="menu-icon fa fa-heartbeat"></i>
-						Health dashboard
-					</a>
-				</li>
-				{% endif %}
-
-				{% if is_granted('ROLE_EDITOR') %}
-				<li>
-					<a href="{{ path('admin_content_decay_index') }}">
-						<i class="menu-icon fa fa-line-chart"></i>
-						Content decay
-					</a>
-				</li>
-				{% endif %}
-
-				{% if is_granted('ROLE_ADMIN') %}
-				<li>
-					<a href="{{ path('admin_activity_log_index') }}">
-						<i class="menu-icon fa fa-history"></i>
-						Nhật ký hoạt động
-					</a>
-				</li>
-
-				<li class="menu-item-has-children dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						<i class="menu-icon fa fa-cogs"></i>
-						{{ 'menu.setting'|trans }}
-					</a>
-					<ul class="sub-menu children dropdown-menu">
-						<li>
-							<i class="fa fa-cogs"></i>
-							<a href="{{ path('admin_settings_global') }}">Cài đặt chung</a>
-						</li>
-						<li>
-							<i class="fa fa-calculator"></i>
-							<a href="{{ path('admin_settings_construction_cost') }}">Đơn giá xây dựng</a>
-						</li>
-						<li>
-							<i class="fa fa-random"></i>
-							<a href="{{ path('admin_redirect_index') }}">Quản lý Redirect</a>
-						</li>
-					</ul>
-				</li>
-				{% endif %}
-			</ul>
-		</div>
-		<!-- /.navbar-collapse -->
-	</nav>
+{% set route = app.request.attributes.get('_route')|default('') %}
+{% set current = route %}
+{% if route starts with 'admin_news_' and route != 'admin_news_new' %}{% set current = 'admin_news_index' %}
+{% elseif route starts with 'admin_newscategory_' %}{% set current = 'admin_newscategory_index' %}
+{% elseif route starts with 'admin_page_' and route != 'admin_page_new' %}{% set current = 'admin_page_index' %}
+{% elseif route == 'admin_user_edit' and app.request.attributes.get('id') == app.user.id %}{% set current = 'profile' %}
+{% elseif route starts with 'admin_user_' and route != 'admin_user_new' %}{% set current = 'admin_user_index' %}
+{% endif %}
+{% set groups = [
+{label:'Tổng quan',items:[{route:'admin_dashboard_index',label:'Dashboard',icon:'dashboard',role:''}]},
+{label:'Nội dung',items:[{route:'news',label:'Bài viết',icon:'pencil-square-o',role:'',children:[{route:'admin_news_index',label:'Danh sách bài viết',icon:'list-ul',role:''},{route:'admin_news_new',label:'Thêm bài viết',icon:'plus-circle',role:''},{route:'admin_newscategory_index',label:'Danh mục bài viết',icon:'folder-open-o',role:'ROLE_EDITOR'},{route:'admin_tag_index',label:'Thẻ nội dung',icon:'tags',role:'ROLE_EDITOR'}]},{route:'pages',label:'Trang',icon:'file-text-o',role:'ROLE_EDITOR',children:[{route:'admin_page_index',label:'Danh sách trang',icon:'list-ul',role:''},{route:'admin_page_new',label:'Thêm trang',icon:'plus-circle',role:''}]},{route:'admin_media_index',label:'Thư viện media',icon:'image',role:''},{route:'admin_service_index',label:'Dịch vụ',icon:'cogs',role:'ROLE_EDITOR'},{route:'admin_project_index',label:'Công trình',icon:'building-o',role:'ROLE_EDITOR'}]},
+{label:'Giao diện website',items:[{route:'admin_homepage_section_index',label:'Khối trang chủ',icon:'th-list',role:'ROLE_EDITOR'},{route:'admin_menu_index',label:'Quản lý menu',icon:'sitemap',role:'ROLE_ADMIN'},{route:'admin_banner_index',label:'Banner',icon:'flag',role:'ROLE_EDITOR'},{route:'admin_gallery_album_index',label:'Hình ảnh hoạt động',icon:'picture-o',role:'ROLE_EDITOR'},{route:'admin_testimonial_index',label:'Đánh giá khách hàng',icon:'quote-right',role:'ROLE_EDITOR'}]},
+{label:'Tương tác',items:[{route:'admin_comment_index',label:'Bình luận',icon:'comments',role:'ROLE_EDITOR'},{route:'admin_contact_index',label:'Liên hệ',icon:'envelope-o',role:'ROLE_ADMIN'},{route:'admin_newsletter_index',label:'Đăng ký bản tin',icon:'paper-plane',role:'ROLE_ADMIN'}]},
+{label:'SEO & sức khỏe website',items:[{route:'admin_health_index',label:'Sức khỏe website',icon:'heartbeat',role:'ROLE_ADMIN'},{route:'admin_content_decay_index',label:'Nội dung cần cập nhật',icon:'line-chart',role:'ROLE_EDITOR'},{route:'admin_redirect_index',label:'Chuyển hướng URL',icon:'random',role:'ROLE_ADMIN'}]},
+{label:'Hệ thống',items:[{route:'users',label:'Người dùng',icon:'users',role:'ROLE_ADMIN',children:[{route:'admin_user_index',label:'Danh sách người dùng',icon:'list-ul',role:''},{route:'admin_user_new',label:'Thêm người dùng',icon:'user-plus',role:''},{route:'profile',label:'Hồ sơ của tôi',icon:'user',role:''}]},{route:'admin_activity_log_index',label:'Nhật ký hoạt động',icon:'history',role:'ROLE_ADMIN'},{route:'settings',label:'Cài đặt',icon:'cogs',role:'ROLE_ADMIN',children:[{route:'admin_settings_global',label:'Cài đặt chung',icon:'cogs',role:''},{route:'admin_settings_construction_cost',label:'Đơn giá xây dựng',icon:'calculator',role:''}]},{route:'profile',label:'Hồ sơ của tôi',icon:'user',role:'NOT_ADMIN'}]}
+] %}
+{% macro link(item, current) %}
+    {% set active = current == item.route or (item.route ends with '_index' and current starts with item.route|slice(0,-5) and current not in ['admin_news_new','admin_page_new','admin_user_new']) %}
+    <a class="admin-nav__link{{ active ? ' is-active' : '' }}" href="{{ item.route == 'profile' ? path('admin_user_edit',{id:app.user.id}) : path(item.route) }}" {{ active ? 'aria-current="page"' : '' }} title="{{ item.label }}">
+        <i class="fa fa-{{ item.icon }}" aria-hidden="true"></i><span class="admin-nav__label">{{ item.label }}</span>
+    </a>
+{% endmacro %}
+<aside id="left-panel" class="left-panel admin-sidebar">
+    <div class="admin-sidebar__inner">
+        <div class="admin-sidebar__brand">
+            <a href="{{ path('homepage') }}" target="_blank" rel="noopener" title="Xem website (mở tab mới)">
+                <span class="admin-sidebar__brand-full">{{ get_setting('siteName')|default('THIỆN GIA') }}</span>
+                <span class="admin-sidebar__brand-short" aria-hidden="true">{{ get_setting('siteName')|default('TG')|slice(0,2)|upper }}</span>
+                <span class="sr-only"> — Xem website (mở tab mới)</span>
+            </a>
+            <button type="button" class="admin-sidebar__mobile-toggle" aria-controls="main-menu" aria-expanded="false" aria-label="Mở menu quản trị"><i class="fa fa-bars" aria-hidden="true"></i></button>
+        </div>
+        <nav id="main-menu" class="admin-nav" aria-label="Điều hướng quản trị">
+        {% for group in groups %}
+            {% set items = group.items|filter(item => item.role == '' or (item.role == 'NOT_ADMIN' ? not is_granted('ROLE_ADMIN') : is_granted(item.role))) %}
+            {% if items|length %}
+            <section class="admin-nav__group" aria-label="{{ group.label }}">
+                <h2 class="admin-nav__heading">{{ group.label }}</h2>
+                <ul>
+                {% for item in items %}
+                    <li>
+                    {% if item.children is defined %}
+                        {% set children = item.children|filter(child => child.role == '' or is_granted(child.role)) %}
+                        {% set expanded = children|filter(child => child.route == current or (child.route ends with '_index' and current starts with child.route|slice(0,-5) and current not in ['admin_news_new','admin_page_new','admin_user_new']))|length > 0 %}
+                        <button type="button" class="admin-nav__link admin-nav__toggle{{ expanded ? ' is-active-group' : '' }}" aria-expanded="{{ expanded ? 'true' : 'false' }}" aria-controls="nav-{{ item.route }}" title="{{ item.label }}">
+                            <i class="fa fa-{{ item.icon }}" aria-hidden="true"></i><span class="admin-nav__label">{{ item.label }}</span><i class="fa fa-angle-down admin-nav__chevron" aria-hidden="true"></i>
+                        </button>
+                        <ul id="nav-{{ item.route }}" class="admin-nav__children" {{ not expanded ? 'hidden' : '' }}>
+                            {% for child in children %}<li>{{ _self.link(child,current) }}</li>{% endfor %}
+                        </ul>
+                    {% else %}{{ _self.link(item,current) }}{% endif %}
+                    </li>
+                {% endfor %}
+                </ul>
+            </section>
+            {% endif %}
+        {% endfor %}
+        </nav>
+    </div>
 </aside>
-<!-- Left Panel -->

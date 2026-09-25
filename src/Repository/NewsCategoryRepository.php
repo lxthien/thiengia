@@ -27,4 +27,44 @@ class NewsCategoryRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * @return NewsCategory[]
+     */
+    public function search(string $query, string $status = ''): array
+    {
+        $qb = $this->createQueryBuilder('c')->orderBy('c.name', 'ASC');
+
+        if ($query !== '') {
+            $qb->andWhere('c.name LIKE :query OR c.url LIKE :query OR c.pageTitle LIKE :query OR c.description LIKE :query')
+                ->setParameter('query', '%'.addcslashes($query, '%_').'%');
+        }
+        if ($status !== '') {
+            $qb->andWhere('c.enable = :enable')->setParameter('enable', $status === 'enabled');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Số bài viết gắn với từng danh mục, dạng [categoryId => count].
+     *
+     * @return array<int, int>
+     */
+    public function countNewsByCategory(): array
+    {
+        $rows = $this->createQueryBuilder('c')
+            ->select('c.id AS id, COUNT(n.id) AS total')
+            ->leftJoin('c.news', 'n')
+            ->groupBy('c.id')
+            ->getQuery()
+            ->getArrayResult();
+
+        $counts = [];
+        foreach ($rows as $row) {
+            $counts[(int) $row['id']] = (int) $row['total'];
+        }
+
+        return $counts;
+    }
 }

@@ -40,13 +40,52 @@ class NewsCategoryController extends AbstractController
      * Lists all NewsCategory entities.
      */
     #[Route('/', name: 'admin_newscategory_index', methods: ['GET'])]
-    public function indexAction()
+    public function indexAction(Request $request)
     {
-        $categories = $this->em->getRepository(NewsCategory::class)->findBy(['parentcat' => null]);
+        $repository = $this->em->getRepository(NewsCategory::class);
+        $filters = [
+            'q' => trim((string) $request->query->get('q', '')),
+            'status' => (string) $request->query->get('status', ''),
+        ];
+        if (!in_array($filters['status'], ['', 'enabled', 'disabled'], true)) {
+            $filters['status'] = '';
+        }
+        $filtering = $filters['q'] !== '' || $filters['status'] !== '';
+        $levels = [];
+
+        if ($filtering) {
+            // Kết quả lọc hiển thị dạng phẳng, kèm cấp và danh mục cha để định vị trong cây.
+            $categories = $repository->search($filters['q'], $filters['status']);
+            foreach ($categories as $category) {
+                $levels[$category->getId()] = $this->getCategoryLevel($category);
+            }
+        } else {
+            $categories = $repository->findBy(['parentcat' => null], ['name' => 'ASC']);
+        }
 
         return $this->render('admin/newscategory/index.html.twig', [
-            'objects' => $categories
+            'objects' => $categories,
+            'levels' => $levels,
+            'filters' => $filters,
+            'filtering' => $filtering,
+            'news_counts' => $repository->countNewsByCategory(),
+            'total' => $repository->count([]),
         ]);
+    }
+
+    private function getCategoryLevel(NewsCategory $category): int
+    {
+        $level = 0;
+        $visited = [$category->getId() => true];
+        $parent = $category->getParentcat();
+
+        while (null !== $parent && !isset($visited[$parent->getId()])) {
+            $visited[$parent->getId()] = true;
+            ++$level;
+            $parent = $parent->getParentcat();
+        }
+
+        return $level;
     }
 
     /**
@@ -133,6 +172,13 @@ class NewsCategoryController extends AbstractController
     public function deleteAction(Request $request, NewsCategory $category)
     {
         if (!$this->isCsrfTokenValid('delete', $request->request->get('token'))) {
+            return $this->redirectToRoute('admin_newscategory_index');
+        }
+
+        // parentcat_id không có ON DELETE — xóa danh mục cha sẽ vi phạm khóa ngoại.
+        if ($category->getChildren()->count() > 0) {
+            $this->addFlash('warning', 'Không thể xóa "'.$category->getName().'" vì còn danh mục con. Hãy chuyển danh mục con sang danh mục khác trước.');
+
             return $this->redirectToRoute('admin_newscategory_index');
         }
 

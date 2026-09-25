@@ -118,12 +118,22 @@ class ContentFormatter
         foreach ($imgs as $img) {
             $src = $img->getAttribute('src');
             $alt = $img->getAttribute('alt');
+            $width = $height = null;
 
-            list($width, $height) = @getimagesize(substr($src, 1));
+            // Chỉ ảnh nội bộ dạng "/path" mới đọc kích thước / đổi sang WebP.
+            // URL tuyệt đối, "//host/..." hay data: giữ nguyên src.
+            if (preg_match('#^/(?!/)#', $src)) {
+                $path = parse_url($src, PHP_URL_PATH) ?: $src;
+                list($width, $height) = @getimagesize($this->convertImages->path($path)) ?: [null, null];
 
-            $src = !is_bool($this->convertImages->webpConvert2($src, '')) ? $this->convertImages->webpConvert2($src, '') : $src;
+                // webpConvert2() trả về đường dẫn không có "/" đầu; khi thất bại
+                // giữ src gốc (đã có "/" đầu) — không được nối thêm "/" thành "//".
+                $webp = $this->convertImages->webpConvert2($path, '');
+                if (is_string($webp)) {
+                    $img->setAttribute('src', '/' . $webp);
+                }
+            }
 
-            $img->setAttribute('src', '/' . $src);
             $img->setAttribute('loading', 'lazy');
             $img->setAttribute('alt', !empty($alt) ? $alt : $post->getTitle());
             $img->setAttribute('width', !empty($width) ? ($width > 900 ? 900 : $width) : 500);

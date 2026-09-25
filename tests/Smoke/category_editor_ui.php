@@ -53,7 +53,7 @@ foreach([true,false]as $new){
     foreach($fields as $name)if($xpath->query('//*[@name="news_category['.$name.']"]')->length!==1)throw new RuntimeException('Missing/duplicated field '.$name);
     foreach(['category-general','category-content','category-display','category-image','category-seo','category-schema','mediaPicker_open','mediaPickerConfirm','mediaPicker_clear']as $id)if($xpath->query('//*[@id="'.$id.'"]')->length!==1)throw new RuntimeException('Missing section/hook '.$id);
     if(substr_count($html,'txt-ckeditor5')!==2)throw new RuntimeException('Must retain both rich text editors');
-    if(!str_contains($html,'build/css/ckeditor5.css'))throw new RuntimeException('Missing CKEditor CSS');
+    if(!str_contains($html,'build/css/ckeditor5-editor.css')||!str_contains($html,'build/css/ckeditor-content.css'))throw new RuntimeException('Missing CKEditor CSS');
     if(!str_contains($html,'name="news_category[_token]"'))throw new RuntimeException('Missing CSRF field');
     if(str_contains($html,'name="news_category[saveAndCreateNew]"')!==$new)throw new RuntimeException('Wrong submit buttons');
 }

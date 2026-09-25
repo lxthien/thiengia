@@ -35,6 +35,65 @@ class NewsRepository extends ServiceEntityRepository
         return $qb;
     }
 
+    /**
+     * Danh sách bài viết admin: lọc theo từ khóa, trạng thái và danh mục cùng lúc.
+     * Join danh mục chỉ để lọc (không addSelect) — xem ghi chú ở getNewsByCategories().
+     *
+     * @param array{q?: string, status?: ?PostStatus, category?: ?int} $filters
+     */
+    public function filterPosts(array $filters, ?User $author = null)
+    {
+        $qb = $this->findAllPosts($author);
+
+        if (($filters['q'] ?? '') !== '') {
+            $qb->andWhere(
+                'n.title LIKE :query
+                OR n.url LIKE :query
+                OR n.description LIKE :query
+                OR n.contents LIKE :query
+                OR n.pageTitle LIKE :query
+                OR n.pageDescription LIKE :query
+                OR n.pageKeyword LIKE :query'
+            )->setParameter('query', '%'.addcslashes($filters['q'], '%_').'%');
+        }
+        if (null !== ($filters['status'] ?? null)) {
+            $qb->andWhere('n.status = :status')->setParameter('status', $filters['status']);
+        }
+        if (null !== ($filters['category'] ?? null)) {
+            $qb->innerJoin('n.category', 'fc')
+                ->andWhere('fc.id = :categoryId')
+                ->setParameter('categoryId', $filters['category']);
+        }
+
+        return $qb;
+    }
+
+    /**
+     * Số bài viết theo trạng thái, dạng [status value => count].
+     *
+     * @return array<string, int>
+     */
+    public function countPostsByStatus(?User $author = null): array
+    {
+        $qb = $this->createQueryBuilder('n')
+            ->select('n.status AS status, COUNT(n.id) AS total')
+            ->where('n.postType = :postType')
+            ->setParameter('postType', 'post')
+            ->groupBy('n.status');
+
+        if (null !== $author) {
+            $qb->andWhere('n.author = :author')->setParameter('author', $author);
+        }
+
+        $counts = [];
+        foreach ($qb->getQuery()->getArrayResult() as $row) {
+            $status = $row['status'] instanceof PostStatus ? $row['status']->value : (string) $row['status'];
+            $counts[$status] = (int) $row['total'];
+        }
+
+        return $counts;
+    }
+
     public function findAllPages()
     {
         return $this->getEntityManager()

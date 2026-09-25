@@ -2,7 +2,9 @@
 @import "bootstrap-tagsinput.scss";
 @import "menu-editor.scss";
 @import "seo-checker.scss";
+@import "content-properties";
 @import "../shared/content-blocks";
+@import "sidebar";
 
 // CKEditor 5 — chặn tràn ngang cả trang khi toolbar dài (nhiều nút hơn CKEditor 4).
 // Nguyên nhân thật: .row/.col-* của theme admin là flexbox (Bootstrap 4, xem
