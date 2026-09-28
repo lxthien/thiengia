@@ -1,0 +1,160 @@
+@use "banner-index" with ($media-workspace-scope: ':is(#admin_menu_index, #admin_menu_new, #admin_menu_edit)');
+// Quản lý menu — cùng khung với trang Danh mục (danh sách) và form Trang/Bài viết (soạn thảo).
+// _menu-editor.scss (nạp toàn cục qua admin.scss) vẫn định nghĩa .dd-* cho các trang kéo thả
+// khác (banner, gallery…) — các rule .dd-* dưới đây chỉ ghi đè trong màn sửa menu.
+
+$ink: #253246;
+$muted: #596579;
+$line: #dce2eb;
+$primary: #195c9e;
+
+:is(#admin_menu_index, #admin_menu_new, #admin_menu_edit) {
+    :focus-visible { outline: 3px solid $primary; outline-offset: 2px; }
+
+    // ---------- Danh sách menu ----------
+    .menu-manager { min-width: 0; }
+    .menu-manager h2 { font-size: 19px; margin: 0; font-weight: 700; }
+    .menu-manager .banner-panel__toolbar span { color: $muted; font-size: 14px; }
+    .menu-table-wrap { overflow-x: auto; width: 100%; }
+    .menu-table { width: 100%; table-layout: fixed; font-size: 14px; border-collapse: collapse; }
+    .menu-table th { padding: 12px 14px; background: #eef2f7; color: #35465c; }
+    .menu-table td { padding: 16px 14px; border-top: 1px solid $line; vertical-align: top; overflow-wrap: anywhere; color: $ink; }
+    .menu-table small { display: block; margin-top: 6px; color: $muted; font-size: 12px; }
+    .menu-table time { font-size: 13px; }
+    .menu-title { font-size: 16px; font-weight: 600; color: $primary; }
+    .menu-site-badge { display: inline-block; margin-left: 8px; padding: 3px 8px; border-radius: 4px; background: #eaf2fb; color: #174b80; font-size: 12px; font-weight: 600; vertical-align: 2px; }
+    .menu-desc { margin: 6px 0 0; color: $muted; font-size: 13px; }
+    .menu-status { display: inline-block; border-radius: 4px; padding: 4px 8px; font-size: 12px; font-weight: 600; }
+    .menu-status.is-enabled { color: #12633c; background: #e7f5ed; }
+    .menu-status.is-disabled { color: #805000; background: #fff2d7; }
+    .menu-table .menu-warning { color: #9f2424; }
+    .menu-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+    .menu-actions form { margin: 0; }
+    .menu-table .banner-button { min-height: 36px; padding: 6px 12px; font-size: 13px; }
+    .menu-empty { text-align: center; padding: 40px 20px !important; color: $muted !important; }
+    .menu-empty h3 { color: $ink; font-size: 19px; }
+
+    // ---------- Hộp xác nhận / hộp thoại ----------
+    .menu-dialog { position: fixed; inset: 0; margin: auto; width: min(520px, calc(100% - 32px)); max-height: 90dvh; overflow: auto; padding: 26px; border: 1px solid $line; border-radius: 8px; color: $ink; background: #fff; overflow-wrap: anywhere; }
+    .menu-dialog::backdrop { background: rgb(15 23 42 / .55); }
+    .menu-dialog h2 { margin: 0 0 12px; font-size: 20px; font-weight: 700; }
+    .menu-dialog p { color: $ink; line-height: 1.6; }
+    .menu-dialog--form { width: min(640px, calc(100% - 32px)); }
+    .menu-dialog__source { margin: -4px 0 18px; color: $muted !important; font-size: 14px; }
+    .menu-dialog__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
+    .menu-dialog__error { margin: 12px 0 0; padding: 10px 12px; border-radius: 5px; background: #fff2f2; color: #8b1e26 !important; }
+    .menu-dialog__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+    .menu-dialog__start { margin-right: auto; }
+    .menu-dialog .form-group { margin-bottom: 16px; }
+    .menu-dialog label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 600; color: $ink; }
+    .menu-dialog .form-control { box-sizing: border-box; width: 100%; height: 44px; padding: 9px 12px; border: 1px solid #b9c4d3; border-radius: 5px; font-size: 15px; color: $ink; }
+    .menu-dialog .form-control[readonly] { background: #f3f6fa; color: $muted; }
+    .menu-dialog .help-block { margin: 6px 0 0; color: $muted; font-size: 13px; }
+
+    .menu-editor__check-inline { display: flex !important; align-items: center; gap: 10px; font-weight: 500 !important; cursor: pointer; }
+    .menu-editor__check-inline input, .menu-editor__check input { width: 18px; height: 18px; accent-color: $primary; }
+    .menu-editor__check .checkbox label { display: flex; align-items: center; gap: 10px; padding-left: 0; font-weight: 500; color: $ink; }
+    .menu-editor__check .checkbox input { position: static; margin: 0; }
+
+    // ---------- Màn sửa menu ----------
+    .menu-notice { margin-bottom: 20px; }
+    .menu-workspace { display: grid; grid-template-columns: minmax(300px, 380px) minmax(0, 1fr); gap: 20px; align-items: start; }
+    .menu-workspace__side { min-width: 0; }
+    .menu-workspace__side .page-editor__section { padding: 20px; }
+    .menu-workspace__side .banner-button { min-height: 40px; }
+
+    .menu-source { border-top: 1px solid $line; }
+    .menu-source:last-child { border-bottom: 1px solid $line; }
+    .menu-source > summary { display: flex; align-items: center; gap: 8px; padding: 13px 2px; font-weight: 600; font-size: 15px; color: $ink; cursor: pointer; list-style: none; }
+    .menu-source > summary::-webkit-details-marker { display: none; }
+    .menu-source > summary::after { content: ''; width: 8px; height: 8px; margin-left: auto; border-right: 2px solid $muted; border-bottom: 2px solid $muted; transform: rotate(45deg); transition: transform .2s; }
+    .menu-source[open] > summary::after { transform: rotate(-135deg); }
+    .menu-source[open] > summary { padding-bottom: 8px; }
+    .menu-source[open] { padding-bottom: 16px; }
+    .menu-source__count { padding: 1px 8px; border-radius: 999px; background: #eef2f7; color: $muted; font-size: 12px; }
+    .menu-source__search { margin-bottom: 8px; height: 40px !important; }
+    .menu-source__list { max-height: 260px; overflow: auto; padding: 4px; border: 1px solid $line; border-radius: 6px; }
+    .menu-source__item { display: flex !important; align-items: flex-start; gap: 10px; margin: 0 !important; padding: 8px; border-radius: 4px; font-weight: 400 !important; font-size: 14px !important; line-height: 1.45; cursor: pointer; }
+    .menu-source__item:hover { background: #f3f7fb; }
+    .menu-source__item input { flex: 0 0 18px; width: 18px; height: 18px; margin: 1px 0 0; accent-color: $primary; }
+    .menu-source__item span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+    .menu-source__item small { flex-shrink: 0; color: $muted; font-size: 12px; }
+    .menu-source__item.is-added { color: $muted; cursor: default; }
+    .menu-source__item[hidden] { display: none !important; }
+    .menu-source__none { margin: 8px; color: $muted; font-size: 13px; }
+    .menu-source__actions { display: flex; gap: 8px; margin-top: 10px; }
+    .menu-source__actions .banner-button:last-child { flex: 1; }
+    .menu-source button:disabled { opacity: .55; cursor: not-allowed; }
+    .menu-custom-link .form-group { margin-bottom: 12px; }
+
+    .menu-danger { margin-top: 24px; padding-top: 18px; border-top: 1px solid $line; }
+    .menu-danger h3 { margin: 0 0 6px; font-size: 16px; font-weight: 700; color: #8b1e26; }
+    .menu-danger p { margin: 0 0 12px; color: $muted; font-size: 14px; }
+
+    .menu-structure { min-width: 0; }
+    .menu-structure__header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .menu-structure__header h2 { margin-bottom: 4px !important; }
+    .menu-structure__tools { display: flex; gap: 8px; }
+    .menu-structure__tools .banner-button { min-height: 38px; padding: 7px 12px; font-size: 13px; }
+    .menu-status { margin: 0; color: $muted; font-size: 14px; }
+    .menu-status[data-state="saving"] { color: #805000; }
+    .menu-status[data-state="success"] { color: #12633c; }
+    .menu-status[data-state="error"] { color: #9f2424; font-weight: 600; }
+    .menu-empty { padding: 40px 20px; border: 2px dashed $line; border-radius: 8px; text-align: center; color: $muted; }
+    .menu-empty[hidden] { display: none; }
+    .menu-empty h3 { margin: 0 0 6px; font-size: 18px; color: $ink; }
+
+    // Cây kéo thả — ghi đè .dd-* toàn cục của _menu-editor.scss.
+    .menu-board .dd-list { margin: 0; padding: 0; list-style: none; }
+    .menu-board .dd-item { position: relative; margin: 0 0 8px; }
+    .menu-board .dd-item .dd-list { margin: 8px 0 0 28px; padding: 0 0 0 16px; border-left: 2px solid #c9d6e6; }
+    .menu-board > .dd-empty, .menu-board .dd-empty { display: none; }
+    .menu-row__main { display: grid; grid-template-columns: 40px 28px minmax(0, 1fr) auto; align-items: center; gap: 8px; min-height: 60px; padding: 8px 12px 8px 4px; background: #fff; border: 1px solid $line; border-radius: 6px; }
+    .menu-row__main:hover { border-color: #b9c9dd; }
+    .menu-board .menu-grip.dd-handle { display: flex; align-items: center; justify-content: center; width: 40px; min-height: 40px; padding: 0; border: 0; border-radius: 4px; background: transparent; color: $muted; font-size: 17px; cursor: grab; box-shadow: none; touch-action: none; }
+    .menu-board .menu-grip.dd-handle:hover { background: #edf3fa; color: $primary; }
+    .menu-row__body { grid-column: 3; min-width: 0; }
+    .menu-row__heading { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+    .menu-row__title { font-size: 15px; font-weight: 600; color: $ink; overflow-wrap: anywhere; }
+    .menu-row__url { display: block; margin-top: 3px; color: $muted; font-size: 13px; overflow-wrap: anywhere; }
+    .menu-type, .menu-flag { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 12px; font-weight: 600; background: #eef2f7; color: #35465c; }
+    .menu-type--url { background: #eaf2fb; color: #174b80; }
+    .menu-type--page { background: #f1ecfb; color: #5b3a9a; }
+    .menu-type--category { background: #e7f5ed; color: #12633c; }
+    .menu-type--news { background: #fff4df; color: #805000; }
+    .menu-flag--off { background: #fdecec; color: #9f2424; }
+    .menu-flag[hidden] { display: none; }
+    .menu-row__actions { display: flex; align-items: center; gap: 6px; }
+    .menu-row__actions form { margin: 0; }
+    .menu-row__actions .banner-button { min-height: 36px; padding: 6px 12px; font-size: 13px; }
+    .menu-icon-button { width: 32px; height: 36px; border: 1px solid #c6d0dd; border-radius: 4px; background: #fff; color: #304b6c; font-size: 18px; cursor: pointer; }
+    .menu-icon-button:hover:not(:disabled) { background: #edf3fa; }
+    .menu-icon-button:disabled { color: #a5adba; background: #f5f6f8; border-color: #e4e7ed; cursor: default; }
+    // Nút mở/thu gọn mục con do nestable2 chèn đầu <li> — đặt vào cột thứ 2 của hàng.
+    // _menu-editor.scss (toàn cục): top 50% + translateY tính theo cả khối mục con, font-size 0 và ::before !important.
+    .menu-board .dd-item > .menu-toggle { position: absolute; top: 12px; left: 44px; z-index: 2; display: flex; align-items: center; justify-content: center; width: 28px; height: 36px; margin: 0; padding: 0; transform: none; border: 0; border-radius: 4px; background: transparent; color: $muted; font-size: 13px; line-height: 1; text-indent: 0; cursor: pointer; }
+    .menu-board .dd-item > .menu-toggle::before { display: none !important; }
+    // nestable2 chèn CẢ nút mở và nút thu gọn, CSS gốc của thư viện ẩn bớt theo .dd-collapsed.
+    .menu-board .dd-item > .menu-toggle[data-action="expand"],
+    .menu-board .dd-collapsed > .menu-toggle[data-action="collapse"] { display: none; }
+    .menu-board .dd-collapsed > .menu-toggle[data-action="expand"] { display: flex; }
+    .menu-board .dd-item > .menu-toggle:hover { background: #edf3fa; color: $primary; }
+    .menu-board .dd-collapsed > .dd-list { display: none; }
+    .menu-board .dd-placeholder, .dd-placeholder { min-height: 60px !important; margin: 0 0 8px; border: 2px dashed #7c9bbb; border-radius: 6px; background: #edf3fa; }
+    .dd-dragel { position: absolute; z-index: 9999; pointer-events: none; list-style: none; margin: 0; padding: 0; }
+    .dd-dragel .menu-row__main { box-shadow: 0 8px 24px rgb(31 47 68 / 18%); border-color: #8da9c8; }
+    .dd-dragel .menu-row__actions { visibility: hidden; }
+
+    @media (max-width: 1199px) {
+        .menu-workspace { grid-template-columns: minmax(0, 1fr); }
+        .menu-structure { order: -1; }
+    }
+    @media (max-width: 767px) {
+        .menu-row__main { grid-template-columns: 40px 28px minmax(0, 1fr); }
+        .menu-row__actions { grid-column: 1 / -1; justify-content: flex-end; flex-wrap: wrap; }
+        .menu-board .dd-item .dd-list { margin-left: 10px; padding-left: 10px; }
+        .menu-dialog__grid { grid-template-columns: minmax(0, 1fr); }
+        .menu-table { min-width: 680px; }
+        .menu-table-wrap { max-width: calc(100vw - 26px); }
+    }
+}

@@ -54,6 +54,7 @@ class PageType extends AbstractType
             ->add('title', null, [
                 'attr' => ['class' => 'sluggable'],
                 'label' => 'label.title',
+                'help' => 'Dùng [YEAR] để tự động hiển thị năm hiện tại. Dữ liệu lưu vẫn giữ nguyên mã này.',
             ])
             ->add('url', TextType::class, [
                 'attr' => ['class' => 'url', 'readonly' => 'readonly'],
@@ -98,6 +99,7 @@ class PageType extends AbstractType
             ->add('pageTitle', TextType::class, [
                 'required' => false,
                 'label' => 'label.pageTitle',
+                'help' => 'Dùng [YEAR] để tự động hiển thị năm hiện tại. Dữ liệu lưu vẫn giữ nguyên mã này.',
             ])
             ->add('pageDescription', TextareaType::class, [
                 'required' => false,

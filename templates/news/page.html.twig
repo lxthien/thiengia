@@ -2,7 +2,7 @@
 
 {% set coverSrc = post.images ?: null %}
 
-{% block title %}{{ post.pageTitle ?: post.title }} | {{ v3.company.shortName }}{% endblock %}
+{% block title %}{{ (post.pageTitle|title_tokens) ?: (post.title|title_tokens) }} | {{ v3.company.shortName }}{% endblock %}
 {% block description %}{{ post.pageDescription ?: post.description }}{% endblock %}
 {% block keyword %}{{ post.pageKeyword }}{% endblock %}
 {% block robots %}<meta name="robots" content="{{ post.getRobotsContent() }}">{% endblock %}
@@ -29,7 +29,7 @@
         <script type="application/ld+json">{{ {
             '@context': 'https://schema.org',
             '@type': 'WebPage',
-            'name': post.pageTitle ?: post.title,
+            'name': (post.pageTitle|title_tokens) ?: (post.title|title_tokens),
             'description': post.pageDescription ?: post.description,
             'url': canonicalUrl,
             'inLanguage': 'vi'
@@ -38,18 +38,23 @@
 {% endblock %}
 
 {% set breadcrumbItems = [{ label: 'Trang chủ', path: path('homepage') }] %}
+{# Trang gốc của chuỗi (cha cao nhất, hoặc chính nó) dùng template "service_page" → chèn mục "Dịch vụ" #}
+{% set rootPage = pageAncestors|default([])|first ?: post %}
+{% if rootPage.template == 'service_page' %}
+    {% set breadcrumbItems = breadcrumbItems|merge([{ label: 'Dịch vụ', path: path('homepage') ~ '#dich-vu' }]) %}
+{% endif %}
 {% for ancestor in pageAncestors|default([]) %}
     {% set breadcrumbItems = breadcrumbItems|merge([
-        { label: ancestor.breadcrumbTitle ?: ancestor.title, path: path('dynamic_post_page', { slug: ancestor.url }) }
+        { label: (ancestor.breadcrumbTitle|title_tokens) ?: (ancestor.title|title_tokens), path: path('dynamic_post_page', { slug: ancestor.url }) }
     ]) %}
 {% endfor %}
-{% set breadcrumbItems = breadcrumbItems|merge([{ label: post.breadcrumbTitle ?: post.title }]) %}
+{% set breadcrumbItems = breadcrumbItems|merge([{ label: (post.breadcrumbTitle|title_tokens) ?: (post.title|title_tokens) }]) %}
 
 {% block body %}
 
     {{ include('v3/components/_page_hero.html.twig', {
         breadcrumb: breadcrumbItems,
-        title: post.title,
+        title: (post.title|title_tokens),
         description: post.description
     }) }}
 

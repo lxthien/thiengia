@@ -13,14 +13,14 @@
                 {% endif %}
 
                 <div class="item">
-                    <a href="{{ path('dynamic_post_page', {'slug': row.getUrl() }) }}" class="list-group-item td-list-group-item" title="{{ row.getTitle() }}">
+                    <a href="{{ path('dynamic_post_page', {'slug': row.getUrl() }) }}" class="list-group-item td-list-group-item" title="{{ (row.getTitle()|title_tokens) }}">
                         <img
-                            alt="{{ row.getTitle() }}"
+                            alt="{{ (row.getTitle()|title_tokens) }}"
                             width="70"
                             height="65"
                             {{ loop.index != 1 ? 'loading="lazy"' : '' }}
                             src="{{ imagePath != false ? absolute_url(imagePath) : absolute_url(imagePathFilter) }}" />
-                        <span>{{ row.getTitle() }}</span>
+                        <span>{{ (row.getTitle()|title_tokens) }}</span>
                     </a>
                 </div>
             {% endfor %}

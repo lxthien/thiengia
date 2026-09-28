@@ -12,12 +12,12 @@
                 {% set imagePath = row.images ?: asset('assets/images/no-image.png') %}
                 {% set imagePathFilter = (row.images ?: asset('assets/images/no-image.png'))|imagine_filter('news_70_65') %}
                 {% set imgSrc = convert_images.fileExists(imagePath) ? convert_images.webpConvert(imagePathFilter, '', true) : imagePath|imagine_filter('news_70_65') %}
-                <a href="{{ path('dynamic_post_page', {'slug': row.getUrl()}) }}" class="ka-post-item" title="{{ row.getTitle() }}">
+                <a href="{{ path('dynamic_post_page', {'slug': row.getUrl()}) }}" class="ka-post-item" title="{{ (row.getTitle()|title_tokens) }}">
                     <div class="ka-post-thumb">
-                        <img alt="{{ row.getTitle() }}" width="70" height="65" class="lazyload" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{ imgSrc ?: absolute_url(imagePathFilter) }}">
+                        <img alt="{{ (row.getTitle()|title_tokens) }}" width="70" height="65" class="lazyload" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{ imgSrc ?: absolute_url(imagePathFilter) }}">
                     </div>
                     <div class="ka-post-info">
-                        <h5>{{ row.getTitle() }}</h5>
+                        <h5>{{ (row.getTitle()|title_tokens) }}</h5>
                     </div>
                 </a>
             {% endfor %}

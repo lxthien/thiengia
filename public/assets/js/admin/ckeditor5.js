@@ -521,7 +521,10 @@ function trackEditorForForm(editor, sourceElement) {
  */
 export default function initCkeditor5() {
     document.querySelectorAll('textarea.txt-ckeditor5').forEach((textarea) => {
-        const minHeight = textarea.dataset.height ? `${textarea.dataset.height}px` : '500px';
+        const requestedHeight = Number(textarea.dataset.height);
+        const height = Number.isFinite(requestedHeight) && requestedHeight > 0 ? requestedHeight : 500;
+        const requestedMax = Number(textarea.dataset.maxHeight);
+        const maxHeight = Number.isFinite(requestedMax) && requestedMax > 0 ? requestedMax : height;
 
         const config = textarea.dataset.editorPreset === 'comment'
             ? { ...baseConfig, toolbar: { items: ['undo', 'redo', '|', 'bold', 'italic', 'link', '|', 'bulletedList', 'numberedList', 'blockQuote', 'removeFormat'], shouldNotGroupWhenFull: false } }
@@ -529,17 +532,9 @@ export default function initCkeditor5() {
         ClassicEditor
             .create(textarea, config)
             .then((editor) => {
-                // data-height của CKEditor 4 cũ là chiều cao CỐ ĐỊNH; ở đây dùng
-                // làm chiều cao tối thiểu, khung tự dài thêm theo nội dung (xem
-                // rule trong admin.scss). Đặt qua CSS custom property + rule
-                // thường (không !important, không set lại mỗi lần UI update) —
-                // bản trước dùng inline style !important gắn lại liên tục trên
-                // editor.ui.on('update', ...) làm rối lịch tính scroll-vào-vùng-
-                // chọn của CKEditor 5 (bấm vào phần tử cuối bài bị nhảy lên đầu).
-                // Custom property đặt ở gốc UI nên .ck-source-editing-area (chế
-                // độ Source, DOM khác hẳn .ck-editor__editable) cũng thừa hưởng
-                // theo, không cần khoá riêng.
-                editor.ui.view.element.style.setProperty('--ck-min-height', minHeight);
+                // Set once; do not reset scrolling during CKEditor UI updates.
+                editor.ui.view.element.style.setProperty('--ck-min-height', `${Math.min(height, maxHeight)}px`);
+                editor.ui.view.element.style.setProperty('--ck-max-height', `${maxHeight}px`);
 
                 trackEditorForForm(editor, textarea);
                 registerEditor(textarea.id, editor);

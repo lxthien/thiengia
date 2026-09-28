@@ -63,6 +63,8 @@ Encore
     .addEntry('js/search', './public/assets/js/admin/search.js')
     .addEntry('js/login', './public/assets/js/admin/login.js')
     .addEntry('js/menu-editor', './public/assets/js/admin/menu-editor.js')
+    .addEntry('js/menu-manager', './public/assets/js/admin/menu-manager.js')
+    .addStyleEntry('css/menu-manager', './public/assets/scss/admin/menu-manager.scss')
     .addEntry('js/banner-index', './public/assets/js/admin/banner-index.js')
     .addStyleEntry('css/banner-index', ['./public/assets/scss/admin/banner-index.scss'])
     .addEntry('js/testimonial-index', './public/assets/js/admin/testimonial-index.js')

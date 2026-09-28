@@ -62,6 +62,7 @@ class NewsController extends AbstractController
         private readonly Breadcrumbs $breadcrumbs,
         private readonly SettingsManager $settingsManager,
         private readonly ContentMetrics $contentMetrics,
+        private readonly \App\Service\TitleTokenResolver $titleTokens,
         private readonly FormFactoryInterface $formFactory,
         #[Autowire(service: 'limiter.public_comment')]
         private readonly RateLimiterFactory $publicCommentLimiter,
@@ -560,7 +561,7 @@ class NewsController extends AbstractController
         ]);
 
         // cache for 3600 seconds
-        $response->setSharedMaxAge(3600);
+        $response->setSharedMaxAge($this->titleTokens->cacheLifetime(3600));
 
         // (optional) set a custom Cache-Control directive
         $response->headers->addCacheControlDirective('must-revalidate', true);
@@ -586,7 +587,7 @@ class NewsController extends AbstractController
         ]);
 
         // cache for 3600 seconds
-        $response->setSharedMaxAge(3600);
+        $response->setSharedMaxAge($this->titleTokens->cacheLifetime(3600));
 
         // (optional) set a custom Cache-Control directive
         $response->headers->addCacheControlDirective('must-revalidate', true);
@@ -841,7 +842,7 @@ class NewsController extends AbstractController
         // Highlight search keywords in results
         $highlightedResults = [];
         foreach ($results as $result) {
-            $result->highlightedTitle = $this->highlightKeyword($result->getTitle(), $searchTerm);
+            $result->highlightedTitle = $this->highlightKeyword($this->titleTokens->resolve($result->getTitle()), $searchTerm);
             $result->highlightedDescription = $this->highlightKeyword($result->getDescription(), $searchTerm);
             $highlightedResults[] = $result;
         }
@@ -1041,14 +1042,14 @@ class NewsController extends AbstractController
                 // Use breadcrumb_title if available (shorter label), otherwise use title
                 $breadcrumbLabel = method_exists($p, 'getBreadcrumbTitle') && !empty($p->getBreadcrumbTitle())
                     ? $p->getBreadcrumbTitle()
-                    : $p->getTitle();
+                    : $this->titleTokens->resolve($p->getTitle());
 
                 if ($index < count($pageChain) - 1) {
                     // Add as link for parent pages
-                    $breadcrumbs->addItem($breadcrumbLabel, $this->generateUrl('dynamic_post_page', array('slug' => $p->getUrl())));
+                    $breadcrumbs->addItem($this->titleTokens->resolve($breadcrumbLabel), $this->generateUrl('dynamic_post_page', array('slug' => $p->getUrl())));
                 } else {
                     // Add current page without link
-                    $breadcrumbs->addItem($p->getTitle(), $this->generateUrl('dynamic_post_page', array('slug' => $p->getUrl())));
+                    $breadcrumbs->addItem($this->titleTokens->resolve($p->getTitle()), $this->generateUrl('dynamic_post_page', array('slug' => $p->getUrl())));
                 }
             }
 
@@ -1087,15 +1088,15 @@ class NewsController extends AbstractController
             if (!empty($category)) {
                 if ($category->getParentcat() === null) {
                     $breadcrumbs->addItem($category->getName(), $this->generateUrl("dynamic_post_page", array('slug' => $category->getUrl())));
-                    $breadcrumbs->addItem($post->getTitle(), $this->generateUrl('dynamic_post_page', array('slug' => $post->getUrl())));
+                    $breadcrumbs->addItem($this->titleTokens->resolve($post->getTitle()), $this->generateUrl('dynamic_post_page', array('slug' => $post->getUrl())));
                 } else {
                     $parentCategory = $category->getParentcat();
                     $breadcrumbs->addItem($parentCategory->getName(), $this->generateUrl("dynamic_post_page", array('slug' => $parentCategory->getUrl())));
                     $breadcrumbs->addItem($category->getName(), $this->generateUrl("dynamic_category_post", array('level1' => $parentCategory->getUrl(), 'level2' => $category->getUrl())));
-                    $breadcrumbs->addItem($post->getTitle(), $this->generateUrl('dynamic_post_page', array('slug' => $post->getUrl())));
+                    $breadcrumbs->addItem($this->titleTokens->resolve($post->getTitle()), $this->generateUrl('dynamic_post_page', array('slug' => $post->getUrl())));
                 }
             } else {
-                $breadcrumbs->addItem($post->getTitle(), $this->generateUrl('dynamic_post_page', array('slug' => $post->getUrl())));
+                $breadcrumbs->addItem($this->titleTokens->resolve($post->getTitle()), $this->generateUrl('dynamic_post_page', array('slug' => $post->getUrl())));
             }
         }
 

@@ -1,0 +1,54 @@
+// Preserve brand styling. Header is compact by default until content fit is measured.
+.hd {
+  .hd-inner { width: 100%; min-width: 0; gap: clamp(12px, 1.5vw, 24px); }
+  .hd-logo { flex: 0 0 auto; white-space: nowrap; }
+  .hd-nav { display: none; flex: 0 0 auto; width: max-content; }
+  .hd-nav > ul { display: flex; align-items: center; gap: clamp(16px, 1.4vw, 24px); }
+  .hd-link { letter-spacing: 0.07em; }
+  .hd-actions { display: flex; align-items: center; flex: 0 0 auto; gap: 12px; margin-left: auto; }
+  .hd-hotline { display: flex; flex: 0 0 auto; }
+  .hd-hotline > span:last-child { display: none; }
+  .hd-hotline-icon { flex: 0 0 44px; width: 44px; height: 44px; }
+  .hd-cta { display: none; white-space: nowrap; }
+  .hd-toggle { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; flex: 0 0 44px; }
+  .hd-toggle span { width: 24px; }
+  .hd-toggle::after { content: "Menu"; font-size: 10px; line-height: 1; letter-spacing: 0; }
+  &[data-layout="full"], &[data-layout="compact"] {
+    .hd-nav { display: block; }
+    .hd-toggle { display: none; }
+  }
+  &[data-layout="full"] .hd-hotline > span:last-child { display: block; }
+  &.hd-hide-cta .hd-cta { display: none; }
+  &.hd-hide-phone .hd-hotline { display: none; }
+  a:focus-visible, button:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+}
+@media (min-width: 640px) { .hd .hd-cta { display: inline-flex; } }
+@media (max-width: 380px) {
+  .hd .hd-inner { padding-left: 12px; padding-right: 12px; gap: 8px; }
+  .hd .hd-actions { gap: 8px; }
+}
+.hd-drop .hd-drop-menu {
+  width: min(320px, calc(100vw - 24px));
+  min-width: 0;
+  max-height: min(65vh, 560px);
+  overflow-y: auto;
+  top: 100%;
+  margin-top: 0;
+  left: calc(50% + var(--dropdown-shift, 0px));
+  a { white-space: normal; overflow-wrap: anywhere; }
+}
+.hd-drop { padding-block: 12px; }
+.hd-menu {
+  // Visibility must change immediately so focus can enter the opened dialog.
+  transition-property: opacity;
+  justify-content: flex-start;
+  padding: 5rem max(1.25rem, calc((100vw - 720px) / 2)) 2rem;
+  overscroll-behavior: contain;
+  overflow-wrap: anywhere;
+  .hd-menu-sub a { min-height: 44px; display: flex; align-items: center; color: rgba(255, 255, 255, .82); }
+  .hd-menu-close { position: sticky; top: 0; margin: -4rem 0 1rem auto; flex-shrink: 0; background: #221c17; }
+  a:focus-visible, button:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hd-menu, .hd-drop-menu, .hd-link { transition: none; }
+}

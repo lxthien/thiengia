@@ -72,7 +72,7 @@ class MenuService
     {
         switch ($item->getType()) {
             case MenuItem::TYPE_URL:
-                return $item->getUrl();
+                return $this->safeStoredUrl($item);
             
             case MenuItem::TYPE_NEWS:
                 if ($item->getTargetId()) {
@@ -110,7 +110,17 @@ class MenuService
                 break;
         }
 
-        return $item->getUrl();
+        // Nội dung đích đã bị xoá: dùng URL lưu lúc thêm vào menu.
+        return $this->safeStoredUrl($item);
+    }
+
+    // URL lưu trong DB có thể có từ trước khi admin kiểm tra hợp lệ — không in
+    // "javascript:..." hay URL lạ ra href của website.
+    private function safeStoredUrl(MenuItem $item): string
+    {
+        $url = $item->getUrl();
+
+        return ($url !== null && $url !== '' && MenuUrlNormalizer::isSafe($url)) ? $url : '#';
     }
 
     /**

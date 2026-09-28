@@ -30,17 +30,17 @@
                     src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
                     data-src="{{ imagePath != false ? asset(imagePath) : asset(imagePathFilter) }}"
                     class="mr-3 img-thumbnail lazyload"
-                    alt="{{row.getTitle()}}"
+                    alt="{{(row.getTitle()|title_tokens)}}"
                     width="277"
                     height="{{ isVerticalCard ? '350' : '220' }}" />
             </picture>
-            <a title="{{ row.getTitle() }}" href="{{ path('dynamic_post_page', {'slug': row.getUrl() }) }}">
+            <a title="{{ (row.getTitle()|title_tokens) }}" href="{{ path('dynamic_post_page', {'slug': row.getUrl() }) }}">
                 <i class="fa fa-link"></i>
             </a>
         </div>
         <div class="ka-card-body">
             <h3 class="mt-0 mb-1">
-                <a href="{{ path('dynamic_post_page', {'slug': row.getUrl() }) }}" title="{{ row.getTitle() }}">{{ row.getTitle() }}</a>
+                <a href="{{ path('dynamic_post_page', {'slug': row.getUrl() }) }}" title="{{ (row.getTitle()|title_tokens) }}">{{ (row.getTitle()|title_tokens) }}</a>
             </h3>
             <p>{{ row.getDescription()|slice(0, 105) }}</p>
         </div>

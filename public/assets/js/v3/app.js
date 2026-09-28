@@ -7,6 +7,7 @@
 
 import initHeader from "./modules/header";
 import initMobileMenu from "./modules/mobile-menu";
+import initAdaptiveHeader from "./modules/adaptive-header";
 import initReveal from "./modules/reveal";
 import initCounters from "./modules/counters";
 import initHeroSlider from "./modules/hero-slider";
@@ -21,6 +22,7 @@ import initLoBanRuler from "./modules/lo-ban-ruler";
 document.addEventListener("DOMContentLoaded", () => {
   initHeader();
   initMobileMenu();
+  initAdaptiveHeader();
   initReveal();
   initCounters();
   initHeroSlider();

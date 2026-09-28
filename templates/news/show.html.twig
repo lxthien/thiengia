@@ -4,7 +4,7 @@
     ? post.images
     : asset('assets/images/no-image.png') %}
 
-{% block title %}{{ post.pageTitle ?: post.title }} | {{ v3.company.shortName }}{% endblock %}
+{% block title %}{{ (post.pageTitle|title_tokens) ?: (post.title|title_tokens) }} | {{ v3.company.shortName }}{% endblock %}
 {% block description %}{{ post.pageDescription ?: post.description }}{% endblock %}
 {% block robots %}<meta name="robots" content="{{ post.getRobotsContent() }}">{% endblock %}
 {% block canonical %}<link rel="canonical" href="{{ canonicalUrl }}">{% endblock %}
@@ -33,7 +33,7 @@
         "@context": "https://schema.org",
         "@type": "Article",
         "mainEntityOfPage": {{ canonicalUrl|json_encode|raw }},
-        "headline": {{ post.title|json_encode|raw }},
+        "headline": {{ (post.title|title_tokens)|json_encode|raw }},
         "description": {{ (post.description ?: '')|json_encode|raw }},
         "image": {{ absolute_url(coverSrc)|json_encode|raw }},
         "datePublished": {{ (post.publishedAt ?: post.createdAt)|date('c')|json_encode|raw }},
@@ -76,7 +76,7 @@
         ]) %}
     {% endif %}
 {% endif %}
-{% set breadcrumbItems = breadcrumbItems|merge([{ label: post.breadcrumbTitle ?: post.title }]) %}
+{% set breadcrumbItems = breadcrumbItems|merge([{ label: (post.breadcrumbTitle|title_tokens) ?: (post.title|title_tokens) }]) %}
 
 {% block body %}
 
@@ -89,7 +89,7 @@
                 <p class="sec-label sec-label--light mt-8 fade">{{ category.name }}</p>
             {% endif %}
 
-            <h1 class="page-hero-title mt-5 max-w-4xl fade">{{ post.title }}</h1>
+            <h1 class="page-hero-title mt-5 max-w-4xl fade">{{ (post.title|title_tokens) }}</h1>
 
             <p class="post-meta mt-8 fade">
                 <span>Bởi <strong>{{ post.author ? post.author.username : v3.company.authorName }}</strong></span>

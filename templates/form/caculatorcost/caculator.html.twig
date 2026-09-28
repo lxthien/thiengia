@@ -5,7 +5,7 @@
     <noscript><link rel="stylesheet" href="{{ absolute_url(asset('build/css/v3-news.css')) }}" ></noscript>
 {% endblock %}
 
-{% block title %}{{ post.getPageTitle() is not null ? post.getPageTitle() : post.getTitle() }}{% endblock %}
+{% block title %}{{ (post.getPageTitle() is not null ? post.getPageTitle() : post.getTitle())|title_tokens }}{% endblock %}
 {% block description %}{{ post.getPageDescription() is not null ? post.getPageDescription() : post.getDescription() }}{% endblock %}
 {% block keyword %}{{ post.getPageKeyword() }}{% endblock %}
 

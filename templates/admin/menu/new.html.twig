@@ -1,50 +1,29 @@
 {% extends 'admin/layout.html.twig' %}
-
-{% block title %}Create Menu{% endblock %}
-
+{% block title %}Thêm menu{% endblock %}
+{% block body_id 'admin_menu_new' %}
+{% block flash_messages %}{% endblock %}
+{% block stylesheets %}{{ parent() }}<link rel="stylesheet" href="{{ asset('build/css/page-editor.css') }}"><link rel="stylesheet" href="{{ asset('build/css/menu-manager.css') }}">{% endblock %}
 {% block main %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-8">
-            <h1 class="h2 mb-4">Create New Menu</h1>
-
-            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-
-            <div class="card">
-                <div class="card-body">
-                    <div class="form-group">
-                        {{ form_label(form.name) }}
-                        {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
-                        {{ form_errors(form.name) }}
-                    </div>
-
-                    <div class="form-group">
-                        {{ form_label(form.description) }}
-                        {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
-                        {{ form_errors(form.description) }}
-                    </div>
-
-                    <div class="form-group">
-                        <div class="custom-control custom-checkbox">
-                            {{ form_widget(form.enable, {'attr': {'class': 'custom-control-input'}}) }}
-                            {{ form_label(form.enable, 'Enable this menu', {'label_attr': {'class': 'custom-control-label'}}) }}
-                        </div>
-                        {{ form_errors(form.enable) }}
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group mt-3">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fa fa-save"></i> Create Menu
-                </button>
-                <a href="{{ path('admin_menu_index') }}" class="btn btn-secondary">
-                    <i class="fa fa-times"></i> Cancel
-                </a>
-            </div>
-
-            {{ form_end(form) }}
+<section class="page-editor menu-editor">
+    <header class="page-editor__header"><div>
+        <a href="{{ path('admin_menu_index') }}">← Danh sách menu</a>
+        <h1>Thêm menu</h1>
+        <p>Đặt tên menu, sau đó thêm các liên kết ở màn hình tiếp theo.</p>
+    </div></header>
+    {{ include('admin/redirect/_messages.html.twig') }}
+    {{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
+    {% if not form.vars.valid %}<div class="page-editor__errors" role="alert"><strong>Chưa thể tạo menu.</strong> Kiểm tra các trường được đánh dấu bên dưới.{{ form_errors(form) }}</div>{% endif %}
+    <section class="page-editor__section" aria-labelledby="menu-general-heading">
+        <h2 id="menu-general-heading">Thông tin menu</h2>
+        {{ include('admin/menu/_settings_fields.html.twig', {form: form, site_menu_names: site_menu_names}, with_context = false) }}
+    </section>
+    <footer class="page-editor__savebar">
+        <span class="page-editor__hint">Sau khi tạo, bạn sẽ được chuyển tới màn hình thêm và sắp xếp mục.</span>
+        <div class="page-editor__save-actions">
+            <button type="submit" class="btn btn-primary">Tạo menu</button>
+            <a href="{{ path('admin_menu_index') }}" class="btn btn-link">Hủy</a>
         </div>
-    </div>
-</div>
+    </footer>
+    {{ form_end(form) }}
+</section>
 {% endblock %}

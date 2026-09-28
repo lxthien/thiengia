@@ -1,0 +1,22 @@
+{# Trường cài đặt menu, dùng chung cho màn thêm và màn sửa menu. #}
+{% set current_name = form.name.vars.value %}
+<div class="form-group{{ form.name.vars.valid ? '' : ' has-error' }}">
+    {{ form_label(form.name, 'Tên menu') }}
+    {{ form_widget(form.name, {attr: {class: 'form-control', 'aria-describedby': form.name.vars.id ~ '_help', maxlength: 255}}) }}
+    {{ form_errors(form.name) }}
+    <p class="help-block" id="{{ form.name.vars.id }}_help">
+        Website gọi menu theo tên: header và menu mobile đang dùng menu
+        {% for name in site_menu_names %}<strong>“{{ name }}”</strong>{{ not loop.last ? ', ' }}{% endfor %}.
+        {% if current_name in site_menu_names %}Đổi tên menu này sẽ làm menu trên website biến mất.{% endif %}
+    </p>
+</div>
+<div class="form-group">
+    {{ form_label(form.description, 'Mô tả (chỉ hiển thị trong trang quản trị)') }}
+    {{ form_widget(form.description, {attr: {class: 'form-control', rows: 3}}) }}
+    {{ form_errors(form.description) }}
+</div>
+<div class="form-group menu-editor__check">
+    {# bootstrap_3_layout: form_widget của checkbox đã bọc sẵn <label>. #}
+    {{ form_widget(form.enable, {label: 'Bật menu này trên website', translation_domain: false}) }}
+    {{ form_errors(form.enable) }}
+</div>

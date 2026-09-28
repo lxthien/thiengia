@@ -18,6 +18,7 @@
         "babdev/pagerfanta-bundle": "^4.6",
         "blackknight467/star-rating-bundle": "^2.0",
         "doctrine/doctrine-bundle": "^2.13",
+        "doctrine/doctrine-migrations-bundle": "^3.4",
         "doctrine/orm": "^2.20",
         "excelwebzone/recaptcha-bundle": "^1.5",
         "ezyang/htmlpurifier": "^4.7",

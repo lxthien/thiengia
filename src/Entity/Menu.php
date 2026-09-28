@@ -7,12 +7,15 @@ use App\Utils\Slugger;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 #[ORM\Table(name: 'menu')]
 #[ORM\Index(columns: ['enable'], name: 'idx_menu_enable')]
 #[ORM\Entity(repositoryClass: MenuRepository::class)]
+// Cột name là UNIQUE trong DB — thiếu ràng buộc này thì trùng tên văng lỗi SQL (500) thay vì báo trên form.
+#[UniqueEntity(fields: ['name'], message: 'Đã có menu mang tên này. Hãy chọn tên khác.')]
 class Menu
 {
     #[ORM\Column(name: 'id', type: Types::INTEGER)]

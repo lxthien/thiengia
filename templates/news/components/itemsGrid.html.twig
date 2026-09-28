@@ -30,21 +30,21 @@
                     src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
                     data-src="{{ imagePath != false ? asset(imagePath) : asset(imagePathFilter) }}"
                     class="mr-3 img-thumbnail lazyload"
-                    alt="{{row.getTitle()}}"
+                    alt="{{(row.getTitle()|title_tokens)}}"
                     width="277"
                     height="{{ isVerticalCard ? '350' : '220' }}" />
             </picture>
-            <a title="{{ row.getTitle() }}" href="{{ path('dynamic_post_page', {'slug': row.getUrl() }) }}" {{ target is defined ? ' target=' ~ target : '' }} {{ rel is defined ? ' rel=' ~ rel : '' }}>
+            <a title="{{ (row.getTitle()|title_tokens) }}" href="{{ path('dynamic_post_page', {'slug': row.getUrl() }) }}" {{ target is defined ? ' target=' ~ target : '' }} {{ rel is defined ? ' rel=' ~ rel : '' }}>
                 <i class="fa fa-link"></i>
             </a>
         </div>
         <div class="ka-card-body">
             <h3 class="mt-0 mb-1">
-                <a title="{{ row.getTitle() }}" href="{{ path('dynamic_post_page', {'slug': row.getUrl() }) }}" title="{{ row.getTitle() }}" {{ target is defined ? ' target=' ~ target : '' }} {{ rel is defined ? ' rel=' ~ rel : '' }}>
+                <a title="{{ (row.getTitle()|title_tokens) }}" href="{{ path('dynamic_post_page', {'slug': row.getUrl() }) }}" title="{{ (row.getTitle()|title_tokens) }}" {{ target is defined ? ' target=' ~ target : '' }} {{ rel is defined ? ' rel=' ~ rel : '' }}>
                     {% if row.highlightedTitle is defined %}
                         {{ row.highlightedTitle|raw }}
                     {% else %}
-                        {{ row.getTitle() }}
+                        {{ (row.getTitle()|title_tokens) }}
                     {% endif %}
                 </a>
             </h3>

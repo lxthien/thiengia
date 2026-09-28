@@ -1,81 +1,34 @@
 {% extends 'admin/layout.html.twig' %}
-
-{% block title %}Menu Management{% endblock %}
-
+{% block title %}Quản lý menu{% endblock %}
+{% block body_id 'admin_menu_index' %}
+{% block flash_messages %}{% endblock %}
+{% block stylesheets %}{{ parent() }}<link rel="stylesheet" href="{{ asset('build/css/menu-manager.css') }}">{% endblock %}
+{% block javascripts %}{{ parent() }}<script src="{{ asset('build/js/menu-manager.js') }}" defer></script>{% endblock %}
 {% block main %}
-<div class="container mt-4">
-    <div class="row mb-3">
-        <div class="col-md-12">
-            <h1 class="h2 d-inline-block">Menu Management</h1>
-            <a href="{{ path('admin_menu_new') }}" class="btn btn-primary float-right">
-                <i class="fa fa-plus"></i> Add New Menu
-            </a>
-        </div>
-    </div>
-
-    {% if objects is empty %}
-        <div class="alert alert-info">
-            <i class="fa fa-info-circle"></i> No menus found. <a href="{{ path('admin_menu_new') }}">Create one</a>
-        </div>
-    {% else %}
-        <div class="card">
-            <div class="table-responsive">
-                <table class="table table-hover table-striped mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Name</th>
-                            <th>Description</th>
-                            <th>Items Count</th>
-                            <th>Status</th>
-                            <th>Updated</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for menu in objects %}
-                            <tr>
-                                <td>
-                                    <strong>{{ menu.name }}</strong>
-                                </td>
-                                <td>
-                                    {% if menu.description %}
-                                        <span title="{{ menu.description }}">{{ menu.description|slice(0, 50) }}{% if menu.description|length > 50 %}...{% endif %}</span>
-                                    {% else %}
-                                        <em class="text-muted">No description</em>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <span class="badge badge-info">{{ menu.items|length }}</span>
-                                </td>
-                                <td>
-                                    {% if menu.enable %}
-                                        <span class="badge badge-success">Active</span>
-                                    {% else %}
-                                        <span class="badge badge-secondary">Inactive</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <small class="text-muted">
-                                        {{ menu.updatedAt|date('d/m/Y H:i') }}
-                                    </small>
-                                </td>
-                                <td>
-                                    <a href="{{ path('admin_menu_edit', {'id': menu.id}) }}" class="btn btn-sm btn-info" title="Edit">
-                                        <i class="fa fa-edit"></i>
-                                    </a>
-                                    <form method="POST" action="{{ path('admin_menu_delete', {'id': menu.id}) }}" style="display:inline-block;">
-                                        <input type="hidden" name="token" value="{{ csrf_token('delete') }}" />
-                                        <button class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');" title="Delete">
-                                            <i class="fa fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    {% endif %}
-</div>
+<section class="banner-manager menu-manager">
+<header class="banner-manager__header"><div><h1>Quản lý menu</h1><p>Sắp xếp các liên kết điều hướng hiển thị trên website.</p></div><a class="banner-button banner-button--primary" href="{{ path('admin_menu_new') }}">Thêm menu</a></header>
+{{ include('admin/redirect/_messages.html.twig') }}
+<section class="banner-panel" aria-labelledby="menu-results"><header class="banner-panel__toolbar"><h2 id="menu-results">Danh sách menu</h2><span>{{ objects|length }} menu</span></header>
+<div class="menu-table-wrap" role="region" aria-label="Danh sách menu" tabindex="0"><table class="menu-table"><colgroup><col><col style="width:14%"><col style="width:14%"><col style="width:15%"><col style="width:17%"></colgroup><thead><tr><th scope="col">Tên / Mô tả</th><th scope="col">Số mục</th><th scope="col">Trạng thái</th><th scope="col">Cập nhật</th><th scope="col">Thao tác</th></tr></thead><tbody>
+{% for menu in objects %}
+{% set on_site = menu.name in site_menu_names %}
+{% set top_level = menu.items|filter(i => not i.parent)|length %}
+<tr>
+<td><a class="menu-title" href="{{ path('admin_menu_edit', {id: menu.id}) }}">{{ menu.name }}</a>
+{% if on_site %}<span class="menu-site-badge">Đang dùng trên website · header &amp; menu mobile</span>{% endif %}
+<p class="menu-desc">{{ menu.description ?: 'Chưa có mô tả.' }}</p></td>
+<td><strong>{{ menu.items|length }}</strong> mục<small>{{ top_level }} mục gốc · {{ menu.items|length - top_level }} mục con</small></td>
+<td><span class="menu-status {{ menu.enable ? 'is-enabled' : 'is-disabled' }}">{{ menu.enable ? 'Đang bật' : 'Đang tắt' }}</span>{% if on_site and not menu.enable %}<small class="menu-warning">Website đang không hiện menu này</small>{% endif %}</td>
+<td><time>{{ menu.updatedAt|date('d/m/Y H:i', 'Asia/Ho_Chi_Minh') }}</time></td>
+<td><div class="menu-actions"><a class="banner-button" href="{{ path('admin_menu_edit', {id: menu.id}) }}">Sửa</a>
+<form method="post" action="{{ path('admin_menu_delete', {id: menu.id}) }}" data-menu-confirm data-confirm-title="Xoá menu?" data-confirm-message="Xoá menu “{{ menu.name }}” cùng {{ menu.items|length }} mục bên trong. Thao tác không thể hoàn tác.{{ on_site ? ' Website đang dùng menu này — header và menu mobile sẽ trống.' : '' }}" data-confirm-button="Xoá menu"><input type="hidden" name="token" value="{{ csrf_token('delete') }}"><button class="banner-button banner-button--delete" type="submit">Xoá</button></form>
+</div></td>
+</tr>
+{% else %}
+<tr><td colspan="5" class="menu-empty"><h3>Chưa có menu nào</h3><p>Website đang gọi menu tên “{{ site_menu_names|first }}”. Tạo menu với đúng tên này để hiện trên header.</p><a class="banner-button banner-button--primary" href="{{ path('admin_menu_new') }}">Thêm menu</a></td></tr>
+{% endfor %}
+</tbody></table></div>
+</section>
+{{ include('admin/menu/_confirm_dialog.html.twig') }}
+</section>
 {% endblock %}

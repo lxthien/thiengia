@@ -21,21 +21,27 @@
 .ck.ck-editor {
     max-width: 100%;
 
-    // Chiều cao KHỞI ĐIỂM, không phải chiều cao cố định: khung luôn cao sẵn
-    // --ck-min-height rồi tự dài thêm theo nội dung. Cố tình KHÔNG kẹp
-    // max-height để tránh thanh cuộn lồng trong thanh cuộn của trang — bài dài
-    // vẫn thao tác được vì toolbar của ClassicEditor tự dính khi cuộn qua.
-    // Biến set 1 lần lúc tạo editor theo data-height của textarea (xem
-    // admin/ckeditor5.js), thừa hưởng xuống cả khung Source (SourceEditing) vì
-    // custom property truyền xuống mọi con cháu.
-    // Bắt buộc loại trừ .ck-editor__nested-editable: class .ck-editor__editable
-    // nằm trên CẢ vùng soạn gốc LẪN vùng soạn lồng nhau (figcaption của ảnh, ô
-    // trong table) — chính CSS của CKEditor 5 cũng phải tự loại trừ y hệt. Thiếu
-    // :not() thì chiều cao này ăn luôn vào figcaption, làm ô chú thích ảnh phình
-    // thành khối trống cao 500px.
-    .ck-editor__editable:not(.ck-editor__nested-editable),
+    // Keep the toolbar outside the scrollport; never constrain nested captions/cells.
+    .ck-editor__editable:not(.ck-editor__nested-editable) {
+        min-height: min(var(--ck-min-height, 500px), 60vh);
+        max-height: min(var(--ck-max-height, 500px), 60vh);
+        overflow-y: auto;
+        scrollbar-gutter: stable;
+    }
+
+    // SourceEditing uses a hidden pseudo-element to grow its wrapper.
+    // Bound the wrapper and let only its textarea scroll.
     .ck-source-editing-area {
-        min-height: var(--ck-min-height, 500px);
+        height: min(var(--ck-max-height, 500px), 60vh);
+        min-height: 0;
+
+        textarea {
+            height: 100%;
+            min-height: 0;
+            max-height: 100%;
+            overflow-y: auto;
+            scrollbar-gutter: stable;
+        }
     }
 }
 

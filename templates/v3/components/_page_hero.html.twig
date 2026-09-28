@@ -15,7 +15,7 @@
         <h1 class="page-hero-title mt-7 fade">{{ title|raw }}</h1>
 
         {% if description is defined and description %}
-            <p class="page-hero-desc fade">{{ description }}</p>
+            <p class="page-hero-desc fade">{{ description|raw }}</p>
         {% endif %}
     </div>
 </section>
