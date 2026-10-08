@@ -35,7 +35,8 @@
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: linear-gradient(96deg, rgba($dark, 0.93) 25%, rgba($dark, 0.7) 60%, rgba($dark, 0.42) 100%);
+    // Lớp phủ đồng nhất, tăng tương phản chữ trên mọi màn hình.
+    background: rgba($dark, 0.55);
   }
 
   .hero2-title {

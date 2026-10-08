@@ -23,8 +23,8 @@
 
     // Keep the toolbar outside the scrollport; never constrain nested captions/cells.
     .ck-editor__editable:not(.ck-editor__nested-editable) {
-        min-height: min(var(--ck-min-height, 500px), 60vh);
-        max-height: min(var(--ck-max-height, 500px), 60vh);
+        min-height: min(var(--ck-min-height, 700px), 80vh);
+        max-height: min(var(--ck-max-height, 700px), 80vh);
         overflow-y: auto;
         scrollbar-gutter: stable;
     }
@@ -32,7 +32,7 @@
     // SourceEditing uses a hidden pseudo-element to grow its wrapper.
     // Bound the wrapper and let only its textarea scroll.
     .ck-source-editing-area {
-        height: min(var(--ck-max-height, 500px), 60vh);
+        height: min(var(--ck-max-height, 700px), 80vh);
         min-height: 0;
 
         textarea {

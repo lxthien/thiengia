@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block title %}
-	{{ user.getName() ~ ' - Xây Dựng Kim Anh' ~ (pagination.currentPageNumber > 1 ? ' - Trang ' ~ pagination.currentPageNumber : '') }}
+	{{ user.getName() ~ ' - ' ~ v3.company.shortName ~ (pagination.currentPageNumber > 1 ? ' - Trang ' ~ pagination.currentPageNumber : '') }}
 {% endblock %}
 {% block description %}
 	{{ 'Danh sách các bài blog chuyên về lĩnh vực Xây Dựng, giúp bạn có thêm kỹ năng về xây dựng thành công.' ~ (pagination.currentPageNumber > 1 ? ' - Trang ' ~ pagination.currentPageNumber : '') }}
@@ -17,7 +17,7 @@
 
 {% block structuredOpenGraph %}
 	<meta property="og:type" content="object"/>
-	<meta property="og:title" content="{{ user.getName() ~ ' - Xây Dựng Kim Anh' ~ (pagination.currentPageNumber > 1 ? ' - Trang ' ~ pagination.currentPageNumber : '') }}"/>
+	<meta property="og:title" content="{{ user.getName() ~ ' - ' ~ v3.company.shortName ~ (pagination.currentPageNumber > 1 ? ' - Trang ' ~ pagination.currentPageNumber : '') }}"/>
 	<meta property="og:description" content="{{ 'Danh sách các bài blog chuyên về lĩnh vực Xây Dựng, giúp bạn có thêm kỹ năng về xây dựng thành công.' ~ (pagination.currentPageNumber > 1 ? ' - Trang ' ~ pagination.currentPageNumber : '') }}"/>
 	{% if pagination.currentPageNumber == 1 and pagination.pageCount > 1 %}
 		<link rel="next" href="{{ baseUrl ~ '/' ~ (pagination.currentPageNumber + 1) }}"/>

@@ -1,0 +1,96 @@
+{% extends 'admin/layout.html.twig' %}
+{% import 'admin/internal_link/_macros.html.twig' as il %}
+{% block title %}Link nội bộ{% endblock %}
+{% block body_id 'admin_internal_link_index' %}
+{% block stylesheets %}{{ parent() }}<link rel="stylesheet" href="{{ asset('build/css/internal-links.css') }}">{% endblock %}
+{% block main %}
+<section class="banner-manager il-manager">
+ <header class="banner-manager__header"><div><h1>Link nội bộ</h1><p>Bản đồ link giữa các trang, trang mồ côi, link hỏng và chất lượng anchor text.</p></div>
+ <form method="post" action="{{ path('admin_internal_link_refresh') }}"><input type="hidden" name="token" value="{{ csrf_token('internal_link_refresh') }}"><button class="banner-button banner-button--primary">Phân tích lại</button></form></header>
+ {% if report is null %}
+ <div class="banner-panel il-empty"><h2>Chưa có báo cáo</h2><p>Bấm “Phân tích lại” ở trên, hoặc chạy lệnh dưới đây trên máy chủ để tạo báo cáo đầu tiên.</p><code>php bin/console app:compute-internal-links</code></div>
+ {% else %}
+ {% set s = report.summary %}
+ <p class="il-meta">Báo cáo lúc <time datetime="{{ generatedAt|date('c') }}">{{ generatedAt|date('d/m/Y H:i','Asia/Ho_Chi_Minh') }}</time>. Mở trang hoặc lọc chỉ đọc báo cáo đã lưu; sau khi sửa nội dung cần phân tích lại.</p>
+ <nav class="il-tabs" aria-label="Các phần của báo cáo">
+ {% for id,label in {'overview':'Tổng quan','pages':'Theo trang','links':'Link có vấn đề','opportunities':'Gợi ý đặt link'} %}
+ <a href="{{ path('admin_internal_link_index',{tab:id}) }}" class="{{ tab == id ? 'is-active' : '' }}" {{ tab == id ? 'aria-current="page"' : '' }}>{{ label }}{% if id == 'opportunities' %} <span>{{ s.opportunities }}</span>{% endif %}</a>
+ {% endfor %}
+ </nav>
+
+ {% if tab == 'overview' %}
+ <div class="il-summary" aria-label="Chỉ số chính">
+ <article class="il-score {{ report.score >= 80 ? 'is-good' : (report.score >= 60 ? 'is-medium' : 'is-bad') }}"><span>Điểm sức khỏe link nội bộ</span><strong>{{ report.score }}<small>/100</small></strong><small>Quy tắc nội bộ, không phải điểm của Google</small></article>
+ <article><span>Trang được phân tích</span><strong>{{ s.pages }}</strong><small>{{ s.indexablePages }} trang cho phép index</small></article>
+ <article><span>Link nội bộ trong nội dung</span><strong>{{ s.internalLinks }}</strong><small>{{ s.menuLinks }} link menu · {{ s.externalLinks }} link ngoài</small></article>
+ <article><span>Link ngữ cảnh đến mỗi trang</span><strong>{{ s.avgInContent }}</strong><small>Trung bình số trang khác link tới</small></article>
+ </div>
+
+ <div class="il-columns">
+ <section class="banner-panel il-issues" aria-labelledby="il-page-issues"><header class="banner-panel__toolbar"><h2 id="il-page-issues">Vấn đề theo trang</h2><span>{{ s.indexablePages }} trang</span></header>
+ <ul>{% for code,issue in pageIssues %}{% set count = attribute(s,code)|default(0) %}
+ <li class="{{ count ? 'has-issue' : '' }}"><a href="{{ path('admin_internal_link_index',{tab:'pages',issue:code}) }}"><span class="il-badge il-badge--{{ count ? issue.level : 'ok' }}">{{ count }}</span><span><strong>{{ issue.label }}</strong><small>{{ issue.help }}</small></span></a></li>
+ {% endfor %}</ul></section>
+ <section class="banner-panel il-issues" aria-labelledby="il-link-issues"><header class="banner-panel__toolbar"><h2 id="il-link-issues">Vấn đề theo link</h2><span>{{ s.internalLinks + s.menuLinks }} link</span></header>
+ <ul>{% for code,issue in linkIssues %}{% set count = attribute(s,code)|default(0) %}
+ <li class="{{ count ? 'has-issue' : '' }}"><a href="{{ path('admin_internal_link_index',{tab:'links',issue:code}) }}"><span class="il-badge il-badge--{{ count ? issue.level : 'ok' }}">{{ count }}</span><span><strong>{{ issue.label }}</strong><small>{{ issue.help }}</small></span></a></li>
+ {% endfor %}</ul></section>
+ </div>
+
+ <details class="banner-panel il-guide"><summary>Báo cáo này kiểm tra gì và dựa trên đâu</summary>
+ <p><strong>Theo hướng dẫn về link của Google Search Central</strong> (bản cập nhật 12/2025): mọi trang quan trọng cần ít nhất một link từ trang khác trong site; link phải là thẻ <code>&lt;a href&gt;</code> trỏ tới URL thật; anchor text cần mô tả, ngắn gọn, không chung chung kiểu “xem thêm”, không để rỗng (ảnh làm link phải có alt); không đặt các link sát nhau; không có con số link “lý tưởng”, nhưng thấy nhiều quá thì nên bớt.</p>
+ <p><strong>Kiểm tra kỹ thuật bổ sung</strong> (thông lệ chung, không phải yêu cầu riêng của Google): link hỏng, link đi qua chuyển hướng, link tới URL không canonical, nofollow trên link nội bộ, link tới trang noindex, trang cụt, độ sâu click từ trang chủ (ngưỡng {{ constant('App\\Seo\\InternalLink\\InternalLinkAnalyzer::MAX_CLICK_DEPTH') }} click là quy ước nội bộ).</p>
+ <p><strong>Phạm vi:</strong> nội dung bài viết, trang, danh mục đã xuất bản và các menu đang bật. “Link tự động” là link do giao diện sinh ra: danh mục liệt kê bài, breadcrumb, trang con về trang cha. Chưa quét link trong các khối trang chủ, footer và sidebar, nên độ sâu click là ước tính. Đây là phân tích từ dữ liệu trong CMS, không phải crawl HTTP thật.</p>
+ <p>Cập nhật định kỳ bằng tác vụ: <code>php bin/console app:compute-internal-links</code></p>
+ </details>
+
+ {% else %}
+ <form class="banner-panel il-filters" method="get" action="{{ path('admin_internal_link_index') }}"><input type="hidden" name="tab" value="{{ tab }}">
+ <label class="il-search">Tìm kiếm<input type="search" name="q" value="{{ filters.q }}" placeholder="{{ tab == 'links' ? 'URL, anchor hoặc trang nguồn…' : 'Tiêu đề, đường dẫn hoặc từ khóa…' }}"></label>
+ {% if tab == 'pages' %}
+ <label>Vấn đề<select name="issue"><option value="">Tất cả trang</option><option value="any" {{ filters.issue == 'any' ? 'selected' : '' }}>Chỉ trang có vấn đề</option>{% for code,issue in pageIssues %}<option value="{{ code }}" {{ filters.issue == code ? 'selected' : '' }}>{{ issue.label }} ({{ attribute(s,code)|default(0) }})</option>{% endfor %}</select></label>
+ <label>Loại trang<select name="type"><option value="">Tất cả</option>{% for code,label in typeLabels|filter((v,k) => k != 'home') %}<option value="{{ code }}" {{ filters.type == code ? 'selected' : '' }}>{{ label }}</option>{% endfor %}</select></label>
+ {% elseif tab == 'links' %}
+ <label>Vấn đề<select name="issue"><option value="">Mọi link có vấn đề</option>{% for code,issue in linkIssues %}<option value="{{ code }}" {{ filters.issue == code ? 'selected' : '' }}>{{ issue.label }} ({{ attribute(s,code)|default(0) }})</option>{% endfor %}<option value="all" {{ filters.issue == 'all' ? 'selected' : '' }}>Tất cả link nội bộ</option></select></label>
+ {% endif %}
+ <div class="il-filter-actions"><button class="banner-button banner-button--primary">Lọc</button><a href="{{ path('admin_internal_link_index',{tab:tab}) }}">Bỏ lọc</a></div>
+ </form>
+
+ <section class="banner-panel il-results"><header class="banner-panel__toolbar"><h2>{{ {'pages':'Danh sách trang','links':'Danh sách link','opportunities':'Gợi ý đặt link ngữ cảnh'}[tab] }}</h2><span>{{ pagination.totalItemCount }} kết quả</span></header>
+ {% if tab == 'opportunities' %}<p class="il-hint">Trang nguồn có nhắc tới từ khóa trọng tâm của trang đích trong phần chữ thường nhưng chưa link tới. Chỉ đặt link khi thật sự giúp người đọc; đừng đặt hàng loạt.</p>{% endif %}
+ {% if pagination.totalItemCount == 0 %}
+ <p class="il-empty">{{ tab == 'links' and filters.issue == '' and filters.q == '' ? 'Không có link nào có vấn đề.' : 'Không có kết quả khớp bộ lọc.' }}</p>
+ {% elseif tab == 'pages' %}
+ <div class="il-table-wrap"><table><thead><tr><th>Trang</th><th class="il-num" title="Số trang khác có link tới trong nội dung">Link ngữ cảnh đến</th><th class="il-num">Menu</th><th class="il-num" title="Danh mục liệt kê bài, breadcrumb">Link tự động</th><th class="il-num">Link đi (nội bộ / ngoài)</th><th class="il-num">Độ sâu</th><th>Vấn đề</th><th>Thao tác</th></tr></thead><tbody>
+ {% for page in pagination %}
+ <tr><td><strong>{{ page.title }}</strong><small>{{ typeLabels[page.type] }} · <code>{{ page.path }}</code>{{ page.indexable ? '' : ' · noindex' }}</small></td>
+ <td class="il-num"><strong>{{ page.inContent }}</strong><small>{{ page.inContentLinks }} link</small></td>
+ <td class="il-num">{{ page.inMenu ? 'Có' : '—' }}</td><td class="il-num">{{ page.inStructure ?: '—' }}</td>
+ <td class="il-num">{{ page.outInternal }} / {{ page.outExternal }}</td><td class="il-num">{{ page.depth is null ? '?' : page.depth }}</td>
+ <td>{% for code in page.issues %}{{ il.badge(pageIssues[code]) }}{% else %}<span class="il-ok">Ổn</span>{% endfor %}</td>
+ <td class="il-actions"><a href="{{ path('admin_internal_link_page',{key:page.key}) }}">Chi tiết link</a>{{ il.edit(page) }}</td></tr>
+ {% endfor %}</tbody></table></div>
+ {% elseif tab == 'links' %}
+ <div class="il-table-wrap"><table><thead><tr><th>Trang nguồn</th><th>Anchor text</th><th>Link tới</th><th>Vấn đề</th><th>Thao tác</th></tr></thead><tbody>
+ {% for link in pagination %}{% set source = report.pages[link.source]|default(null) %}
+ <tr><td>{% if source %}<strong>{{ source.title }}</strong><small><code>{{ source.path }}</code></small>{% else %}<strong>Menu</strong><small>Hiển thị ở mọi trang</small>{% endif %}</td>
+ <td>{{ link.anchor ?: '(rỗng)' }}</td>
+ <td><code>{{ link.href }}</code>{% if link.target and report.pages[link.target] is defined %}<small>→ {{ report.pages[link.target].title }}</small>{% endif %}</td>
+ <td>{% for code in link.issues %}{{ il.badge(linkIssues[code]) }}{% else %}<span class="il-ok">Ổn</span>{% endfor %}{% if link.note %}<small>{{ link.note }}</small>{% endif %}</td>
+ <td class="il-actions">{% if source %}{{ il.edit(source) }}{% else %}{% if is_granted('ROLE_ADMIN') %}<a href="{{ path('admin_menu_index') }}">Sửa menu</a>{% endif %}{% endif %}</td></tr>
+ {% endfor %}</tbody></table></div>
+ {% else %}
+ <div class="il-table-wrap"><table><thead><tr><th>Trang nguồn (nơi đặt link)</th><th>Đoạn văn có từ khóa</th><th>Trang đích (nên link tới)</th><th>Thao tác</th></tr></thead><tbody>
+ {% for item in pagination %}{% set source = report.pages[item.source] %}{% set target = report.pages[item.target] %}
+ <tr><td><strong>{{ source.title }}</strong><small><code>{{ source.path }}</code></small></td>
+ <td>{{ item.snippet }}<small>Từ khóa: <strong>{{ item.keyword }}</strong></small></td>
+ <td><strong>{{ target.title }}</strong><small><code>{{ target.path }}</code> · đang có {{ target.inContent }} trang link tới</small></td>
+ <td class="il-actions">{{ il.edit(source) }}<a href="{{ path('admin_internal_link_page',{key:target.key}) }}">Link của trang đích</a></td></tr>
+ {% endfor %}</tbody></table></div>
+ {% endif %}
+ </section>
+ <nav class="il-pagination" aria-label="Phân trang">{{ knp_pagination_render(pagination, '@KnpPaginator/Pagination/twitter_bootstrap_v4_pagination.html.twig') }}</nav>
+ {% endif %}
+ {% endif %}
+</section>
+{% endblock %}

@@ -6,11 +6,12 @@
 {% block javascripts %}{{ parent() }}<script src="{{ asset('build/js/settings-global.js') }}" defer></script>{% endblock %}
 {% block main %}
 {% set groups = {
-'general':{title:'Thông tin website', description:'Tên website và thông tin liên hệ hiển thị chung.', fields:['siteName','emailContact','hotLine1','hotLine2','displayNameCommentAs']},
+'general':{title:'Thông tin website', description:'Tên website và thông tin liên hệ hiển thị chung.', fields:['siteName','emailContact','companyAddress','companyTax','companyWorkingHours','hotLine1','hotLine2']},
+'email':{title:'Cấu hình email', description:'Địa chỉ dùng làm người gửi cho email hệ thống (thông báo form liên hệ). Nên là địa chỉ được máy chủ SMTP cho phép gửi.', fields:['emailSender']},
 'homepage':{title:'Trang chủ & hiển thị', description:'Giữ nguyên định dạng dữ liệu đang sử dụng khi chỉnh danh mục và bảng giá.', fields:['listPrices','listCategoryOnHomepage','numberRecordOnPage','marqueeHomepage']},
 'seo':{title:'SEO', description:'Thông tin tiêu đề, mô tả và từ khóa mặc định.', fields:['pageTitle','pageDescription','pageKeyword','topKeyword']},
 'tracking':{title:'Analytics & tích hợp', description:'Chỉ sử dụng mã từ nguồn tin cậy. Tránh cấu hình trùng một dịch vụ ở nhiều trường.', fields:['GTM','ga4MeasurementID','googleAnalytic','fbApp','facebookMessenger']},
-'variables':{title:'Biến nội dung', description:'Các giá trị thay thế cho placeholder trong nội dung. Đây là cấu hình riêng với thông tin liên hệ phía trên.', fields:['contens_ten_cong_ty','contens_ten_day_du','contens_dia_chi','contens_hotline_1','contens_hotline_2','contens_hotline_3','contens_email','contens_mst']},
+'variables':{title:'Biến nội dung', description:'Các giá trị thay thế cho placeholder trong nội dung. Đây là cấu hình riêng với thông tin liên hệ phía trên.', fields:['content_ten_cong_ty','content_ten_day_du','content_dia_chi','content_hotline_1','content_hotline_2','content_hotline_3','content_email','content_mst']},
 'social':{title:'Mạng xã hội', description:'Đường dẫn đến các kênh của doanh nghiệp. Các trường cũ được giữ để không mất dữ liệu.', fields:['linkToFacebook','linkToGooglePlus','linkToTwitter','linkToYoutube','linkToLinkedin','linkToInstagram']},
 'schema':{title:'Dữ liệu có cấu trúc', description:'Cấu hình JSON-LD dùng chung. Dán nguyên thẻ script type="application/ld+json" theo định dạng hiện tại.', fields:['schemaOrganization','schemaLocalBusiness']}
 } %}
@@ -32,7 +33,8 @@
 {% set codeField = name in ['googleAnalytic','facebookMessenger','schemaOrganization','schemaLocalBusiness'] %}
 <div class="settings-field {{ 'textarea' in field.vars.block_prefixes ? 'settings-field--wide' : '' }}">
 {{ form_row(field, {attr:field.vars.attr|merge(codeField ? {class:'form-control settings-code',spellcheck:'false'} : {class:'form-control'})}) }}
-{% if name starts with 'contens_' %}<p class="settings-hint">Dùng trong nội dung: <code>[{{ name|slice(8) }}]</code></p>{% endif %}
+{% if name starts with 'content_' %}<p class="settings-hint">Dùng trong nội dung: <code>[{{ name|slice(8) }}]</code></p>{% endif %}
+{% if name == 'emailSender' %}<p class="settings-hint">Để trống thì dùng Email Liên hệ.</p>{% endif %}
 {% if name == 'GTM' %}<p class="settings-hint">Nhập ID dạng GTM-…, không phải toàn bộ đoạn script.</p>{% endif %}
 {% if name == 'ga4MeasurementID' %}<p class="settings-hint">Nhập Measurement ID dạng G-….</p>{% endif %}
 </div>

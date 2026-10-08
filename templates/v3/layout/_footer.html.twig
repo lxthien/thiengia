@@ -3,7 +3,7 @@
         <div>
             {{ include('v3/components/_logo.html.twig', { onDark: true }) }}
             <p class="mt-5 max-w-sm leading-relaxed">{{ v3.company.footerIntro }}</p>
-            <p class="ft-legal">{{ v3.company.legalName }} · MST: {{ v3.company.taxCode }}</p>
+            <p class="ft-legal">{{ v3.company.legalName }}{% if v3.company.taxCode %} · MST: {{ v3.company.taxCode }}{% endif %}</p>
         </div>
 
         <nav aria-label="Dịch vụ">

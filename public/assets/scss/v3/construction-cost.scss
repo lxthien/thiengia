@@ -1,0 +1,64 @@
+@use "component/page-hero";
+@use "component/post-content" as pc;
+@use "tokens" as *;
+
+.construction-cost {
+  color: $text;
+  padding: 3rem 0 4rem;
+  .cost-container { max-width: 1200px; }
+  [hidden] { display: none !important; }
+  h2 { font-size: 1.4rem; font-weight: 600; margin: 0 0 .65rem; }
+  p { line-height: 1.75; }
+  .cost-intro { color: #514b45; font-size: .85rem; margin-bottom: 1.5rem; }
+  .cost-note { background: $base; border-left: 3px solid $primary; padding: 1rem 1.25rem; margin-bottom: 1.5rem; font-size: .85rem; }
+  .cost-workspace { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); border: 1px solid $line; background: $white; }
+  .cost-form, .cost-results { min-width: 0; padding: 1.75rem; }
+  .cost-form { border-right: 1px solid $line; }
+  .cost-group { min-width: 0; border: 0; margin: 0 0 1.5rem; padding: 0 0 1.5rem; border-bottom: 1px solid $line; }
+  legend { width: 100%; font-size: 1rem; font-weight: 600; padding: 0; margin-bottom: 1rem; }
+  legend span { color: #9b3825; margin-right: .35rem; }
+  .cost-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+  .cost-field { min-width: 0; }
+  label { display: block; font-size: .85rem; font-weight: 600; margin-bottom: .5rem; }
+  input, select { box-sizing: border-box; width: 100%; min-width: 0; height: 48px; border: 1px solid #9b9289; border-radius: 3px; background: $white; color: $text; padding: .6rem .7rem; font: inherit; font-size: .9rem; }
+  small { display: block; color: #514b45; font-size: .75rem; line-height: 1.65; margin-top: .4rem; }
+  .cost-actions { display: flex; flex-wrap: wrap; gap: .65rem; }
+  button { min-height: 48px; padding: .65rem 1rem; background: $white; color: $text; border: 1px solid #9b9289; border-radius: 3px; font: inherit; font-size: .9rem; cursor: pointer; }
+  button.cost-submit { background: $primary; border-color: $primary; color: $white; font-weight: 600; }
+  button:hover { filter: brightness(.94); }
+  :is(input,select,button,summary,[tabindex]):focus-visible { outline: 3px solid #9b3825; outline-offset: 3px; }
+  #cost-result { scroll-margin-top: 110px; }
+  .cost-total-label { font-size: .85rem; font-weight: 600; }
+  .cost-total { color: #9b3825; font-size: clamp(1.7rem, 3vw, 2.35rem); font-weight: 700; line-height: 1.4; margin: .4rem 0 1rem; overflow-wrap: anywhere; }
+  .cost-total span { font-size: 1rem; white-space: nowrap; }
+  .cost-summary { margin-bottom: 1.5rem; }
+  .cost-summary > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .3rem .8rem; padding: .7rem 0; border-bottom: 1px solid $line; font-size: .85rem; }
+  dt { color: #514b45; } dd { margin: 0; font-weight: 600; }
+  .cost-table-wrap { overflow-x: auto; margin-bottom: 1.25rem; }
+  table { width: 100%; border-collapse: collapse; font-size: .8rem; font-variant-numeric: tabular-nums; }
+  caption { text-align: left; font-weight: 600; margin-bottom: .75rem; }
+  th, td { padding: .7rem .5rem; border-bottom: 1px solid $line; text-align: right; overflow-wrap: anywhere; }
+  th:first-child { text-align: left; width: 40%; }
+  thead, tfoot { background: $base; } tbody th { font-weight: 400; }
+  .cost-empty { background: $base; padding: 1.25rem; margin: 1.25rem 0; font-size: .9rem; }
+  .cost-empty-title { font-weight: 600; margin-bottom: .75rem; }
+  .cost-empty ol { padding-left: 1.2rem; margin-top: 1rem; list-style: decimal; }
+  .cost-empty li { margin: .65rem 0; line-height: 1.65; }
+  .cost-guide { border-top: 1px solid $line; margin-top: 1.5rem; padding-top: 1rem; font-size: .85rem; }
+  summary { cursor: pointer; font-weight: 600; line-height: 1.65; }
+  .cost-guide p { margin-top: .75rem; }
+  .cost-error, .cost-field ul { color: #992a1a; padding: .75rem; background: #fff1e6; margin-bottom: 1rem; }
+  .cost-stale { background: #fff1e6; color: #843409; border: 1px solid #dca675; padding: .85rem; font-size: .85rem; margin-bottom: 1rem; }
+  .cost-content { @include pc.post-content; max-width: 850px; margin: 3rem auto 0; }
+  @media (max-width: 991px) {
+    .cost-workspace { grid-template-columns: minmax(0, 1fr); }
+    .cost-form { border-right: 0; border-bottom: 1px solid $line; }
+  }
+  @media (max-width: 575px) {
+    padding: 2rem 0;
+    .cost-form, .cost-results { padding: 1rem; }
+    .cost-fields { grid-template-columns: minmax(0, 1fr); }
+    .cost-actions button { width: 100%; }
+    th, td { padding: .6rem .3rem; font-size: .75rem; }
+  }
+}

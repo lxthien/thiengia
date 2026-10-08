@@ -193,6 +193,7 @@
 .seo-keyword-density-title { font-weight: 700; margin-bottom: 7px; }
 
 .seo-density-bar { gap: 10px; }
+.seo-density-row + .seo-density-row { margin-top: 10px; }
 .seo-density-label { flex: 0 0 55px; font-size: 12px; }
 .seo-density-progress { background: #e4e9ef; border-radius: 4px; flex: 1; height: 18px; overflow: hidden; }
 .seo-density-fill { align-items: center; background: #2474b5; color: #fff; display: flex; font-size: 10px; font-weight: 700; height: 100%; justify-content: center; min-width: 0; transition: width .2s ease; }

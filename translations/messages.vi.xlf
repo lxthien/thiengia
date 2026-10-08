@@ -557,7 +557,7 @@
             </trans-unit>
             <trans-unit id="post.archives.title">
                 <source>post.archives.title</source>
-                <target>%title% - Trang %currentPage% của %totalPage% | Xây Dựng Kim Anh</target>
+                <target>%title% - Trang %currentPage% của %totalPage%</target>
             </trans-unit>
             <trans-unit id="post.archives.description">
                 <source>post.archives.description</source>

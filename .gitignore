@@ -59,3 +59,6 @@
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
+
+# Google Search Console service account key
+/config/secrets/*.json

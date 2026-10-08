@@ -57,6 +57,49 @@ function checkLength(value, config, label, emptyMessage) {
     return {status: 'warning', title: label, desc: `${value.length} ký tự — hơi ${direction}, nên ở khoảng ${config.min}-${config.max}.`, points: 10};
 }
 
+function parseKeywords(value) {
+    const keywords = String(value || '')
+        .split(',')
+        .map((keyword) => keyword.replace(/\s+/g, ' ').trim().toLocaleLowerCase())
+        .filter(Boolean);
+
+    return [...new Set(keywords)];
+}
+
+function countOccurrences(haystack, needle) {
+    return needle ? haystack.split(needle).length - 1 : 0;
+}
+
+function createDensityRow(keyword, occurrences, percentage) {
+    const row = document.createElement('div');
+    row.className = 'seo-density-row';
+
+    const bar = document.createElement('div');
+    bar.className = 'seo-density-bar';
+
+    const label = document.createElement('div');
+    label.className = 'seo-density-label';
+    label.textContent = 'Mật độ';
+
+    const progress = document.createElement('div');
+    progress.className = 'seo-density-progress';
+
+    const fill = document.createElement('div');
+    fill.className = 'seo-density-fill';
+    fill.style.width = `${Math.min(100, percentage * 50)}%`;
+    fill.textContent = `${percentage.toFixed(2)}%`;
+
+    const text = document.createElement('p');
+    text.className = 'seo-check-desc';
+    text.textContent = `“${keyword}”: ${occurrences} lần trong nội dung (${percentage.toFixed(2)}%).`;
+
+    progress.appendChild(fill);
+    bar.append(label, progress);
+    row.append(bar, text);
+
+    return row;
+}
+
 function createCheck(check) {
     const item = document.createElement('div');
     item.className = 'seo-check-item';
@@ -98,8 +141,7 @@ function setupChecker(container) {
     const scoreText = container.querySelector('[data-seo-score-text]');
     const checks = container.querySelector('[data-seo-checks]');
     const density = container.querySelector('[data-seo-density]');
-    const densityFill = container.querySelector('[data-seo-density-fill]');
-    const densityText = container.querySelector('[data-seo-density-text]');
+    const densityList = container.querySelector('[data-seo-density-list]');
     const tips = container.querySelector('[data-seo-tips]');
     const previewTitle = container.querySelector('[data-seo-preview-title]');
     const previewUrl = container.querySelector('[data-seo-preview-url]');
@@ -127,7 +169,7 @@ function setupChecker(container) {
             slug: fieldValue(fields.slug),
             rawContent,
             plainContent: htmlToText(rawContent),
-            focus: fieldValue(fields.focus).toLocaleLowerCase(),
+            keywords: parseKeywords(fieldValue(fields.focus)),
         };
     }
 
@@ -161,31 +203,41 @@ function setupChecker(container) {
             checksData.push({status: 'warning', title: 'Độ dài nội dung', desc: `${wordCount} từ — mốc tham chiếu là ${CONFIG.minimumWords} từ.`, points: Math.floor((wordCount / CONFIG.minimumWords) * 15)});
         }
 
-        if (data.focus) {
-            const places = [
-                data.title.toLocaleLowerCase().includes(data.focus) ? 'tiêu đề' : null,
-                data.description.toLocaleLowerCase().includes(data.focus) ? 'mô tả' : null,
-                data.plainContent.toLocaleLowerCase().includes(data.focus) ? 'nội dung' : null,
-            ].filter(Boolean);
+        if (data.keywords.length) {
+            const title = data.title.toLocaleLowerCase();
+            const description = data.description.toLocaleLowerCase();
+            const plainContent = data.plainContent.toLocaleLowerCase();
+            const densityRows = [];
 
-            checksData.push({
-                status: places.length ? 'check' : 'warning',
-                title: 'Từ khóa trọng tâm',
-                desc: places.length ? `Có trong ${places.join(', ')}.` : 'Chưa xuất hiện trong tiêu đề, mô tả hoặc nội dung.',
-                points: Math.min(15, places.length * 5),
+            // The keyword block is still worth 15 points in total, split evenly
+            // across keywords so adding more keywords never inflates the score.
+            const keywordPoints = 15 / data.keywords.length;
+            data.keywords.forEach((keyword) => {
+                const places = [
+                    title.includes(keyword) ? 'tiêu đề' : null,
+                    description.includes(keyword) ? 'mô tả' : null,
+                    plainContent.includes(keyword) ? 'nội dung' : null,
+                ].filter(Boolean);
+
+                checksData.push({
+                    status: places.length ? 'check' : 'warning',
+                    title: data.keywords.length > 1 ? `Từ khóa trọng tâm: “${keyword}”` : 'Từ khóa trọng tâm',
+                    desc: places.length ? `Có trong ${places.join(', ')}.` : 'Chưa xuất hiện trong tiêu đề, mô tả hoặc nội dung.',
+                    points: Math.min(keywordPoints, places.length * keywordPoints / 3),
+                });
+
+                const occurrences = countOccurrences(plainContent, keyword);
+                const percentage = wordCount ? (occurrences / wordCount) * 100 : 0;
+                densityRows.push(createDensityRow(keyword, occurrences, percentage));
             });
 
-            const contentOccurrences = data.plainContent.toLocaleLowerCase().split(data.focus).length - 1;
-            const percentage = wordCount ? (contentOccurrences / wordCount) * 100 : 0;
             density.hidden = false;
-            densityFill.style.width = `${Math.min(100, percentage * 50)}%`;
-            densityFill.textContent = `${percentage.toFixed(2)}%`;
-            densityText.textContent = `${contentOccurrences} lần trong nội dung (${percentage.toFixed(2)}%).`;
+            densityList.replaceChildren(...densityRows);
         } else {
             density.hidden = true;
         }
 
-        const total = Math.min(100, checksData.reduce((sum, check) => sum + check.points, 0));
+        const total = Math.min(100, Math.round(checksData.reduce((sum, check) => sum + check.points, 0)));
         const level = total >= 80 ? 'excellent' : (total >= 60 ? 'good' : (total >= 40 ? 'moderate' : 'poor'));
         const label = total >= 80 ? 'Tốt' : (total >= 60 ? 'Khá' : (total >= 40 ? 'Cần cải thiện' : 'Chưa sẵn sàng'));
 

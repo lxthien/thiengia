@@ -219,7 +219,7 @@ class ContactController extends AbstractController
 
         $email = (new Email())
             ->subject($this->translator->trans('contact.email.title', ['%siteName%' => $this->settingsManager->get('siteName')]))
-            ->from(new Address('hotro.xaydungminhduy@gmail.com', $this->settingsManager->get('siteName')))
+            ->from(new Address($this->settingsManager->get('emailSender') ?: $this->settingsManager->get('emailContact'),$this->settingsManager->get('siteName')))
             ->to($this->settingsManager->get('emailContact'))
             ->html(
                 $this->renderView(

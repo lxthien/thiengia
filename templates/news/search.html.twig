@@ -14,12 +14,12 @@
 {% endblock %}
 
 {% block title %}
-	{{ 'post.archives.title'|trans({'%title%': q, '%currentPage%': pagination.currentPageNumber, '%totalPage%': pagination.pageCount}) }}
+	{{ 'post.archives.title'|trans({'%title%': q, '%currentPage%': pagination.currentPageNumber, '%totalPage%': pagination.pageCount}) ~ ' | ' ~ v3.company.shortName }}
 {% endblock %}
 
 {% block structuredOpenGraph %}
 	<meta property="og:type" content="object"/>
-	<meta property="og:title" content="{{ 'post.archives.title'|trans({'%title%': q, '%currentPage%': pagination.currentPageNumber, '%totalPage%': pagination.pageCount}) }}"/>
+	<meta property="og:title" content="{{ 'post.archives.title'|trans({'%title%': q, '%currentPage%': pagination.currentPageNumber, '%totalPage%': pagination.pageCount}) ~ ' | ' ~ v3.company.shortName }}"/>
 	{% if pagination.currentPageNumber == 1 and pagination.pageCount > 1 %}
 		<link rel="next" href="{{ baseUrl ~ '&page=' ~ (pagination.currentPageNumber + 1) }}"/>
 	{% endif %}

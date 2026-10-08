@@ -16,22 +16,18 @@ final class V3Config
      * Đường dẫn trong cấu hình => danh sách setting key theo thứ tự ưu tiên.
      * Key đầu tiên có giá trị không rỗng sẽ được dùng.
      *
-     * TẠM ĐỂ TRỐNG — chưa chốt nguồn thông tin công ty.
-     *
-     * Bảng `settings` của DB dev (kientruc_v3) đang giữ thông tin của một
-     * thương hiệu khác do DB được nhân bản, trong khi theme v3 chưa bao giờ
-     * đọc các key `contens_*` (chỉ bộ template cũ templates/layout/* dùng,
-     * mà bộ đó không còn được include). Bật map dưới đây khi thông tin công
-     * ty trong settings đã đúng là của Thiện Gia:
-     *
-     *   'company.legalName' => ['contens_ten_day_du'],
-     *   'company.shortName' => ['contens_ten_cong_ty'],
-     *   'company.address'   => ['contens_dia_chi'],
-     *   'company.phone'     => ['contens_hotline_1', 'hotLine1'],
-     *   'company.email'     => ['contens_email', 'emailContact'],
-     *   'company.taxCode'   => ['contens_mst'],
+     * Nguồn là nhóm "Thông tin website" ở /admin/settings. Các key
+     * `content_*` (nhóm "Biến nội dung") chỉ dùng để thay placeholder trong
+     * nội dung bài viết, không dùng cho giao diện.
      */
-    private const OVERRIDES = [];
+    private const OVERRIDES = [
+        'company.shortNameOnly' => ['siteName'],
+        'company.address'       => ['companyAddress'],
+        'company.taxCode'       => ['companyTax'],
+        'company.workingHours'  => ['companyWorkingHours'],
+        'company.phone'         => ['hotLine1'],
+        'company.email'         => ['emailContact'],
+    ];
 
     private ?array $config = null;
 
@@ -93,6 +89,10 @@ final class V3Config
         // admin đổi hotline trong settings mà nút gọi vẫn giữ số cũ.
         $phoneRaw = self::toTelNumber($config['company']['phone'] ?? '');
         $config['company']['phoneRaw'] = $phoneRaw ?: ($this->defaults['company']['phoneRaw'] ?? '');
+
+        if ($phoneRaw !== '') {
+            $config['company']['zalo'] = 'https://zalo.me/' . preg_replace('/^\+84/', '0', $phoneRaw);
+        }
 
         return $config;
     }

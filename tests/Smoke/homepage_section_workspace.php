@@ -78,6 +78,13 @@ $gallery = $formFor(SectionType::Gallery);
 check(!$gallery->has('items') && !$gallery->has('image'), 'Thư viện lấy dữ liệu từ entity nên không có ô nội dung');
 
 // --- Ô để trống phải thành NULL để template dùng nội dung mặc định ---
+$commitSection = new HomepageSection(SectionType::Commitments);
+$commitForm = $formFor(SectionType::Commitments, $commitSection);
+check($commitForm->has('image') && $commitForm->has('imageAlt') && $commitForm->has('items'), 'Cam kết cần ảnh, alt và danh sách');
+$commitForm->submit(['image' => '/uploads/media/site.jpg', 'imageAlt' => 'Kiểm tra bản vẽ', 'items' => [['name' => 'Đúng tiến độ', 'desc' => 'Theo hợp đồng', 'icon' => 'clock']], 'enable' => '1']);
+check($commitForm->isValid(), (string) $commitForm->getErrors(true));
+check($commitSection->getConfigValue('image') === '/uploads/media/site.jpg' && $commitSection->getConfigValue('imageAlt') === 'Kiểm tra bản vẽ' && count($commitSection->getConfigValue('items')) === 1, 'Lưu ảnh không được làm mất cam kết');
+
 $blank = new HomepageSection(SectionType::Commitments);
 $form = $formFor(SectionType::Commitments, $blank);
 $form->submit(['label' => '   ', 'title' => '', 'enable' => '1']);

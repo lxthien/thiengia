@@ -1,298 +1,130 @@
 {% extends 'layout.html.twig' %}
-
+{% block bodyClass %}construction-cost-page{% endblock %}
 {% block stylesheets %}
-    <link href="{{ absolute_url(asset('build/css/v3-news.css')) }}" rel="preload stylesheet" as="style" onload="this.rel='stylesheet'" >
-    <noscript><link rel="stylesheet" href="{{ absolute_url(asset('build/css/v3-news.css')) }}" ></noscript>
+    <link rel="stylesheet" href="{{ asset('build/css/v3-cost.css') }}">
 {% endblock %}
-
-{% block title %}{{ (post.getPageTitle() is not null ? post.getPageTitle() : post.getTitle())|title_tokens }}{% endblock %}
-{% block description %}{{ post.getPageDescription() is not null ? post.getPageDescription() : post.getDescription() }}{% endblock %}
-{% block keyword %}{{ post.getPageKeyword() }}{% endblock %}
+{% block javascripts %}<script src="{{ asset('build/js/v3-cost.js') }}" defer></script>{% endblock %}
+{% block title %}{{ post ? (post.getPageTitle() is not null ? post.getPageTitle() : post.getTitle())|title_tokens : 'Dự toán chi phí xây dựng | ' ~ v3.company.shortName }}{% endblock %}
+{% block description %}{{ post ? (post.getPageDescription() is not null ? post.getPageDescription() : post.getDescription()) : v3.company.description }}{% endblock %}
+{% block keyword %}{{ post ? post.getPageKeyword() : '' }}{% endblock %}
 
 {% block body %}
-    <div class="container-fluid ka-hero-section">
-        <div class="container">
-            <div class="row">
-                <div class="col-12">
-                    <nav aria-label="breadcrumb" class="ka-breadcrumb-nav">
-                        {{ wo_render_breadcrumbs() }}
-                    </nav>
-                    <h1 class="ka-hero-title">DỰ TOÁN CHI PHÍ XÂY DỰNG</h1>
-                    <div class="ka-hero-divider"></div>
-                </div>
-            </div>
-        </div>
+{{ include('v3/components/_page_hero.html.twig', {
+    breadcrumb: [{label: 'Trang chủ', path: path('homepage')}, {label: 'Chi phí xây dựng'}],
+    title: 'Dự toán <em>chi phí xây dựng</em>',
+    description: 'Nhập quy mô và phương án thi công để ước tính ngân sách, xem diện tích quy đổi và chi phí từng hạng mục.'
+}) }}
+<section class="construction-cost" aria-labelledby="cost-heading">
+<div class="container cost-container">
+    <div class="cost-note" role="note"><strong>Dự toán tham khảo, không thay thế báo giá.</strong>
+        <p>Chi phí thực tế phụ thuộc thiết kế, vật tư, địa chất và điều kiện thi công. Đơn giá và hệ số sử dụng cấu hình hiện tại của {{ v3.company.shortName }}.</p>
     </div>
+    {% for message in app.flashes('error') %}
+        <p class="cost-error" role="alert">{{ message }}</p>
+    {% endfor %}
+    <div class="cost-workspace">
+        {{ form_start(form, {attr: {class: 'cost-form', 'data-cost-form': '', 'data-reset-url': path('caculator_cost_construction')}}) }}
+        <h2 id="cost-heading">Thông tin công trình</h2>
+        <p class="cost-intro">Chọn phương án gần nhất với công trình dự kiến của bạn.</p>
+        {{ form_errors(form) }}
+        {% set groups = [
+            {title: 'Thông tin cơ bản', fields: ['type', 'method', 'muc_dau_tu', 'wide', 'long', 'floor']},
+            {title: 'Kết cấu', fields: ['mong', 'mai']},
+            {title: 'Công năng phụ trợ', fields: ['lung', 'tum', 'san_thuong', 'ban_cong', 'tang_ham', 'san_vuon']},
+            {title: 'Điều kiện thi công', fields: ['mat_tien', 'hem']}
+        ] %}
+        {% for group in groups %}
+        <fieldset class="cost-group">
+            <legend><span aria-hidden="true">{{ loop.index }}</span> {{ group.title }}</legend>
+            <div class="cost-fields">
+                {% for name in group.fields %}
+                    {% set field = attribute(form, name) %}
+                    <div class="cost-field">
+                        {{ form_label(field) }}
+                        {% if name in ['wide', 'long'] %}
+                            {{ form_widget(field, {attr: {inputmode: 'decimal', maxlength: '20', 'aria-describedby': field.vars.id ~ '_help', 'data-cost-dimension': ''}}) }}
+                            <small id="{{ field.vars.id }}_help">Số lớn hơn 0; dùng dấu chấm thập phân, ví dụ 4.5.</small>
+                        {% elseif name == 'floor' %}
+                            {{ form_widget(field, {attr: {'aria-describedby': field.vars.id ~ '_help'}}) }}
+                            <small id="{{ field.vars.id }}_help">Tính cả tầng trệt; tầng lửng và tum chọn riêng bên dưới.</small>
+                        {% else %}
+                            {{ form_widget(field) }}
+                        {% endif %}
+                        {{ form_errors(field) }}
+                    </div>
+                {% endfor %}
+            </div>
+        </fieldset>
+        {% endfor %}
+        <p class="cost-note cost-type-note" data-cost-type-note{{ form.type.vars.value != '3' ? ' hidden' : '' }}>Với nhà cấp 4, công thức hiện tại chỉ tính diện tích rộng × dài; số tầng, kết cấu và công năng phụ trợ không cộng thêm vào diện tích quy đổi.</p>
+        <div class="cost-actions">
+            {{ form_widget(form.caculator, {attr: {class: 'cost-submit'}}) }}
+            {{ form_widget(form.reset) }}
+        </div>
+        {{ form_end(form) }}
 
-    <div class="container wrapper-container ka-page-detail costs">
-        <div class="row">
-            <div class="col-12 ka-content-column">
-                <article id="post-{{ post.getId() }}" class="ka-article-wrapper pt-4">
-
-                    {# === CALCULATOR FORM (above content) === #}
-                    <div class="ka-calc-card">
-                        <div class="ka-calc-header">
-                            <i class="fas fa-calculator"></i>
-                            <span>Công cụ tính chi phí xây dựng</span>
-                        </div>
-                        <div class="ka-calc-body">
-                            {% for message in app.flashes('error') %}
-                                <div class="alert alert-danger" role="alert">
-                                    {{ message }}
-                                </div>
+        <aside class="cost-results" aria-labelledby="cost-result-heading">
+            <div id="cost-result" tabindex="-1" data-cost-result="{{ costs is not null ? 'ready' : 'empty' }}">
+                <h2 id="cost-result-heading">Kết quả dự toán</h2>
+                {% if costs is not null %}
+                    <p class="cost-stale" data-cost-stale hidden role="status">Bạn đã thay đổi thông tin. Nhấn “Dự toán chi phí” để cập nhật kết quả.</p>
+                    <p class="cost-intro">{{ costs.title }}</p>
+                    <p class="cost-total-label">Tổng chi phí dự kiến</p>
+                    <p class="cost-total">{{ costs.costTotal|number_format(0, ',', '.') }} <span>VNĐ</span></p>
+                    <dl class="cost-summary">
+                        <div><dt>Diện tích một sàn</dt><dd>{{ costs.area|number_format(2, ',', '.') }} m²</dd></div>
+                        <div><dt>Tổng diện tích quy đổi</dt><dd>{{ costs.areaTotal|number_format(2, ',', '.') }} m²</dd></div>
+                        <div><dt>Đơn giá áp dụng</dt><dd>{{ costs.cost|number_format(0, ',', '.') }} VNĐ/m²</dd></div>
+                    </dl>
+                    {% set rows = [] %}
+                    {% if costs.areaMong > 0 %}{% set rows = rows|merge([{label: costs.titleMong, area: costs.areaMong}]) %}{% endif %}
+                    {% if costs.areaTangHam > 0 %}{% set rows = rows|merge([{label: 'Tầng hầm', area: costs.areaTangHam}]) %}{% endif %}
+                    {% set floors = form.type.vars.value == '3' ? 1 : costs.floor %}
+                    {% for i in 1..floors %}
+                        {% set rows = rows|merge([{label: i == 1 ? 'Tầng trệt' : 'Tầng ' ~ (i - 1), area: costs.area}]) %}
+                    {% endfor %}
+                    {% for item in [
+                        {label: 'Tầng lửng', area: costs.areaLung}, {label: 'Ban công', area: costs.areaBanCong},
+                        {label: 'Tum / Tầng thượng', area: costs.areaTum}, {label: 'Sân thượng', area: costs.areaSanThuong},
+                        {label: 'Sân vườn', area: costs.areaSanVuon}, {label: costs.titleMai, area: costs.areaMai}
+                    ] %}
+                        {% if item.area > 0 %}{% set rows = rows|merge([item]) %}{% endif %}
+                    {% endfor %}
+                    <div class="cost-table-wrap" role="region" aria-label="Chi tiết chi phí" tabindex="0">
+                        <table>
+                            <caption>Chi tiết theo diện tích quy đổi</caption>
+                            <thead><tr><th scope="col">Hạng mục</th><th scope="col">Quy đổi (m²)</th><th scope="col">Thành tiền (VNĐ)</th></tr></thead>
+                            <tbody>
+                            {% for row in rows %}
+                                <tr><th scope="row">{{ row.label }}</th><td>{{ row.area|number_format(2, ',', '.') }}</td><td>{{ (row.area * costs.cost)|number_format(0, ',', '.') }}</td></tr>
                             {% endfor %}
-                            
-                            {{ form_start(form, {'attr': {'class': 'ka-main-form'}}) }}
-                            
-                            <h5 class="mb-3 text-primary"><i class="fa fa-info-circle"></i> 1. Thông tin cơ bản</h5>
-                            <div class="row border-bottom pb-3 mb-4">
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        {{ form_label(form.type) }}
-                                        {{ form_widget(form.type, {'attr': {'class': 'form-control'}}) }}
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        {{ form_label(form.method) }}
-                                        {{ form_widget(form.method, {'attr': {'class': 'form-control'}}) }}
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        {{ form_label(form.muc_dau_tu) }}
-                                        {{ form_widget(form.muc_dau_tu, {'attr': {'class': 'form-control'}}) }}
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        {{ form_label(form.wide) }}
-                                        {{ form_widget(form.wide, {'attr': {'class': 'form-control', 'placeholder': 'VD: 4'}}) }}
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        {{ form_label(form.long) }}
-                                        {{ form_widget(form.long, {'attr': {'class': 'form-control', 'placeholder': 'VD: 15'}}) }}
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        {{ form_label(form.floor) }}
-                                        {{ form_widget(form.floor, {'attr': {'class': 'form-control'}}) }}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <h5 class="mb-3 text-primary"><i class="fa fa-building"></i> 2. Thông tin kết cấu & công năng</h5>
-                            <div class="row border-bottom pb-3 mb-4">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        {{ form_label(form.mong) }}
-                                        {{ form_widget(form.mong, {'attr': {'class': 'form-control'}}) }}
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        {{ form_label(form.mai) }}
-                                        {{ form_widget(form.mai, {'attr': {'class': 'form-control'}}) }}
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        {{ form_label(form.lung) }}
-                                        {{ form_widget(form.lung, {'attr': {'class': 'form-control'}}) }}
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        {{ form_label(form.tum) }}
-                                        {{ form_widget(form.tum, {'attr': {'class': 'form-control'}}) }}
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        {{ form_label(form.san_thuong) }}
-                                        {{ form_widget(form.san_thuong, {'attr': {'class': 'form-control'}}) }}
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        {{ form_label(form.ban_cong) }}
-                                        {{ form_widget(form.ban_cong, {'attr': {'class': 'form-control'}}) }}
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        {{ form_label(form.tang_ham) }}
-                                        {{ form_widget(form.tang_ham, {'attr': {'class': 'form-control'}}) }}
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        {{ form_label(form.san_vuon) }}
-                                        {{ form_widget(form.san_vuon, {'attr': {'class': 'form-control'}}) }}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <h5 class="mb-3 text-primary"><i class="fa fa-map-marker"></i> 3. Điều kiện thi công</h5>
-                            <div class="row pb-3 mb-2">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        {{ form_label(form.mat_tien) }}
-                                        {{ form_widget(form.mat_tien, {'attr': {'class': 'form-control'}}) }}
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        {{ form_label(form.hem) }}
-                                        {{ form_widget(form.hem, {'attr': {'class': 'form-control'}}) }}
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-12 text-center ka-form-btns">
-                                    {{ form_widget(form.caculator, {'attr': {'class': 'btn btn-primary btn-lg ka-btn-submit'}}) }}
-                                    {{ form_widget(form.reset, {'attr': {'class': 'btn btn-default btn-lg ka-btn-reset'}}) }}
-                                </div>
-                            </div>
-                            {{ form_end(form) }}
-                        </div>
+                            {% set surcharge = costs.costTotal - costs.areaTotal * costs.cost %}
+                            {% if surcharge > 0 %}
+                                <tr><th scope="row">Phụ phí thi công / mặt tiền</th><td>—</td><td>{{ surcharge|number_format(0, ',', '.') }}</td></tr>
+                            {% endif %}
+                            </tbody>
+                            <tfoot><tr><th scope="row">Tổng cộng</th><td>{{ costs.areaTotal|number_format(2, ',', '.') }}</td><td>{{ costs.costTotal|number_format(0, ',', '.') }}</td></tr></tfoot>
+                        </table>
                     </div>
-
-                    {# === RESULT (if calculated) === #}
-                    {% if costs is not null %}
-                    <div class="ka-result-card" id="result-scroll">
-                        <div class="ka-result-header">
-                            <i class="fas fa-poll-h"></i>
-                            <span>Kết quả dự toán chi phí</span>
-                        </div>
-                        <div class="ka-result-body">
-                            <div class="ka-result-summary">
-                                <div class="ka-summary-item">
-                                    <span class="ka-label">Đơn giá áp dụng:</span>
-                                    <span class="ka-value">{{ costs.cost|number_format(0, '.', ',') }} VNĐ/m²</span>
-                                </div>
-                                <div class="ka-summary-item ka-total">
-                                    <span class="ka-label">Tổng chi phí dự kiến:</span>
-                                    <span class="ka-value text-danger">{{ costs.costTotal|number_format(0, '.', ',') }} VNĐ</span>
-                                </div>
-                            </div>
-
-                            <div class="table-responsive mt-3">
-                                <table class="table table-bordered table-striped ka-table-result">
-                                    <thead class="thead-dark">
-                                        <tr>
-                                            <th>Hạng mục</th>
-                                            <th class="text-center">Diện tích quy đổi (m²)</th>
-                                            <th class="text-right">Thành tiền (VNĐ)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% if costs.areaMong > 0 %}
-                                        <tr>
-                                            <td>{{ costs.titleMong }}</td>
-                                            <td class="text-center">{{ costs.areaMong|number_format(2, '.', ',') }}</td>
-                                            <td class="text-right font-weight-bold">{{ (costs.areaMong * costs.cost)|number_format(0, '.', ',') }}</td>
-                                        </tr>
-                                        {% endif %}
-                                        
-                                        {% if costs.areaTangHam > 0 %}
-                                        <tr>
-                                            <td>Tầng hầm</td>
-                                            <td class="text-center">{{ costs.areaTangHam|number_format(2, '.', ',') }}</td>
-                                            <td class="text-right font-weight-bold">{{ (costs.areaTangHam * costs.cost)|number_format(0, '.', ',') }}</td>
-                                        </tr>
-                                        {% endif %}
-
-                                        {% if costs.floor > 0 %}
-                                            {% for i in range(1, costs.floor) %}
-                                            <tr>
-                                                <td>Tầng {{ i == 1 ? 'trệt' : (i - 1) }}</td>
-                                                <td class="text-center">{{ costs.area|number_format(2, '.', ',') }}</td>
-                                                <td class="text-right font-weight-bold">{{ (costs.area * costs.cost)|number_format(0, '.', ',') }}</td>
-                                            </tr>
-                                            {% endfor %}
-                                        {% endif %}
-                                        
-                                        {% if costs.areaLung > 0 %}
-                                        <tr>
-                                            <td>Tầng lửng</td>
-                                            <td class="text-center">{{ costs.areaLung|number_format(2, '.', ',') }}</td>
-                                            <td class="text-right font-weight-bold">{{ (costs.areaLung * costs.cost)|number_format(0, '.', ',') }}</td>
-                                        </tr>
-                                        {% endif %}
-                                        
-                                        {% if costs.areaBanCong > 0 %}
-                                        <tr>
-                                            <td>Ban công</td>
-                                            <td class="text-center">{{ costs.areaBanCong|number_format(2, '.', ',') }}</td>
-                                            <td class="text-right font-weight-bold">{{ (costs.areaBanCong * costs.cost)|number_format(0, '.', ',') }}</td>
-                                        </tr>
-                                        {% endif %}
-                                        
-                                        {% if costs.areaTum > 0 %}
-                                        <tr>
-                                            <td>Tum / Tầng thượng</td>
-                                            <td class="text-center">{{ costs.areaTum|number_format(2, '.', ',') }}</td>
-                                            <td class="text-right font-weight-bold">{{ (costs.areaTum * costs.cost)|number_format(0, '.', ',') }}</td>
-                                        </tr>
-                                        {% endif %}
-                                        
-                                        {% if costs.areaSanThuong > 0 %}
-                                        <tr>
-                                            <td>Sân thượng</td>
-                                            <td class="text-center">{{ costs.areaSanThuong|number_format(2, '.', ',') }}</td>
-                                            <td class="text-right font-weight-bold">{{ (costs.areaSanThuong * costs.cost)|number_format(0, '.', ',') }}</td>
-                                        </tr>
-                                        {% endif %}
-                                        
-                                        {% if costs.areaSanVuon > 0 %}
-                                        <tr>
-                                            <td>Sân vườn</td>
-                                            <td class="text-center">{{ costs.areaSanVuon|number_format(2, '.', ',') }}</td>
-                                            <td class="text-right font-weight-bold">{{ (costs.areaSanVuon * costs.cost)|number_format(0, '.', ',') }}</td>
-                                        </tr>
-                                        {% endif %}
-                                        
-                                        {% if costs.areaMai > 0 %}
-                                        <tr>
-                                            <td>{{ costs.titleMai }}</td>
-                                            <td class="text-center">{{ costs.areaMai|number_format(2, '.', ',') }}</td>
-                                            <td class="text-right font-weight-bold">{{ (costs.areaMai * costs.cost)|number_format(0, '.', ',') }}</td>
-                                        </tr>
-                                        {% endif %}
-                                    </tbody>
-                                    <tfoot>
-                                        <tr class="ka-footer-row bg-light">
-                                            <td><strong class="text-danger">Tổng cộng</strong></td>
-                                            <td class="text-center"><strong class="text-danger">{{ costs.areaTotal|number_format(2, '.', ',') }} m²</strong></td>
-                                            <td class="text-right"><strong class="text-danger">{{ costs.costTotal|number_format(0, '.', ',') }}</strong></td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-                            <div class="ka-note alert alert-warning mt-3">
-                                <i class="fas fa-info-circle"></i>
-                                <span><strong>Lưu ý:</strong> {{ costs.note|raw }}</span>
-                            </div>
-                        </div>
+                    <p class="cost-note">{{ costs.note }}</p>
+                {% else %}
+                    <div class="cost-empty">
+                        <p class="cost-empty-title">Ngân sách dự kiến của bạn</p>
+                        <p>Điền kích thước và chọn phương án ở bên cạnh, sau đó nhấn <strong>Dự toán chi phí</strong>.</p>
+                        <ol><li>Xem tổng ngân sách tham khảo.</li><li>Đối chiếu diện tích quy đổi và từng hạng mục.</li><li>Thay đổi lựa chọn để tính lại phương án khác.</li></ol>
                     </div>
-                    <script>
-                        document.addEventListener("DOMContentLoaded", function() {
-                            document.getElementById('result-scroll').scrollIntoView({ behavior: 'smooth' });
-                        });
-                    </script>
-                    {% endif %}
-
-                    {# === POST CONTENT (below form) === #}
-                    <div class="ka-article-body">
-                        {{ contentsLazy|raw }}
-                    </div>
-                </article>
+                {% endif %}
+                <details class="cost-guide">
+                    <summary>Diện tích quy đổi được tính thế nào?</summary>
+                    <p>Công cụ cộng diện tích các tầng với diện tích móng, mái và công năng phụ trợ theo hệ số đã cấu hình. Đây không phải diện tích đất hay diện tích cấp phép.</p>
+                    <p>Chi phí dự kiến = diện tích quy đổi × đơn giá điều chỉnh, sau đó cộng phụ phí điều kiện thi công và mặt tiền (nếu có).</p>
+                </details>
             </div>
-        </div>
+        </aside>
     </div>
+    {% if contentsLazy %}
+        <article{% if post %} id="post-{{ post.getId() }}"{% endif %} class="post-content cost-content">{{ contentsLazy|raw }}</article>
+    {% endif %}
+</div>
+</section>
 {% endblock %}

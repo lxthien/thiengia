@@ -522,7 +522,7 @@ function trackEditorForForm(editor, sourceElement) {
 export default function initCkeditor5() {
     document.querySelectorAll('textarea.txt-ckeditor5').forEach((textarea) => {
         const requestedHeight = Number(textarea.dataset.height);
-        const height = Number.isFinite(requestedHeight) && requestedHeight > 0 ? requestedHeight : 500;
+        const height = Number.isFinite(requestedHeight) && requestedHeight > 0 ? requestedHeight : 700;
         const requestedMax = Number(textarea.dataset.maxHeight);
         const maxHeight = Number.isFinite(requestedMax) && requestedMax > 0 ? requestedMax : height;
 

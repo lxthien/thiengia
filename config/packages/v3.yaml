@@ -27,13 +27,13 @@ parameters:
             nameFirst:     'THIỆN'
             nameLast:      'GIA'
             nameSub:       'XÂY DỰNG'
-            slogan:        'Xây tổ ấm bằng cái tâm'
-            taxCode:       '0312345678'
+            slogan:        'Kiến tạo tổ ấm trọn vẹn'
+            taxCode:       ''
 
             phone:    '0901 234 567'
             phoneRaw: '+84901234567'
             zalo:     'https://zalo.me/0901234567'
-            email:    'contact@xaydungthiengia.vn'
+            email:    'contact@xaydungthiengia.com'
 
             street:   '123 Nguyễn Văn Linh'
             district: 'Quận 7'
@@ -44,7 +44,7 @@ parameters:
             projectsCount: '500+'
             description: 'Công ty TNHH Xây Dựng Thiện Gia — xây nhà trọn gói, xây biệt thự, sửa nhà tại TP.HCM. Hơn 10 năm, 500+ công trình, bảo hành kết cấu 10 năm.'
             heroIntro: 'Hơn 10 năm, Thiện Gia xây tổ ấm cho hàng trăm gia đình Việt: đúng bản vẽ, đúng tiến độ, đúng ngân sách đã ký — bảo hành kết cấu 10 năm bằng văn bản.'
-            footerIntro: 'Xây tổ ấm bằng cái tâm — xây nhà trọn gói, xây biệt thự, sửa nhà tại TP.HCM và các tỉnh lân cận từ 2015.'
+            footerIntro: 'Kiến tạo tổ ấm trọn vẹn — xây nhà trọn gói, xây biệt thự, sửa nhà tại TP.HCM và các tỉnh lân cận từ 2015.'
 
             authorName:   'KTS. Nguyễn Thiện Gia'
             authorAvatar: 'assets/images/v3/author.jpg'

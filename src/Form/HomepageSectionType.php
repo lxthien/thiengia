@@ -47,7 +47,7 @@ class HomepageSectionType extends AbstractType
     private const CONFIG_FIELDS = [
         'hero' => ['points'],
         'figures' => ['items'],
-        'commitments' => ['items'],
+        'commitments' => ['items', 'image', 'imageAlt'],
         'about' => ['image', 'imageAlt', 'checks'],
         'steps' => ['items'],
         'news' => ['limit', 'categories'],
@@ -125,7 +125,7 @@ class HomepageSectionType extends AbstractType
                 'constraints' => [new NotBlank(message: 'Nhập nội dung hoặc xóa dòng này.'), new Length(max: 160)],
             ]),
             SectionType::Figures => $this->addCollection($form, $section, 'items', FigureItemType::class, 'Các con số'),
-            SectionType::Commitments => $this->addCollection($form, $section, 'items', CommitmentItemType::class, 'Danh sách cam kết'),
+            SectionType::Commitments => $this->addCommitmentFields($form, $section),
             SectionType::Steps => $this->addCollection($form, $section, 'items', StepItemType::class, 'Các bước'),
             SectionType::About => $this->addAboutFields($form, $section),
             SectionType::Cta => $this->addImageField($form, $section, 'Ảnh nền khối CTA'),
@@ -171,6 +171,20 @@ class HomepageSectionType extends AbstractType
             'expanded' => true,
             'help' => 'Bỏ trống thì dùng cấu hình cũ ở Cài đặt chung ("Danh mục hiển thị trang chủ").',
         ]);
+    }
+
+    private function addCommitmentFields(FormInterface $form, HomepageSection $section): void
+    {
+        $this->addImageField($form, $section, 'Ảnh khối cam kết');
+        $form->add('imageAlt', TextType::class, [
+            'mapped' => false,
+            'required' => false,
+            'label' => 'Mô tả ảnh (alt)',
+            'data' => (string) $section->getConfigValue('imageAlt', ''),
+            'constraints' => [new Length(max: 255)],
+            'help' => 'Chọn ảnh kỹ sư, thi công hoặc nghiệm thu được phép sử dụng. Để trống ảnh thì dùng ảnh minh họa mặc định có ghi chú.',
+        ]);
+        $this->addCollection($form, $section, 'items', CommitmentItemType::class, 'Danh sách cam kết');
     }
 
     private function addAboutFields(FormInterface $form, HomepageSection $section): void

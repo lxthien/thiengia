@@ -1126,7 +1126,7 @@ class NewsController extends AbstractController
             ->getForm();
     }
 
-    #[Route('/chi-phi-xay-dung/', name: 'caculator_cost_construction')]
+    #[Route('/cong-cu/chi-phi-xay-dung/', name: 'caculator_cost_construction')]
     public function caculatorCostConstructionAction(Request $request, $type = null)
     {
         $settingsManager = $this->settingsManager;

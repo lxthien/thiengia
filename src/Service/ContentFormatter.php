@@ -41,34 +41,11 @@ class ContentFormatter
             return '';
         }
 
-        // Replace hardcoded phone numbers with <a href="tel:[hotline_1]">[hotline_1]</a>
-        // We use lookaround or specific regex to avoid nesting <a> tags if they are already linked.
-        
-        $longPhonePattern = '0974[\s\.]*776[\s\.]*305[\s\-\–]*0966[\s\.]*289[\s\.]*559[\s\-\–]*0987[\s\.]*244[\s\.]*305';
-        // 1. Replace if it is inside an existing <a> tag
-        $content = preg_replace('/<a\b[^>]*>(?:(?!<\/a>).)*?' . $longPhonePattern . '(?:(?!<\/a>).)*?<\/a>/is', '<a href="tel:[hotline_1]">[hotline_1]</a>', $content);
-        // 2. Replace bare occurrences
-        $content = preg_replace('/' . $longPhonePattern . '/is', '<a href="tel:[hotline_1]">[hotline_1]</a>', $content);
-
-        $shortPhonePattern = '0974[\s\.]*776[\s\.]*305';
-        // 1. Replace if it is inside an existing <a> tag
-        $content = preg_replace('/<a\b[^>]*>(?:(?!<\/a>).)*?' . $shortPhonePattern . '(?:(?!<\/a>).)*?<\/a>/is', '<a href="tel:[hotline_1]">[hotline_1]</a>', $content);
-        // 2. Replace bare occurrences
-        $content = preg_replace('/' . $shortPhonePattern . '/is', '<a href="tel:[hotline_1]">[hotline_1]</a>', $content);
-
-        // If you also want to replace other numbers:
-        // $content = preg_replace('/0966[\s\.]*289[\s\.]*559/is', '<a href="tel:[hotline_2]">[hotline_2]</a>', $content);
-        // $content = preg_replace('/0987[\s\.]*244[\s\.]*305/is', '<a href="tel:[hotline_3]">[hotline_3]</a>', $content);
-
-        // Replace email and ensure it is hyperlinked
-        $content = preg_replace('/<a[^>]*href=["\']mailto:xaydungkimanh@gmail\.com["\'][^>]*>.*?<\/a>/i', '<a href="mailto:[email]">[email]</a>', $content);
-        $content = preg_replace('/xaydungkimanh@gmail\.com/i', '<a href="mailto:[email]">[email]</a>', $content);
-
-        // Replace placeholders from settings (contens_* or contents_*)
+        // Replace placeholders from settings (content_* or contents_*)
         $content = preg_replace_callback('/\[([a-zA-Z0-9_]+)\]/', function ($matches) {
             $varName = $matches[1];
-            // Try contens_ prefix first
-            $value = $this->settingsManager->get('contens_' . $varName);
+            // Try content_ prefix first
+            $value = $this->settingsManager->get('content_' . $varName);
             if ($value !== null) {
                 return $value;
             }

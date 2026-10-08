@@ -70,6 +70,16 @@ services:
         arguments:
             $logsDir: '%kernel.logs_dir%'
 
+    App\Seo\Gsc\SearchConsoleClient:
+        arguments:
+            $credentialsPath: '%env(resolve:GSC_CREDENTIALS_PATH)%'
+            $siteUrl: '%env(GSC_SITE_URL)%'
+
+    App\Seo\InternalLink\InternalLinkAnalyzer:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+            $siteUrl: '%env(GSC_SITE_URL)%'
+
     App\Command\PublishScheduledCommand:
         arguments:
             $timezone: '%app.timezone%'

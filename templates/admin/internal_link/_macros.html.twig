@@ -1,0 +1,4 @@
+{% macro badge(issue) %}<span class="il-badge il-badge--{{ issue.level }}" title="{{ issue.help }}">{{ issue.label }}</span>{% endmacro %}
+
+{# Trang chức năng (liên hệ, công cụ...) do code định nghĩa nên không có form sửa. #}
+{% macro edit(page) %}{% if page.edit %}<a href="{{ path(page.edit.route,{id:page.edit.id}) }}">Sửa nội dung</a>{% endif %}{% endmacro %}

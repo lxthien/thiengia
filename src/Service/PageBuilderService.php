@@ -25,7 +25,7 @@ class PageBuilderService
         if (is_string($value)) {
             return preg_replace_callback('/\[([a-zA-Z0-9_]+)\]/', function ($matches) {
                 $varName = $matches[1];
-                $val = $this->settingsManager->get('contens_' . $varName);
+                $val = $this->settingsManager->get('content_' . $varName);
                 if ($val !== null) {
                     return $val;
                 }

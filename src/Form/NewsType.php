@@ -73,7 +73,7 @@ class NewsType extends AbstractType
                 'label' => 'label.description',
             ])
             ->add('contents', TextareaType::class, [
-                'attr' => ['class' => 'txt-ckeditor5', 'data-height' => '500'],
+                'attr' => ['class' => 'txt-ckeditor5', 'data-height' => '700'],
                 'label' => 'label.contents',
             ])
             ->add('ordering', TextType::class, [

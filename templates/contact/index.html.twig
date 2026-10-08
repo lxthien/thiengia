@@ -21,9 +21,7 @@
             "email": {{ v3.company.email|json_encode|raw }},
             "address": {
                 "@type": "PostalAddress",
-                "streetAddress": {{ v3.company.street|json_encode|raw }},
-                "addressLocality": {{ v3.company.district|json_encode|raw }},
-                "addressRegion": {{ v3.company.city|json_encode|raw }},
+                "streetAddress": {{ v3.company.address|json_encode|raw }},
                 "addressCountry": "VN"
             }
         }

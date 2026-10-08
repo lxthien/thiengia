@@ -38,6 +38,21 @@ class SitemapController extends AbstractController
         );
     }
 
+    #[Route('/robots.txt', name: 'robots_txt', methods: ['GET'])]
+    public function robotsAction(): Response
+    {
+        $response = new Response(
+            $this->renderView('Sitemap/robots.txt.twig'),
+            Response::HTTP_OK,
+            ['Content-Type' => 'text/plain; charset=utf-8']
+        );
+        $response->setPublic();
+        $response->setMaxAge(300);
+        $response->setSharedMaxAge(300);
+
+        return $response;
+    }
+
     private function createXmlResponse(Request $request, string $xml, string $etag): Response
     {
         $response = new Response(
