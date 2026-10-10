@@ -19,7 +19,7 @@ class NewsCategoryType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('parentcat', null, [
@@ -101,7 +101,7 @@ class NewsCategoryType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => NewsCategory::class,

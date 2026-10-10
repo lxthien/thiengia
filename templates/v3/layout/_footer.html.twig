@@ -1,23 +1,56 @@
 <footer class="ft pt-16">
     <div class="container max-w-7xl grid gap-10 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1.2fr] pb-14">
-        <div>
-            {{ include('v3/components/_logo.html.twig', { onDark: true }) }}
+        <div class="ft-brand">
+            <a href="{{ path('homepage') }}" class="hd-logo" aria-label="{{ v3.company.shortName }} — Trang chủ">
+                <img src="{{ asset('assets/images/thiengia-logo-footer.svg') }}"
+                     alt="{{ v3.company.shortName }}" width="220" height="154"
+                     loading="lazy" decoding="async"
+                     style="display: block; width: 220px; max-width: 100%; height: auto;">
+            </a>
             <p class="mt-5 max-w-sm leading-relaxed">{{ v3.company.footerIntro }}</p>
-            <p class="ft-legal">{{ v3.company.legalName }}{% if v3.company.taxCode %} · MST: {{ v3.company.taxCode }}{% endif %}</p>
+            {% set socialChannels = {
+                zalo: {label: 'Zalo', key: 'linkToZalo'},
+                facebook: {label: 'Facebook', key: 'linkToFacebook'},
+                youtube: {label: 'YouTube', key: 'linkToYoutube'},
+                tiktok: {label: 'TikTok', key: 'linkToTiktok'},
+                x: {label: 'X / Twitter', key: 'linkToTwitter'},
+                linkedin: {label: 'LinkedIn', key: 'linkToLinkedin'},
+                instagram: {label: 'Instagram', key: 'linkToInstagram'}
+            } %}
+            {% set socialLinks = [] %}
+            {% for name, channel in socialChannels %}
+                {% set url = get_setting(channel.key, '')|default('')|trim %}
+                {% if url matches '#^https?://[^[:space:]]+$#i' %}
+                    {% set socialLinks = socialLinks|merge([{name: name, label: channel.label, url: url}]) %}
+                {% endif %}
+            {% endfor %}
+            {% if socialLinks %}
+                <nav class="ft-socials" aria-label="Mạng xã hội Thiện Gia">
+                    {% for channel in socialLinks %}
+                        <a class="ft-social" href="{{ channel.url }}" target="_blank" rel="noopener noreferrer"
+                           aria-label="{{ channel.label }} (mở trong tab mới)" title="{{ channel.label }}">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true" focusable="false">
+                                {% include 'v3/components/_social_icon.html.twig' with {name: channel.name} only %}
+                            </svg>
+                        </a>
+                    {% endfor %}
+                </nav>
+            {% endif %}
         </div>
 
         <nav aria-label="Dịch vụ">
             <h4 class="ft-head">Dịch vụ</h4>
             {% for item in v3.menu.services %}
-                <a href="{{ path('homepage') }}#dich-vu" class="ft-link">{{ item }}</a>
+                <a href="{{ item.anchor }}" class="ft-link">{{ item.label }}</a>
             {% endfor %}
         </nav>
 
-        <nav aria-label="Công ty">
-            <h4 class="ft-head">Công ty</h4>
-            <a href="{{ path('homepage') }}#gioi-thieu" class="ft-link">Giới thiệu</a>
-            <a href="{{ path('homepage') }}#cong-trinh" class="ft-link">Công trình thực tế</a>
-            <a href="{{ path('news_category', { level1: v3.newsCategorySlug }) }}" class="ft-link">Cẩm nang xây dựng</a>
+        <nav aria-label="Thông tin">
+            <h4 class="ft-head">Thông tin</h4>
+            <a href="{{ path('dynamic_post_page', { slug: 'gioi-thieu' }) }}" class="ft-link">Giới thiệu</a>
+            <a href="{{ path('dynamic_post_page', { slug: 'cong-trinh' }) }}" class="ft-link">Công trình thực tế</a>
+            <a href="{{ path('dynamic_post_page', { slug: 'cam-nang' }) }}" class="ft-link">Cẩm nang xây dựng</a>
+            <a href="{{ path('cost_calculator') }}" class="ft-link">Chi phí xây dựng</a>
             <a href="{{ path('lo_ban_calculator') }}" class="ft-link">Tra cứu thước Lỗ Ban</a>
             <a href="{{ path('building_density_calculator') }}" class="ft-link">Tính mật độ xây dựng</a>
             <a href="{{ path('building_age_calculator') }}" class="ft-link">Xem tuổi xây nhà</a>

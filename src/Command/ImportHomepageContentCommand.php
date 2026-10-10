@@ -43,7 +43,7 @@ class ImportHomepageContentCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('app:homepage:import-content')
@@ -51,7 +51,7 @@ class ImportHomepageContentCommand extends Command
             ->addOption('force', null, InputOption::VALUE_NONE, 'Ghi đè cả những khóa config admin đã sửa.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         $force = (bool) $input->getOption('force');

@@ -26,6 +26,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Range;
+use Symfony\Component\Validator\Constraints\Regex;
 
 /**
  * Form sửa 1 khối trang chủ.
@@ -48,7 +49,7 @@ class HomepageSectionType extends AbstractType
         'hero' => ['points'],
         'figures' => ['items'],
         'commitments' => ['items', 'image', 'imageAlt'],
-        'about' => ['image', 'imageAlt', 'checks'],
+        'about' => ['image', 'imageAlt', 'image2', 'image2Alt', 'badgeValue', 'badgeUnit', 'badgeLabel', 'checks'],
         'steps' => ['items'],
         'news' => ['limit', 'categories'],
         'cta' => ['image'],
@@ -199,6 +200,34 @@ class HomepageSectionType extends AbstractType
             'constraints' => [new Length(max: 255)],
             'help' => 'Dùng cho SEO và người dùng trình đọc màn hình.',
         ]);
+
+        $form->add('image2', HiddenType::class, [
+            'mapped' => false,
+            'required' => false,
+            'label' => 'Ảnh phụ (đè lên góc ảnh chính)',
+            'data' => (string) $section->getConfigValue('image2', ''),
+            'constraints' => [new Length(max: 255)],
+        ]);
+
+        $texts = [
+            'image2Alt' => ['Mô tả ảnh phụ (alt)', 255, null],
+            'badgeValue' => ['Thẻ số liệu: con số', 6, 'Chỉ nhập số, ví dụ 10. Để trống thì dùng con số đầu tiên của khối "Con số".'],
+            'badgeUnit' => ['Thẻ số liệu: ký hiệu sau số', 4, 'Ví dụ: + hoặc %.'],
+            'badgeLabel' => ['Thẻ số liệu: nhãn', 40, 'Ví dụ: Năm kinh nghiệm.'],
+        ];
+
+        foreach ($texts as $key => [$label, $max, $help]) {
+            $form->add($key, TextType::class, [
+                'mapped' => false,
+                'required' => false,
+                'label' => $label,
+                'data' => (string) $section->getConfigValue($key, ''),
+                'constraints' => $key === 'badgeValue'
+                    ? [new Length(max: $max), new Regex(pattern: '/^\d*$/', message: 'Chỉ nhập chữ số.')]
+                    : [new Length(max: $max)],
+                'help' => $help,
+            ]);
+        }
 
         $this->addCollection($form, $section, 'checks', AboutCheckItemType::class, 'Gạch đầu dòng');
     }

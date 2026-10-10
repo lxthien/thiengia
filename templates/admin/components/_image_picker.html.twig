@@ -31,7 +31,7 @@
                         <div id="{{ picker_id }}_placeholder"
                              style="text-align:center;color:#b0b8d4;display:{{ _img_url ? 'none' : 'flex' }};flex-direction:column;align-items:center;gap:8px;padding:20px;">
                             <i class="fa fa-image fa-3x"></i>
-                            <small style="font-size:11px;">Chưa chọn ảnh — đang dùng ảnh mặc định của theme</small>
+                            <small style="font-size:11px;">{{ empty_label|default('Chưa chọn ảnh — đang dùng ảnh mặc định của theme') }}</small>
                         </div>
                         <button type="button"
                                 id="{{ picker_id }}_clear_btn"

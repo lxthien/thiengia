@@ -234,6 +234,22 @@
   border-top: 1px solid $line;
   border-bottom: 1px solid $line;
 
+  .author-avatar-fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 72px;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    color: $primary;
+    background: $sand;
+    font-size: 1.75rem;
+    font-weight: 600;
+  }
+
+  .author-details { min-width: 0; overflow-wrap: anywhere; }
+
   img {
     width: 72px;
     height: 72px;
@@ -274,5 +290,13 @@
     font-weight: 300;
     line-height: 1.75;
     color: $mut;
+    p + p, ul, ol { margin-top: 0.6rem; }
+    ul, ol { padding-left: 1.25rem; }
+    ul { list-style: disc; }
+    ol { list-style: decimal; }
+    a { color: $primary; text-decoration: underline; text-underline-offset: 3px; }
+    a:focus-visible { outline: 2px solid $primary; outline-offset: 3px; }
   }
+
+  @media (max-width: 479px) { gap: 1rem; }
 }

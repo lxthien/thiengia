@@ -1,0 +1,93 @@
+@use "../tokens" as *;
+
+// Search results must be immediately visible, also without JavaScript.
+.search-view .fade {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+.search-page {
+  padding: 3rem 0 5rem;
+
+  &__form {
+    max-width: 52rem;
+    margin-bottom: 2.5rem;
+    label { display: block; margin-bottom: 0.65rem; font-weight: 500; }
+  }
+
+  &__fields { display: flex; gap: 0.75rem; }
+  input {
+    min-width: 0;
+    flex: 1;
+    width: 100%;
+    min-height: 52px;
+    padding: 0.85rem 1rem;
+    background: $white;
+    color: $text;
+    border: 1px solid #9d9185;
+    border-radius: 0;
+    font: inherit;
+    &::placeholder { color: #6b6259; opacity: 1; }
+  }
+  .btn2 {
+    min-height: 52px;
+    letter-spacing: 0.08em;
+    padding: 0.9rem 1.5rem;
+    &:hover { background: $brown; }
+  }
+  a:focus-visible, input:focus-visible, button:focus-visible, summary:focus-visible {
+    outline: 2px solid $primary;
+    outline-offset: 4px;
+  }
+
+  &__summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid $line;
+    h2 { font-size: 1.125rem; font-weight: 500; overflow-wrap: anywhere; }
+  }
+  &__sort {
+    summary { cursor: pointer; color: $primary; font-weight: 500; }
+    div { display: flex; flex-wrap: wrap; gap: 1rem; padding-top: 0.75rem; }
+    a { text-decoration: underline; text-underline-offset: 3px; }
+  }
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3rem 2rem;
+    .post-card { min-width: 0; }
+    .post-card-title { overflow-wrap: anywhere; }
+  }
+  mark {
+    background: $sand;
+    color: $text;
+    font-weight: 500;
+    padding: 0 0.1em;
+  }
+  &__empty {
+    max-width: 42rem;
+    margin: 0 auto;
+    padding: 1rem 0;
+    text-align: center;
+    h3 { font-family: $f-display; font-size: 1.75rem; line-height: 1.4; }
+    p { margin: 1rem 0 1.75rem; color: #51483f; }
+  }
+  @media (max-width: 1023px) {
+    &__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 639px) {
+    padding: 2rem 0 3rem;
+    &__fields { flex-direction: column; }
+    &__grid { grid-template-columns: minmax(0, 1fr); gap: 2.5rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .btn2, .post-card-media img, .post-card-title a { transition: none; }
+    .post-card:hover .post-card-media img { transform: none; }
+  }
+}

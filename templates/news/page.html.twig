@@ -59,16 +59,7 @@
     }) }}
 
     {# ============ SỐ LIỆU TIN CẬY ============ #}
-    <div class="figures">
-        <div class="container max-w-7xl grid grid-cols-2 lg:grid-cols-4 divide-x divide-white/10">
-            {% for figure in v3.figures %}
-                <div class="figure">
-                    <p class="figure-value"><span data-count="{{ figure.value }}">0</span><sup>{{ figure.unit }}</sup></p>
-                    <p class="figure-label">{{ figure.label }}</p>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
+    {{ include('v3/components/_figures.html.twig') }}
 
     {# ============ NỘI DUNG ============ #}
     <div class="container max-w-7xl py-16 lg:py-20">
@@ -90,14 +81,6 @@
                     {% endif %}
                 </div>
 
-                <aside class="author-box mt-12">
-                    <img src="{{ asset(v3.company.authorAvatar) }}" alt="Chân dung {{ v3.company.authorName }}" loading="lazy" decoding="async">
-                    <div>
-                        <p class="author-label">Tác giả</p>
-                        <p class="author-name">{{ post.author ? post.author.username : v3.company.authorName }}</p>
-                        <p class="author-bio">{{ v3.company.authorBio }}</p>
-                    </div>
-                </aside>
 
                 {{ include('news/comments/_section.html.twig', { comments: comments, form: form }, with_context = false) }}
             </article>

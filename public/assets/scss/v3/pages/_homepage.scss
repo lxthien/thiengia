@@ -31,24 +31,160 @@
 }
 
 // ---------- Giới thiệu ----------
+// Khối Cam kết và Giới thiệu cùng nền sáng: khi đứng liền nhau thì bỏ bớt
+// khoảng đệm trên để hai khoảng đệm không cộng dồn thành một dải trống.
+.commits + .about2 {
+  padding-top: 1.5rem;
+}
+
 .about2 {
+  position: relative;
+  overflow: hidden;
+
+  // Nền lưới bản vẽ kỹ thuật, mờ dần về phía phần chữ
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba($primary, 0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba($primary, 0.07) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(ellipse 60% 75% at 18% 50%, #000 0%, transparent 72%);
+    pointer-events: none;
+  }
+
+  > .container {
+    position: relative;
+  }
+
   .about2-media {
     position: relative;
+    padding-bottom: 2.75rem;
 
-    img {
-      width: 100%;
-      aspect-ratio: 4 / 3;
-      object-fit: cover;
+    // Trượt vào từ trái thay cho trượt lên mặc định của .fade
+    &.fade {
+      transform: translateX(-44px);
+
+      &.is-in {
+        transform: none;
+      }
+    }
+
+    &--duo {
+      padding-right: 16%;
+      padding-bottom: 4.5rem;
     }
 
     .seal {
       position: absolute;
-      right: -1.25rem;
-      bottom: -1.25rem;
+      right: -1rem;
+      bottom: 0;
+      z-index: 3;
       background: $white;
       border-radius: 9999px;
       box-shadow: 0 16px 40px rgba($dark, 0.18);
     }
+
+    &--duo .seal {
+      // Cưỡi lên mép phải phía trên của ảnh chính
+      right: calc(16% - 52px);
+      bottom: auto;
+      top: 2rem;
+      width: 104px;
+      height: 104px;
+    }
+  }
+
+  .about2-photo {
+    position: relative;
+    // Nền giữ chỗ khi ảnh chưa tải hoặc chưa được chọn
+    background: linear-gradient(135deg, $sand, $tint);
+
+    img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      color: transparent;
+      transition: transform 1.2s $ease;
+    }
+
+    &--main {
+      aspect-ratio: 4 / 5;
+      max-height: 620px;
+      width: 100%;
+
+      // Khung viền vàng đồng lệch phía sau ảnh
+      &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border: 2px solid $gold;
+        transform: translate(-1.1rem, 1.1rem);
+        z-index: -1;
+        transition: transform $dur $ease;
+      }
+    }
+
+    &--sub {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      z-index: 2;
+      width: 46%;
+      aspect-ratio: 1;
+      border: 7px solid $base;
+      box-shadow: 0 24px 50px rgba($dark, 0.22);
+      overflow: hidden;
+    }
+  }
+
+  .about2-media:hover {
+    .about2-photo--main::before {
+      transform: translate(-0.6rem, 0.6rem);
+    }
+
+    .about2-photo--sub img {
+      transform: scale(1.06);
+    }
+  }
+
+  .about2-badge {
+    position: absolute;
+    left: -0.75rem;
+    bottom: 0.25rem;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 1rem 1.4rem 1rem 1.2rem;
+    background: $primary;
+    color: $white;
+    box-shadow: 0 18px 40px rgba($primary, 0.35);
+    animation: about2-float 5s ease-in-out infinite;
+  }
+
+  .about2-badge-value {
+    font-family: $f-display;
+    font-size: 2.6rem;
+    font-weight: 700;
+    line-height: 1;
+
+    sup {
+      font-size: 0.5em;
+      top: -0.7em;
+      color: $gold;
+    }
+  }
+
+  .about2-badge-label {
+    max-width: 6.5rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    line-height: 1.5;
+    text-transform: uppercase;
   }
 
   .about2-lead {
@@ -58,133 +194,434 @@
     color: rgba($text, 0.7);
   }
 
-  .about2-check {
-    display: flex;
-    gap: 0.9rem;
-    align-items: flex-start;
-    padding: 0.55rem 0;
-    font-size: 0.95rem;
+  .about2-checks {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+  }
 
-    svg {
-      flex-shrink: 0;
-      margin-top: 3px;
-      color: $accent;
+  .about2-check {
+    position: relative;
+    display: flex;
+    gap: 1.1rem;
+    align-items: flex-start;
+    padding: 1rem 1.25rem;
+    background: $white;
+    border: 1px solid $line;
+    font-size: 0.92rem;
+    line-height: 1.7;
+    color: $mut;
+    transition:
+      opacity 0.9s $ease,
+      transform 0.6s $ease,
+      border-color $dur $ease,
+      box-shadow $dur $ease;
+
+    // Hiện lần lượt từng thẻ
+    &:nth-child(2) {
+      transition-delay: 0.12s;
+    }
+
+    &:nth-child(3) {
+      transition-delay: 0.24s;
+    }
+
+    &:nth-child(n + 4) {
+      transition-delay: 0.36s;
+    }
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: -1px;
+      top: -1px;
+      bottom: -1px;
+      width: 3px;
+      background: $accent;
+      transform: scaleY(0);
+      transform-origin: bottom;
+      transition: transform $dur $ease;
+    }
+
+    &.is-in:hover {
+      transform: translateX(6px);
+      transition-delay: 0s;
+      border-color: rgba($accent, 0.45);
+      box-shadow: 0 14px 34px rgba($dark, 0.08);
+
+      &::before {
+        transform: scaleY(1);
+      }
+
+      .about2-check-no {
+        color: $primary;
+      }
     }
 
     strong {
+      display: block;
       font-weight: 600;
       color: $text;
+    }
+  }
+
+  .about2-check-no {
+    flex-shrink: 0;
+    font-family: $f-display;
+    font-size: 1.5rem;
+    font-style: italic;
+    line-height: 1.2;
+    color: rgba($accent, 0.55);
+    transition: color $dur $ease;
+  }
+
+  @media (max-width: 1023px) {
+    .about2-media {
+      max-width: 34rem;
+      margin-inline: auto;
+      width: 100%;
+    }
+
+    .about2-photo--main {
+      aspect-ratio: 4 / 3.6;
+    }
+
+    .about2-badge {
+      left: 0.75rem;
+    }
+
+    .about2-media .seal {
+      right: 0.5rem;
+      width: 104px;
+      height: 104px;
+    }
+  }
+}
+
+@keyframes about2-float {
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about2 {
+    .about2-badge {
+      animation: none;
+    }
+
+    .about2-media.fade,
+    .about2-check {
+      transform: none;
+      transition: none;
     }
   }
 }
 
 // ---------- Dịch vụ ----------
 .svc {
+  position: relative;
   background: $sand;
+  overflow: hidden;
 
+  // Vệt sáng chéo để nền be không bị phẳng
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 55% 60% at 100% 0%, rgba($white, 0.55), transparent 70%),
+      radial-gradient(ellipse 45% 55% at 0% 100%, rgba($accent, 0.1), transparent 70%);
+    pointer-events: none;
+  }
+
+  > .container {
+    position: relative;
+  }
+
+  .svc-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem 2rem;
+  }
+
+  // Điện thoại: hàng poster trượt ngang, bắt dính từng thẻ.
+  // Từ tablet trở lên: lưới, số cột đổi theo số thẻ.
+  .svc-grid {
+    display: flex;
+    gap: 1rem;
+    margin-top: 3rem;
+    margin-inline: -1.25rem;
+    padding-inline: 1.25rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 1.25rem;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    > .svc-card {
+      flex: 0 0 76%;
+      scroll-snap-align: start;
+    }
+
+    &[data-cards="1"] > .svc-card {
+      flex-basis: 100%;
+    }
+
+    @media (min-width: 640px) {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.25rem;
+      margin-inline: 0;
+      padding-inline: 0;
+      overflow: visible;
+
+      &[data-cards="1"] {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      &[data-cards="3"],
+      &[data-cards="many"] {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      &[data-cards="4"] {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+  }
+
+  // Poster: ảnh phủ kín, bo góc, chữ nổi ở đáy
   .svc-card {
     position: relative;
     display: flex;
-    flex-direction: column;
-    background: $white;
-    border: 1px solid $line;
+    aspect-ratio: 3 / 4.3;
+    border-radius: 18px;
     overflow: hidden;
-    transition: all $dur $ease;
+    isolation: isolate;
+    // Nền giữ chỗ khi dịch vụ chưa có ảnh
+    background: linear-gradient(150deg, #5a4636, $brown);
+    box-shadow: 0 18px 40px rgba($dark, 0.18);
+    transition:
+      opacity 0.9s $ease,
+      transform 0.6s $ease,
+      box-shadow $dur $ease;
 
+    // Hiện lần lượt từng thẻ
+    @for $i from 2 through 4 {
+      &:nth-child(#{$i}) {
+        transition-delay: #{($i - 1) * 0.1}s;
+      }
+    }
+
+    // Lớp tối dần từ đáy để chữ đọc được trên mọi ảnh
     &::before {
       content: "";
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: $primary;
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform $dur $ease;
+      inset: 0;
       z-index: 1;
+      background: linear-gradient(
+        to top,
+        rgba($dark, 0.95) 0%,
+        rgba($dark, 0.6) 26%,
+        rgba($dark, 0.04) 55%,
+        rgba($dark, 0.14) 100%
+      );
+    }
+  }
+
+  // Ít thẻ thì đổi sang khổ ngang để thẻ không cao quá màn hình
+  @media (min-width: 640px) {
+    .svc-grid[data-cards="1"] .svc-card {
+      aspect-ratio: 21 / 9;
     }
 
-    figure {
-      overflow: hidden;
+    .svc-grid[data-cards="2"] .svc-card {
+      aspect-ratio: 4 / 3;
+    }
+  }
 
-      img {
-        width: 100%;
-        aspect-ratio: 16 / 10;
-        object-fit: cover;
-        transition: transform 1.4s $ease;
-      }
+  @media (min-width: 1024px) {
+    .svc-grid[data-cards="3"] .svc-card,
+    .svc-grid[data-cards="many"] .svc-card {
+      aspect-ratio: 3 / 3.6;
+    }
+  }
+
+  .svc-img {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 1.6s $ease;
+  }
+
+  .svc-no {
+    position: absolute;
+    top: 1.2rem;
+    left: 1.4rem;
+    z-index: 2;
+    font-family: $f-display;
+    font-style: italic;
+    font-size: 1.3rem;
+    line-height: 1;
+    color: rgba($white, 0.9);
+    text-shadow: 0 2px 12px rgba($dark, 0.6);
+  }
+
+  // Nút mũi tên tròn ở góc, sáng lên khi hover
+  .svc-arrow {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 9999px;
+    background: rgba($white, 0.16);
+    backdrop-filter: blur(6px);
+    color: $white;
+    transition:
+      background-color $dur $ease,
+      transform $dur $ease;
+  }
+
+  .svc-body {
+    position: relative;
+    z-index: 2;
+    align-self: flex-end;
+    width: 100%;
+    padding: 1.4rem 1.4rem 1.5rem;
+  }
+
+  .svc-price {
+    display: inline-block;
+    max-width: 100%;
+    margin-bottom: 0.4rem;
+    padding: 0.45rem 0.7rem;
+    background: $base;
+    color: $primary;
+    border-left: 3px solid $primary;
+    font-size: clamp(1.125rem, 1.4vw, 1.25rem);
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    overflow-wrap: anywhere;
+  }
+
+  .svc-name {
+    margin-top: 0.35rem;
+    font-family: $f-display;
+    font-weight: 700;
+    font-size: 1.45rem;
+    line-height: 1.25;
+    color: $white;
+    text-shadow: 0 2px 14px rgba($dark, 0.5);
+
+    // Phủ link ra toàn bộ thẻ để bấm đâu cũng được
+    a::after {
+      content: "";
+      position: absolute;
+      inset: -100vh -100vw;
+      z-index: 3;
     }
 
-    .svc-body {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      padding: 1.6rem 1.5rem 1.7rem;
+    a:focus-visible {
+      outline: none;
     }
+  }
 
-    .svc-name {
-      font-family: $f-display;
-      font-weight: 600;
-      font-size: 1.3rem;
-      color: $text;
-      transition: color $dur $ease;
-    }
+  .svc-card:focus-within {
+    outline: 2px solid $gold;
+    outline-offset: 3px;
+  }
 
-    .svc-desc {
-      margin: 0.6rem 0 1.2rem;
-      font-size: 0.88rem;
-      line-height: 1.8;
-      color: $mut;
-    }
+  .svc-desc {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+    margin-top: 0.55rem;
+    font-size: 0.86rem;
+    line-height: 1.65;
+    color: rgba($base, 0.82);
+  }
 
-    .svc-link {
-      margin-top: auto;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-      align-self: flex-start;
-      position: relative;
-      padding-bottom: 0.35rem;
-      font-size: 0.78rem;
-      font-weight: 600;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: $primary;
+  // Khung vàng đồng bên trong thẻ, hiện khi hover
+  .svc-card::after {
+    content: "";
+    position: absolute;
+    inset: 0.6rem;
+    z-index: 2;
+    border: 1px solid rgba($gold, 0.9);
+    border-radius: 12px;
+    opacity: 0;
+    transform: scale(1.04);
+    transition:
+      opacity $dur $ease,
+      transform $dur $ease;
+    pointer-events: none;
+  }
+
+  .svc-name a {
+    background: linear-gradient($gold, $gold) left bottom / 0 2px no-repeat;
+    padding-bottom: 0.15rem;
+    transition: background-size 0.5s $ease;
+  }
+
+  @media (hover: hover) {
+    .svc-card:hover {
+      transform: translateY(-10px);
+      transition-delay: 0s;
+      box-shadow: 0 34px 60px rgba($dark, 0.32);
 
       &::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 1px;
-        background: currentColor;
-        transform: scaleX(0.35);
-        transform-origin: left;
-        transition: transform $dur $ease;
+        opacity: 1;
+        transform: none;
+      }
+
+      .svc-img {
+        transform: scale(1.08);
+      }
+
+      .svc-arrow {
+        background: $primary;
+        transform: rotate(45deg);
+      }
+
+      .svc-name a {
+        background-size: 100% 2px;
       }
     }
+  }
+}
 
-    &:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 30px 50px rgba($dark, 0.12);
-      border-color: transparent;
+@media (prefers-reduced-motion: reduce) {
+  .svc {
+    .svc-card,
+    .svc-img,
+    .svc-arrow,
+    .svc-name a {
+      transition: none;
+    }
 
-      &::before {
-        transform: scaleX(1);
-      }
+    .svc-card:hover {
+      transform: none;
 
-      img {
-        transform: scale(1.06);
-      }
-
-      .svc-name {
-        color: $accent;
-      }
-
-      .svc-link::after {
-        transform: scaleX(1);
+      .svc-img {
+        transform: none;
       }
     }
   }
@@ -282,46 +719,98 @@
 
 // ---------- Quy trình 8 bước ----------
 .steps2 {
-  .step2 {
-    position: relative;
-    padding: 1.9rem 1.6rem;
-    background: $white;
-    border: 1px solid $line;
-    transition: all $dur $ease;
+  background: $base;
 
-    .step2-no {
-      font-family: $f-display;
-      font-weight: 500;
-      font-size: 2.6rem;
-      line-height: 1;
-      color: rgba($text, 0.12);
-      transition: color $dur $ease;
+  // Normal document order: left to right, then next row.
+  .steps2-flow {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    column-gap: 2rem;
+    row-gap: 2.75rem;
+    margin: 3.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .step2 { position: relative; min-width: 0; display: flex; flex-direction: column; }
+  .step2::before {
+    content: "";
+    position: absolute;
+    top: 43px;
+    left: 50%;
+    width: calc(100% + 2rem);
+    border-top: 2px solid #d6b6a3;
+  }
+  .step2::after {
+    content: "";
+    position: absolute;
+    top: 39px;
+    right: -1.2rem;
+    width: 8px;
+    height: 8px;
+    border-top: 2px solid $primary;
+    border-right: 2px solid $primary;
+    transform: rotate(45deg);
+  }
+  .step2:nth-child(4n)::before, .step2:nth-child(4n)::after,
+  .step2--last::before, .step2--last::after { display: none; }
+  .step2-milestone { position: relative; width: 88px; height: 88px; margin: 0 auto 1.5rem; flex-shrink: 0; }
+  .step2-icon {
+    display: flex; align-items: center; justify-content: center;
+    width: 88px; height: 88px; border: 2px solid #d6b6a3; border-radius: 50%;
+    background: $white; color: $primary;
+    box-shadow: 0 0 0 8px $base;
+  }
+  .step2-no {
+    position: absolute; right: -5px; bottom: -3px;
+    display: flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: $primary; color: $white; border: 3px solid $base;
+    font-family: $f-body; font-size: .75rem; font-weight: 700;
+  }
+  .step2-copy { flex: 1; padding: 1.25rem 1.1rem; border-top: 3px solid #d6b6a3; background: $white; }
+  .step2-name { font-family: $f-display; font-size: 1.15rem; line-height: 1.4; font-weight: 600; color: $text; overflow-wrap: anywhere; }
+  .step2-desc { margin-top: .65rem; font-size: .85rem; line-height: 1.8; color: #514b45; overflow-wrap: anywhere; }
+  .step2-next { display: none; margin-top: 1rem; font-size: .75rem; font-weight: 600; color: #9b3825; }
+  .step2-next span { margin-left: .35rem; }
+  .step2:nth-child(4n) .step2-next { display: block; }
+  .step2--last .step2-icon { background: $primary; color: $white; border-color: $primary; }
+  .step2--last .step2-copy { border-top-color: $primary; }
+
+  @media (hover: hover) and (pointer: fine) {
+    .step2:hover .step2-icon { border-color: $primary; }
+    .step2:hover .step2-copy { border-top-color: $primary; box-shadow: 0 12px 24px rgba($dark, .08); }
+    @media (prefers-reduced-motion: no-preference) {
+      .step2-icon, .step2-copy { transition: transform .28s $ease; }
+      .step2-icon svg { transition: transform .28s $ease; }
+      .step2:hover .step2-icon { transform: translateY(-3px) scale(1.05); }
+      .step2:hover .step2-icon svg { transform: rotate(-8deg); }
+      .step2:hover .step2-copy { transform: translateY(-5px); }
     }
+  }
 
-    .step2-name {
-      margin-top: 0.9rem;
-      font-family: $f-display;
-      font-weight: 600;
-      font-size: 1.15rem;
-      color: $text;
+  @media (max-width: 1023px) {
+    .steps2-flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .step2:nth-child(2n)::before, .step2:nth-child(2n)::after { display: none; }
+    .step2:nth-child(2n) .step2-next { display: block; }
+  }
+  @media (max-width: 639px) {
+    .steps2-flow { display: block; margin-top: 2.5rem; }
+    .step2 { flex-direction: row; align-items: flex-start; padding-bottom: 1.5rem; }
+    .step2::before, .step2:nth-child(2n)::before, .step2:nth-child(4n)::before {
+      display: block; top: 30px; bottom: 0; left: 29px; width: 0;
+      border-top: 0; border-left: 2px solid #d6b6a3;
     }
-
-    .step2-desc {
-      margin-top: 0.5rem;
-      font-size: 0.84rem;
-      line-height: 1.75;
-      color: $mut;
-    }
-
-    &:hover {
-      border-color: $accent;
-      box-shadow: 0 16px 36px rgba($dark, 0.1);
-      transform: translateY(-4px);
-
-      .step2-no {
-        color: $accent;
-      }
-    }
+    .step2::after { display: none; }
+    .step2--last::before { display: none !important; }
+    .step2-milestone { width: 60px; height: 60px; margin: .15rem 1.25rem 0 0; flex: 0 0 60px; }
+    .step2-icon { width: 60px; height: 60px; box-shadow: 0 0 0 5px $base; }
+    .step2-icon svg { width: 25px; height: 25px; }
+    .step2-no { width: 28px; height: 28px; font-size: .65rem; right: -4px; bottom: -5px; }
+    .step2-copy { flex: 1 1 0; min-width: 0; padding: 1rem; }
+    .step2-name { font-size: 1.05rem; }
+    .step2-desc { font-size: .82rem; }
+    .steps2-flow .step2 .step2-next { display: none; }
   }
 }
 

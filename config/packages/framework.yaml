@@ -25,7 +25,8 @@ framework:
     secret:          '%env(SYMFONY_SECRET)%'
     form:            ~
     csrf_protection: ~
-    validation:      { enable_annotations: true }
+    validation:      { enable_attributes: true }
+    handle_all_throwables: true
     default_locale:  '%locale%'
     trusted_hosts:   ~
     session:
@@ -165,6 +166,11 @@ liip_imagine:
             quality: 100
             filters:
                 thumbnail: { size: [1500, 550], mode: outbound }
+        page_hero_architecture:
+            quality: 78
+            format: webp
+            filters:
+                thumbnail: { size: [1000, 700], mode: outbound }
 
 # KnpPaginationBundle
 knp_paginator:

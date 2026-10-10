@@ -6,10 +6,21 @@
   font-size: 0.9rem;
   font-weight: 300;
 
+  .ft-brand {
+    min-width: 0;
+
+    .hd-logo {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+  }
+
   .ft-head {
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.32em;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: $white;
     margin-bottom: 1.3rem;
@@ -24,18 +35,82 @@
   }
 
   .ft-link {
-    display: block;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
     padding: 0.35rem 0;
+    line-height: 1.6;
+    transition: color $dur $ease;
 
-    &:hover {
-      padding-left: 0.5rem;
+    // A CSS chevron keeps multi-line link labels aligned, without an icon font.
+    &::before {
+      content: "";
+      flex: 0 0 0.35rem;
+      width: 0.35rem;
+      height: 0.35rem;
+      margin-top: 0.5rem;
+      border-top: 1.5px solid currentColor;
+      border-right: 1.5px solid currentColor;
+      transform: rotate(45deg);
+      color: $accent;
+    }
+
+    &:hover,
+    &:focus-visible {
+      color: $accent;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $accent;
+      outline-offset: 3px;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      &::before { transition: transform $dur $ease; }
+
+      &:hover::before,
+      &:focus-visible::before {
+        transform: translateX(3px) rotate(45deg);
+      }
     }
   }
 
-  .ft-legal {
+  .ft-socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
     margin-top: 1rem;
-    font-size: 0.72rem;
-    color: rgba($white, 0.4);
+  }
+
+  .ft-social {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    color: $white;
+    background: rgba($white, 0.06);
+    border: 1px solid rgba($white, 0.24);
+    transition: color $dur $ease, background-color $dur $ease, border-color $dur $ease;
+
+    &:hover {
+      color: $white;
+      background: $primary;
+      border-color: $primary;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $accent;
+      outline-offset: 3px;
+    }
+
+    svg { display: block; flex-shrink: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ft-social,
+    .ft-link { transition: none; }
   }
 
   .ft-bottom {

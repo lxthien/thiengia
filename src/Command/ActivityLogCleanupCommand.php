@@ -16,7 +16,7 @@ class ActivityLogCleanupCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('app:activity-log:cleanup')
@@ -25,7 +25,7 @@ class ActivityLogCleanupCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         $months = (int) $input->getOption('months');

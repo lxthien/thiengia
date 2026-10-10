@@ -23,7 +23,7 @@
         <p class="cost-error" role="alert">{{ message }}</p>
     {% endfor %}
     <div class="cost-workspace">
-        {{ form_start(form, {attr: {class: 'cost-form', 'data-cost-form': '', 'data-reset-url': path('caculator_cost_construction')}}) }}
+        {{ form_start(form, {attr: {class: 'cost-form', 'data-cost-form': '', 'data-reset-url': path('cost_calculator')}}) }}
         <h2 id="cost-heading">Thông tin công trình</h2>
         <p class="cost-intro">Chọn phương án gần nhất với công trình dự kiến của bạn.</p>
         {{ form_errors(form) }}

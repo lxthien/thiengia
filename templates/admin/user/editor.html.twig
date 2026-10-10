@@ -2,7 +2,7 @@
 {% block title %}{{ mode == 'new' ? 'Thêm người dùng' : (mode == 'password' ? 'Đổi mật khẩu' : 'Sửa hồ sơ') }}{% endblock %}
 {% block body_id 'admin_user_editor' %}
 {% block flash_messages %}{% endblock %}
-{% block stylesheets %}{{ parent() }}<link rel="stylesheet" href="{{ asset('build/css/user-manager.css') }}">{% endblock %}
+{% block stylesheets %}{{ parent() }}<link rel="stylesheet" href="{{ asset('build/css/user-manager.css') }}">{% if mode != 'password' %}<link rel="stylesheet" href="{{ asset('build/css/ckeditor5.css') }}">{% endif %}{% endblock %}
 {% block main %}
 <section class="banner-manager contact-manager user-manager"><header class="banner-manager__header"><div><h1>{{ block('title') }}</h1><p>{{ mode == 'new' ? 'Nhập thông tin và chọn quyền phù hợp cho tài khoản mới.' : 'Tài khoản: ' ~ user.username }}</p></div><a class="banner-button" href="{{ path('admin_user_index') }}">Quay lại danh sách</a></header>
 {{ include('admin/redirect/_messages.html.twig') }}
@@ -15,6 +15,13 @@
 {{ form_row(form.username) }}{{ form_row(form.name) }}{{ form_row(form.email) }}
 {% if form.plainPassword is defined %}{{ form_row(form.plainPassword,{attr:{autocomplete:'new-password'}}) }}{% endif %}
 <fieldset class="user-permissions"><legend>Vai trò và trạng thái</legend><p>Chỉ cấp các quyền cần thiết. Danh sách lựa chọn phụ thuộc quyền quản trị của bạn.</p>{{ form_row(form.roles) }}{{ form_row(form.enabled) }}</fieldset>
+<fieldset class="user-permissions"><legend>Hồ sơ tác giả công khai</legend>
+<p>Khối tác giả chỉ hiển thị cuối post, không hiển thị trên page. Ưu tiên tên công khai; để trống sẽ dùng “Tên hiển thị” phía trên.</p>
+{{ form_row(form.publicDisplayName) }}
+{{ include('admin/components/_image_picker.html.twig', {field: form.avatar, picker_id: 'authorAvatarPicker', empty_label: 'Chưa chọn avatar, sẽ hiển thị chữ cái tên tác giả'}) }}
+{{ form_row(form.biography) }}
+{{ form_row(form.showAuthorInfo) }}
+</fieldset>
 {% if mode == 'edit' %}<a class="banner-button" href="{{ path('admin_user_change_password',{id:user.id}) }}">Đổi mật khẩu</a>{% endif %}
 {% endif %}
 <div class="contact-actions">{{ form_widget(form.save,{attr:{class:'banner-button banner-button--primary'}}) }}<a class="banner-button" href="{{ path('admin_user_index') }}">Hủy</a></div>

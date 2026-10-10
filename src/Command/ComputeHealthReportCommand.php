@@ -29,14 +29,14 @@ class ComputeHealthReportCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('app:compute-health-report')
             ->setDescription('Chạy audit sức khỏe nội dung/hạ tầng, lưu kết quả vào health_report.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $report = $this->healthAudit->buildReport();
         $generatedAt = $report['generatedAt'];

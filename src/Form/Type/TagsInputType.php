@@ -41,7 +41,7 @@ class TagsInputType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             // The Tag collection must be transformed into a comma separated string.
@@ -56,7 +56,7 @@ class TagsInputType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         $view->vars['tags'] = $this->manager->getRepository(Tag::class)->findAll();
     }
@@ -64,7 +64,7 @@ class TagsInputType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function getParent()
+    public function getParent(): ?string
     {
         return TextType::class;
     }

@@ -42,7 +42,7 @@
         {% if category %}"articleSection": {{ category.name|json_encode|raw }},{% endif %}
         "author": {
             "@type": "Person",
-            "name": {{ (post.author ? post.author.username : v3.company.authorName)|json_encode|raw }}
+            "name": {{ (post.author ? post.author.authorDisplayName : v3.company.authorName)|json_encode|raw }}
         },
         "publisher": {
             "@type": "Organization",
@@ -82,6 +82,7 @@
 
     {# ============ BANNER BÀI VIẾT ============ #}
     <header class="page-hero !pb-32" aria-label="Thông tin bài viết">
+        {{ include('v3/components/_page_hero_media.html.twig') }}
         <div class="container max-w-7xl relative">
             {{ include('v3/components/_breadcrumb.html.twig', { items: breadcrumbItems }) }}
 
@@ -92,7 +93,7 @@
             <h1 class="page-hero-title mt-5 max-w-4xl fade">{{ (post.title|title_tokens) }}</h1>
 
             <p class="post-meta mt-8 fade">
-                <span>Bởi <strong>{{ post.author ? post.author.username : v3.company.authorName }}</strong></span>
+                <span>Bởi <strong>{{ post.author ? post.author.authorDisplayName : v3.company.authorName }}</strong></span>
                 <time datetime="{{ post.createdAt|date('Y-m-d') }}">{{ post.createdAt|date('d/m/Y') }}</time>
                 {% if readingMinutes|default(0) %}
                     <span>{{ readingMinutes }} phút đọc</span>
@@ -125,14 +126,7 @@
                     alreadyRated: alreadyRated,
                 }, with_context = false) }}
 
-                <aside class="author-box mt-12">
-                    <img src="{{ asset(v3.company.authorAvatar) }}" alt="Chân dung {{ v3.company.authorName }}" loading="lazy" decoding="async">
-                    <div>
-                        <p class="author-label">Tác giả</p>
-                        <p class="author-name">{{ post.author ? post.author.username : v3.company.authorName }}</p>
-                        <p class="author-bio">{{ v3.company.authorBio }}</p>
-                    </div>
-                </aside>
+                {{ include('v3/components/_author_box.html.twig', {post: post}) }}
 
                 {{ include('news/comments/_section.html.twig', { comments: comments, form: form }, with_context = false) }}
             </article>

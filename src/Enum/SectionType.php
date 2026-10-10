@@ -49,7 +49,7 @@ enum SectionType: string
     {
         return match ($this) {
             self::Hero => 'Ảnh nền lấy từ Banner (nhóm hero). Gạch đầu dòng lấy từ cấu hình theme.',
-            self::Figures => 'Bốn con số lấy từ cấu hình theme.',
+            self::Figures => 'Số liệu dùng chung cho trang chủ và các trang nội dung. Sửa tại khối này; cấu hình theme chỉ là giá trị dự phòng.',
             self::Commitments => 'Danh sách cam kết lấy từ cấu hình theme.',
             self::About => 'Ảnh và nội dung giới thiệu lấy từ cấu hình theme.',
             self::Services => 'Danh sách dịch vụ lấy từ cấu hình theme.',

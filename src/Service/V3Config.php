@@ -2,6 +2,9 @@
 
 namespace App\Service;
 
+use App\Enum\SectionType;
+use App\Repository\HomepageSectionRepository;
+
 /**
  * Nguồn đọc cấu hình theme v3.
  *
@@ -34,6 +37,7 @@ final class V3Config
     public function __construct(
         private readonly array $defaults,
         private readonly SettingsManager $settingsManager,
+        private readonly HomepageSectionRepository $homepageSections,
     ) {
     }
 
@@ -92,6 +96,18 @@ final class V3Config
 
         if ($phoneRaw !== '') {
             $config['company']['zalo'] = 'https://zalo.me/' . preg_replace('/^\+84/', '0', $phoneRaw);
+        }
+
+        // Shared statistics: the homepage editor is the single source for all pages.
+        // Keep the configured values even when the strip is hidden on the homepage.
+        try {
+            $items = $this->homepageSections->findOneByType(SectionType::Figures)?->getConfigValue('items');
+            if (is_array($items) && $items !== []) {
+                $config['figures'] = $items;
+            }
+        } catch (\Throwable) {
+            // Installation/error rendering may run before the homepage table is available.
+            // In that case the YAML defaults remain usable.
         }
 
         return $config;

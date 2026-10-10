@@ -1,16 +1,25 @@
 <section id="quy-trinh" class="steps2 py-20 lg:py-24" aria-labelledby="quy-trinh-h">
     <div class="container max-w-7xl">
         <div class="max-w-2xl mx-auto text-center">
-            <p class="sec-label sec-label--center fade">{{ section.label|default('Quy trình làm việc')|raw }}</p>
-            <h2 id="quy-trinh-h" class="h-display text-3xl lg:text-4xl mt-5 fade">{{ section.title|default('8 bước — rõ ràng <em>từ đầu</em>')|raw }}</h2>
+            <p class="sec-label sec-label--center">{{ section.label|default('Quy trình làm việc')|raw }}</p>
+            <h2 id="quy-trinh-h" class="h-display text-3xl lg:text-4xl mt-5">{{ section.title|default('8 bước, rõ ràng <em>từ đầu</em>')|raw }}</h2>
         </div>
 
-        <ol class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-12">
+        {% set icons = ['ruler', 'money', 'contract', 'ruler', 'contract', 'home', 'materials', 'shield'] %}
+        <ol class="steps2-flow" role="list">
             {% for step in section.getConfigValue('items') ?: v3.steps %}
-                <li class="step2 fade">
-                    <p class="step2-no" aria-hidden="true">{{ '%02d'|format(loop.index) }}</p>
+                <li class="step2{{ loop.last ? ' step2--last' : '' }}">
+                    <div class="step2-milestone" aria-hidden="true">
+                        <span class="step2-icon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">{{ section_icon(icons[loop.index0]|default('check')) }}</svg></span>
+                        <span class="step2-no">{{ '%02d'|format(loop.index) }}</span>
+                    </div>
+                    <div class="step2-copy">
                     <h3 class="step2-name">{{ step.name }}</h3>
                     <p class="step2-desc">{{ step.desc }}</p>
+                    {% if not loop.last %}
+                        <span class="step2-next" aria-hidden="true">Tiếp tục bước {{ '%02d'|format(loop.index + 1) }} <span>↓</span></span>
+                    {% endif %}
+                    </div>
                 </li>
             {% endfor %}
         </ol>

@@ -1,0 +1,7 @@
+{# Decorative brand architecture, shared by page and post headers. Missing media falls back to the solid surface. #}
+{% set heroImage = v3.pageHeroImage|default('') %}
+{% if heroImage and convert_images.fileExists(heroImage) %}
+    <div class="page-hero-media" aria-hidden="true">
+        <img src="{{ heroImage|imagine_filter('page_hero_architecture') }}" alt="" width="1000" height="700" decoding="async">
+    </div>
+{% endif %}

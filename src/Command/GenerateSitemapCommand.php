@@ -14,14 +14,14 @@ class GenerateSitemapCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('app:sitemap:generate')
             ->setDescription('Display the bounded XML sitemap index manifest.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $output->writeln('<info>Sitemap index is available at: /sitemap.xml</info>');
         $output->writeln(sprintf('<comment>Indexable URLs: %d</comment>', $this->sitemapService->getUrlCount()));

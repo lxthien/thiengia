@@ -53,6 +53,40 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     )]
     private ?string $name = null;
 
+    #[ORM\Column(name: 'publicDisplayName', type: Types::STRING, length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
+    private ?string $publicDisplayName = null;
+
+    public function getPublicDisplayName(): ?string { return $this->publicDisplayName; }
+    public function setPublicDisplayName(?string $name): static
+    {
+        $this->publicDisplayName = trim($name ?? '') ?: null;
+        return $this;
+    }
+    public function getAuthorDisplayName(): string
+    {
+        return $this->publicDisplayName ?: ($this->name ?: $this->username);
+    }
+
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
+    #[Assert\Regex(pattern: '#^/uploads/media/(?!.*\.\.)[^\s?\#]+\.(?:jpe?g|png|gif|webp|avif)$#i', message: 'Chọn ảnh hợp lệ từ thư viện media.')]
+    private ?string $avatar = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\Length(max: 10000, maxMessage: 'Giới thiệu tối đa 10.000 ký tự.')]
+    private ?string $biography = null;
+
+    #[ORM\Column(name: 'showAuthorInfo', type: Types::BOOLEAN, options: ['default' => false])]
+    private bool $showAuthorInfo = false;
+
+    public function getAvatar(): ?string { return $this->avatar; }
+    public function setAvatar(?string $avatar): static { $this->avatar = $avatar ?: null; return $this; }
+    public function getBiography(): ?string { return $this->biography; }
+    public function setBiography(?string $biography): static { $this->biography = $biography; return $this; }
+    public function isShowAuthorInfo(): bool { return $this->showAuthorInfo; }
+    public function setShowAuthorInfo(bool $show): static { $this->showAuthorInfo = $show; return $this; }
+
     #[Gedmo\Timestampable(on: 'create')]
     #[ORM\Column(name: 'createdAt', type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $createdAt = null;

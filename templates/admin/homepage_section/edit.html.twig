@@ -24,6 +24,13 @@
                                     {{ include('admin/components/_image_picker.html.twig', {field: form.image, picker_id: 'sectionPicker'}) }}
                                 {% endif %}
                                 {% if form.imageAlt is defined %}{{ form_row(form.imageAlt) }}{% endif %}
+                                {% if form.image2 is defined %}
+                                    {{ include('admin/components/_image_picker.html.twig', {field: form.image2, picker_id: 'sectionPicker2'}) }}
+                                    {{ form_row(form.image2Alt) }}
+                                    {{ form_row(form.badgeValue) }}
+                                    {{ form_row(form.badgeUnit) }}
+                                    {{ form_row(form.badgeLabel) }}
+                                {% endif %}
 
                                 {% if form.points is defined %}
                                     {{ include('admin/homepage_section/_collection.html.twig', {field: form.points, add_label: 'Thêm gạch đầu dòng'}) }}

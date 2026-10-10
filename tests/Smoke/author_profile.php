@@ -1,0 +1,66 @@
+<?php
+require dirname(__DIR__, 2).'/vendor/autoload.php';
+
+use App\Entity\User;
+use App\Service\AuthorBiographySanitizer;
+use App\Twig\AuthorProfileExtension;
+use Symfony\Component\Validator\Validation;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
+use Twig\TwigFunction;
+
+$check = static function ($ok, $message) { if (!$ok) { throw new RuntimeException($message); } };
+$sanitizer = new AuthorBiographySanitizer();
+$clean = $sanitizer->sanitize('<p onclick="alert(1)">Giới thiệu <strong>tác giả</strong> <a href="https://example.com" target="_blank">Website</a><a href="javascript:alert(1)">Bad</a></p><script>alert(1)</script><iframe src="https://example.com"></iframe><img src=x onerror=alert(1)>');
+$check(str_contains($clean, '<strong>tác giả</strong>') && str_contains($clean, 'https://example.com'), 'Formatting and HTTPS link must survive');
+$check(!preg_match('/script|onclick|onerror|iframe|<img/i', $clean), 'Unsafe markup must be removed');
+$check(str_contains($clean, 'noopener') && str_contains($clean, 'noreferrer'), 'External target must be safe');
+$user = (new User())->setUsername('author')->setName('Nguyễn Văn An')->setEmail('author@example.com')->setBiography($clean);
+$twig = new Environment(new FilesystemLoader(dirname(__DIR__, 2).'/templates'), ['strict_variables' => true]);
+$twig->addExtension(new AuthorProfileExtension($sanitizer));
+$twig->addFunction(new TwigFunction('asset', static fn ($path) => $path));
+$twig->addGlobal('convert_images', new class { public function fileExists($path) { return $path === '/uploads/media/avatar.jpg'; } });
+$render = static fn () => $twig->render('v3/components/_author_box.html.twig', ['post' => ['author' => $user]]);
+$check(trim($render()) === '', 'Profile must be hidden by default');
+$user->setShowAuthorInfo(true);
+$html = $render();
+$check(str_contains($html, 'Nguyễn Văn An') && str_contains($html, 'author-avatar-fallback'), 'Real name and avatar fallback must render');
+$check(!str_contains($html, '<img'), 'Missing avatar must not emit a broken image');
+$user->setPublicDisplayName('  Kiến trúc sư An  ');
+$check(str_contains($render(), 'Kiến trúc sư An') && $user->getAuthorDisplayName() === 'Kiến trúc sư An', 'Public display name must override default name');
+$user->setPublicDisplayName('   ');
+$check($user->getPublicDisplayName() === null && str_contains($render(), 'Nguyễn Văn An'), 'Blank public name must fall back to default name');
+$check(!str_contains(file_get_contents(dirname(__DIR__, 2).'/templates/news/page.html.twig'), '_author_box.html.twig'), 'Page must not include author box');
+$check(str_contains(file_get_contents(dirname(__DIR__, 2).'/templates/news/show.html.twig'), '_author_box.html.twig'), 'Post must retain author box');
+$user->setAvatar('/uploads/media/avatar.jpg');
+$check(str_contains($render(), 'src="/uploads/media/avatar.jpg"'), 'Selected avatar must render');
+$user->setAvatar('/uploads/media/missing.jpg');
+$check(str_contains($render(), 'author-avatar-fallback'), 'Deleted media must use fallback');
+$user->setShowAuthorInfo(false);
+$check(trim($render()) === '', 'Visibility toggle must hide profile');
+$validator = Validation::createValidatorBuilder()->enableAnnotationMapping()->getValidator();
+$user->setAvatar('/uploads/media/../evil.svg');
+$check(count($validator->validateProperty($user, 'avatar')) > 0, 'Invalid avatar paths must be rejected');
+$check(trim($twig->render('v3/components/_author_box.html.twig', ['post' => ['author' => null]])) === '', 'Unassigned author must not show company biography');
+
+// Verify persistence hooks on an isolated in-memory database, never the CMS DB.
+$config = Doctrine\ORM\ORMSetup::createAttributeMetadataConfiguration([dirname(__DIR__, 2).'/src/Entity'], true);
+$em = Doctrine\ORM\EntityManager::create(['driver' => 'pdo_sqlite', 'memory' => true], $config);
+$listener = new App\EventListener\UserBiographySanitizerListener($sanitizer);
+$em->getEventManager()->addEventListener(['prePersist', 'preUpdate'], $listener);
+(new Doctrine\ORM\Tools\SchemaTool($em))->createSchema([$em->getClassMetadata(User::class)]);
+$saved = (new User())->setUsername('isolated-author')->setName('Test Author')->setEmail('isolated@example.com')->setPassword('test-only')->setBiography('<p onclick="bad()">Hello <strong>author</strong></p>');
+$em->persist($saved);
+$em->flush();
+$id = $saved->getId();
+$em->clear();
+$saved = $em->find(User::class, $id);
+$check(!str_contains($saved->getBiography(), 'onclick') && str_contains($saved->getBiography(), '<strong>author</strong>'), 'prePersist must sanitize stored biography');
+$saved->setBiography('<p>Updated <a href="javascript:alert(1)">link</a></p>')->setShowAuthorInfo(true)->setPublicDisplayName('Public Author');
+$em->flush();
+$em->clear();
+$saved = $em->find(User::class, $id);
+$check(!str_contains($saved->getBiography(), 'javascript:') && $saved->isShowAuthorInfo(), 'preUpdate must sanitize and preserve visibility');
+$check($saved->getAuthorDisplayName() === 'Public Author', 'Public display name must persist');
+$em->close();
+echo "Author profile smoke checks passed.\n";

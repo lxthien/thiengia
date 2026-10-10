@@ -1,0 +1,103 @@
+@use "../tokens" as *;
+
+.error-page {
+  padding: clamp(3rem, 7vw, 6rem) 0;
+  border-top: 1px solid $line;
+
+  &__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.35fr);
+    gap: clamp(2rem, 5vw, 5rem);
+    align-items: center;
+  }
+
+  &__status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    border-right: 1px solid $line;
+    text-align: center;
+  }
+
+  &__code {
+    color: $primary;
+    font-family: $f-display;
+    font-size: clamp(6rem, 13vw, 11rem);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.05em;
+    font-variant-numeric: lining-nums;
+  }
+
+  &__status-label { margin-top: 1rem; color: #64594f; font-size: 0.875rem; }
+  &__content { min-width: 0; }
+
+  h1 {
+    margin-bottom: 1.25rem;
+    font-family: $f-display;
+    font-size: clamp(1.875rem, 3.5vw, 3rem);
+    font-weight: 500;
+    line-height: 1.25;
+  }
+
+  &__message { max-width: 60ch; color: #51483f; line-height: 1.85; }
+  &__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }
+
+  .btn2 {
+    min-height: 48px;
+    padding: 0.9rem 1.4rem;
+    letter-spacing: 0.08em;
+    border: 1px solid $primary;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    &:hover { background: $brown; border-color: $brown; }
+  }
+
+  .error-page__secondary {
+    background: transparent;
+    color: $primary;
+    &:hover { background: $primary; color: $white; border-color: $primary; }
+  }
+
+  a:focus-visible, button:focus-visible, input:focus-visible {
+    outline: 2px solid $primary;
+    outline-offset: 4px;
+  }
+
+  &__hint { margin-top: 1.5rem; max-width: 60ch; font-size: 0.875rem; color: #64594f; }
+  &__search { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid $line; }
+  &__search label { display: block; margin-bottom: 0.65rem; font-weight: 500; }
+  &__search-row { display: flex; gap: 0.75rem; }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    min-height: 48px;
+    padding: 0.85rem 1rem;
+    color: $text;
+    background: $white;
+    border: 1px solid #9d9185;
+    border-radius: 0;
+    font: inherit;
+    &::placeholder { color: #6b6259; opacity: 1; }
+  }
+
+  @media (max-width: 767px) {
+    &__layout { grid-template-columns: minmax(0, 1fr); gap: 1.75rem; }
+    &__status { padding: 0 0 1.75rem; border-right: 0; border-bottom: 1px solid $line; }
+    &__content { text-align: center; }
+    &__actions { justify-content: center; }
+    &__message, &__hint { margin-left: auto; margin-right: auto; }
+    &__search { text-align: left; }
+  }
+
+  @media (max-width: 479px) {
+    &__actions { flex-direction: column; }
+    &__search-row { flex-direction: column; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn2 { transition: none; }
+  }
+}

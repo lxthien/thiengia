@@ -1,5 +1,7 @@
 {# Nội dung lấy từ entity Service (admin: Dịch vụ). Khi chưa có dịch vụ nào
-   trong DB thì dùng danh sách mặc định của theme để khối không bị trống. #}
+   trong DB thì dùng danh sách mặc định của theme để khối không bị trống.
+   Thẻ dạng poster: ảnh phủ kín làm nền, bo góc, chữ nổi ở đáy. Cần ảnh
+   không chữ. Số cột đổi theo data-cards; điện thoại là hàng trượt ngang. #}
 {% set cards = [] %}
 {% for service in services|default([]) %}
     {% set cards = cards|merge([{
@@ -7,31 +9,42 @@
         image: service.image,
         desc: service.description,
         price: service.priceFrom,
+        link: service.slug,
     }]) %}
 {% endfor %}
 {% if cards is empty %}
     {% for service in v3.services %}
-        {% set cards = cards|merge([{name: service.name, image: service.image, desc: service.desc, price: null}]) %}
+        {% set cards = cards|merge([{name: service.name, image: service.image, desc: service.desc, price: null, link: null}]) %}
     {% endfor %}
 {% endif %}
 
-<section id="dich-vu" class="svc py-20 lg:py-24" aria-labelledby="dich-vu-h">
+<section id="dich-vu" class="svc py-20 lg:py-28" aria-labelledby="dich-vu-h">
     <div class="container max-w-7xl">
-        <div class="max-w-2xl mx-auto text-center">
-            <p class="sec-label sec-label--center fade">{{ section.label|default('Dịch vụ')|raw }}</p>
-            <h2 id="dich-vu-h" class="h-display text-3xl lg:text-4xl mt-5 fade">{{ section.title|default('Trọn gói từ móng đến <em>nội thất</em>')|raw }}</h2>
+        <div class="svc-head">
+            <div>
+                <p class="sec-label fade">{{ section.label|default('Dịch vụ')|raw }}</p>
+                <h2 id="dich-vu-h" class="h-display text-3xl lg:text-4xl mt-5 fade">{{ section.title|default('Trọn gói từ móng đến <em>nội thất</em>')|raw }}</h2>
+            </div>
+            <a href="{{ path('homepage') }}#bao-gia-nhanh" class="btn2 btn2--dark fade">Nhận báo giá chi tiết</a>
         </div>
 
-        <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-5 mt-12">
+        <div class="svc-grid" data-cards="{{ cards|length > 4 ? 'many' : cards|length }}">
             {% for card in cards %}
                 <article class="svc-card fade">
-                    <figure>
-                        <img src="{{ asset(card.image) }}" alt="{{ card.name }}" loading="lazy" decoding="async">
-                    </figure>
+                    {% if card.image %}
+                        <img class="svc-img" src="{{ asset(card.image) }}" alt="" loading="lazy" decoding="async">
+                    {% endif %}
+                    <span class="svc-no" aria-hidden="true">{{ '%02d'|format(loop.index) }}</span>
+                    <span class="svc-arrow" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M8 7h9v9"/></svg>
+                    </span>
+
                     <div class="svc-body">
-                        <h3 class="svc-name">{{ card.name }}</h3>
-                        <p class="svc-desc">{{ card.desc }}{% if card.price %} Đơn giá {{ card.price }}.{% endif %}</p>
-                        <a href="{{ path('contact') }}" class="svc-link">Xem báo giá <span aria-hidden="true">→</span></a>
+                        {% if card.price %}<p class="svc-price">{{ card.price }}</p>{% endif %}
+                        <h3 class="svc-name">
+                            <a href="{{ card.link ?: path('contact') }}">{{ card.name }}</a>
+                        </h3>
+                        <p class="svc-desc">{{ card.desc }}</p>
                     </div>
                 </article>
             {% endfor %}

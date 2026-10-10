@@ -526,7 +526,14 @@ export default function initCkeditor5() {
         const requestedMax = Number(textarea.dataset.maxHeight);
         const maxHeight = Number.isFinite(requestedMax) && requestedMax > 0 ? requestedMax : height;
 
-        const config = textarea.dataset.editorPreset === 'comment'
+        const config = textarea.dataset.editorPreset === 'author'
+            ? {
+                licenseKey: 'GPL', translations: [coreTranslations], language: 'vi',
+                plugins: [Essentials, Paragraph, Bold, Italic, Link, List, RemoveFormat],
+                toolbar: { items: ['undo', 'redo', '|', 'bold', 'italic', 'link', '|', 'bulletedList', 'numberedList', 'removeFormat'], shouldNotGroupWhenFull: false },
+                link: { defaultProtocol: 'https://', addTargetToExternalLinks: true },
+            }
+            : textarea.dataset.editorPreset === 'comment'
             ? { ...baseConfig, toolbar: { items: ['undo', 'redo', '|', 'bold', 'italic', 'link', '|', 'bulletedList', 'numberedList', 'blockQuote', 'removeFormat'], shouldNotGroupWhenFull: false } }
             : baseConfig;
         ClassicEditor

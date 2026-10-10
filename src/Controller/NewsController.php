@@ -815,7 +815,7 @@ class NewsController extends AbstractController
             return $this->redirectToRoute('homepage', [], 301);
         }
 
-        $q = $form->getData()['q'];
+        $q = $form->isSubmitted() ? ($form->getData()['q'] ?? null) : null;
         if (!empty($q)) {
             return $this->redirectToRoute('news_search', array('q' => $q));
         }
@@ -861,7 +861,7 @@ class NewsController extends AbstractController
 
         return $this->render('news/search.html.twig', [
             'baseUrl' => $this->generateUrl('news_search', array('q' => $searchTerm), UrlGeneratorInterface::ABSOLUTE_URL),
-            'q' => ucfirst($searchTerm),
+            'q' => $searchTerm,
             'pagination' => $pagination
         ]);
     }
@@ -875,12 +875,15 @@ class NewsController extends AbstractController
      */
     private function highlightKeyword($text, $keyword)
     {
+        // Only the generated <mark> tags may be rendered as HTML.
+        $text = htmlspecialchars((string) $text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $keyword = htmlspecialchars((string) $keyword, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
         if (empty($text) || empty($keyword)) {
             return $text;
         }
 
         // Case-insensitive replacement with word boundaries
-        $pattern = '/(' . preg_quote($keyword, '/') . ')/i';
+        $pattern = '/(' . preg_quote($keyword, '/') . ')/iu';
         return preg_replace($pattern, '<mark>$1</mark>', $text);
     }
 
@@ -1126,15 +1129,15 @@ class NewsController extends AbstractController
             ->getForm();
     }
 
-    #[Route('/cong-cu/chi-phi-xay-dung/', name: 'caculator_cost_construction')]
-    public function caculatorCostConstructionAction(Request $request, $type = null)
+    #[Route('/cong-cu/chi-phi-xay-dung/', name: 'cost_calculator')]
+    public function costCalculatorAction(Request $request, $type = null)
     {
         $settingsManager = $this->settingsManager;
 
         $form = $this->createFormBuilder(null, array(
             'csrf_protection' => false,
         ))
-            ->setAction($this->generateUrl('caculator_cost_construction'))
+            ->setAction($this->generateUrl('cost_calculator'))
             ->setMethod('POST')
             ->add('type', ChoiceType::class, array(
                 'choices' => array(
@@ -1284,7 +1287,7 @@ class NewsController extends AbstractController
             // Validate numeric
             if (!is_numeric($long) || !is_numeric($wide) || !is_numeric($type) || !is_numeric($method) || !is_numeric($floor)) {
                 $this->addFlash('error', "Vui lòng nhập đúng dữ liệu");
-                return $this->redirectToRoute('caculator_cost_construction');
+                return $this->redirectToRoute('cost_calculator');
             }
 
             $area = $long * $wide;

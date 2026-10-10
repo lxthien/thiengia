@@ -54,7 +54,7 @@ class ListUsersCommand extends Command
     /**
      * {@inheritdoc}
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             // a good practice is to use the 'app:' prefix to group all your custom application commands
@@ -88,7 +88,7 @@ HELP
      * This method is executed after initialize(). It usually contains the logic
      * to execute to complete this command task.
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $maxResults = $input->getOption('max-results');
         // Use ->findBy() instead of ->findAll() to allow result sorting and limiting

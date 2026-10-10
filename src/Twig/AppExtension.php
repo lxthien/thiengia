@@ -66,7 +66,7 @@ class AppExtension extends AbstractExtension
     /**
      * {@inheritdoc}
      */
-    public function getFilters()
+    public function getFilters(): array
     {
         return [
             new TwigFilter('rating', [$this, 'renderRating'], ['is_safe' => ['html']]),
@@ -76,7 +76,7 @@ class AppExtension extends AbstractExtension
     /**
      * {@inheritdoc}
      */
-    public function getFunctions()
+    public function getFunctions(): array
     {
         return [
             new TwigFunction('locales', [$this, 'getLocales']),

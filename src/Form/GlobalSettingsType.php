@@ -13,7 +13,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class GlobalSettingsType extends AbstractType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('siteName', TextType::class, ['required' => false, 'label' => 'Tên Website'])
@@ -44,7 +44,8 @@ class GlobalSettingsType extends AbstractType
             ->add('fbApp', TextType::class, ['required' => false, 'label' => 'Facebook App ID'])
             
             ->add('linkToFacebook', TextType::class, ['required' => false, 'label' => 'Link Facebook'])
-            ->add('linkToGooglePlus', TextType::class, ['required' => false, 'label' => 'Link Google+'])
+            ->add('linkToTiktok', TextType::class, ['required' => false, 'label' => 'Link TikTok'])
+            ->add('linkToZalo', TextType::class, ['required' => false, 'label' => 'Link Zalo'])
             ->add('linkToTwitter', TextType::class, ['required' => false, 'label' => 'Link Twitter'])
             ->add('linkToYoutube', TextType::class, ['required' => false, 'label' => 'Link Youtube'])
             ->add('linkToLinkedin', TextType::class, ['required' => false, 'label' => 'Link Linkedin'])
@@ -66,7 +67,7 @@ class GlobalSettingsType extends AbstractType
         ;
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             // no data class, we pass an array

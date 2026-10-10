@@ -1,0 +1,28 @@
+{% extends 'layout.html.twig' %}
+{% block title %}{{ errorTitle|default('Đã xảy ra lỗi') }} ({{ errorCode|default(status_code|default(500)) }}) - {{ v3.company.shortName }}{% endblock %}
+{% block description %}{{ errorMessage|default('Yêu cầu chưa thể hoàn tất. Vui lòng trở về trang chủ hoặc liên hệ Thiện Gia để được hỗ trợ.') }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex, nofollow">{% endblock %}
+{% block canonical %}{% endblock %}
+{% block localBusiness %}{% endblock %}
+{% block bodyClass %}error-view{% endblock %}
+{% block body %}
+<section class="error-page" aria-labelledby="error-title">
+    <div class="container max-w-7xl">
+        <div class="error-page__layout">
+            <div class="error-page__status" aria-label="Mã lỗi {{ errorCode|default(status_code|default(500)) }}">
+                <span class="error-page__code" aria-hidden="true">{{ errorCode|default(status_code|default(500)) }}</span>
+                <span class="error-page__status-label">Yêu cầu chưa thể hoàn tất</span>
+            </div>
+            <div class="error-page__content">
+                <h1 id="error-title">{{ errorTitle|default('Rất tiếc, đã xảy ra lỗi') }}</h1>
+                <p class="error-page__message">{{ block('description') }}</p>
+                <div class="error-page__actions">
+                    <a class="btn2" href="{{ path('homepage') }}">Về trang chủ</a>
+                    <a class="btn2 error-page__secondary" href="{{ path(errorSecondaryRoute|default('contact')) }}">{{ errorSecondaryLabel|default('Liên hệ hỗ trợ') }}</a>
+                </div>
+                {% block error_extra %}{% endblock %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -15,6 +15,9 @@ parameters:
         # Đổi cho khớp NewsCategory.url thật trong DB.
         newsCategorySlug: 'blog'
 
+        # Nền kiến trúc dùng chung cho banner trang trong. Để trống để tắt ảnh.
+        pageHeroImage: '/uploads/media/banner/thiet-ke-nha-pho_1791344582.jpg'
+
         colors:
             primary: '#b5462e'   # đỏ gạch — logo, CTA, heading nhấn
             accent:  '#e07b39'   # cam đất — hover, icon, badge
@@ -44,7 +47,7 @@ parameters:
             projectsCount: '500+'
             description: 'Công ty TNHH Xây Dựng Thiện Gia — xây nhà trọn gói, xây biệt thự, sửa nhà tại TP.HCM. Hơn 10 năm, 500+ công trình, bảo hành kết cấu 10 năm.'
             heroIntro: 'Hơn 10 năm, Thiện Gia xây tổ ấm cho hàng trăm gia đình Việt: đúng bản vẽ, đúng tiến độ, đúng ngân sách đã ký — bảo hành kết cấu 10 năm bằng văn bản.'
-            footerIntro: 'Kiến tạo tổ ấm trọn vẹn — xây nhà trọn gói, xây biệt thự, sửa nhà tại TP.HCM và các tỉnh lân cận từ 2015.'
+            footerIntro: 'Thiết kế và thi công nhà phố, biệt thự, sửa chữa cải tạo nhà tại TP.HCM và các tỉnh lân cận. Báo giá công khai cách tính, vật tư ghi rõ trong hợp đồng, bảo hành kết cấu 5 năm bằng văn bản.'
 
             authorName:   'KTS. Nguyễn Thiện Gia'
             authorAvatar: 'assets/images/v3/author.jpg'
@@ -57,11 +60,12 @@ parameters:
                 - { label: 'Quy trình làm việc',      anchor: '#quy-trinh' }
                 - { label: 'Hình ảnh hoạt động',      anchor: '#hoat-dong' }
             services:
-                - 'Xây nhà trọn gói'
-                - 'Xây nhà phần thô'
-                - 'Xây biệt thự'
-                - 'Sửa nhà trọn gói'
-                - 'Thiết kế kiến trúc'
+                - { label: 'Xây nhà trọn gói',                          anchor: '/xay-nha-tron-goi/' }
+                - { label: 'Xây nhà phần thô và nhân công hoàn thiện',  anchor: '/xay-nha-phan-tho/' }
+                - { label: 'Sửa nhà trọn gói',                          anchor: '/sua-nha-tron-goi/' }
+                - { label: 'Thiết kế kiến trúc',                        anchor: '/thiet-ke-kien-truc/' }
+                - { label: 'Xin giấy phép xây dựng',                    anchor: '/dich-vu-xin-giay-phep-xay-dung/' }
+                - { label: 'Hoàn công',                                 anchor: '/dich-vu-hoan-cong/' }
 
         heroPoints:
             - 'Không phát sinh ngoài hợp đồng'
@@ -106,7 +110,7 @@ parameters:
 
         services:
             - { name: 'Xây nhà trọn gói', image: 'assets/images/v3/svc-1.jpg', desc: 'Chìa khóa trao tay từ thiết kế, xin phép đến hoàn thiện. Đơn giá từ 7,5 triệu/m².' }
-            - { name: 'Xây nhà phần thô', image: 'assets/images/v3/svc-2.jpg', desc: 'Kết cấu chuẩn kỹ thuật + nhân công hoàn thiện. Đơn giá từ 3,8 triệu/m².' }
+            - { name: 'Xây nhà phần thô và nhân công hoàn thiện', image: 'assets/images/v3/svc-2.jpg', desc: 'Kết cấu chuẩn kỹ thuật + nhân công hoàn thiện. Đơn giá từ 3,8 triệu/m².' }
             - { name: 'Xây biệt thự',     image: 'assets/images/v3/svc-3.jpg', desc: 'Biệt thự phố, sân vườn, nghỉ dưỡng — hồ bơi, tầng hầm, smarthome.' }
             - { name: 'Sửa nhà trọn gói', image: 'assets/images/v3/svc-4.jpg', desc: 'Cải tạo, nâng tầng, thay đổi công năng — khảo sát miễn phí tại nhà.' }
 
@@ -124,8 +128,8 @@ parameters:
         steps:
             - { name: 'Khảo sát hiện trạng',   desc: 'Đo đạc thực địa, kiểm tra địa chất, quy hoạch và hiện trạng công trình lân cận — miễn phí.' }
             - { name: 'Tư vấn & dự toán',      desc: 'Tư vấn phương án phù hợp ngân sách, lập dự toán sơ bộ theo nhu cầu thực tế của gia đình.' }
-            - { name: 'Thiết kế',              desc: 'Concept 3D chỉnh đến khi ưng ý — hồ sơ kỹ thuật đủ chi tiết để thi công không phát sinh.' }
             - { name: 'Ký kết hợp đồng',       desc: 'Dự toán bóc tách từng hạng mục, phụ lục ghi rõ mã vật tư — con số ký là con số cuối.' }
+            - { name: 'Thiết kế',              desc: 'Concept 3D chỉnh đến khi ưng ý — hồ sơ kỹ thuật đủ chi tiết để thi công không phát sinh.' }
             - { name: 'Xin giấy phép pháp lý', desc: 'Thiện Gia thay gia chủ lo trọn hồ sơ xin phép xây dựng và các thủ tục pháp lý liên quan.' }
             - { name: 'Thi công phần thô',     desc: 'Móng, khung kết cấu, tường bao, mái — kỹ sư giám sát riêng, nghiệm thu từng giai đoạn.' }
             - { name: 'Thi công hoàn thiện',   desc: 'Ốp lát, sơn nước, trần, cửa, cơ điện, nội thất — đối chiếu vật tư đúng phụ lục hợp đồng.' }

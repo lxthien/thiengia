@@ -12,6 +12,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -325,6 +327,24 @@ class UserController extends AbstractController
                     new Assert\NotBlank(['message' => 'Vui lòng nhập email']),
                     new Assert\Email(['message' => 'Email không hợp lệ']),
                 ]
+            ]);
+
+        $builder
+            ->add('publicDisplayName', TextType::class, [
+                'required' => false,
+                'label' => 'Tên hiển thị công khai',
+                'help' => 'Để trống để dùng tên hiển thị mặc định của user.',
+                'attr' => ['maxlength' => 255],
+            ])
+            ->add('avatar', HiddenType::class, ['required' => false, 'label' => 'Avatar tác giả'])
+            ->add('biography', TextareaType::class, [
+                'required' => false,
+                'label' => 'Giới thiệu tác giả',
+                'attr' => ['class' => 'txt-ckeditor5', 'data-editor-preset' => 'author', 'data-height' => 180, 'data-max-height' => 300, 'rows' => 6],
+            ])
+            ->add('showAuthorInfo', CheckboxType::class, [
+                'required' => false,
+                'label' => 'Hiển thị thông tin tác giả ở cuối post',
             ]);
 
         // Password field only for new users

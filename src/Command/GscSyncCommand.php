@@ -36,7 +36,7 @@ class GscSyncCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('app:gsc:sync')
@@ -46,7 +46,7 @@ class GscSyncCommand extends Command
             ->addOption('to', null, InputOption::VALUE_REQUIRED, 'Ngày kết thúc (YYYY-MM-DD), mặc định là hôm qua');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (!$this->client->isConfigured()) {
             $output->writeln('Chua cau hinh Search Console (GSC_SITE_URL / GSC_CREDENTIALS_PATH), bo qua.');

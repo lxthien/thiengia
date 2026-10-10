@@ -24,14 +24,14 @@ class ComputeInternalLinksCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('app:compute-internal-links')
             ->setDescription('Phân tích link nội bộ (trang mồ côi, link hỏng, anchor text...) và lưu vào internal_link_report.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $summary = $this->reports->refresh($this->analyzer)->getData()['summary'];
 

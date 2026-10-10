@@ -29,14 +29,14 @@ class ComputeContentDecayCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('app:compute-content-decay')
             ->setDescription('Tính lại điểm content decay cho mọi bài viết đã xuất bản, lưu vào content_decay_snapshot.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $posts = $this->em->getRepository(News::class)->createQueryBuilder('n')
             ->where('n.postType = :postType')

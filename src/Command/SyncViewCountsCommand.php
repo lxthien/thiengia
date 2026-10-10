@@ -16,14 +16,14 @@ class SyncViewCountsCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('app:sync-views')
             ->setDescription('Đồng bộ lượt xem bài viết từ file log vào mảng database để khắc phục deadlock.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $logFile = rtrim($this->logsDir, '/\\') . '/view_counts.log';
         $processingFile = $logFile . '.processing';

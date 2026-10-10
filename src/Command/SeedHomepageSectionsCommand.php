@@ -29,14 +29,14 @@ class SeedHomepageSectionsCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('app:homepage:seed-sections')
             ->setDescription('Tạo các khối trang chủ còn thiếu (idempotent).');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         $existing = [];

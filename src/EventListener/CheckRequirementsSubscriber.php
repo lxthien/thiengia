@@ -45,7 +45,7 @@ class CheckRequirementsSubscriber implements EventSubscriberInterface
     // listen to. You can listen to several events, execute more than one method
     // for each event and set the priority of each event too.
     // See https://symfony.com/doc/current/event_dispatcher.html#creating-an-event-subscriber
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             // Errors are one of the events defined by the Console. See the

@@ -1,0 +1,16 @@
+{% set author = post.author %}
+{% if author and author.showAuthorInfo %}
+    {% set authorName = author.authorDisplayName %}
+    <aside class="author-box mt-12" aria-label="Thông tin tác giả">
+        {% if author.avatar and convert_images.fileExists(author.avatar) %}
+            <img src="{{ asset(author.avatar) }}" alt="Chân dung {{ authorName }}" width="72" height="72" loading="lazy" decoding="async">
+        {% else %}
+            <span class="author-avatar-fallback" aria-hidden="true">{{ authorName|slice(0, 1)|upper }}</span>
+        {% endif %}
+        <div class="author-details">
+            <p class="author-label">Tác giả</p>
+            <p class="author-name">{{ authorName }}</p>
+            {% if author.biography %}<div class="author-bio">{{ author.biography|author_biography }}</div>{% endif %}
+        </div>
+    </aside>
+{% endif %}

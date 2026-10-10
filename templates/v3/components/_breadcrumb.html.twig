@@ -2,12 +2,15 @@
     Breadcrumb.
     Tham số: items = [{ label, path (tuỳ chọn) }] — phần tử cuối là trang hiện tại.
 #}
-<nav class="breadcrumb-v3" aria-label="Breadcrumb">
+<nav class="breadcrumb-v3" aria-label="Đường dẫn điều hướng">
     <ol>
         {% for item in items %}
-            <li>
+            <li class="{{ loop.last ? 'breadcrumb-v3-current' : '' }}">
                 {% if item.path is defined and not loop.last %}
-                    <a href="{{ item.path }}">{{ item.label }}</a>
+                    <a href="{{ item.path }}">
+                        {% if loop.first %}<svg class="breadcrumb-v3-home" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{{ section_icon('home') }}</svg>{% endif %}
+                        <span>{{ item.label }}</span>
+                    </a>
                 {% else %}
                     <span aria-current="page">{{ item.label }}</span>
                 {% endif %}
@@ -28,4 +31,4 @@
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     'itemListElement': breadcrumbListItems
-}|json_encode(constant('JSON_PRETTY_PRINT') b-or constant('JSON_UNESCAPED_SLASHES') b-or constant('JSON_UNESCAPED_UNICODE'))|raw }}</script>
+}|json_encode(constant('JSON_PRETTY_PRINT') b-or constant('JSON_UNESCAPED_SLASHES') b-or constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_HEX_TAG') b-or constant('JSON_HEX_AMP') b-or constant('JSON_HEX_APOS') b-or constant('JSON_HEX_QUOT'))|raw }}</script>

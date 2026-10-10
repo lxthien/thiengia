@@ -24,14 +24,14 @@ class PublishScheduledCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('app:publish-scheduled')
             ->setDescription('Tự động chuyển bài viết/trang "Đặt lịch" sang "Đã xuất bản" khi đã tới giờ hẹn.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $now = new \DateTime('now', new \DateTimeZone($this->timezone));
 

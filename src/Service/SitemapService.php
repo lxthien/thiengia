@@ -240,7 +240,7 @@ class SitemapService
 
         return [
             ['url' => $this->router->generate('homepage', [], UrlGeneratorInterface::ABSOLUTE_URL), 'lastmod' => $today, 'changefreq' => 'daily', 'priority' => '1.0'],
-            ['url' => $this->router->generate('caculator_cost_construction', [], UrlGeneratorInterface::ABSOLUTE_URL), 'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.5'],
+            ['url' => $this->router->generate('cost_calculator', [], UrlGeneratorInterface::ABSOLUTE_URL), 'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['url' => $this->router->generate('contact', [], UrlGeneratorInterface::ABSOLUTE_URL), 'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['url' => $this->router->generate('building_density_calculator', [], UrlGeneratorInterface::ABSOLUTE_URL), 'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['url' => $this->router->generate('building_age_calculator', [], UrlGeneratorInterface::ABSOLUTE_URL), 'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.5'],

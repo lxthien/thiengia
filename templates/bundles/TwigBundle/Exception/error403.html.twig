@@ -1,29 +1,6 @@
-{% extends 'layout.html.twig' %}
-
-{% block title %}Truy cập bị từ chối (403) - {{ v3.company.shortName }}{% endblock %}
-
-{% block robots %}
-<meta name="robots" content="nofollow, noindex" />
-{% endblock %}
-
-{% block body %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-12 text-center">
-            <div class="error-container py-5">
-                <div class="mb-4">
-                    <i class="fas fa-lock text-warning" style="font-size: 100px;"></i>
-                </div>
-                <h1 class="display-1 text-warning font-weight-bold">403</h1>
-                <h2 class="h3 mb-3">Bạn không có quyền truy cập</h2>
-                <p class="lead text-muted mb-5">
-                    Rất tiếc, bạn không có đủ quyền hạn để xem trang này. Vui lòng đăng nhập với tài khoản hợp lệ hoặc quay lại trang chủ.
-                </p>
-                <div class="error-actions">
-                    <a href="{{ path('homepage') }}" class="btn btn-primary btn-lg px-5">Quay lại trang chủ</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
+{% extends 'bundles/TwigBundle/Exception/_layout.html.twig' %}
+{% set errorCode = 403 %}
+{% set errorTitle = 'Bạn chưa có quyền truy cập' %}
+{% set errorMessage = 'Nội dung này yêu cầu quyền truy cập phù hợp. Nếu bạn có tài khoản được cấp quyền, hãy đăng nhập. Nếu đã đăng nhập, vui lòng liên hệ quản trị viên.' %}
+{% set errorSecondaryRoute = 'app_login' %}
+{% set errorSecondaryLabel = 'Đăng nhập' %}

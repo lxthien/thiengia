@@ -1,45 +1,13 @@
-{% extends 'layout.html.twig' %}
-
-{% block title %}Không tìm thấy trang (404) - {{ v3.company.shortName }}{% endblock %}
-
-
-{% block robots %}
-<meta name="robots" content="nofollow, noindex" />
-{% endblock %}
-
-{% block body %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-12 text-center">
-            <div class="error-container py-5">
-                <div class="mb-4">
-                    <img src="{{ asset('assets/images/404-building.svg') }}" alt="404 Error" style="max-width: 200px; opacity: 0.8;" onerror="this.src='https://img.icons8.com/dotty/200/broken-link.png'">
-                </div>
-                <h1 class="display-1 text-primary font-weight-bold">404</h1>
-                <h2 class="h3 mb-3">Không tìm thấy nội dung yêu cầu</h2>
-                <p class="lead text-muted mb-5">
-                    Trang bạn đang tìm kiếm có thể đã bị xóa, thay đổi tên hoặc tạm thời không khả dụng. 
-                    Mời bạn quay lại trang chủ hoặc xem các dự án nổi bật của chúng tôi.
-                </p>
-                <div class="error-actions">
-                    <a href="{{ path('homepage') }}" class="btn btn-primary btn-lg px-5 shadow-sm">Về trang chủ</a>
-                </div>
-            </div>
-        </div>
+{% extends 'bundles/TwigBundle/Exception/_layout.html.twig' %}
+{% set errorCode = 404 %}
+{% set errorTitle = 'Không tìm thấy trang' %}
+{% set errorMessage = 'Trang bạn đang tìm có thể đã được đổi địa chỉ hoặc không còn tồn tại. Bạn có thể tìm nội dung khác hoặc trở về trang chủ.' %}
+{% block error_extra %}
+<form class="error-page__search" action="{{ path('news_search') }}" method="get" role="search">
+    <label for="error-search">Tìm nội dung trên Thiện Gia</label>
+    <div class="error-page__search-row">
+        <input id="error-search" type="search" name="q" placeholder="Ví dụ: báo giá xây nhà" required maxlength="200">
+        <button class="btn2" type="submit">Tìm kiếm</button>
     </div>
-</div>
-
-<style>
-    .error-container {
-        animation: fadeIn 0.8s ease-out;
-    }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .display-1 {
-        font-size: 8rem;
-        letter-spacing: -2px;
-    }
-</style>
+</form>
 {% endblock %}

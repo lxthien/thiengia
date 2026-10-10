@@ -27,11 +27,11 @@
         {% endif %}
 
         <{{ headingLevel }} class="post-card-title">
-            <a href="{{ path('dynamic_post_page', { slug: post.url }) }}">{{ (post.title|title_tokens) }}</a>
+            <a href="{{ path('dynamic_post_page', { slug: post.url }) }}">{% if searchHighlight|default(false) %}{{ post.highlightedTitle|raw }}{% else %}{{ (post.title|title_tokens) }}{% endif %}</a>
         </{{ headingLevel }}>
 
         {% if post.description %}
-            <p class="post-card-excerpt">{{ post.description }}</p>
+            <p class="post-card-excerpt">{% if searchHighlight|default(false) %}{{ post.highlightedDescription|raw }}{% else %}{{ post.description }}{% endif %}</p>
         {% endif %}
     </div>
 </article>

@@ -1,76 +1,58 @@
 {% extends 'layout.html.twig' %}
-
-{% block stylesheets %}
-	<link href="{{ absolute_url(asset('build/css/v3-list.css')) }}" rel="preload stylesheet" as="style" onload="this.rel='stylesheet'">
-	<noscript><link rel="stylesheet" href="{{ absolute_url(asset('build/css/v3-list.css')) }}"></noscript>
-	<style>
-		mark {
-			background-color: #fff44f;
-			padding: 2px 4px;
-			border-radius: 3px;
-			font-weight: 500;
-		}
-	</style>
-{% endblock %}
-
-{% block title %}
-	{{ 'post.archives.title'|trans({'%title%': q, '%currentPage%': pagination.currentPageNumber, '%totalPage%': pagination.pageCount}) ~ ' | ' ~ v3.company.shortName }}
-{% endblock %}
-
-{% block structuredOpenGraph %}
-	<meta property="og:type" content="object"/>
-	<meta property="og:title" content="{{ 'post.archives.title'|trans({'%title%': q, '%currentPage%': pagination.currentPageNumber, '%totalPage%': pagination.pageCount}) ~ ' | ' ~ v3.company.shortName }}"/>
-	{% if pagination.currentPageNumber == 1 and pagination.pageCount > 1 %}
-		<link rel="next" href="{{ baseUrl ~ '&page=' ~ (pagination.currentPageNumber + 1) }}"/>
-	{% endif %}
-	{% if pagination.currentPageNumber > 1 and pagination.currentPageNumber < pagination.pageCount %}
-		<link rel="prev" href="{{ baseUrl ~ '&page=' ~ (pagination.currentPageNumber - 1) }}"/>
-		<link rel="next" href="{{ baseUrl ~ '&page=' ~ (pagination.currentPageNumber + 1) }}"/>
-	{% endif %}
-	{% if pagination.currentPageNumber == pagination.pageCount and pagination.pageCount > 1 %}
-		<link rel="prev" href="{{ baseUrl ~ '&page=' ~ (pagination.currentPageNumber - 1) }}"/>
-	{% endif %}
-{% endblock %}
-
-{% block robots %}
-	<meta name="robots" content="noindex, nofollow"/>
-{% endblock %}
-
+{% set currentPage = pagination.currentPageNumber %}
+{% set pageCount = pagination.pageCount %}
+{% block title %}Tìm kiếm: {{ q }}{{ currentPage > 1 ? ' - Trang ' ~ currentPage : '' }} | {{ v3.company.shortName }}{% endblock %}
+{% block description %}Kết quả tìm kiếm nội dung về xây dựng cho từ khóa {{ q }} trên {{ v3.company.shortName }}.{% endblock %}
+{% block robots %}<meta name="robots" content="noindex, follow">{% endblock %}
 {% block canonical %}
-	<meta name="DC.identifier" content="{{ baseUrl }}">
-	<link rel="canonical" href="{{ baseUrl }}"/>
+    <link rel="canonical" href="{{ currentPage > 1 ? baseUrl ~ '&page=' ~ currentPage : baseUrl }}">
+    {% if currentPage > 1 %}<link rel="prev" href="{{ currentPage == 2 ? baseUrl : baseUrl ~ '&page=' ~ (currentPage - 1) }}">{% endif %}
+    {% if currentPage < pageCount %}<link rel="next" href="{{ baseUrl ~ '&page=' ~ (currentPage + 1) }}">{% endif %}
 {% endblock %}
-
+{% block stylesheets %}<link rel="stylesheet" href="{{ asset('build/css/v3-list.css') }}">{% endblock %}
+{% block bodyClass %}search-view{% endblock %}
 {% block body %}
-	{{ include('news/components/breadcrumbs.html.twig',
-        { type: 'category', title: 'Kết quả tìm kiếm cho từ khoá: "' ~ q ~ '"', description: 'Vui lòng tìm lại nếu không đúng kết quả cần tìm' })
-    }}
-
-	<div class="container wrapper-container">
-		<div class="row ka-category-list">
-			<div
-				class="col-12 col-md-12 col-lg-12">
-				{# List item on this page #}
-				{% if pagination|length > 0  %}
-					{# Sort items #}
-					{% if get_setting('isShowSortOnCategory') %}
-						{{ include('news/components/sort.html.twig') }}
-					{% endif %}
-
-					<div class="ka-article-grid">
-						<div class="row">
-							{% for row in pagination %}
-								{{ include('news/components/itemsGrid.html.twig') }}
-							{% endfor %}
-						</div>
-					</div>
-
-					{# Pagination #}
-					{{ include('news/components/pagination.html.twig') }}
-				{% else %}
-					{{ include('news/components/noRecord.html.twig') }}
-				{% endif %}
-			</div>
-		</div>
-	</div>
+{{ include('v3/components/_page_hero.html.twig', {
+    breadcrumb: [{label: 'Trang chủ', path: path('homepage')}, {label: 'Tìm kiếm'}],
+    title: 'Kết quả tìm kiếm',
+    description: ('Nội dung phù hợp với từ khóa “' ~ q ~ '”.')|e
+}) }}
+<section class="search-page" aria-labelledby="search-results-title">
+    <div class="container max-w-7xl">
+        <form class="search-page__form" action="{{ path('news_search') }}" method="get" role="search">
+            <label for="search-query">Bạn muốn tìm nội dung gì?</label>
+            <div class="search-page__fields">
+                <input id="search-query" type="search" name="q" value="{{ q }}" placeholder="Ví dụ: chi phí xây nhà" required maxlength="200">
+                <button class="btn2" type="submit">Tìm kiếm</button>
+            </div>
+        </form>
+        <div class="search-page__summary">
+            <h2 id="search-results-title">{{ pagination.totalItemCount }} kết quả cho “{{ q }}”</h2>
+            {% if pagination|length and get_setting('isShowSortOnCategory') %}
+                <details class="search-page__sort">
+                    <summary>Sắp xếp kết quả</summary>
+                    <div>
+                        {{ knp_pagination_sortable(pagination, 'Theo mã bài viết', 'id') }}
+                        {{ knp_pagination_sortable(pagination, 'Theo tiêu đề', 'title') }}
+                        {{ knp_pagination_sortable(pagination, 'Theo ngày đăng', 'createdAt') }}
+                    </div>
+                </details>
+            {% endif %}
+        </div>
+        {% if pagination|length %}
+            <div class="search-page__grid">
+                {% for post in pagination %}
+                    {{ include('v3/components/_post_card.html.twig', {post: post, searchHighlight: true}) }}
+                {% endfor %}
+            </div>
+            <div class="pagination-v3 mt-16">{{ knp_pagination_render(pagination) }}</div>
+        {% else %}
+            <div class="search-page__empty">
+                <h3>Chưa tìm thấy nội dung phù hợp</h3>
+                <p>Hãy thử từ khóa ngắn hơn, kiểm tra chính tả hoặc tìm theo chủ đề như “xây nhà”, “báo giá”, “thiết kế”.</p>
+                <a class="btn2" href="{{ path('homepage') }}">Về trang chủ</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
 {% endblock %}
