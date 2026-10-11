@@ -42,15 +42,35 @@ $config = array();
 // ghi), vừa tránh hẳn xung đột autoloader.
 $projectDir = __DIR__ . '/../../../../';
 
-$config['authentication'] = function () use ($projectDir) {
-    $env = $_SERVER['APP_ENV'] ?? getenv('APP_ENV') ?: null;
+// Đọc một biến môi trường theo cùng thứ tự ưu tiên với Symfony Dotenv:
+// biến thật của server > .env.local > .env. Tự parse thay vì nạp Dotenv vì
+// file này không được dùng autoloader của app (xem ghi chú phía trên).
+$readEnv = static function (string $key, string $default = '') use ($projectDir): string {
+    $value = $_SERVER[$key] ?? getenv($key);
 
-    if (!$env) {
-        $envFile = $projectDir . '.env';
-        $env = (is_file($envFile) && preg_match('/^APP_ENV=(\S+)/m', file_get_contents($envFile), $m))
-            ? trim($m[1], "\"' \t\r\n")
-            : 'prod';
+    if (is_string($value) && $value !== '') {
+        return $value;
     }
+
+    foreach (['.env.local', '.env'] as $name) {
+        $envFile = $projectDir . $name;
+
+        if (is_file($envFile) && preg_match('/^' . preg_quote($key, '/') . '=(.*)$/m', file_get_contents($envFile), $m)) {
+            $value = trim($m[1], "\"' \t\r\n");
+
+            if ($value !== '') {
+                return $value;
+            }
+        }
+    }
+
+    return $default;
+};
+
+$config['authentication'] = function () use ($projectDir, $readEnv) {
+    // Trên production APP_ENV=prod nằm trong .env.local, còn .env vẫn ghi
+    // "dev" — phải theo đúng thứ tự ưu tiên, nếu không sẽ tìm session sai thư mục.
+    $env = $readEnv('APP_ENV', 'prod');
 
     ini_set('session.save_path', $projectDir . 'var/sessions/' . $env);
     session_start();
@@ -70,8 +90,10 @@ $config['authentication'] = function () use ($projectDir) {
 /*============================ License Key ============================================*/
 // http://docs.cksource.com/ckfinder3-php/configuration.html#configuration_options_licenseKey
 
-$config['licenseName'] = 'kientruckimanh.com';
-$config['licenseKey']  = 'AHCH5ADECUMTBDPKXRA11CFSL9VDM';
+// Không ghi license vào file này (file được commit vào git). Khai báo trong
+// .env.local của từng môi trường: CKFINDER_LICENSE_NAME, CKFINDER_LICENSE_KEY.
+$config['licenseName'] = $readEnv('CKFINDER_LICENSE_NAME');
+$config['licenseKey']  = $readEnv('CKFINDER_LICENSE_KEY');
 
 /*============================ CKFinder Internal Directory ============================*/
 // http://docs.cksource.com/ckfinder3-php/configuration.html#configuration_options_privateDir

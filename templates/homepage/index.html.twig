@@ -1,7 +1,8 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}{{ v3.company.shortName }} — {{ v3.company.slogan }}{% endblock %}
-{% block description %}{{ v3.company.description }}{% endblock %}
+{# Tiêu đề, mô tả lấy từ admin (Cài đặt chung → SEO); để trống thì dùng mặc định của theme #}
+{% block title %}{{ get_setting('pageTitle') ?: v3.company.shortName ~ ' — ' ~ v3.company.slogan }}{% endblock %}
+{% block description %}{{ get_setting('pageDescription') ?: v3.company.description }}{% endblock %}
 
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('build/css/v3-homepage.css') }}">
