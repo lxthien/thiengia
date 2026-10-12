@@ -28,18 +28,27 @@ use Twig\TwigFunction;
 final class V3ImageExtension extends AbstractExtension
 {
     /** Phải khớp với các filter set v3_<width> trong config/packages/framework.yaml. */
-    private const WIDTHS = [400, 640, 960, 1280, 1920];
+    private const WIDTHS = [400, 640, 800, 960, 1280, 1920];
 
     /** Bề rộng dùng cho thuộc tính src (trình duyệt không hỗ trợ srcset). */
     private const DEFAULT_WIDTH = 960;
 
+    /**
+     * `sizes` phải sát bề rộng ảnh thật sự hiển thị, nếu không trình duyệt
+     * tải bản lớn hơn cần thiết (PageSpeed: "larger than it needs to be").
+     * Nội dung nằm trong container max-w-7xl (1280px) nên từ 1280px trở lên
+     * dùng số px cố định. Mốc 800 dành cho điện thoại màn hình mật độ cao
+     * (412px × 1.75 ≈ 720px).
+     */
     private const PRESETS = [
         // Ảnh tràn hết chiều ngang (hero, nền CTA)
-        'hero' => ['widths' => [640, 960, 1280, 1920], 'sizes' => '100vw'],
-        // Ảnh chiếm khoảng nửa bố cục trên desktop (giới thiệu, cam kết)
-        'half' => ['widths' => [400, 640, 960, 1280], 'sizes' => '(min-width: 1024px) 50vw, 100vw'],
+        'hero' => ['widths' => [640, 800, 960, 1280, 1920], 'sizes' => '100vw'],
+        // Ảnh chiếm khoảng nửa container trên desktop (giới thiệu)
+        'half' => ['widths' => [400, 640, 800, 960, 1280], 'sizes' => '(min-width: 1280px) 600px, (min-width: 1024px) 46vw, 100vw'],
+        // Ảnh chiếm khoảng một phần ba container trên desktop (cam kết)
+        'third' => ['widths' => [400, 640, 800, 960], 'sizes' => '(min-width: 1280px) 470px, (min-width: 1024px) 36vw, 100vw'],
         // Thẻ trong lưới 3–4 cột (dịch vụ, công trình, thư viện ảnh)
-        'card' => ['widths' => [400, 640, 960], 'sizes' => '(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 80vw'],
+        'card' => ['widths' => [400, 640, 800], 'sizes' => '(min-width: 1280px) 300px, (min-width: 1024px) 24vw, (min-width: 640px) 46vw, 76vw'],
         // Ảnh đại diện nhỏ
         'avatar' => ['widths' => [400], 'sizes' => '96px'],
     ];
@@ -107,7 +116,7 @@ final class V3ImageExtension extends AbstractExtension
         }
 
         $largest = (int) array_key_last($variants);
-        $default = $variants[min(self::DEFAULT_WIDTH, $largest)] ?? end($variants);
+        $default = $variants[min(self::DEFAULT_WIDTH, $largest)] ?? $variants[$largest];
 
         $sized = [];
 

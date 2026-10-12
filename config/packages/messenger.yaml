@@ -14,11 +14,12 @@ framework:
             sync: 'sync://'
 
         routing:
-            # Gửi email (form-builder-contact, thông báo user...) qua hàng đợi
-            # thay vì chặn request chờ SMTP trả lời — Symfony Mailer tự dispatch
-            # SendEmailMessage lên bus này mỗi khi có message bus, không cần
-            # sửa code ở nơi gọi $mailer->send().
-            Symfony\Component\Mailer\Messenger\SendEmailMessage: async
+            # Email được gửi ngay trong request (transport "sync"), không qua hàng
+            # đợi: lượng form của site thấp, và cách này không cần worker/cron
+            # messenger:consume — thứ từng dồn tiến trình làm cạn kết nối DB trên
+            # production. Muốn quay lại hàng đợi thì đổi "sync" thành "async" và
+            # chạy worker có flock + timeout.
+            Symfony\Component\Mailer\Messenger\SendEmailMessage: sync
 
 # when@test:
 #    framework:

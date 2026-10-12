@@ -101,7 +101,7 @@ liip_imagine:
     # tới bản .webp qua App\Twig\V3ImageExtension.
     webp:
         generate: true
-        quality: 80
+        quality: 75
 
     resolvers:
         default:
@@ -184,6 +184,10 @@ liip_imagine:
             quality: 82
             filters:
                 downscale: { max: [640, 6000] }
+        v3_800:
+            quality: 82
+            filters:
+                downscale: { max: [800, 6000] }
         v3_960:
             quality: 82
             filters:

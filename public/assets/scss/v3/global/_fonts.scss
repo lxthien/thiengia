@@ -1,0 +1,48 @@
+// ============================================================
+// Font tự lưu trữ của theme v3 (thay cho Google Fonts).
+//
+// Mỗi file trong public/assets/fonts/v3 đã gộp sẵn Latin + tiếng Việt nên
+// mỗi độ đậm chỉ là MỘT request cùng tên miền — bản Google chia theo
+// subset, mỗi độ đậm tải 2–3 file qua 2 tên miền khác và phải chờ file
+// CSS của Google trước.
+//
+// Tạo lại file (khi cần thêm ký tự/độ đậm): tải TTF gốc từ
+// github.com/google/fonts (ofl/bevietnampro, ofl/playfairdisplay) rồi
+//   python -m fontTools.subset <file.ttf> --unicodes=<dải ký tự> \
+//     --flavor=woff2 --no-hinting --desubroutinize --output-file=<file.woff2>
+//
+// Đổi nội dung file font thì tăng $font-version để trình duyệt tải lại.
+// Hai font đầu trang được preload trong templates/layout.html.twig.
+// ============================================================
+
+$font-dir: "/assets/fonts/v3";
+$font-version: "2";
+
+// Be Vietnam Pro — font tĩnh, mỗi độ đậm một file.
+// 800 không có file riêng: trình duyệt dùng bản 700.
+@each $weight in (300, 400, 500, 600, 700) {
+  @font-face {
+    font-family: "Be Vietnam Pro";
+    font-style: normal;
+    font-weight: $weight;
+    font-display: swap;
+    src: url("#{$font-dir}/be-vietnam-pro-#{$weight}.woff2?v=#{$font-version}") format("woff2");
+  }
+}
+
+// Playfair Display — font biến thiên, một file phủ mọi độ đậm 400–900.
+@font-face {
+  font-family: "Playfair Display";
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url("#{$font-dir}/playfair-display.woff2?v=#{$font-version}") format("woff2");
+}
+
+@font-face {
+  font-family: "Playfair Display";
+  font-style: italic;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url("#{$font-dir}/playfair-display-italic.woff2?v=#{$font-version}") format("woff2");
+}

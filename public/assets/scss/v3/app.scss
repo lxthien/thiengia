@@ -3,6 +3,7 @@
 // Nạp cùng public/assets/css/v3/tailwind.css — xem webpack.config.js
 // ============================================================
 
+@use "global/fonts";
 @use "global/base";
 @use "global/buttons";
 @use "global/header";

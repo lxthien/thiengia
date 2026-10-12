@@ -19,9 +19,6 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Address;
-use Symfony\Component\Mime\Email;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -29,6 +26,7 @@ use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use App\Entity\Contact;
 use App\Entity\News;
+use App\Service\ContactNotifier;
 use App\Service\SettingsManager;
 use WhiteOctober\BreadcrumbsBundle\Model\Breadcrumbs;
 
@@ -42,6 +40,7 @@ class ContactController extends AbstractController
         private readonly FormFactoryInterface $formFactory,
         #[Autowire(service: 'limiter.public_form')]
         private readonly RateLimiterFactory $publicFormLimiter,
+        private readonly ContactNotifier $contactNotifier,
     ) {
     }
 
@@ -99,6 +98,8 @@ class ContactController extends AbstractController
                     'form' => $form->createView(),
                 ]);
             } else {
+                $this->contactNotifier->notify($contact, 'Trang Liên hệ');
+
                 $this->addFlash(
                     'notice',
                     $this->translator->trans('contact.message.success')
@@ -160,6 +161,8 @@ class ContactController extends AbstractController
             if (null === $contact->getId()) {
                 return new JsonResponse(['success' => false, 'message' => $this->translator->trans('contact.message.error')]);
             } else {
+                $this->contactNotifier->notify($contact, 'Form báo giá nhanh');
+
                 return new JsonResponse(['success' => true, 'message' => $this->translator->trans('contact.message.success')]);
             }
         }
@@ -173,7 +176,7 @@ class ContactController extends AbstractController
     }
 
     #[Route('page-builder-contact/', name: 'page_builder_contact_submit', methods: ['POST'])]
-    public function pageBuilderSubmitAction(Request $request, MailerInterface $mailer)
+    public function pageBuilderSubmitAction(Request $request)
     {
         if (!$this->publicFormLimiter->create($request->getClientIp())->consume(1)->isAccepted()) {
             $this->addFlash('error', 'Bạn gửi quá nhiều yêu cầu. Vui lòng thử lại sau ít phút.');
@@ -217,24 +220,7 @@ class ContactController extends AbstractController
             return new RedirectResponse($redirectUrl);
         }
 
-        $email = (new Email())
-            ->subject($this->translator->trans('contact.email.title', ['%siteName%' => $this->settingsManager->get('siteName')]))
-            ->from(new Address($this->settingsManager->get('emailSender') ?: $this->settingsManager->get('emailContact'),$this->settingsManager->get('siteName')))
-            ->to($this->settingsManager->get('emailContact'))
-            ->html(
-                $this->renderView(
-                    'Emails/contact.html.twig',
-                    array(
-                        'name' => $form->get('name')->getData(),
-                        'phone' => $form->get('phone')->getData(),
-                        'email' => $form->get('email')->getData(),
-                        'body' => $form->get('contents')->getData(),
-                        'gclid' => $contact->getGclid()
-                    )
-                )
-            );
-
-        $mailer->send($email);
+        $this->contactNotifier->notify($contact, 'Form trong trang nội dung');
 
         $this->addFlash('notice', $this->translator->trans('contact.message.success'));
 
