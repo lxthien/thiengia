@@ -6,7 +6,7 @@
             {% set customImage = section.getConfigValue('image') %}
             <figure>
                 <div class="commits-media">
-                    <img src="{{ asset(customImage ?: 'assets/images/commitments/engineer-stock.jpg') }}" alt="{{ customImage ? section.getConfigValue('imageAlt', '') : 'Ảnh minh họa kỹ sư kiểm tra bản vẽ tại công trường' }}" width="800" height="600" loading="lazy" decoding="async">
+                    {{ v3_image(customImage ?: 'assets/images/commitments/engineer-stock.jpg', 'half', {alt: customImage ? section.getConfigValue('imageAlt', '') : 'Ảnh minh họa kỹ sư kiểm tra bản vẽ tại công trường'}) }}
                 </div>
                 {% if not customImage %}<figcaption class="commits-caption">Ảnh minh họa, không phải công trình Thiện Gia.</figcaption>{% endif %}
             </figure>

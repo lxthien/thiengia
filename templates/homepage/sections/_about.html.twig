@@ -5,11 +5,11 @@
         {% set badgeValue = section.getConfigValue('badgeValue') ?: badge.value %}
         <div class="about2-media{{ image2 ? ' about2-media--duo' }} fade">
             <div class="about2-photo about2-photo--main">
-                <img src="{{ asset(section.getConfigValue('image') ?: v3.about.image) }}" alt="{{ section.getConfigValue('imageAlt') ?: v3.about.imageAlt }}" loading="lazy" decoding="async">
+                {{ v3_image(section.getConfigValue('image') ?: v3.about.image, 'half', {alt: section.getConfigValue('imageAlt') ?: v3.about.imageAlt}) }}
             </div>
             {% if image2 %}
                 <div class="about2-photo about2-photo--sub">
-                    <img src="{{ asset(image2) }}" alt="{{ section.getConfigValue('image2Alt') }}" loading="lazy" decoding="async">
+                    {{ v3_image(image2, 'card', {alt: section.getConfigValue('image2Alt')}) }}
                 </div>
             {% endif %}
 

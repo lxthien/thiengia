@@ -32,7 +32,7 @@
             {% for card in cards %}
                 <article class="svc-card fade">
                     {% if card.image %}
-                        <img class="svc-img" src="{{ asset(card.image) }}" alt="" loading="lazy" decoding="async">
+                        {{ v3_image(card.image, 'card', {class: 'svc-img'}) }}
                     {% endif %}
                     <span class="svc-no" aria-hidden="true">{{ '%02d'|format(loop.index) }}</span>
                     <span class="svc-arrow" aria-hidden="true">

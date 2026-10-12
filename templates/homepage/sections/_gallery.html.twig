@@ -23,9 +23,9 @@
                 {% set cover = album.coverImage %}
                 {% if cover %}
                     <button type="button" class="gallery-item"
-                            data-album-images="{{ album.images|map(i => {src: i.imageUrl, caption: i.caption ?: album.name, alt: i.alt ?: album.name})|json_encode|e('html_attr') }}">
+                            data-album-images="{{ album.images|map(i => {src: v3_image_url(i.imageUrl, 1920), caption: i.caption ?: album.name, alt: i.alt ?: album.name})|json_encode|e('html_attr') }}">
                         <figure>
-                            <img src="{{ cover.imageUrl }}" alt="{{ cover.alt ?: album.name }}" loading="lazy" decoding="async">
+                            {{ v3_image(cover.imageUrl, 'card', {alt: cover.alt ?: album.name}) }}
                             <figcaption>{{ album.name }}</figcaption>
                         </figure>
                     </button>

@@ -14,7 +14,7 @@
                             {%- for i in 1..5 -%}{{ i <= quote.rating ? '★' : '☆' }}{%- endfor -%}
                         </p>
                         <figcaption class="quote-author">
-                            <img src="{{ quote.avatarUrl }}" alt="Chân dung {{ quote.name }}" loading="lazy" decoding="async">
+                            {{ v3_image(quote.avatarUrl, 'avatar', {alt: 'Chân dung ' ~ quote.name}) }}
                             <span>
                                 <span class="quote-name">{{ quote.name }}</span>
                                 <span class="quote-role">{{ quote.role }}</span>

@@ -96,6 +96,13 @@ stof_doctrine_extensions:
 # LiipImagineBundle
 # https://github.com/liip/LiipImagineBundle
 liip_imagine:
+    # Mỗi ảnh qua filter được lưu thêm một bản .webp; URL resolve chuyển hướng
+    # sang bản đó khi trình duyệt gửi Accept: image/webp. Theme v3 trỏ thẳng
+    # tới bản .webp qua App\Twig\V3ImageExtension.
+    webp:
+        generate: true
+        quality: 80
+
     resolvers:
         default:
             web_path:
@@ -166,6 +173,29 @@ liip_imagine:
             quality: 100
             filters:
                 thumbnail: { size: [1500, 550], mode: outbound }
+        # Ảnh responsive của theme v3 (v3_image() trong Twig). Chỉ thu nhỏ, không
+        # phóng to; chiều cao 6000 để bề rộng là giới hạn duy nhất. Danh sách bề
+        # rộng phải khớp V3ImageExtension::WIDTHS.
+        v3_400:
+            quality: 82
+            filters:
+                downscale: { max: [400, 6000] }
+        v3_640:
+            quality: 82
+            filters:
+                downscale: { max: [640, 6000] }
+        v3_960:
+            quality: 82
+            filters:
+                downscale: { max: [960, 6000] }
+        v3_1280:
+            quality: 82
+            filters:
+                downscale: { max: [1280, 6000] }
+        v3_1920:
+            quality: 82
+            filters:
+                downscale: { max: [1920, 6000] }
         page_hero_architecture:
             quality: 78
             format: webp

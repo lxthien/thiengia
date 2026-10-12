@@ -209,7 +209,7 @@ class Image
             $this->gdImage = imagecreatefromstring($imageData);
         }
 
-        if (!is_resource($this->gdImage)) {
+        if (!is_resource($this->gdImage) && !($this->gdImage instanceof \GdImage)) { // PHP 8: GD trả về object GdImage, không còn là resource
             throw new CKFinderException('Unsupported image type (not resource): ' . $this->mime);
         }
 
@@ -708,7 +708,7 @@ class Image
 
     public function __destruct()
     {
-        if (is_resource($this->gdImage)) {
+        if (is_resource($this->gdImage) || $this->gdImage instanceof \GdImage) {
             imagedestroy($this->gdImage);
         }
     }

@@ -217,7 +217,16 @@ $config['cache'] = array(
 /*============================ Temp Directory settings ================================*/
 // http://docs.cksource.com/ckfinder3-php/configuration.html#configuration_options_tempDirectory
 
-$config['tempDirectory'] = sys_get_temp_dir();
+// Dùng thư mục tạm riêng trong var/ của dự án thay cho thư mục tạm của hệ
+// thống: trên production (PHP-FPM) thư mục tạm hệ thống có thể không ghi được
+// với user chạy PHP, khi đó mọi lần upload đều lỗi 110 "Unknown error".
+$ckfinderTmp = $projectDir . 'var/ckfinder-tmp';
+
+if (!is_dir($ckfinderTmp)) {
+    @mkdir($ckfinderTmp, 0775, true);
+}
+
+$config['tempDirectory'] = is_writable($ckfinderTmp) ? $ckfinderTmp : sys_get_temp_dir();
 
 /*============================ Session Cause Performance Issues =======================*/
 // http://docs.cksource.com/ckfinder3-php/configuration.html#configuration_options_sessionWriteClose

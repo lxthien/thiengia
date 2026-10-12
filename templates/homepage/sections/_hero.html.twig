@@ -2,11 +2,8 @@
 <section class="hero2" aria-label="Giới thiệu tổng quan">
     <div class="hero2-bg" data-hero-slides>
         {% for slide in heroBanners %}
-            <img {{ loop.first ? 'class="is-active"' : '' }}
-                 src="{{ slide.urlImage }}"
-                 alt="{{ slide.name }}"
-                 {{ loop.first ? 'fetchpriority="high"' : 'loading="lazy"' }}
-                 decoding="async">
+            {# Ảnh đầu tiên quyết định LCP: tải ngay, ưu tiên cao; các ảnh sau lazy #}
+            {{ v3_image(slide.urlImage, 'hero', {alt: slide.name, class: loop.first ? 'is-active' : null, priority: loop.first}) }}
         {% endfor %}
     </div>
 

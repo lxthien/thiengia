@@ -118,6 +118,12 @@ class FileBag extends ParameterBag
             return $data;
         }
 
+        // PHP 8.1 thêm khóa "full_path" vào mỗi phần tử của $_FILES. Bản Symfony
+        // 2.7 đi kèm CKFinder so khớp chính xác 5 khóa cũ, nên thấy khóa lạ là
+        // coi phần tử như một mảng lồng và trả về mảng thay vì UploadedFile —
+        // mọi lần upload đều lỗi 110 "Unknown error". Bỏ khóa này trước khi so.
+        unset($data['full_path']);
+
         $keys = array_keys($data);
         sort($keys);
 

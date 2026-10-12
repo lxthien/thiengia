@@ -1,7 +1,7 @@
 {% set cta_title_default = 'Bạn đang chuẩn bị <em>xây nhà</em>?<br>Đừng ký hợp đồng khi chưa gọi ' ~ v3.company.shortNameOnly ~ '.' %}
 <section class="cta2 py-20 lg:py-24" aria-labelledby="cta-h">
     <div class="cta2-bg">
-        <img src="{{ asset(section.getConfigValue('image') ?: v3.ctaImage) }}" alt="" loading="lazy" decoding="async" aria-hidden="true">
+        {{ v3_image(section.getConfigValue('image') ?: v3.ctaImage, 'hero', {attr: {'aria-hidden': 'true'}}) }}
     </div>
     <div class="container max-w-7xl flex flex-wrap items-center justify-between gap-10">
         <div class="max-w-2xl">
