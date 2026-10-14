@@ -5,16 +5,19 @@ namespace App\Service;
 use App\Utils\ConvertImages;
 use App\Entity\News;
 use App\Service\SettingsManager;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class ContentFormatter
 {
     private $convertImages;
     private $settingsManager;
+    private $requestStack;
 
-    public function __construct(ConvertImages $convertImages, SettingsManager $settingsManager)
+    public function __construct(ConvertImages $convertImages, SettingsManager $settingsManager, RequestStack $requestStack)
     {
         $this->convertImages = $convertImages;
         $this->settingsManager = $settingsManager;
+        $this->requestStack = $requestStack;
     }
 
     public function stripTagsContent($string)
@@ -44,6 +47,12 @@ class ContentFormatter
         // Replace placeholders from settings (content_* or contents_*)
         $content = preg_replace_callback('/\[([a-zA-Z0-9_]+)\]/', function ($matches) {
             $varName = $matches[1];
+            // [website] để trống trong cài đặt: dùng tên miền đang chạy, không hardcode.
+            if ($varName === 'website' && (string) $this->settingsManager->get('content_website') === '') {
+                $request = $this->requestStack->getCurrentRequest();
+
+                return $request ? $request->getHost() : $matches[0];
+            }
             // Try content_ prefix first
             $value = $this->settingsManager->get('content_' . $varName);
             if ($value !== null) {

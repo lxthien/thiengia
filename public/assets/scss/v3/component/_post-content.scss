@@ -130,7 +130,12 @@
   // CKEditor 5 bọc mọi bảng trong <figure class="table"> (data format của table
   // widget, không tắt được bằng config) — reset margin mặc định của <figure> và
   // cho cuộn ngang trên mobile; style bảng vẫn do rule "table" bên dưới lo.
+  // display: block là bắt buộc: class "table" trùng tên utility Tailwind
+  // (.table { display: table }), mà box dạng table thì bỏ qua overflow-x và
+  // giãn theo nội dung, làm bảng nhiều cột tràn ra ngoài trang trên mobile.
   figure.table {
+    display: block;
+    max-width: 100%;
     margin: 2.25rem 0;
     overflow-x: auto;
 

@@ -57,9 +57,11 @@
     div { display: flex; flex-wrap: wrap; gap: 1rem; padding-top: 0.75rem; }
     a { text-decoration: underline; text-underline-offset: 3px; }
   }
+  // Cùng bố cục lưới với trang danh mục (news/list.html.twig:
+  // sm:grid-cols-2 xl:grid-cols-4 gap-x-8 gap-y-12).
   &__grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 3rem 2rem;
     .post-card { min-width: 0; }
     .post-card-title { overflow-wrap: anywhere; }
@@ -78,13 +80,13 @@
     h3 { font-family: $f-display; font-size: 1.75rem; line-height: 1.4; }
     p { margin: 1rem 0 1.75rem; color: #51483f; }
   }
-  @media (max-width: 1023px) {
+  @media (max-width: 1279px) {
     &__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 639px) {
     padding: 2rem 0 3rem;
     &__fields { flex-direction: column; }
-    &__grid { grid-template-columns: minmax(0, 1fr); gap: 2.5rem; }
+    &__grid { grid-template-columns: minmax(0, 1fr); }
   }
   @media (prefers-reduced-motion: reduce) {
     .btn2, .post-card-media img, .post-card-title a { transition: none; }

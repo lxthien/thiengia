@@ -86,6 +86,8 @@
 <section class="page-editor__section" id="news-seo" aria-labelledby="news-seo-heading">
 <h2 id="news-seo-heading">SEO &amp; kết quả tìm kiếm</h2>
 {{ include('admin/components/seo-checker.html.twig', {form: form}, with_context = false) }}
+{# Số liệu Search Console thật của bài — chỉ có khi bài đã được lưu #}
+{% if form.vars.data.id %}{{ include('admin/components/_gsc_panel.html.twig', {slug: form.vars.data.url}, with_context = false) }}{% endif %}
 {{ form_row(form.pageTitle) }}
 {{ form_row(form.pageDescription) }}
 {{ form_row(form.pageKeyword) }}

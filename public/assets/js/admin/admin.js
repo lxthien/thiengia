@@ -7,6 +7,7 @@ import 'bootstrap-sass/assets/javascripts/bootstrap/modal.js';
 import initCkeditor5 from './ckeditor5';
 import initSeoCheckers from './seo-checker';
 import initAdminSidebarState from './sidebar';
+import initUnsavedGuard from './unsaved-guard';
 
 $(function() {
     // Shared HTML escape helpers
@@ -48,6 +49,7 @@ $(function() {
     initContentBlocks();
     initMediaPicker();
     initBulkActions();
+    initUnsavedGuard();
 
     /**
      * Create sluggable from name

@@ -106,9 +106,11 @@
     <div class="container max-w-7xl py-16 lg:py-20">
         <div class="grid lg:grid-cols-[1fr_340px] gap-16 items-start">
 
-            <article class="max-w-3xl">
+            <article class="max-w-3xl min-w-0">
                 {# Nội dung từ CKEditor #}
-                <div class="post-content">{{ post.contents|raw }}</div>
+                {# contentsLazy: nội dung đã qua ContentFormatter (thay shortcode
+                   [ten_cong_ty], [hotline_1]..., ảnh lazy + WebP), giống trang Page. #}
+                <div class="post-content">{{ contentsLazy|raw }}</div>
 
                 {% if post.tags|default([])|length %}
                     <nav class="post-tags mt-12" aria-label="Thẻ bài viết">
@@ -158,7 +160,10 @@
                         <p class="sec-label fade">Đọc tiếp</p>
                         <h2 id="lien-quan-h" class="h-display text-3xl lg:text-4xl mt-5 fade">Bài viết <em>liên quan</em></h2>
                     </div>
-                    <a href="{{ path('news_category', { level1: v3.newsCategorySlug }) }}" class="btn2 btn2--dark !py-3 !px-5 fade">Xem tất cả</a>
+                    {# Danh mục chính của bài (NewsController::showAction); bài chưa gắn danh mục thì ẩn nút. #}
+                    {% if categoryUrl %}
+                        <a href="{{ categoryUrl }}" class="btn2 btn2--dark !py-3 !px-5 fade">Xem tất cả{% if category %}<span class="sr-only"> bài viết {{ category.name }}</span>{% endif %}</a>
+                    {% endif %}
                 </div>
 
                 <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-x-8 gap-y-12 mt-12">

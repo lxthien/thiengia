@@ -85,3 +85,66 @@
     }
     @media (max-width: 575px) { max-width: 100vw; }
 }
+
+// Hộp số liệu Search Console trong phần SEO — templates/admin/components/_gsc_panel.html.twig
+.gsc-panel {
+    margin-bottom: 20px;
+    padding: 18px 20px;
+    border: 1px solid #dce2eb;
+    border-radius: 8px;
+    background: #f7f9fc;
+    color: #253246;
+
+    &__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; margin-bottom: 14px; }
+    &__head h3 { margin: 0; font-size: 16px; font-weight: 700; }
+    &__head p, &__note, &__empty { margin: 0; color: #596579; font-size: 13px; line-height: 1.6; }
+    &__empty { font-size: 14px; }
+    &__note { margin-top: 10px; }
+
+    &__stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 0; }
+    &__stats > div { padding: 12px 14px; border: 1px solid #dce2eb; border-radius: 6px; background: #fff; min-width: 0; }
+    &__stats dt { color: #596579; font-size: 12px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; }
+    &__stats dd { margin: 4px 0 2px; font-size: 24px; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; }
+
+    &__chart { margin: 16px 0 0; }
+    &__chart svg { display: block; width: 100%; height: 56px; border-bottom: 1px solid #dce2eb; }
+    &__chart rect { fill: #195c9e; }
+    &__chart rect:hover { fill: #0f3d6b; }
+    &__chart figcaption { margin-top: 6px; color: #596579; font-size: 12px; }
+
+    &__table { margin-top: 16px; overflow-x: auto; }
+    &__table table { width: 100%; border-collapse: collapse; font-size: 14px; background: #fff; border: 1px solid #dce2eb; }
+    &__table caption { caption-side: top; padding: 0 0 8px; color: #253246; font-weight: 600; font-size: 14px; text-align: left; }
+    &__table th, &__table td { padding: 8px 12px; border-top: 1px solid #dce2eb; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    &__table thead th { border-top: 0; color: #596579; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
+    &__table th:first-child { text-align: left; white-space: normal; overflow-wrap: anywhere; }
+    &__table tbody th { font-weight: 500; }
+
+    @media (max-width: 767px) {
+        &__stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+}
+
+.gsc-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+
+    &--up { color: #1b6b3a; }
+    &--down { color: #a51d25; }
+    &--flat { color: #596579; font-weight: 500; }
+}
+
+// Chữ chỉ dành cho trình đọc màn hình trong mũi tên so sánh; tự khai báo để
+// không phụ thuộc .sr-only của Bootstrap.
+.gsc-delta .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+}

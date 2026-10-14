@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Seo\IndexNow\IndexNowClient;
 use App\Service\SitemapService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -51,6 +52,21 @@ class SitemapController extends AbstractController
         $response->setSharedMaxAge(300);
 
         return $response;
+    }
+
+    /**
+     * File khóa IndexNow: công cụ tìm kiếm tải /<key>.txt để xác minh site
+     * thật sự sở hữu khóa đã dùng khi gửi URL. Chỉ trả lời đúng khóa đang
+     * cấu hình (INDEXNOW_KEY), mọi tên khác là 404.
+     */
+    #[Route('/{key}.txt', name: 'indexnow_key', requirements: ['key' => '[a-f0-9]{8,128}'], methods: ['GET'], priority: 10)]
+    public function indexNowKeyAction(string $key, IndexNowClient $indexNow): Response
+    {
+        if (!$indexNow->isEnabled() || !hash_equals($indexNow->getKey(), $key)) {
+            throw $this->createNotFoundException();
+        }
+
+        return new Response($indexNow->getKey(), Response::HTTP_OK, ['Content-Type' => 'text/plain; charset=utf-8']);
     }
 
     private function createXmlResponse(Request $request, string $xml, string $etag): Response

@@ -65,7 +65,7 @@
     <div class="container max-w-7xl py-16 lg:py-20">
         <div class="grid lg:grid-cols-[1fr_340px] gap-16 items-start">
 
-            <article class="max-w-3xl">
+            <article class="max-w-3xl min-w-0">
                 {% for message in app.flashes('error') %}
                     <div class="alert alert-danger" role="alert">{{ message }}</div>
                 {% endfor %}

@@ -1,0 +1,116 @@
+{#
+ # Hiệu suất trên Google Search của một bài viết/trang, đọc từ dữ liệu
+ # app:gsc:sync đã lưu (App\Seo\Gsc\GscStatsReader). Chỉ hiện với bài đã lưu.
+ #
+ # Tham số:
+ #   - slug: News.url của bài đang sửa
+ #}
+{% set stats = gsc_post_stats(slug) %}
+<div class="gsc-panel" aria-labelledby="gsc-panel-heading">
+    <div class="gsc-panel__head">
+        <h3 id="gsc-panel-heading">Hiệu suất trên Google Search</h3>
+        {% if stats.to is defined %}
+            <p>{{ stats.days }} ngày, {{ stats.from|date('d/m') }} – {{ stats.to|date('d/m/Y') }}</p>
+        {% endif %}
+    </div>
+
+    {% if stats.state == 'empty' %}
+        <p class="gsc-panel__empty">
+            {% if gsc_configured() %}
+                Chưa có dữ liệu Search Console trong hệ thống. Dữ liệu được nạp bằng lệnh <code>app:gsc:sync</code> (nên chạy hằng ngày qua cron).
+            {% else %}
+                Chưa kết nối Search Console: cần khai báo <code>GSC_SITE_URL</code> và file khóa service account trên máy chủ, rồi chạy <code>app:gsc:sync</code>.
+            {% endif %}
+        </p>
+    {% elseif stats.state == 'no_rows' %}
+        <p class="gsc-panel__empty">
+            Google chưa ghi nhận lượt hiển thị nào cho bài này trong kỳ. Bài mới thường cần vài ngày đến vài tuần mới xuất hiện; số liệu Search Console trễ 2–3 ngày.
+        </p>
+    {% else %}
+        {% set t = stats.totals %}
+        {% set p = stats.previous %}
+        {% set hasPrevious = p.impressions > 0 or p.clicks > 0 %}
+        <dl class="gsc-panel__stats">
+            <div>
+                <dt>Lượt nhấp</dt>
+                <dd>{{ t.clicks|number_format(0, ',', '.') }}</dd>
+                {% if hasPrevious %}{{ _self.delta(t.clicks - p.clicks, 0, false) }}{% endif %}
+            </div>
+            <div>
+                <dt>Lượt hiển thị</dt>
+                <dd>{{ t.impressions|number_format(0, ',', '.') }}</dd>
+                {% if hasPrevious %}{{ _self.delta(t.impressions - p.impressions, 0, false) }}{% endif %}
+            </div>
+            <div>
+                <dt>CTR</dt>
+                <dd>{{ t.ctr|number_format(1, ',', '.') }}%</dd>
+                {% if hasPrevious %}{{ _self.delta(t.ctr - p.ctr, 1, false, ' điểm') }}{% endif %}
+            </div>
+            <div>
+                <dt>Vị trí trung bình</dt>
+                <dd>{{ t.position|number_format(1, ',', '.') }}</dd>
+                {# Vị trí: số nhỏ hơn là tốt hơn #}
+                {% if hasPrevious and p.position > 0 %}{{ _self.delta(t.position - p.position, 1, true) }}{% endif %}
+            </div>
+        </dl>
+        {% if hasPrevious %}<p class="gsc-panel__note">Mũi tên so với {{ stats.days }} ngày liền trước.</p>{% endif %}
+
+        {# Biểu đồ cột lượt hiển thị theo ngày #}
+        {% set peak = max(stats.series|map(d => d.impressions)) %}
+        {% if peak > 0 %}
+            {% set count = stats.series|length %}
+            <figure class="gsc-panel__chart">
+                <svg viewBox="0 0 {{ count * 10 }} 44" preserveAspectRatio="none" role="img"
+                     aria-label="Lượt hiển thị theo ngày, cao nhất {{ peak }} lượt trong một ngày">
+                    {% for day in stats.series %}
+                        {% set h = day.impressions > 0 ? max(2, (day.impressions / peak * 40)|round(1)) : 0 %}
+                        <rect x="{{ loop.index0 * 10 + 1.5 }}" y="{{ 44 - h }}" width="7" height="{{ h }}" rx="1">
+                            <title>{{ day.date|date('d/m') }}: {{ day.impressions }} lượt hiển thị, {{ day.clicks }} lượt nhấp</title>
+                        </rect>
+                    {% endfor %}
+                </svg>
+                <figcaption>Lượt hiển thị theo ngày (cao nhất {{ peak|number_format(0, ',', '.') }}/ngày)</figcaption>
+            </figure>
+        {% endif %}
+
+        {% if stats.queries %}
+            <div class="gsc-panel__table">
+                <table>
+                    <caption>Truy vấn đưa người dùng tới bài này</caption>
+                    <thead>
+                        <tr><th scope="col">Truy vấn</th><th scope="col">Nhấp</th><th scope="col">Hiển thị</th><th scope="col">CTR</th><th scope="col">Vị trí</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for row in stats.queries %}
+                            <tr>
+                                <th scope="row">{{ row.query }}</th>
+                                <td>{{ row.clicks|number_format(0, ',', '.') }}</td>
+                                <td>{{ row.impressions|number_format(0, ',', '.') }}</td>
+                                <td>{{ row.ctr|number_format(1, ',', '.') }}%</td>
+                                <td>{{ row.position|number_format(1, ',', '.') }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="gsc-panel__note">Google chưa công bố truy vấn cho bài này (thường do lượng tìm kiếm còn quá ít).</p>
+        {% endif %}
+    {% endif %}
+</div>
+
+{# Chênh lệch so với kỳ trước. lowerIsBetter: dùng cho vị trí trung bình. #}
+{% macro delta(value, decimals, lowerIsBetter, unit) %}
+    {% set rounded = value|round(decimals) %}
+    {% if rounded == 0 %}
+        <span class="gsc-delta gsc-delta--flat">Không đổi</span>
+    {% else %}
+        {% set good = lowerIsBetter ? rounded < 0 : rounded > 0 %}
+        <span class="gsc-delta {{ good ? 'gsc-delta--up' : 'gsc-delta--down' }}">
+            <span aria-hidden="true">{{ rounded > 0 ? '▲' : '▼' }}</span>
+            <span class="sr-only">{{ rounded > 0 ? 'tăng' : 'giảm' }}</span>
+            {{ rounded|abs|number_format(decimals, ',', '.') }}{{ unit|default('') }}
+            <span class="sr-only">, {{ good ? 'tốt hơn' : 'kém hơn' }} kỳ trước</span>
+        </span>
+    {% endif %}
+{% endmacro %}

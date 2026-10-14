@@ -536,12 +536,24 @@ export default function initCkeditor5() {
             : textarea.dataset.editorPreset === 'comment'
             ? { ...baseConfig, toolbar: { items: ['undo', 'redo', '|', 'bold', 'italic', 'link', '|', 'bulletedList', 'numberedList', 'blockQuote', 'removeFormat'], shouldNotGroupWhenFull: false } }
             : baseConfig;
+
+        // CKEditor ẩn textarea gốc và chỉ ghi nội dung vào đó ở sự kiện submit.
+        // Nếu textarea còn "required", trình duyệt chặn form trước khi submit
+        // kịp chạy ("invalid form control is not focusable") nên không lưu được.
+        // Nội dung trống vẫn được kiểm tra ở server (Assert\NotBlank).
+        textarea.required = false;
+
         ClassicEditor
             .create(textarea, config)
             .then((editor) => {
                 // Set once; do not reset scrolling during CKEditor UI updates.
                 editor.ui.view.element.style.setProperty('--ck-min-height', `${Math.min(height, maxHeight)}px`);
                 editor.ui.view.element.style.setProperty('--ck-max-height', `${maxHeight}px`);
+
+                // Báo cho unsaved-guard.js biết form có thay đổi chưa lưu.
+                editor.model.document.on('change:data', () => {
+                    textarea.dispatchEvent(new CustomEvent('editor:change', { bubbles: true }));
+                });
 
                 trackEditorForForm(editor, textarea);
                 registerEditor(textarea.id, editor);
