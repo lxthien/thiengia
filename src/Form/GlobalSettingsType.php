@@ -21,6 +21,13 @@ class GlobalSettingsType extends AbstractType
             ->add('pageDescription', TextareaType::class, ['required' => false, 'label' => 'Mô tả trang'])
             ->add('pageKeyword', TextType::class, ['required' => false, 'label' => 'Từ khóa trang'])
             ->add('topKeyword', TextareaType::class, ['required' => false, 'attr' => ['rows' => 10], 'label' => 'Từ khóa hàng đầu'])
+            ->add('searchSuggestions', TextareaType::class, [
+                'required' => false, 'empty_data' => '',
+                'label' => 'Gợi ý tìm kiếm',
+                'help' => 'Mỗi dòng một từ khóa, hiển thị tối đa 6 gợi ý dưới ô tìm kiếm. Để trống để ẩn.',
+                'attr' => ['rows' => 6, 'maxlength' => 1500],
+                'constraints' => [new \Symfony\Component\Validator\Constraints\Length(max: 1500)],
+            ])
             
             ->add('emailContact', EmailType::class, ['required' => false, 'label' => 'Email Liên hệ'])
             ->add('companyAddress', TextType::class, ['required' => false, 'label' => 'Địa chỉ công ty'])

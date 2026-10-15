@@ -33,6 +33,9 @@
         </nav>
 
         <div class="hd-actions">
+            <a href="{{ path('news_search') }}" class="hd-search-toggle" aria-label="Tìm kiếm" title="Tìm kiếm">
+                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            </a>
             <a href="tel:{{ v3.company.phoneRaw }}" class="hd-hotline" aria-label="Gọi {{ v3.company.phone }}" title="{{ v3.company.phone }}">
                 <span class="hd-hotline-icon">
                     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
@@ -43,7 +46,7 @@
                 </span>
             </a>
 
-            <a href="{{ path('contact') }}" class="btn2 hd-cta !py-3 !px-6">Nhận báo giá</a>
+            <a href="{{ path('contact') }}" class="btn2 hd-cta">Nhận báo giá</a>
 
             <button type="button" class="hd-toggle"
                     aria-label="Mở menu" aria-expanded="false" aria-controls="v3-menu">
@@ -51,4 +54,5 @@
             </button>
         </div>
     </div>
+    {{ include('v3/layout/_header_search.html.twig') }}
 </header>

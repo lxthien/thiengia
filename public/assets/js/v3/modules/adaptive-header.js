@@ -14,9 +14,9 @@ export default function initAdaptiveHeader() {
     header.dataset.layout = "full";
     const style = getComputedStyle(row);
     const available = row.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
-    const gap = parseFloat(style.columnGap) || 0;
+    const gap = () => parseFloat(getComputedStyle(row).columnGap) || 0;
     const width = element => element.getBoundingClientRect().width;
-    const fits = () => width(logo) + width(nav) + width(actions) + gap * 2 <= available - 2;
+    const fits = () => width(logo) + width(nav) + width(actions) + gap() * 2 <= available - 2;
     // Touch users get the same explicit menu controls as mobile.
     let mode = "drawer";
     if (matchMedia("(min-width: 1024px) and (hover: hover)").matches) {
@@ -28,7 +28,7 @@ export default function initAdaptiveHeader() {
     }
     header.dataset.layout = mode;
     if (mode === "drawer") {
-      const fitsDrawer = () => width(logo) + width(actions) + gap <= available - 2;
+      const fitsDrawer = () => width(logo) + width(actions) + gap() <= available - 2;
       if (!fitsDrawer()) header.classList.add("hd-hide-cta");
       if (!fitsDrawer()) header.classList.add("hd-hide-phone");
     }
@@ -47,10 +47,10 @@ export default function initAdaptiveHeader() {
     }
   };
   const schedule = () => { if (!frame) frame = requestAnimationFrame(fit); };
-  new ResizeObserver(schedule).observe(row);
+  if (typeof ResizeObserver !== "undefined") new ResizeObserver(schedule).observe(row);
   new MutationObserver(schedule).observe(nav, { childList: true, subtree: true, characterData: true });
   window.addEventListener("resize", schedule, { passive: true });
   document.fonts?.ready.then(schedule);
-  document.fonts?.addEventListener("loadingdone", schedule);
+  document.fonts?.addEventListener?.("loadingdone", schedule);
   fit();
 }

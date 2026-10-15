@@ -2,7 +2,7 @@
 
 {% set coverSrc = post.images ?: null %}
 
-{% block title %}{{ (post.pageTitle|title_tokens) ?: (post.title|title_tokens) }} | {{ v3.company.shortName }}{% endblock %}
+{% block title %}{{ (post.pageTitle|title_tokens) ?: (post.title|title_tokens) }}{% endblock %}
 {% block description %}{{ post.pageDescription ?: post.description }}{% endblock %}
 {% block keyword %}{{ post.pageKeyword }}{% endblock %}
 {% block robots %}<meta name="robots" content="{{ post.getRobotsContent() }}">{% endblock %}
@@ -95,7 +95,7 @@
 
                 <div class="post-cta-card">
                     <p class="post-cta-title">Nhận dự toán <em>miễn phí</em> cho ngôi nhà của bạn</p>
-                    <p class="post-cta-note">Kiến trúc sư trưởng lập bảng bóc tách chi tiết trong 48 giờ.</p>
+                    <p class="post-cta-note">Kiến trúc sư trưởng lập bảng bóc tách chi tiết trong 24 giờ.</p>
                     <a href="{{ path('contact') }}" class="btn2">Đặt lịch tư vấn</a>
                     <a href="tel:{{ v3.company.phoneRaw }}" class="post-cta-phone">{{ v3.company.phone }}</a>
                 </div>

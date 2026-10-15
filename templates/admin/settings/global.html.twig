@@ -8,6 +8,7 @@
 {% set groups = {
 'general':{title:'Thông tin website', description:'Tên website và thông tin liên hệ hiển thị chung.', fields:['siteName','emailContact','companyAddress','companyTax','companyWorkingHours','hotLine1','hotLine2']},
 'email':{title:'Cấu hình email', description:'Địa chỉ dùng làm người gửi cho email hệ thống (thông báo form liên hệ). Nên là địa chỉ được máy chủ SMTP cho phép gửi.', fields:['emailSender']},
+'search':{title:'Tìm kiếm', description:'Các từ khóa gợi ý hiển thị khi mở tìm kiếm trên header.', fields:['searchSuggestions']},
 'homepage':{title:'Trang chủ & hiển thị', description:'Giữ nguyên định dạng dữ liệu đang sử dụng khi chỉnh danh mục và bảng giá.', fields:['listPrices','listCategoryOnHomepage','numberRecordOnPage','marqueeHomepage']},
 'seo':{title:'SEO', description:'Thông tin tiêu đề, mô tả và từ khóa mặc định.', fields:['pageTitle','pageDescription','pageKeyword','topKeyword']},
 'tracking':{title:'Analytics & tích hợp', description:'Chỉ sử dụng mã từ nguồn tin cậy. Tránh cấu hình trùng một dịch vụ ở nhiều trường.', fields:['GTM','ga4MeasurementID','googleAnalytic','fbApp','facebookMessenger']},

@@ -811,17 +811,20 @@ class NewsController extends AbstractController
 
         $form->handleRequest($request);
 
-        if (!$form->isSubmitted() && empty($request->query->get('q'))) {
-            return $this->redirectToRoute('homepage', [], 301);
-        }
-
         $q = $form->isSubmitted() ? ($form->getData()['q'] ?? null) : null;
         if (!empty($q)) {
             return $this->redirectToRoute('news_search', array('q' => $q));
         }
 
         // Improved search: search across multiple fields
-        $searchTerm = $request->query->get('q');
+        $searchTerm = trim($request->query->get('q', ''));
+        if ($searchTerm === '') {
+            return $this->render('news/search.html.twig', [
+                'baseUrl' => $this->generateUrl('news_search', [], UrlGeneratorInterface::ABSOLUTE_URL),
+                'q' => '',
+                'pagination' => $this->paginator->paginate([], 1, 10),
+            ]);
+        }
         $searchPattern = '%' . $searchTerm . '%';
 
         $query = $this->em->getRepository(News::class)

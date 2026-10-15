@@ -6,6 +6,7 @@
 // ============================================================
 
 import initHeader from "./modules/header";
+import initHeaderSearch from "./modules/header-search";
 import initMobileMenu from "./modules/mobile-menu";
 import initAdaptiveHeader from "./modules/adaptive-header";
 import initReveal from "./modules/reveal";
@@ -21,6 +22,7 @@ import initLoBanRuler from "./modules/lo-ban-ruler";
 
 document.addEventListener("DOMContentLoaded", () => {
   initHeader();
+  initHeaderSearch();
   initMobileMenu();
   initAdaptiveHeader();
   initReveal();

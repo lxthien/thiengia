@@ -14,8 +14,8 @@
 {% block body %}
 {{ include('v3/components/_page_hero.html.twig', {
     breadcrumb: [{label: 'Trang chủ', path: path('homepage')}, {label: 'Tìm kiếm'}],
-    title: 'Kết quả tìm kiếm',
-    description: ('Nội dung phù hợp với từ khóa “' ~ q ~ '”.')|e
+    title: q ? 'Kết quả tìm kiếm' : 'Tìm kiếm trên Thiện Gia',
+    description: (q ? 'Nội dung phù hợp với từ khóa “' ~ q ~ '”.' : 'Tìm dịch vụ, báo giá và kinh nghiệm xây nhà bạn cần.')|e
 }) }}
 <section class="search-page" aria-labelledby="search-results-title">
     <div class="container max-w-7xl">
@@ -27,7 +27,7 @@
             </div>
         </form>
         <div class="search-page__summary">
-            <h2 id="search-results-title">{{ pagination.totalItemCount }} kết quả cho “{{ q }}”</h2>
+            <h2 id="search-results-title">{{ q ? pagination.totalItemCount ~ ' kết quả cho “' ~ q ~ '”' : 'Nhập từ khóa để bắt đầu tìm kiếm' }}</h2>
             {% if pagination|length and get_setting('isShowSortOnCategory') %}
                 <details class="search-page__sort">
                     <summary>Sắp xếp kết quả</summary>
@@ -46,7 +46,7 @@
                 {% endfor %}
             </div>
             <div class="pagination-v3 mt-16">{{ knp_pagination_render(pagination) }}</div>
-        {% else %}
+        {% elseif q %}
             <div class="search-page__empty">
                 <h3>Chưa tìm thấy nội dung phù hợp</h3>
                 <p>Hãy thử từ khóa ngắn hơn, kiểm tra chính tả hoặc tìm theo chủ đề như “xây nhà”, “báo giá”, “thiết kế”.</p>

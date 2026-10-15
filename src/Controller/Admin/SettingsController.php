@@ -18,6 +18,7 @@ class SettingsController extends AbstractController
     public function global(Request $request, SettingsManager $settingsManager): Response
     {
         $settings = $settingsManager->all();
+        $settings['searchSuggestions'] ??= $this->getParameter('v3_defaults')['searchSuggestions'] ?? '';
 
         $form = $this->createForm(GlobalSettingsType::class, $settings);
         $form->handleRequest($request);

@@ -1,0 +1,21 @@
+<section id="header-search" class="header-search" aria-label="Tìm kiếm trên website" hidden>
+    <div class="container max-w-7xl">
+        <div class="header-search__heading">
+            <label for="header-search-query">Bạn đang tìm thông tin gì?</label>
+            <button type="button" class="header-search__close" aria-label="Đóng tìm kiếm">×</button>
+        </div>
+        <form action="{{ path('news_search') }}" method="get" role="search" aria-label="Tìm kiếm toàn website">
+            <div class="header-search__fields">
+                <input id="header-search-query" type="search" name="q" value="{{ app.request.attributes.get('_route') == 'news_search' ? app.request.query.get('q', '') : '' }}" placeholder="Tìm dịch vụ, báo giá, kinh nghiệm xây nhà…" required maxlength="200" enterkeyhint="search">
+                <button class="btn2" type="submit">Tìm kiếm</button>
+            </div>
+        </form>
+        {% set suggestions = get_setting('searchSuggestions', v3.searchSuggestions|default(''))|split('\n')|map(term => term|trim)|filter(term => term != '')|slice(0, 6) %}
+        {% if suggestions %}
+            <nav class="header-search__suggestions" aria-label="Gợi ý tìm kiếm">
+                <span>Gợi ý:</span>
+                {% for term in suggestions %}<a href="{{ path('news_search', {q: term|slice(0, 200)}) }}">{{ term|slice(0, 200) }}</a>{% endfor %}
+            </nav>
+        {% endif %}
+    </div>
+</section>

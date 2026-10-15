@@ -4,7 +4,7 @@
     ? post.images
     : asset('assets/images/no-image.png') %}
 
-{% block title %}{{ (post.pageTitle|title_tokens) ?: (post.title|title_tokens) }} | {{ v3.company.shortName }}{% endblock %}
+{% block title %}{{ (post.pageTitle|title_tokens) ?: (post.title|title_tokens) }}{% endblock %}
 {% block description %}{{ post.pageDescription ?: post.description }}{% endblock %}
 {% block robots %}<meta name="robots" content="{{ post.getRobotsContent() }}">{% endblock %}
 {% block canonical %}<link rel="canonical" href="{{ canonicalUrl }}">{% endblock %}

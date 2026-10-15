@@ -14,6 +14,7 @@ parameters:
         # Slug chuyên mục dùng cho link "Cẩm nang" trên menu/footer.
         # Đổi cho khớp NewsCategory.url thật trong DB.
         newsCategorySlug: 'blog'
+        searchSuggestions: "Xây nhà trọn gói\nĐơn giá phần thô\nXin phép xây dựng"
 
         # Nền kiến trúc dùng chung cho banner trang trong. Để trống để tắt ảnh.
         pageHeroImage: '/uploads/media/banner/thiet-ke-nha-pho_1791344582.jpg'
