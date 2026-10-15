@@ -61,7 +61,7 @@
  {% if pagination.totalItemCount == 0 %}
  <p class="il-empty">{{ tab == 'links' and filters.issue == '' and filters.q == '' ? 'Không có link nào có vấn đề.' : 'Không có kết quả khớp bộ lọc.' }}</p>
  {% elseif tab == 'pages' %}
- <div class="il-table-wrap"><table><thead><tr><th>Trang</th><th class="il-num" title="Số trang khác có link tới trong nội dung">Link ngữ cảnh đến</th><th class="il-num">Menu</th><th class="il-num" title="Danh mục liệt kê bài, breadcrumb">Link tự động</th><th class="il-num">Link đi (nội bộ / ngoài)</th><th class="il-num">Độ sâu</th><th>Vấn đề</th><th>Thao tác</th></tr></thead><tbody>
+ <div class="il-table-wrap"><table><thead><tr><th>Trang</th><th class="il-num" title="Số trang khác có link tới trong nội dung">Link đến<small>trong nội dung</small></th><th class="il-num">Menu</th><th class="il-num" title="Danh mục liệt kê bài, breadcrumb">Tự động<small>danh mục</small></th><th class="il-num" title="Link đi trong nội dung: nội bộ / ra ngoài site">Link đi<small>nội bộ / ngoài</small></th><th class="il-num" title="Số click từ trang chủ">Độ sâu</th><th>Vấn đề</th><th>Thao tác</th></tr></thead><tbody>
  {% for page in pagination %}
  <tr><td><strong>{{ page.title }}</strong><small>{{ typeLabels[page.type] }} · <code>{{ page.path }}</code>{{ page.indexable ? '' : ' · noindex' }}</small></td>
  <td class="il-num"><strong>{{ page.inContent }}</strong><small>{{ page.inContentLinks }} link</small></td>

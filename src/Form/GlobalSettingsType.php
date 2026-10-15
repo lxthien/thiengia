@@ -61,6 +61,8 @@ class GlobalSettingsType extends AbstractType
             // Content variables (Placeholders)
             ->add('content_ten_cong_ty', TextType::class, ['required' => false, 'label' => 'Tên công ty'])
             ->add('content_ten_day_du', TextType::class, ['required' => false, 'label' => 'Tên đầy đủ'])
+            ->add('content_chuyen_gia', TextType::class, ['required' => false, 'empty_data' => '', 'label' => 'Chuyên gia'])
+            ->add('content_chuc_danh', TextType::class, ['required' => false, 'empty_data' => '', 'label' => 'Chức danh'])
             ->add('content_dia_chi', TextareaType::class, ['required' => false, 'attr' => ['rows' => 3], 'label' => 'Địa chỉ'])
             ->add('content_hotline_1', TextType::class, ['required' => false, 'label' => 'Hotline 1'])
             ->add('content_hotline_2', TextType::class, ['required' => false, 'label' => 'Hotline 2'])

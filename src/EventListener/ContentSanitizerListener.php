@@ -97,7 +97,7 @@ class ContentSanitizerListener
                 'ul[class]', 'ol[class]', 'li[class]',
                 'a[href|title|target|rel|class|id|data-fancybox|data-caption]',
                 'img[src|alt|title|width|height|class|loading]',
-                'blockquote[class]', 'q',
+                'blockquote[class]', 'q', 'cite[class]',
                 'table[class]', 'thead', 'tbody', 'tr[class]', 'th[class|colspan|rowspan]', 'td[class|colspan|rowspan]',
                 'span[style|class]',
                 'div[style|class|id|data-cms-block|data-cms-payload]',
@@ -115,7 +115,7 @@ class ContentSanitizerListener
             // không cho attribute data-* — phải khai báo thêm. DefinitionRev PHẢI
             // tăng mỗi khi sửa khối dưới đây, nếu không bản cache cũ vẫn được dùng.
             $config->set('HTML.DefinitionID', 'thiengia-cms-content');
-            $config->set('HTML.DefinitionRev', 2);
+            $config->set('HTML.DefinitionRev', 3);
 
             // maybeGetRawHTMLDefinition() "finalize" config, nên mọi ->set() phải
             // nằm TRƯỚC dòng này; trả về null khi definition đã có sẵn trong cache.

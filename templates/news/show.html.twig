@@ -92,13 +92,12 @@
 
             <h1 class="page-hero-title mt-5 max-w-4xl fade">{{ (post.title|title_tokens) }}</h1>
 
-            <p class="post-meta mt-8 fade">
-                <span>Bởi <strong>{{ post.author ? post.author.authorDisplayName : v3.company.authorName }}</strong></span>
-                <time datetime="{{ post.createdAt|date('Y-m-d') }}">{{ post.createdAt|date('d/m/Y') }}</time>
-                {% if readingMinutes|default(0) %}
-                    <span>{{ readingMinutes }} phút đọc</span>
-                {% endif %}
-            </p>
+            {% set publicationDate = post.publishedAt ?: post.createdAt %}
+            {% if publicationDate %}
+                <p class="post-meta mt-8 fade">
+                    <span>Đăng ngày <time datetime="{{ publicationDate|date('c') }}">{{ publicationDate|date('d/m/Y') }}</time></span>
+                </p>
+            {% endif %}
         </div>
     </header>
 
@@ -143,7 +142,7 @@
 
                 <div class="post-cta-card">
                     <p class="post-cta-title">Nhận dự toán <em>miễn phí</em> cho ngôi nhà của bạn</p>
-                    <p class="post-cta-note">Kiến trúc sư trưởng lập bảng bóc tách chi tiết trong 48 giờ.</p>
+                    <p class="post-cta-note">Kiến trúc sư trưởng lập bảng bóc tách chi tiết trong 24 giờ.</p>
                     <a href="{{ path('contact') }}" class="btn2">Đặt lịch tư vấn</a>
                     <a href="tel:{{ v3.company.phoneRaw }}" class="post-cta-phone">{{ v3.company.phone }}</a>
                 </div>

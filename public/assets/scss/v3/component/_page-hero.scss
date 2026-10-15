@@ -53,6 +53,10 @@
     line-height: 1.85;
     color: rgba($white, 0.86);
     padding-left: 1.45rem;
+
+    // Rich-text descriptions may contain multiple paragraphs.
+    > p { margin: 0; }
+    > :not(:first-child) { margin-top: 1rem; }
   }
 
   @media (max-width: 767px) {

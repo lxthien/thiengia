@@ -241,6 +241,33 @@ function TocPlugin(editor) {
  * phần tử mang data-cms-block — tương đương findCmsBlockElement() cũ nhưng
  * làm việc trên DOM thật thay vì CKEDITOR.dom.element.
  */
+/**
+ * <cite> đứng riêng một dòng (vd nguồn trích dẫn cuối <blockquote>):
+ * GeneralHtmlSupport chỉ coi <cite> là thẻ inline nên tự bọc nó trong <p>.
+ * Plugin này giữ <cite> nằm trực tiếp trong khối chứa thành một khối riêng
+ * (model "citeBlock"); <cite> nằm trong đoạn văn vẫn để GHS xử lý như inline.
+ */
+const CITE_BLOCK_PARENTS = new Set(['blockquote', 'div', 'section', 'article', 'aside', 'figure']);
+
+function CiteBlockPlugin(editor) {
+    editor.model.schema.register('citeBlock', { inheritAllFrom: '$block' });
+
+    editor.conversion.for('upcast').elementToElement({
+        view: 'cite',
+        model: (viewElement, { writer }) => {
+            const parent = viewElement.parent;
+            // Cha không phải element: <cite> nằm ngay gốc nội dung.
+            const isBlock = !parent || !parent.is('element') || CITE_BLOCK_PARENTS.has(parent.name);
+
+            // Trả null thì converter bỏ qua, để GHS chuyển như thẻ inline.
+            return isBlock ? writer.createElement('citeBlock') : null;
+        },
+        converterPriority: 'high',
+    });
+
+    editor.conversion.for('downcast').elementToElement({ model: 'citeBlock', view: 'cite' });
+}
+
 function findCmsBlockDomElement(domNode) {
     let node = domNode;
     if (node && node.nodeType !== Node.ELEMENT_NODE) {
@@ -415,6 +442,7 @@ const baseConfig = {
         PasteFromOffice,
         GeneralHtmlSupport,
         TocPlugin,
+        CiteBlockPlugin,
     ],
     // CKFinder thật (dùng chung 1 connector đã có sẵn với CKEditor 4 cũ, xem
     // public/assets/cksourceckfinder/ — script ckfinder.js load global trong
@@ -483,7 +511,7 @@ const baseConfig = {
     htmlSupport: {
         allow: [
             {
-                name: /^(div|span|section|p|blockquote|table|thead|tbody|tr|th|td|ul|ol|li|h2|h3|h4)$/,
+                name: /^(div|span|section|p|cite|blockquote|table|thead|tbody|tr|th|td|ul|ol|li|h2|h3|h4)$/,
                 attributes: true,
                 classes: true,
                 styles: true,

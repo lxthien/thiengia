@@ -43,15 +43,30 @@
  .il-filter-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:12px;font-size:14px;}
  .il-filter-actions>a{color:#195c9e;text-decoration:underline;}
  .il-results{margin-bottom:22px;overflow:hidden;}
- .il-table-wrap{overflow:auto;}
+ /* #right-panel của layout admin là display:table-cell nên tự nở theo nội dung,
+    overflow:auto không chặn được; contain:inline-size bỏ bề rộng của bảng khỏi
+    phép tính đó để bảng cuộn ngang bên trong khung thay vì đẩy cả trang. */
+ .il-table-wrap{overflow:auto;contain:inline-size;}
+ .il-table-wrap table{min-width:900px;}
+ th:first-child,td:first-child{padding-left:20px;}
  table{width:100%;border-collapse:collapse;}
- th,td{padding:14px 20px;border-bottom:1px solid #e5e9ef;text-align:left;vertical-align:top;font-size:14px;overflow-wrap:anywhere;}
+ th,td{padding:14px 14px;border-bottom:1px solid #e5e9ef;text-align:left;vertical-align:top;font-size:14px;overflow-wrap:anywhere;}
  th{background:#f8fafc;color:#46536a;font-weight:600;}
  tbody tr:last-child td{border-bottom:0;}
  tbody tr:hover{background:#fafcff;}
  td small{display:block;color:#596579;margin-top:6px;font-size:13px;line-height:1.6;}
  td strong{font-weight:600;}
- th.il-num,td.il-num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;}
+ /* Cột đầu (tên trang/nguồn) cần đủ rộng: overflow-wrap:anywhere ở td làm bảng tự
+    động co cột này về gần 0, tên trang và đường dẫn bị bẻ từng chữ. */
+ th:first-child,td:first-child{min-width:220px;}
+ /* Cột Vấn đề (kế cuối): đủ rộng cho 1 nhãn trên 1–2 dòng. */
+ th:nth-last-child(2),td:nth-last-child(2){min-width:170px;}
+ td .il-badge{white-space:normal;}
+ td:first-child strong{overflow-wrap:break-word;}
+ /* Cột số: tiêu đề được xuống dòng để cột hẹp, số căn giữa theo tiêu đề. */
+ th.il-num{white-space:nowrap;text-align:center;}
+ th small{display:block;margin-top:2px;color:#596579;font-size:12px;font-weight:400;}
+ td.il-num{text-align:center;white-space:nowrap;font-variant-numeric:tabular-nums;}
  td.il-num small{white-space:nowrap;}
  code{color:#304b6c;overflow-wrap:anywhere;white-space:normal;}
  .il-actions{white-space:nowrap;}
@@ -65,5 +80,5 @@
  .pagination .active .page-link{color:#fff;background:#195c9e;border-color:#195c9e;}
  summary:focus-visible,input:focus-visible,select:focus-visible,.il-tabs a:focus-visible{outline:3px solid #195c9e;outline-offset:3px;}
  @media(max-width:1199px){.il-summary{grid-template-columns:repeat(2,minmax(0,1fr));}.il-columns{grid-template-columns:1fr;}.il-filters{grid-template-columns:1fr 1fr;}.il-search{grid-column:1/-1;}}
- @media(max-width:767px){.il-manager{padding:18px 12px;}.il-filters{grid-template-columns:1fr;padding:16px;}.il-summary{gap:10px;}.il-summary article{padding:14px;}th,td{padding:12px;}table{min-width:760px;}}
+ @media(max-width:767px){.il-manager{padding:18px 12px;}.il-filters{grid-template-columns:1fr;padding:16px;}.il-summary{gap:10px;}.il-summary article{padding:14px;}th,td{padding:12px;}}
 }
