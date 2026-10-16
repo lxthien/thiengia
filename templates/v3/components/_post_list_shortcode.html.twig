@@ -1,0 +1,10 @@
+{#
+    Danh sách bài viết chèn vào nội dung bằng shortcode
+    [bai_viet danh_muc="12,15" so_luong="6"] — xem App\Service\ContentFormatter.
+    Tham số: posts (News[])
+#}
+<div class="post-list-sc grid sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+    {% for post in posts %}
+        {{ include('v3/components/_post_card.html.twig', { post: post, headingLevel: 'h3' }, with_context = false) }}
+    {% endfor %}
+</div>

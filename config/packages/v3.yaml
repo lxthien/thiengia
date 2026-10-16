@@ -13,7 +13,7 @@ parameters:
     v3_defaults:
         # Slug chuyên mục dùng cho link "Cẩm nang" trên menu/footer.
         # Đổi cho khớp NewsCategory.url thật trong DB.
-        newsCategorySlug: 'blog'
+        newsCategorySlug: 'cam-nang'
         searchSuggestions: "Xây nhà trọn gói\nĐơn giá phần thô\nXin phép xây dựng"
 
         # Nền kiến trúc dùng chung cho banner trang trong. Để trống để tắt ảnh.

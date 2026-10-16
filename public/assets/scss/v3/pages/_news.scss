@@ -37,6 +37,34 @@
   @include pc.post-content;
 }
 
+// Lưới bài viết chèn bằng shortcode [bai_viet ...] (App\Service\ContentFormatter):
+// trả lại style thẻ bài viết mà rule chung của .post-content (a gạch chân, h3 to,
+// khoảng cách đầu khối) đè mất.
+.post-content .post-list-sc {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .post-card-title {
+    margin-top: 0.85rem;
+    font-size: 1.2rem;
+    line-height: 1.4;
+
+    a:hover {
+      color: $accent;
+    }
+  }
+
+  .post-card-excerpt {
+    margin-top: 0.75rem;
+  }
+}
+
 // Mục lục dính bên phải
 .toc {
   border: 1px solid $line;

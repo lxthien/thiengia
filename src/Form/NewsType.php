@@ -135,10 +135,6 @@ class NewsType extends AbstractType
                 'empty_data' => 'post',
                 'attr' => ['class' => 'postType-select'],
             ])
-            ->add('relatedNews', TextType::class, [
-                'required' => false,
-                'label' => 'label.relatedNews',
-            ])
             ->add('contactHotline', TextareaType::class, [
                 'required' => false,
                 'attr' => ['rows' => '5'],
