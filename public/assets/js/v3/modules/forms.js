@@ -47,7 +47,10 @@ export default function initForms() {
         .then((response) => response.json())
         .then((data) => {
           showToast(data.success ? "success" : "error", data.message || "Đã có lỗi xảy ra. Vui lòng thử lại.");
-          if (data.success) form.reset();
+          if (data.success) {
+            form.reset();
+            form.dispatchEvent(new CustomEvent("ajax-form:success", { detail: data }));
+          }
         })
         .catch(() => {
           showToast("error", "Không thể gửi yêu cầu. Vui lòng thử lại hoặc gọi hotline.");

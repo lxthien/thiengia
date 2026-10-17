@@ -10,14 +10,16 @@
 
 {% block body %}
 {{ include('v3/components/_page_hero.html.twig', {
-    breadcrumb: [{label: 'Trang chủ', path: path('homepage')}, {label: 'Chi phí xây dựng'}],
-    title: 'Dự toán <em>chi phí xây dựng</em>',
-    description: 'Nhập quy mô và phương án thi công để ước tính ngân sách, xem diện tích quy đổi và chi phí từng hạng mục.'
+    breadcrumb: [{label: 'Trang chủ', path: path('homepage')}, {label: post.getTitle() is not null ? post.getTitle()|title_tokens : 'Chi phí xây dựng'}],
+    title: post.getTitle() is not null ? post.getTitle()|title_tokens : 'Dự toán <em>chi phí xây dựng</em>',
+    description: post.getDescription() is not null ? post.getDescription() : 'Nhập quy mô và phương án thi công để ước tính ngân sách, xem diện tích quy đổi và chi phí từng hạng mục.'
 }) }}
 <section class="construction-cost" aria-labelledby="cost-heading">
 <div class="container cost-container">
     <div class="cost-note" role="note"><strong>Dự toán tham khảo, không thay thế báo giá.</strong>
         <p>Chi phí thực tế phụ thuộc thiết kế, vật tư, địa chất và điều kiện thi công. Đơn giá và hệ số sử dụng cấu hình hiện tại của {{ v3.company.shortName }}.</p>
+        <p>Nhập kích thước, số tầng và phương án thi công để <strong>tính chi phí xây nhà</strong> theo đơn giá hiện hành của {{ v3.company.shortName }}. Kết quả hiện ngay trên màn hình, gồm diện tích quy đổi và chi phí từng hạng mục, không cần để lại số điện thoại.</p>
+        <p><em>Dự toán tham khảo, không thay thế báo giá. Đơn giá áp dụng từ 01/01/2026.</em></p>
     </div>
     {% for message in app.flashes('error') %}
         <p class="cost-error" role="alert">{{ message }}</p>
@@ -46,7 +48,14 @@
                             <small id="{{ field.vars.id }}_help">Số lớn hơn 0; dùng dấu chấm thập phân, ví dụ 4.5.</small>
                         {% elseif name == 'floor' %}
                             {{ form_widget(field, {attr: {'aria-describedby': field.vars.id ~ '_help'}}) }}
-                            <small id="{{ field.vars.id }}_help">Tính cả tầng trệt; tầng lửng và tum chọn riêng bên dưới.</small>
+                            <small id="{{ field.vars.id }}_help">Tính cả tầng trệt; tầng lửng và tum nhập riêng bên dưới.</small>
+                        {% elseif name in ['lung', 'tum', 'san_vuon'] %}
+                            {{ form_widget(field, {attr: {inputmode: 'decimal', maxlength: '20', 'aria-describedby': field.vars.id ~ '_help', 'data-cost-optional-area': ''}}) }}
+                            <small id="{{ field.vars.id }}_help">{{ {
+                                lung: 'Tối đa 65% diện tích một sàn; nhập lớn hơn sẽ được tính bằng mức tối đa.',
+                                tum: 'Diện tích phần tum / tầng thượng có mái che, thường gồm cầu thang và phòng thờ.',
+                                san_vuon: 'Diện tích sân trước, sân sau có lát nền, tường rào.'
+                            }[name] }}</small>
                         {% else %}
                             {{ form_widget(field) }}
                         {% endif %}
@@ -82,9 +91,12 @@
                     {% set floors = form.type.vars.value == '3' ? 1 : costs.floor %}
                     {% for i in 1..floors %}
                         {% set rows = rows|merge([{label: i == 1 ? 'Tầng trệt' : 'Tầng ' ~ (i - 1), area: costs.area}]) %}
+                        {% if i == 1 and costs.areaLung > 0 %}
+                            {% set rows = rows|merge([{label: 'Tầng lửng (tối đa 65% diện tích sàn)', area: costs.areaLung}]) %}
+                        {% endif %}
                     {% endfor %}
                     {% for item in [
-                        {label: 'Tầng lửng', area: costs.areaLung}, {label: 'Ban công', area: costs.areaBanCong},
+                        {label: 'Ban công', area: costs.areaBanCong},
                         {label: 'Tum / Tầng thượng', area: costs.areaTum}, {label: 'Sân thượng', area: costs.areaSanThuong},
                         {label: 'Sân vườn', area: costs.areaSanVuon}, {label: costs.titleMai, area: costs.areaMai}
                     ] %}
@@ -107,6 +119,7 @@
                         </table>
                     </div>
                     <p class="cost-note">{{ costs.note }}</p>
+                    {% if leadForm %}<button type="button" class="cost-submit cost-lead-open" data-cost-lead-open>Nhận đơn giá chi tiết từng hạng mục</button>{% endif %}
                 {% else %}
                     <div class="cost-empty">
                         <p class="cost-empty-title">Ngân sách dự kiến của bạn</p>
@@ -126,5 +139,30 @@
         <article{% if post %} id="post-{{ post.getId() }}"{% endif %} class="post-content cost-content">{{ contentsLazy|raw }}</article>
     {% endif %}
 </div>
+{% if leadForm %}
+    {# Hiện sau 5 giây kể từ khi có kết quả — xem public/assets/js/v3/construction-cost.js #}
+    <dialog class="cost-lead" data-cost-lead aria-labelledby="cost-lead-title" aria-describedby="cost-lead-intro">
+        <button type="button" class="cost-lead-close" data-cost-lead-close aria-label="Đóng">×</button>
+        <h2 id="cost-lead-title">Nhận đơn giá chi tiết</h2>
+        <p id="cost-lead-intro" class="cost-lead-intro">Chi phí trên chỉ là tính toán sơ bộ. Để nhận đơn giá chi tiết từng hạng mục, vật tư, hãy để lại thông tin bên dưới.</p>
+        <dl class="cost-lead-summary">
+            <div><dt>Nhu cầu</dt><dd>{{ costs.leadTitle }}</dd></div>
+            <div><dt>Mô tả</dt><dd><ul>{% for line in costs.leadLines %}<li>{{ line }}</li>{% endfor %}</ul></dd></div>
+        </dl>
+        {{ form_start(leadForm, {attr: {class: 'cost-lead-form', 'data-quote': '', 'data-ajax-form': '', 'data-cost-lead-form': ''}}) }}
+            <div class="cost-field">
+                {{ form_label(leadForm.name) }}
+                {{ form_widget(leadForm.name, {attr: {required: 'required'}}) }}
+            </div>
+            <div class="cost-field">
+                {{ form_label(leadForm.phone) }}
+                {{ form_widget(leadForm.phone, {attr: {required: 'required', 'aria-describedby': leadForm.phone.vars.id ~ '_help'}}) }}
+                <small id="{{ leadForm.phone.vars.id }}_help">Số di động 10 số, ví dụ 0901 234 567.</small>
+            </div>
+            <button type="submit" class="cost-submit">Gửi đi</button>
+        {{ form_end(leadForm) }}
+        <p class="cost-lead-thanks" data-cost-lead-thanks role="status" hidden>Cảm ơn bạn! Chúng tôi đã nhận thông tin và sẽ gửi đơn giá chi tiết sớm nhất.</p>
+    </dialog>
+{% endif %}
 </section>
 {% endblock %}

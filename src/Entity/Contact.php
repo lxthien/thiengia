@@ -50,6 +50,10 @@ class Contact
     #[ORM\Column(name: 'gclid', type: Types::STRING, length: 255, nullable: true)]
     private $gclid;
 
+    // Form nơi khách gửi yêu cầu, ví dụ "Trang Liên hệ", "Popup dự toán chi phí xây dựng"
+    #[ORM\Column(name: 'source', type: Types::STRING, length: 100, nullable: true)]
+    private $source;
+
 
     /**
      * Get id
@@ -285,6 +289,30 @@ class Contact
     public function getGclid()
     {
         return $this->gclid;
+    }
+
+    /**
+     * Set source
+     *
+     * @param string|null $source
+     *
+     * @return Contact
+     */
+    public function setSource($source)
+    {
+        $this->source = $source;
+
+        return $this;
+    }
+
+    /**
+     * Get source
+     *
+     * @return string|null
+     */
+    public function getSource()
+    {
+        return $this->source;
     }
 }
 

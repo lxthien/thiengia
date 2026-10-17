@@ -26,6 +26,7 @@ use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use App\Entity\Contact;
 use App\Entity\News;
+use App\Form\CostLeadType;
 use App\Service\ContactNotifier;
 use App\Service\SettingsManager;
 use WhiteOctober\BreadcrumbsBundle\Model\Breadcrumbs;
@@ -85,6 +86,7 @@ class ContactController extends AbstractController
         }
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $contact->setSource('Trang Liên hệ');
             $this->em->persist($contact);
             $this->em->flush();
 
@@ -155,6 +157,7 @@ class ContactController extends AbstractController
                 $contact->setContents('Yêu cầu báo giá nhanh — Nhu cầu: ' . $contact->getTitle());
             }
 
+            $contact->setSource('Form báo giá nhanh');
             $this->em->persist($contact);
             $this->em->flush();
 
@@ -211,6 +214,7 @@ class ContactController extends AbstractController
             return new RedirectResponse($redirectUrl);
         }
 
+        $contact->setSource('Form trong trang nội dung');
         $this->em->persist($contact);
         $this->em->flush();
 
@@ -225,6 +229,46 @@ class ContactController extends AbstractController
         $this->addFlash('notice', $this->translator->trans('contact.message.success'));
 
         return new RedirectResponse($redirectUrl);
+    }
+
+    #[Route('cong-cu/chi-phi-xay-dung/nhan-bao-gia/', name: 'cost_calculator_lead', methods: ['POST'])]
+    public function costLeadAction(Request $request)
+    {
+        if (!$this->publicFormLimiter->create($request->getClientIp())->consume(1)->isAccepted()) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Bạn gửi quá nhiều yêu cầu. Vui lòng thử lại sau ít phút.',
+            ], 429);
+        }
+
+        $contact = new Contact();
+        $form = $this->formFactory->createNamed('cost_lead', CostLeadType::class, $contact);
+        $form->handleRequest($request);
+
+        if (!$form->isSubmitted() || !$form->isValid()) {
+            $errors = [];
+            foreach ($form->getErrors(true) as $error) {
+                $errors[] = $error->getMessage();
+            }
+
+            return new JsonResponse(['success' => false, 'message' => implode(' ', array_unique($errors)) ?: 'Form không hợp lệ. Vui lòng kiểm tra lại.']);
+        }
+
+        // Nhu cầu / mô tả là hidden field dựng từ kết quả dự toán — cắt độ dài cho an toàn
+        $contact->setTitle(mb_substr((string) $contact->getTitle(), 0, 255) ?: null);
+        $contact->setContents(mb_substr((string) $contact->getContents(), 0, 2000));
+        $contact->setSource('Popup dự toán chi phí xây dựng');
+
+        $this->em->persist($contact);
+        $this->em->flush();
+
+        if (null === $contact->getId()) {
+            return new JsonResponse(['success' => false, 'message' => $this->translator->trans('contact.message.error')]);
+        }
+
+        $this->contactNotifier->notify($contact, 'Popup dự toán chi phí xây dựng');
+
+        return new JsonResponse(['success' => true, 'message' => 'Đã nhận thông tin. Chúng tôi sẽ gửi đơn giá chi tiết cho bạn sớm nhất.']);
     }
 
     /**

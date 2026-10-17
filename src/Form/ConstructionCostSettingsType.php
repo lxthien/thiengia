@@ -112,12 +112,12 @@ class ConstructionCostSettingsType extends AbstractType
             // === HỆ SỐ HẠNG MỤC BỔ SUNG ===
             ->add('cost_lung_ratio', NumberType::class, [
                 'required' => false,
-                'label' => 'Lửng (hệ số)',
+                'label' => 'Lửng (hệ số × m² lửng nhập)',
                 'attr' => $numberAttr,
             ])
             ->add('cost_tum_ratio', NumberType::class, [
                 'required' => false,
-                'label' => 'Tum / Tầng thượng (hệ số)',
+                'label' => 'Tum / Tầng thượng (hệ số × m² tum nhập)',
                 'attr' => $numberAttr,
             ])
             ->add('cost_san_thuong_ratio', NumberType::class, [
@@ -132,12 +132,12 @@ class ConstructionCostSettingsType extends AbstractType
             ])
             ->add('cost_ban_cong_area', NumberType::class, [
                 'required' => false,
-                'label' => 'Diện tích ban công mặc định (m²/tầng)',
+                'label' => 'Diện tích ban công mặc định (m²/tầng, từ tầng 2)',
                 'attr' => $numberAttr,
             ])
             ->add('cost_san_vuon_ratio', NumberType::class, [
                 'required' => false,
-                'label' => 'Sân vườn (hệ số)',
+                'label' => 'Sân vườn (hệ số × m² sân vườn nhập)',
                 'attr' => $numberAttr,
             ])
 

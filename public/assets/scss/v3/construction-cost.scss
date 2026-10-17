@@ -50,6 +50,19 @@
   .cost-error, .cost-field ul { color: #992a1a; padding: .75rem; background: #fff1e6; margin-bottom: 1rem; }
   .cost-stale { background: #fff1e6; color: #843409; border: 1px solid #dca675; padding: .85rem; font-size: .85rem; margin-bottom: 1rem; }
   .cost-content { @include pc.post-content; max-width: 850px; margin: 3rem auto 0; }
+  .cost-lead-open { width: 100%; margin-top: .25rem; }
+  .cost-lead { width: min(520px, calc(100% - 2rem)); max-height: calc(100% - 2rem); overflow-y: auto; border: 0; border-top: 4px solid $primary; border-radius: 4px; padding: 1.75rem; color: $text; background: $white; box-shadow: 0 20px 60px rgba(0, 0, 0, .25); }
+  .cost-lead::backdrop { background: rgba(20, 16, 12, .55); }
+  .cost-lead h2 { padding-right: 2rem; }
+  .cost-lead-close { position: absolute; top: .5rem; right: .5rem; width: 44px; min-height: 44px; padding: 0; border: 0; background: transparent; font-size: 1.6rem; line-height: 1; }
+  .cost-lead-intro { font-size: .9rem; margin-bottom: 1rem; }
+  .cost-lead-summary { background: $base; padding: .85rem 1rem; margin-bottom: 1.25rem; font-size: .85rem; }
+  .cost-lead-summary > div + div { margin-top: .6rem; }
+  .cost-lead-summary dd ul { margin: .25rem 0 0; padding-left: 1.1rem; list-style: disc; font-weight: 400; }
+  .cost-lead-summary li { line-height: 1.6; }
+  .cost-lead-form { display: grid; gap: 1rem; }
+  .cost-lead-form button[type=submit] { width: 100%; }
+  .cost-lead-thanks { background: #eaf5ec; color: #1f5f2c; border-left: 3px solid #2f8a43; padding: .85rem 1rem; font-size: .9rem; font-weight: 600; }
   @media (max-width: 991px) {
     .cost-workspace { grid-template-columns: minmax(0, 1fr); }
     .cost-form { border-right: 0; border-bottom: 1px solid $line; }

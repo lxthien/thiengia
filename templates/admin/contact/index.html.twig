@@ -24,7 +24,7 @@
         <article class="contact-row {{ not row.isRead ? 'contact-row--unread' : '' }}" id="contact-{{ row.id }}">
             <div class="contact-sender">
                 <h3>{{ row.name }}</h3><span class="contact-status {{ row.isRead ? 'is-read' : 'is-unread' }}">{{ row.isRead ? 'Đã đọc' : 'Chưa đọc' }}</span>
-                <p class="contact-muted">#{{ row.id }} · {{ row.createdAt|date('d/m/Y H:i','Asia/Ho_Chi_Minh') }}</p>
+                <p class="contact-muted">#{{ row.id }} · {{ row.createdAt|date('d/m/Y H:i','Asia/Ho_Chi_Minh') }}{% if row.source %} · Nguồn: {{ row.source }}{% endif %}</p>
                 <dl><dt>Điện thoại</dt><dd>{% if row.phone %}<a href="tel:{{ row.phone|replace({' ':'','-':'','(':'',')':''}) }}">{{ row.phone }}</a>{% else %}Chưa cung cấp{% endif %}</dd>
                 <dt>Email</dt><dd>{% if row.email %}<a href="mailto:{{ row.email }}">{{ row.email }}</a>{% else %}Chưa cung cấp{% endif %}</dd></dl>
             </div>
