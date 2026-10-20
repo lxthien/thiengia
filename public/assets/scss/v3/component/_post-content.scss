@@ -109,10 +109,17 @@
     color: $text;
   }
 
+  // CKEditor 5 ghi kích thước ảnh đã chỉnh thành inline style trên figure
+  // (<figure class="image image_resized" style="width:800px">) — max-width
+  // thắng width inline nên ảnh không tràn khung trên mobile (giống rule
+  // .image_resized trong content CSS của chính CKEditor 5).
   figure {
+    max-width: 100%;
+    box-sizing: border-box;
     margin: 2.75rem 0;
 
     img {
+      max-width: 100%;
       width: 100%;
       height: auto;
     }

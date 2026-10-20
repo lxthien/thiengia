@@ -141,7 +141,21 @@ export default class ContentProperties extends Plugin {
             if (!safePropertyUrl(src.value, true)) { preview.removeAttribute('src'); previewNote.textContent = 'Nhập URL ảnh hợp lệ để xem trước.'; return; }
             previewNote.textContent = 'Đang tải ảnh xem trước…'; preview.src = src.value.trim();
         };
-        preview.onload = () => { natural = { width: preview.naturalWidth, height: preview.naturalHeight }; if (!Number.isFinite(ratio)) ratio = natural.width / natural.height; previewNote.textContent = 'Kích thước gốc: ' + natural.width + ' × ' + natural.height + ' px. Để trống cả hai ô để dùng kích thước tự nhiên.'; };
+        // Khóa tỷ lệ theo ảnh thật, không theo width/height đang lưu: nội dung cũ có thể
+        // mang kích thước sai tỷ lệ (vd. 750×500 cho ảnh dọc 1536×2048), CKEditor đổi
+        // chúng thành style aspect-ratio nên ảnh bị méo cả trong editor lẫn ngoài site.
+        preview.onload = () => {
+            natural = { width: preview.naturalWidth, height: preview.naturalHeight };
+            ratio = natural.width / natural.height;
+            previewNote.textContent = 'Kích thước gốc: ' + natural.width + ' × ' + natural.height + ' px. Để trống cả hai ô để dùng kích thước tự nhiên.';
+            if (lock.checked && width.value) {
+                const fitted = Math.round(Number(width.value) / ratio);
+                if (Math.abs(fitted - Number(height.value)) > 1) {
+                    height.value = fitted;
+                    previewNote.textContent += ' Chiều cao đã được chỉnh theo tỷ lệ thật của ảnh — bấm Áp dụng để sửa ảnh bị méo.';
+                }
+            }
+        };
         preview.onerror = () => { previewNote.textContent = 'Không tải được ảnh xem trước. Kiểm tra URL trước khi áp dụng.'; };
         src.addEventListener('change', loadPreview); loadPreview();
         width.addEventListener('input', () => { if (lock.checked && ratio > 0 && width.value) height.value = Math.round(Number(width.value) / ratio); });

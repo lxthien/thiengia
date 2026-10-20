@@ -138,6 +138,11 @@ class ConvertImages
             // Free up memory
             imagedestroy($image);
 
+            // Bản .webp này mới là ảnh khách/Google tải về, GD không chép metadata sang.
+            if ($result) {
+                ImageCopyright::applyToFile($output);
+            }
+
             return false === $result ? false : $output_file;
         } elseif (class_exists('Imagick')) {
             $image = new \Imagick();

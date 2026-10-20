@@ -332,21 +332,11 @@ class NewsController extends AbstractController
                 $listCategoriesIds[] = $value->getId();
             }
 
-            if ($category->getContent() == NULL) {
-                $news = $this->em->getRepository(News::class)
-                    ->getNewsByCategories($listCategoriesIds, $orderingKey[0], $orderingData[$orderingKey[0]]);
-            } else {
-                $news = $this->em->getRepository(News::class)
-                    ->getNewsByCategory($category->getId(), $orderingKey[0], $orderingData[$orderingKey[0]], 8);
-            }
+            $news = $this->em->getRepository(News::class)
+                ->getNewsByCategories($listCategoriesIds, $orderingKey[0], $orderingData[$orderingKey[0]]);
         } else {
-            if ($subCategory->getContent() == NULL) {
-                $news = $this->em->getRepository(News::class)
-                    ->getNewsByCategory($subCategory->getId(), $orderingKey[0], $orderingData[$orderingKey[0]]);
-            } else {
-                $news = $this->em->getRepository(News::class)
-                    ->getNewsByCategory($subCategory->getId(), $orderingKey[0], $orderingData[$orderingKey[0]], 12);
-            }
+            $news = $this->em->getRepository(News::class)
+                ->getNewsByCategory($subCategory->getId(), $orderingKey[0], $orderingData[$orderingKey[0]]);
         }
 
         $paginator = $this->paginator;
@@ -1134,7 +1124,7 @@ class NewsController extends AbstractController
     }
 
     #[Route('/cong-cu/chi-phi-xay-dung/', name: 'cost_calculator')]
-    public function costCalculatorAction(Request $request, $type = null)
+    public function costCalculatorAction(Request $request)
     {
         $settingsManager = $this->settingsManager;
         // Ô cấu hình bỏ trống lưu chuỗi rỗng; khi đó dùng giá trị mặc định thay vì lỗi TypeError
@@ -1524,23 +1514,13 @@ class NewsController extends AbstractController
 
         $contentsLazy = $post ? $this->contentFormatter->lazyloadContent($post) : '';
 
-        if (!empty($type) && $type === 'page') {
-            return $this->render('form/caculatorcost/page.html.twig', [
-                'form' => $form->createView()
-            ]);
-        } elseif (!empty($type) && $type === 'sidebar') {
-            return $this->render('form/caculatorcost/sidebar.html.twig', [
-                'form' => $form->createView()
-            ]);
-        } else {
-            return $this->render('form/caculatorcost/caculator.html.twig', [
-                'form' => $form->createView(),
-                'costs' => $costs ? $costs : null,
-                'leadForm' => isset($leadForm) ? $leadForm->createView() : null,
-                'post' => $post,
-                'contentsLazy' => $contentsLazy
-            ]);
-        }
+        return $this->render('tools/construction_cost.html.twig', [
+            'form' => $form->createView(),
+            'costs' => $costs ? $costs : null,
+            'leadForm' => isset($leadForm) ? $leadForm->createView() : null,
+            'post' => $post,
+            'contentsLazy' => $contentsLazy
+        ]);
     }
 
 }

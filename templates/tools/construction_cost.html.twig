@@ -8,6 +8,19 @@
 {% block description %}{{ post ? (post.getPageDescription() is not null ? post.getPageDescription() : post.getDescription()) : v3.company.description }}{% endblock %}
 {% block keyword %}{{ post ? post.getPageKeyword() : '' }}{% endblock %}
 
+{% block jsonld %}
+<script type="application/ld+json">{{ {
+    '@context':'https://schema.org','@type':'WebApplication','name':'Tính chi phí xây nhà','description':block('description')|trim,
+    'applicationCategory':'UtilitiesApplication','operatingSystem':'Any',
+    'url':url('cost_calculator'),'offers':{'@type':'Offer','price':'0','priceCurrency':'VND'}
+}|json_encode(constant('JSON_HEX_TAG'))|raw }}</script>
+{# Schema tự khai báo ở bài "chi-phi-xay-dung" (FAQ...) — cùng cách news/page.html.twig xuất #}
+{% set schemaMarkup = post ? post.schemaMarkup|safe_json_ld : null %}
+{% if schemaMarkup %}
+<script type="application/ld+json">{{ schemaMarkup }}</script>
+{% endif %}
+{% endblock %}
+
 {% block body %}
 {{ include('v3/components/_page_hero.html.twig', {
     breadcrumb: [{label: 'Trang chủ', path: path('homepage')}, {label: post.getTitle() is not null ? post.getTitle()|title_tokens : 'Chi phí xây dựng'}],

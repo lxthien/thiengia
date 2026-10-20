@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\MediaAsset;
 use App\Service\MediaThumbnailGenerator;
+use App\Utils\ImageCopyright;
 use App\Repository\MediaAssetRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -163,7 +164,8 @@ class MediaController extends AbstractController
         // Move file
         try {
             $file->move($uploadDirPath, $filename);
-            
+            ImageCopyright::applyToFile($filepath);
+
             // Create thumbnail
             $this->createThumbnail($filepath);
             $thumbpath = $uploadDirPath . 'thumbs/' . $filename;
@@ -397,6 +399,10 @@ class MediaController extends AbstractController
             imagesavealpha($result, true);
             $temporary = tempnam(dirname($path), '.media-');
             $saved = $size[2] === IMAGETYPE_PNG ? imagepng($result, $temporary) : imagejpeg($result, $temporary, 90);
+            // GD vừa ghi lại ảnh nên metadata bản quyền đã mất — ghi lại trước khi thay file gốc.
+            if ($saved) {
+                ImageCopyright::applyToFile($temporary);
+            }
             if (!$saved || !rename($temporary, $path)) {
                 throw new \RuntimeException('Save failed');
             }

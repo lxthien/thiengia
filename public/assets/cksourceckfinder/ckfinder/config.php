@@ -203,7 +203,9 @@ $config['debug'] = false;
 // http://docs.cksource.com/ckfinder3-php/configuration.html#configuration_options_plugins
 
 $config['pluginsDirectory'] = __DIR__ . '/plugins';
-$config['plugins'] = array();
+// ImageCopyright: ghi metadata bản quyền (XMP) vào ảnh tải lên — xem
+// plugins/ImageCopyright và src/Utils/ImageCopyright.php.
+$config['plugins'] = array('ImageCopyright');
 
 /*================================ Cache settings =====================================*/
 // http://docs.cksource.com/ckfinder3-php/configuration.html#configuration_options_cache

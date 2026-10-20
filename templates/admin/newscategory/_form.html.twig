@@ -9,14 +9,12 @@
     <p class="page-editor__hint">Bấm vào ô URL để chỉnh sửa. URL đã được sử dụng cần được cân nhắc trước khi thay đổi.</p>
     </section>
     <section class="page-editor__section" id="category-content" aria-labelledby="category-content-title">
-    <h2 id="category-content-title">Mô tả &amp; nội dung</h2>
+    <h2 id="category-content-title">Mô tả</h2>
     {{ form_row(form.description) }}
-    {{ form_row(form.content) }}
     </section>
     <section class="page-editor__section" id="category-display" aria-labelledby="category-display-title">
     <h2 id="category-display-title">Hiển thị &amp; sắp xếp</h2>
     <div class="page-editor__checks">
-    {{ form_row(form.showPostRelated) }}
     {{ form_row(form.enable) }}
     </div>
     <div class="page-editor__grid">

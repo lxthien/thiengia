@@ -7,6 +7,17 @@
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('build/css/v3-homepage.css') }}">
 {% endblock %}
+{% block jsonld %}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Xây Dựng Thiện Gia",
+        "alternateName": "Thiện Gia",
+        "url": "https://xaydungthiengia.com/"
+    }
+    </script>
+{% endblock %}
 
 {% block body %}
     {# Thứ tự, bật/tắt và phần chữ của từng khối do admin quản lý ở

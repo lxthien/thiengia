@@ -129,7 +129,6 @@ class InternalLinkAnalyzer
                 'parent' => $parent ? 'cat:' . $parent->getId() : null,
             ]);
             $this->categoriesBySlug[$category->getUrl()] = ['key' => $key, 'parentSlug' => $parent ? $parent->getUrl() : null];
-            $contents[$key] = (string) $category->getContent();
         }
 
         $rows = $this->em->createQueryBuilder()
