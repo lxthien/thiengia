@@ -10,7 +10,8 @@
 // http://docs.cksource.com/ckfinder3-php/debugging.html
 
 // Production
-error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);
+// Không dùng E_STRICT: hằng này deprecated từ PHP 8.4 (mức lỗi đã bị bỏ).
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
 ini_set('display_errors', 0);
 
 // Development
