@@ -26,8 +26,10 @@ use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use App\Entity\Contact;
 use App\Entity\News;
+use App\Form\ChecklistLeadType;
 use App\Form\CostLeadType;
 use App\Service\ContactNotifier;
+use App\Service\Shortcode;
 use App\Service\SettingsManager;
 use WhiteOctober\BreadcrumbsBundle\Model\Breadcrumbs;
 
@@ -269,6 +271,75 @@ class ContactController extends AbstractController
         $this->contactNotifier->notify($contact, 'Popup dự toán chi phí xây dựng');
 
         return new JsonResponse(['success' => true, 'message' => 'Đã nhận thông tin. Chúng tôi sẽ gửi đơn giá chi tiết cho bạn sớm nhất.']);
+    }
+
+    /**
+     * Form shortcode [form_tai_checklist] (xem App\Service\Shortcode::CHECKLIST).
+     * Danh sách file tải về đọc lại từ chính nội dung bài viết theo post + block,
+     * không lấy từ dữ liệu trình duyệt gửi lên.
+     */
+    #[Route('form/tai-checklist/', name: 'checklist_lead', methods: ['POST'])]
+    public function checklistLeadAction(Request $request): JsonResponse
+    {
+        if (!$this->publicFormLimiter->create($request->getClientIp())->consume(1)->isAccepted()) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Bạn gửi quá nhiều yêu cầu. Vui lòng thử lại sau ít phút.',
+            ], 429);
+        }
+
+        $contact = new Contact();
+        $form = $this->formFactory->createNamed('checklist_lead', ChecklistLeadType::class, $contact);
+        $form->handleRequest($request);
+
+        if (!$form->isSubmitted() || !$form->isValid()) {
+            $errors = [];
+            foreach ($form->getErrors(true) as $error) {
+                $errors[] = $error->getMessage();
+            }
+
+            return new JsonResponse(['success' => false, 'message' => implode(' ', array_unique($errors)) ?: 'Form không hợp lệ. Vui lòng tải lại trang và thử lại.']);
+        }
+
+        $post = $this->em->getRepository(News::class)->find((int) $form->get('post')->getData());
+        $attributes = $post ? Shortcode::find((string) $post->getContents(), Shortcode::CHECKLIST, (int) $form->get('block')->getData()) : null;
+        $files = $attributes !== null ? Shortcode::checklistFiles($attributes) : [];
+
+        // Trang khách đang xem (chỉ nhận URL cùng tên miền) để biết lead đến từ bài nào.
+        $referer = (string) $request->headers->get('referer');
+        $pageUrl = parse_url($referer, PHP_URL_HOST) === $request->getHost() ? $referer : '';
+
+        $lines = ['Đăng ký nhận checklist' . ($post ? ' từ bài "' . $post->getTitle() . '"' : '') . '.'];
+        if ($pageUrl !== '') {
+            $lines[] = 'Trang: ' . $pageUrl;
+        }
+        $lines[] = $files
+            ? 'Khách tải file ngay trên trang: ' . implode(', ', array_column($files, 'label')) . '.'
+            : 'Cần gửi file checklist qua Zalo số ' . $contact->getPhone() . '.';
+        $lines[] = 'Khách đã đồng ý Chính sách bảo mật lúc ' . (new \DateTime())->format('H:i d/m/Y') . '.';
+
+        $contact->setTitle(ChecklistLeadType::NEED);
+        $contact->setContents(mb_substr(implode("\n", $lines), 0, 2000));
+        $contact->setSource('Form tải checklist');
+
+        $this->em->persist($contact);
+        $this->em->flush();
+
+        if (null === $contact->getId()) {
+            return new JsonResponse(['success' => false, 'message' => $this->translator->trans('contact.message.error')]);
+        }
+
+        $this->contactNotifier->notify($contact, 'Form tải checklist');
+
+        $name = trim((string) $contact->getName());
+
+        return new JsonResponse([
+            'success' => true,
+            'message' => $files
+                ? sprintf('Cảm ơn %s! Bấm vào nút bên dưới để tải checklist.', $name)
+                : sprintf('Cảm ơn %s! Thiện Gia sẽ gửi file checklist qua Zalo số %s trong giờ làm việc.', $name, $contact->getPhone()),
+            'files' => $files,
+        ]);
     }
 
     /**

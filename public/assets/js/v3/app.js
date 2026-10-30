@@ -17,6 +17,7 @@ import initGallery from "./modules/gallery-lightbox";
 import initToc from "./modules/toc";
 import initContentToc from "./modules/content-toc";
 import initForms from "./modules/forms";
+import initChecklistForms from "./modules/checklist-form";
 import initRating from "./modules/rating";
 import initLoBanRuler from "./modules/lo-ban-ruler";
 
@@ -33,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initToc();
   initContentToc();
   initForms();
+  initChecklistForms();
   initRating();
   initLoBanRuler();
 });

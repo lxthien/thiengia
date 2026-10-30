@@ -6,5 +6,6 @@
 @use "component/figures"; // dải số liệu tin cậy trên trang tĩnh (page.html.twig)
 @use "component/geo-blocks"; // key-takeaways, TOC gấp/mở, expert-quote, definition, stat-box
 @use "component/comments"; // danh sách bình luận + form gửi bình luận
+@use "component/checklist-form"; // shortcode [form_tai_checklist]
 
 @use "pages/news";

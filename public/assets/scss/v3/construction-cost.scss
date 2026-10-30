@@ -1,5 +1,6 @@
 @use "component/page-hero";
 @use "component/post-content" as pc;
+@use "component/checklist-form"; // shortcode [form_tai_checklist] trong nội dung trang
 @use "tokens" as *;
 
 .construction-cost {

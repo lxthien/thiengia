@@ -1,0 +1,50 @@
+{#
+    Shortcode [form_tai_checklist] trong nội dung bài viết — render bởi
+    ContentFormatter::renderChecklistForms, gửi AJAX tới checklist_lead
+    (forms.js + checklist-form.js). Tên field khớp App\Form\ChecklistLeadType.
+    Link file không in ở đây: server trả về sau khi khách gửi form.
+#}
+{% set uid = 'checklist-' ~ (post.id ?: 0) ~ '-' ~ index %}
+<section class="checklist-box" data-checklist aria-labelledby="{{ uid }}-title">
+    <p class="checklist-title" id="{{ uid }}-title">{{ title ?: 'Nhận checklist miễn phí' }}</p>
+    <p class="checklist-intro">{{ intro ?: (hasFiles
+        ? 'Để lại họ tên và số điện thoại để tải checklist ngay.'
+        : 'Để lại họ tên và số điện thoại, Thiện Gia sẽ gửi file checklist qua Zalo cho bạn.') }}</p>
+
+    <form class="checklist-form" action="{{ path('checklist_lead') }}" method="post" data-quote data-ajax-form>
+        <div class="checklist-field">
+            <label for="{{ uid }}-name">Họ và tên *</label>
+            <input type="text" id="{{ uid }}-name" name="checklist_lead[name]" required maxlength="100"
+                   autocomplete="name" placeholder="Nguyễn Văn A">
+        </div>
+        <div class="checklist-field">
+            <label for="{{ uid }}-phone">Số điện thoại {{ hasFiles ? '' : 'Zalo ' }}*</label>
+            <input type="tel" id="{{ uid }}-phone" name="checklist_lead[phone]" required inputmode="tel"
+                   autocomplete="tel" placeholder="09xx xxx xxx" data-checklist-phone
+                   aria-describedby="{{ uid }}-phone-help">
+            <small id="{{ uid }}-phone-help">Số di động 10 số, ví dụ 0901 234 567.</small>
+        </div>
+
+        <label class="checklist-consent">
+            <input type="checkbox" name="checklist_lead[agree]" value="1" required>
+            <span>Tôi đồng ý với <a href="/chinh-sach-bao-mat/" target="_blank" rel="noopener">Chính sách bảo mật</a>
+                của {{ v3.company.shortName }}.</span>
+        </label>
+
+        {# Bẫy bot — người dùng không thấy ô này #}
+        <div class="checklist-hp" aria-hidden="true">
+            <label for="{{ uid }}-website">Website</label>
+            <input type="text" id="{{ uid }}-website" name="checklist_lead[website]" tabindex="-1" autocomplete="off">
+        </div>
+        <input type="hidden" name="checklist_lead[post]" value="{{ post.id }}">
+        <input type="hidden" name="checklist_lead[block]" value="{{ index }}">
+        <input type="hidden" name="checklist_lead[_token]" value="{{ csrf_token('checklist_lead') }}">
+
+        <button type="submit" class="btn2 checklist-submit">{{ hasFiles ? 'Nhận checklist' : 'Gửi checklist qua Zalo' }}</button>
+    </form>
+
+    <div class="checklist-done" data-checklist-done role="status" tabindex="-1" hidden>
+        <p class="checklist-message" data-checklist-message></p>
+        <div class="checklist-files" data-checklist-files hidden></div>
+    </div>
+</section>

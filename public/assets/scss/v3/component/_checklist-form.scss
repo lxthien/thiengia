@@ -1,0 +1,155 @@
+@use "../tokens" as *;
+
+// Form shortcode [form_tai_checklist] trong nội dung bài viết
+// (templates/v3/components/_checklist_form.html.twig). Nằm trong .post-content
+// nên selector lồng dưới .checklist-box để thắng style chữ/link của bài viết.
+.checklist-box {
+  margin: 2.5rem 0;
+  padding: 1.75rem;
+  background: $base;
+  border: 1px solid $line;
+  border-top: 4px solid $primary;
+  border-radius: 4px;
+  color: $text;
+
+  .checklist-title {
+    margin: 0 0 0.35rem;
+    font-family: $f-display;
+    font-size: 1.35rem;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .checklist-intro {
+    margin: 0 0 1.25rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: $mut;
+  }
+
+  .checklist-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .checklist-field {
+    min-width: 0;
+
+    label {
+      display: block;
+      margin-bottom: 0.45rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    input {
+      box-sizing: border-box;
+      width: 100%;
+      height: 48px;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid #9b9289;
+      border-radius: 3px;
+      background: $white;
+      color: $text;
+      font: inherit;
+      font-size: 0.95rem;
+    }
+
+    small {
+      display: block;
+      margin-top: 0.35rem;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      color: #514b45;
+    }
+  }
+
+  .checklist-consent,
+  .checklist-submit {
+    grid-column: 1 / -1;
+  }
+
+  .checklist-consent {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    cursor: pointer;
+
+    input {
+      flex: none;
+      width: 18px;
+      height: 18px;
+      margin: 0.15rem 0 0;
+      accent-color: $primary;
+    }
+
+    a {
+      color: $primary;
+      text-decoration: underline;
+    }
+  }
+
+  .checklist-submit {
+    justify-self: start;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .checklist-hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .checklist-done:focus {
+    outline: none;
+  }
+
+  .checklist-message {
+    margin: 0;
+    padding: 0.85rem 1rem;
+    border-left: 3px solid #2f8a43;
+    background: #eaf5ec;
+    color: #1f5f2c;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.6;
+  }
+
+  .checklist-files {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+  }
+
+  a.checklist-file {
+    color: $white;
+    text-decoration: none;
+    white-space: normal;
+    text-align: center;
+  }
+
+  :is(input, button, a):focus-visible {
+    outline: 3px solid #9b3825;
+    outline-offset: 3px;
+  }
+
+  @media (max-width: 575px) {
+    padding: 1.25rem;
+
+    .checklist-form {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .checklist-submit,
+    a.checklist-file {
+      width: 100%;
+    }
+  }
+}

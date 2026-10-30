@@ -156,6 +156,7 @@ class ContentFormatter
         // Chạy SAU bước xử lý ảnh ở trên: thẻ bài viết đã có srcset/WebP riêng,
         // không được bị gắn lại width/height/src kiểu ảnh trong nội dung.
         $newContent = $this->renderPostLists($newContent, $post);
+        $newContent = $this->renderChecklistForms($newContent, $post);
 
         return trim($newContent);
     }
@@ -172,31 +173,35 @@ class ContentFormatter
      */
     private function renderPostLists(string $content, News $current): string
     {
-        if (!str_contains($content, '[bai_viet')) {
-            return $content;
-        }
+        // Shortcode::replaceBlocks lo việc CKEditor bọc shortcode trong <p>.
+        return Shortcode::replaceBlocks($content, 'bai_viet', fn (string $shortcode) => $this->renderPostList($shortcode, $current));
+    }
 
-        $shortcode = '\[bai_viet\b[^\]]*\]';
+    /**
+     * Shortcode form nhận checklist — xem Shortcode::CHECKLIST. Link file KHÔNG
+     * được in ra HTML: sau khi khách gửi form, ContactController::checklistLeadAction
+     * đọc lại đúng shortcode thứ $index trong nội dung gốc rồi mới trả link về.
+     */
+    private function renderChecklistForms(string $content, News $post): string
+    {
+        $index = 0;
 
-        // CKEditor bọc shortcode trong <p>: thay cả đoạn để không lồng <div> trong <p>.
-        return preg_replace_callback(
-            '#<p(?:\s[^>]*)?>\s*(' . $shortcode . ')\s*</p>|' . $shortcode . '#u',
-            fn (array $m) => $this->renderPostList($m[1] ?? $m[0], $current),
-            $content
-        );
+        return Shortcode::replaceBlocks($content, Shortcode::CHECKLIST, function (string $shortcode) use ($post, &$index) {
+            $attributes = Shortcode::attributes($shortcode);
+
+            return $this->twig->render('v3/components/_checklist_form.html.twig', [
+                'post' => $post,
+                'index' => $index++,
+                'title' => $attributes['tieu_de'] ?? '',
+                'intro' => $attributes['mo_ta'] ?? '',
+                'hasFiles' => Shortcode::checklistFiles($attributes) !== [],
+            ]);
+        });
     }
 
     private function renderPostList(string $shortcode, News $current): string
     {
-        // Dấu nháy có thể đã bị mã hoá (&quot;) hoặc là khoảng trắng không ngắt.
-        $shortcode = str_replace(" ", ' ', html_entity_decode($shortcode, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
-        // Giá trị có thể nằm trong "…", '…', “…” (gõ từ Word) hoặc không có nháy.
-        preg_match_all('/(\w+)\s*=\s*["\'“”]?([^"\'“”\]]*)/u', $shortcode, $pairs, PREG_SET_ORDER);
-
-        $params = [];
-        foreach ($pairs as $pair) {
-            $params[strtolower($pair[1])] = trim($pair[2]);
-        }
+        $params = Shortcode::attributes($shortcode);
 
         $limit = (int) ($params['so_luong'] ?? self::POST_LIST_DEFAULT_LIMIT);
         $limit = max(1, min(self::POST_LIST_MAX_LIMIT, $limit ?: self::POST_LIST_DEFAULT_LIMIT));
