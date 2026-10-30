@@ -72,7 +72,10 @@
     <div class="ft-bottom">
         <div class="container max-w-7xl flex flex-wrap items-center justify-between gap-3 py-5">
             <p>© {{ "now"|date("Y") }} {{ v3.company.shortName|capitalize }}. Bảo lưu mọi quyền.</p>
-            <p>{{ v3.company.slogan }}</p>
+            <nav class="flex flex-wrap items-center gap-x-5 gap-y-2" aria-label="Chính sách">
+                <a href="/chinh-sach-bao-hanh/" class="hover:text-white underline">Chính sách bảo hành</a> &nbsp;
+                <a href="/chinh-sach-bao-mat/" class="hover:text-white underline">Chính sách bảo mật</a>
+            </nav>
         </div>
     </div>
 </footer>

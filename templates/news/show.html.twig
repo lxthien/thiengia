@@ -48,17 +48,26 @@
             "@type": "Organization",
             "name": {{ v3.company.legalName|json_encode|raw }}
         }
-        {%- if ratingCount is defined and ratingCount > 0 %},
-        "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": {{ rating }},
-            "reviewCount": {{ ratingCount }},
-            "bestRating": 5,
-            "worstRating": 1
-        }
-        {%- endif %}
     }
     </script>
+    {# Sao đánh giá tách riêng: Google không hiện review snippet cho aggregateRating
+       lồng trong Article (Search Console báo "Invalid object type for field parent_node").
+       CreativeWorkSeries là kiểu được hỗ trợ — giống kientruc. ratingCount (lượt chấm
+       sao), không phải reviewCount (bài nhận xét có nội dung). #}
+    {% if ratingCount is defined and ratingCount > 0 %}
+    <script type="application/ld+json">{{ {
+        '@context': 'https://schema.org',
+        '@type': 'CreativeWorkSeries',
+        'name': post.title|title_tokens,
+        'aggregateRating': {
+            '@type': 'AggregateRating',
+            'ratingValue': rating ~ '',
+            'ratingCount': ratingCount,
+            'bestRating': 5,
+            'worstRating': 1
+        }
+    }|json_encode(constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_UNESCAPED_SLASHES') b-or constant('JSON_HEX_TAG'))|raw }}</script>
+    {% endif %}
 {% endblock %}
 
 {% set breadcrumbItems = [{ label: 'Trang chủ', path: path('homepage') }] %}

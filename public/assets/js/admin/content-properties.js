@@ -64,6 +64,32 @@ export default class ContentProperties extends Plugin {
             const script = document.createElement('script'); script.src = '/assets/cksourceckfinder/ckfinder/ckfinder.js'; script.dataset.propertiesCkfinder = 'true'; document.head.appendChild(script);
         }
     }
+    // Chọn ảnh từ nút CKFinder trên toolbar → mở ngay "Thuộc tính ảnh" để nhập ALT,
+    // chú thích, căn lề… trước khi coi như đã chèn; Hủy thì gỡ ảnh vừa chèn.
+    // CKFinder (cả "Choose" lẫn "Choose Resized") chèn ảnh bằng lệnh insertImage
+    // sau khi popup đóng, nên chỉ bắt insertImage ngay sau lần bấm nút ckfinder.
+    afterInit() {
+        const editor = this.editor;
+        const ckfinder = editor.commands.get('ckfinder');
+        const insertImage = editor.commands.get('insertImage');
+        if (!ckfinder || !insertImage) return;
+        let fromFinder = false;
+        let lastBatch = null;
+        this.listenTo(ckfinder, 'execute', () => { fromFinder = true; });
+        this.listenTo(editor.model.document, 'change', (evt, batch) => { lastBatch = batch; });
+        // priority low: chạy SAU khi ảnh đã vào model và đã được chọn — lastBatch lúc
+        // này đúng là batch chèn ảnh (CKEditor gắn width/height ở batch riêng, sau đó).
+        this.listenTo(insertImage, 'execute', (evt, [options]) => {
+            if (!fromFinder) return;
+            fromFinder = false;
+            const sources = [].concat(options?.source ?? []);
+            // Chọn nhiều ảnh một lúc: giữ cách chèn thẳng như cũ.
+            if (sources.length === 1) {
+                const batch = lastBatch;
+                setTimeout(() => this.openImage({ inserted: true, batch }), 0);
+            }
+        }, { priority: 'low' });
+    }
     destroy() {
         this.editor.editing.view.getDomRoot()?.removeEventListener('dblclick', this.doubleClick, true);
         this.dialog?.close();
@@ -117,17 +143,33 @@ export default class ContentProperties extends Plugin {
             })
         });
     }
-    openImage() {
+    openImage({ inserted = false, batch = null } = {}) {
         const editor = this.editor;
         const image = editor.plugins.get('ImageUtils').getClosestSelectedImageElement(editor.model.document.selection);
         if (!image || editor.isReadOnly) return;
         const original = Object.fromEntries(image.getAttributes());
         const caption = [...image.getChildren()].find(child => child.name === 'caption');
         const captionText = caption ? [...editor.model.createRangeIn(caption).getItems()].filter(n => n.is('$textProxy')).map(n => n.data).join('') : '';
-        const ui = this.shell('Thuộc tính ảnh');
+        const ui = this.shell(inserted ? 'Chèn ảnh' : 'Thuộc tính ảnh');
+        let applied = false;
+        if (inserted) {
+            ui.submit.textContent = 'Chèn ảnh';
+            // Hủy / Esc khi vừa chọn từ CKFinder = không chèn. Hoàn tác đúng batch chèn
+            // thay vì chỉ gỡ ảnh: nếu lúc chọn đang có ảnh được chọn, CKEditor đã THAY
+            // ảnh đó bằng ảnh mới — undo trả lại ảnh cũ, gỡ ảnh mới thì mất cả hai.
+            ui.dialog.addEventListener('close', () => {
+                if (applied || image.root.rootName === '$graveyard') return;
+                const undo = editor.commands.get('undo');
+                if (batch && undo?.isEnabled) editor.execute('undo', batch);
+                else editor.model.change(writer => writer.remove(image));
+            }, { once: true });
+        }
         const src = ui.field('URL ảnh', original.src || ''); src.required = true;
         ui.button('Duyệt máy chủ / tải ảnh lên', () => this.browse(ui, src, true));
         const alt = ui.field('Văn bản thay thế (ALT)', original.alt || '');
+        // Gợi ý ALT từ tên file (mong-be.jpg → "mong be") — chỉ là placeholder, nên viết lại cho đúng nội dung ảnh.
+        const fileName = decodeURIComponent(String(original.src || '').split(/[?#]/)[0].split('/').pop() || '');
+        alt.placeholder = fileName.replace(/\.[a-z0-9]+$/i, '').replace(/[-_]+/g, ' ').trim() || 'Mô tả ngắn nội dung ảnh';
         const width = ui.field('Chiều rộng (px)', original.width || '', 'number'); width.min = '1'; width.max = '20000';
         const height = ui.field('Chiều cao (px)', original.height || '', 'number'); height.min = '1'; height.max = '20000';
         const lock = ui.check('Khóa tỷ lệ ảnh', true);
@@ -204,9 +246,11 @@ export default class ContentProperties extends Plugin {
                     }
                 }
             });
+            applied = true;
             ui.dialog.close();
         });
-        src.focus();
+        // Vừa chọn ảnh xong thì việc cần làm đầu tiên là nhập ALT.
+        (inserted ? alt : src).focus();
     }
     // Tên thuộc tính model mà GeneralHtmlSupport dùng để giữ title/target/rel… của <a>.
     // CKEditor 5 v48: link chữ là "htmlA" (bản cũ là "htmlAAttributes" — ghi vào tên
