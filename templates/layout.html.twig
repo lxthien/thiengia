@@ -52,9 +52,14 @@
     {# CSS chung của theme v3 #}
     <link rel="stylesheet" href="{{ asset('build/css/v3-app.css') }}">
     {% block stylesheets %}{% endblock %}
+
+    {{ include('v3/layout/_tracking.html.twig') }}
 </head>
 
 <body class="v3 {% block bodyClass %}{% endblock %}">
+    {% if app.environment == 'prod' and get_setting('GTM')|trim %}
+        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ get_setting('GTM')|trim|url_encode }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    {% endif %}
     <a class="skip-link" href="#noi-dung">Bỏ qua đến nội dung chính</a>
 
     {{ include('v3/layout/_topbar.html.twig') }}

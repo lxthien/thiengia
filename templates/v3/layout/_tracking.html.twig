@@ -1,0 +1,51 @@
+{# Google Tag Manager + lưu gclid (Google Ads). ID lấy từ Cài đặt chung → GTM.
+
+   GTM tải trễ để không ảnh hưởng tốc độ (LCP/TBT/INP): chỉ chèn gtm.js khi người
+   dùng tương tác lần đầu (cuộn, chạm, di chuột, bấm phím) hoặc 3,5 giây sau sự kiện
+   load — tùy cái nào đến trước. Lượt xem trang vẫn được ghi vì dataLayer giữ sự
+   kiện gtm.js và GTM xử lý hàng đợi khi tải xong. #}
+{# Chỉ chạy ở APP_ENV=prod để máy dev/test không đẩy số liệu ảo lên GA/Ads. #}
+{% set gtmId = app.environment == 'prod' ? get_setting('GTM')|trim : '' %}
+{% if gtmId %}
+<script>
+(function () {
+    var events = ['scroll', 'mousemove', 'touchstart', 'keydown'];
+    var done = false;
+    function load() {
+        if (done) return;
+        done = true;
+        events.forEach(function (e) { window.removeEventListener(e, load, { passive: true }); });
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtm.js?id={{ gtmId|url_encode|e('js') }}';
+        document.head.appendChild(s);
+    }
+    events.forEach(function (e) { window.addEventListener(e, load, { passive: true }); });
+    if (document.readyState === 'complete') {
+        setTimeout(load, 3500);
+    } else {
+        window.addEventListener('load', function () { setTimeout(load, 3500); });
+    }
+})();
+</script>
+{% endif %}
+{# gclid từ quảng cáo Google Ads: lưu cookie 90 ngày, điền vào các input ẩn [gclid]
+   của form liên hệ / bình luận / tính chi phí để biết lead đến từ quảng cáo nào. #}
+<script>
+(function () {
+    var gclid = new URLSearchParams(window.location.search).get('gclid');
+    if (gclid) {
+        document.cookie = 'gclid=' + encodeURIComponent(gclid) + '; max-age=' + (90 * 86400) + '; path=/; SameSite=Lax';
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        var m = document.cookie.match(/(?:^|; )gclid=([^;]+)/);
+        if (!m) return;
+        var value = decodeURIComponent(m[1]);
+        document.querySelectorAll('input[type="hidden"][name$="[gclid]"]').forEach(function (input) {
+            input.value = value;
+        });
+    });
+})();
+</script>
