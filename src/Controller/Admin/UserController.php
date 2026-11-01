@@ -19,6 +19,9 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
+use Symfony\Component\String\Slugger\AsciiSlugger;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -342,10 +345,42 @@ class UserController extends AbstractController
                 'label' => 'Giới thiệu tác giả',
                 'attr' => ['class' => 'txt-ckeditor5', 'data-editor-preset' => 'author', 'data-height' => 180, 'data-max-height' => 300, 'rows' => 6],
             ])
+            ->add('jobTitle', TextType::class, [
+                'required' => false,
+                'label' => 'Chức danh',
+                'help' => 'Ví dụ: Kiến trúc sư trưởng, Kỹ sư kết cấu. Hiển thị cạnh tên và khai báo cho Google.',
+                'attr' => ['maxlength' => 255],
+            ])
+            ->add('knowsAbout', TextType::class, [
+                'required' => false,
+                'label' => 'Lĩnh vực chuyên môn',
+                'help' => 'Phân tách bằng dấu phẩy, ví dụ: Thiết kế nhà phố, Kết cấu móng, Dự toán xây dựng.',
+                'attr' => ['maxlength' => 500],
+            ])
+            ->add('sameAs', TextareaType::class, [
+                'required' => false,
+                'label' => 'Link hồ sơ ở nơi khác',
+                'help' => 'Mỗi dòng một link https:// (Facebook, LinkedIn, YouTube, chứng chỉ hành nghề...). Chỉ nhập hồ sơ của chính người này.',
+                'attr' => ['rows' => 4, 'placeholder' => "https://www.facebook.com/...\nhttps://www.linkedin.com/in/..."],
+            ])
+            ->add('authorSlug', TextType::class, [
+                'required' => false,
+                'label' => 'Đường dẫn trang tác giả',
+                'help' => 'Trang công khai /tac-gia/{đường-dẫn}/. Để trống sẽ tự tạo từ tên công khai khi bật hiển thị. Không dùng tên đăng nhập.',
+                'attr' => ['maxlength' => 190, 'pattern' => '[a-z0-9]+(-[a-z0-9]+)*'],
+            ])
             ->add('showAuthorInfo', CheckboxType::class, [
                 'required' => false,
-                'label' => 'Hiển thị thông tin tác giả ở cuối post',
+                'label' => 'Hiển thị thông tin tác giả (cuối bài viết và trang tác giả)',
             ]);
+
+        // Bật hiển thị mà chưa có đường dẫn → tạo từ tên công khai (bỏ dấu, thêm số nếu trùng).
+        $builder->addEventListener(FormEvents::SUBMIT, function (FormEvent $event): void {
+            $user = $event->getData();
+            if ($user instanceof User && $user->isShowAuthorInfo() && $user->getAuthorSlug() === null) {
+                $user->setAuthorSlug($this->uniqueAuthorSlug($user));
+            }
+        });
 
         // Password field only for new users
         if ($isNew) {
@@ -393,6 +428,23 @@ class UserController extends AbstractController
             ]);
 
         return $builder->getForm();
+    }
+
+    private function uniqueAuthorSlug(User $user): ?string
+    {
+        $base = strtolower((string) (new AsciiSlugger('vi'))->slug($user->getAuthorDisplayName()));
+        $base = substr($base, 0, 180) ?: 'tac-gia';
+        if ($base === strtolower($user->getUsername())) {
+            $base .= '-tac-gia';
+        }
+
+        $repository = $this->em->getRepository(User::class);
+        $slug = $base;
+        for ($i = 2; ($other = $repository->findOneBy(['authorSlug' => $slug])) && $other !== $user; $i++) {
+            $slug = $base . '-' . $i;
+        }
+
+        return $slug;
     }
 
     /**

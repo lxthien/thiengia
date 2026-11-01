@@ -10,7 +10,7 @@
                 "@type": "ListItem",
                 "position": {{ loop.index }},
                 "name": {% if b.translate is defined and b.translate == true %}{{ b.text | trans(b.translationParameters, translation_domain, locale) | json_encode(constant('JSON_UNESCAPED_UNICODE')) | raw }}{% else %}{{ b.text | json_encode(constant('JSON_UNESCAPED_UNICODE')) | raw }}{% endif %}{% if b.url %},
-                "item": {{ absolute_url(b.url)|json_encode|raw }}{% endif %}
+                "item": {{ absolute_url(b.url)|json_ld }}{% endif %}
 
             }{% if not loop.last %},{% endif %}
 

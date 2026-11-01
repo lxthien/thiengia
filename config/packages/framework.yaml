@@ -217,7 +217,9 @@ knp_paginator:
         filter_field_name: filterField  # filter field query parameter name
         filter_value_name: filterValue  # filter value query parameter name
     template:                                        
-        pagination: '@KnpPaginator/Pagination/sliding.html.twig'     # sliding pagination controls template                                    
+        # Phân trang phía khách (danh mục, tìm kiếm, tác giả) theo markup v3.
+        # Trang admin luôn truyền template bootstrap riêng nên không bị ảnh hưởng.
+        pagination: 'v3/components/_knp_pagination.html.twig'
         sortable: '@KnpPaginator/Pagination/sortable_link.html.twig' # sort link template                                
         filtration: '@KnpPaginator/Pagination/filtration.html.twig'  # filters template
 

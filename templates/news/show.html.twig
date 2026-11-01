@@ -28,28 +28,33 @@
 {% endblock %}
 
 {% block jsonld %}
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "Article",
-        "mainEntityOfPage": {{ canonicalUrl|json_encode|raw }},
-        "headline": {{ (post.title|title_tokens)|json_encode|raw }},
-        "description": {{ (post.description ?: '')|json_encode|raw }},
-        "image": {{ absolute_url(coverSrc)|json_encode|raw }},
-        "datePublished": {{ (post.publishedAt ?: post.createdAt)|date('c')|json_encode|raw }},
-        {% if post.updatedAt %}"dateModified": {{ post.updatedAt|date('c')|json_encode|raw }},{% endif %}
-        "inLanguage": "vi",
-        {% if category %}"articleSection": {{ category.name|json_encode|raw }},{% endif %}
-        "author": {
-            "@type": "Person",
-            "name": {{ (post.author ? post.author.authorDisplayName : v3.company.authorName)|json_encode|raw }}
-        },
-        "publisher": {
-            "@type": "Organization",
-            "name": {{ v3.company.legalName|json_encode|raw }}
-        }
-    }
-    </script>
+    {# Tác giả có trang công khai → khai báo url + @id trùng Person trên ProfilePage
+       (user/author.html.twig) để Google nối bài viết với hồ sơ tác giả. #}
+    {% set authorUrl = author_url(post.author) %}
+    {% set articleAuthor = { '@type': 'Person' } %}
+    {% if authorUrl %}
+        {% set articleAuthor = articleAuthor|merge({ '@id': authorUrl ~ '#person', 'url': authorUrl }) %}
+        {% if post.author.jobTitle %}{% set articleAuthor = articleAuthor|merge({ 'jobTitle': post.author.jobTitle }) %}{% endif %}
+    {% endif %}
+    {% set articleAuthor = articleAuthor|merge({ 'name': post.author ? post.author.authorDisplayName : v3.company.authorName }) %}
+
+    {% set article = {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        'mainEntityOfPage': canonicalUrl,
+        'headline': post.title|title_tokens,
+        'description': post.description ?: '',
+        'image': absolute_url(coverSrc),
+        'datePublished': (post.publishedAt ?: post.createdAt)|date('c'),
+    } %}
+    {% if post.updatedAt %}{% set article = article|merge({ 'dateModified': post.updatedAt|date('c') }) %}{% endif %}
+    {% set article = article|merge({ 'inLanguage': 'vi' }) %}
+    {% if category %}{% set article = article|merge({ 'articleSection': category.name }) %}{% endif %}
+    {% set article = article|merge({
+        'author': articleAuthor,
+        'publisher': { '@type': 'Organization', 'name': v3.company.legalName }
+    }) %}
+    <script type="application/ld+json">{{ article|json_ld(true) }}</script>
     {# Sao đánh giá tách riêng: Google không hiện review snippet cho aggregateRating
        lồng trong Article (Search Console báo "Invalid object type for field parent_node").
        CreativeWorkSeries là kiểu được hỗ trợ — giống kientruc. ratingCount (lượt chấm
@@ -66,7 +71,7 @@
             'bestRating': 5,
             'worstRating': 1
         }
-    }|json_encode(constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_UNESCAPED_SLASHES') b-or constant('JSON_HEX_TAG'))|raw }}</script>
+    }|json_ld(true) }}</script>
     {% endif %}
 {% endblock %}
 

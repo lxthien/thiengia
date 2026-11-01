@@ -8,10 +8,13 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'user')]
+#[UniqueEntity(fields: ['authorSlug'], message: 'Đường dẫn trang tác giả này đã có người dùng.')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -86,6 +89,81 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setBiography(?string $biography): static { $this->biography = $biography; return $this; }
     public function isShowAuthorInfo(): bool { return $this->showAuthorInfo; }
     public function setShowAuthorInfo(bool $show): static { $this->showAuthorInfo = $show; return $this; }
+
+    /**
+     * Đường dẫn công khai /tac-gia/{authorSlug}/. Tách khỏi username để URL
+     * không làm lộ tên đăng nhập.
+     */
+    #[ORM\Column(name: 'authorSlug', type: Types::STRING, length: 190, unique: true, nullable: true)]
+    #[Assert\Length(max: 190)]
+    #[Assert\Regex(pattern: '/^[a-z0-9]+(?:-[a-z0-9]+)*$/', message: 'Chỉ dùng chữ thường không dấu, số và dấu gạch ngang, ví dụ: nguyen-van-a.')]
+    private ?string $authorSlug = null;
+
+    /** Chức danh, ví dụ "Kiến trúc sư trưởng" — schema Person.jobTitle. */
+    #[ORM\Column(name: 'jobTitle', type: Types::STRING, length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
+    private ?string $jobTitle = null;
+
+    /** Lĩnh vực chuyên môn, phân tách bằng dấu phẩy — schema Person.knowsAbout. */
+    #[ORM\Column(name: 'knowsAbout', type: Types::STRING, length: 500, nullable: true)]
+    #[Assert\Length(max: 500)]
+    private ?string $knowsAbout = null;
+
+    /** Link hồ sơ ở nơi khác (Facebook, LinkedIn, YouTube...), mỗi dòng một link — schema Person.sameAs. */
+    #[ORM\Column(name: 'sameAs', type: Types::TEXT, nullable: true)]
+    #[Assert\Length(max: 3000)]
+    private ?string $sameAs = null;
+
+    public function getAuthorSlug(): ?string { return $this->authorSlug; }
+    public function setAuthorSlug(?string $slug): static
+    {
+        $this->authorSlug = strtolower(trim($slug ?? '')) ?: null;
+        return $this;
+    }
+    public function getJobTitle(): ?string { return $this->jobTitle; }
+    public function setJobTitle(?string $jobTitle): static { $this->jobTitle = trim($jobTitle ?? '') ?: null; return $this; }
+    public function getKnowsAbout(): ?string { return $this->knowsAbout; }
+    public function setKnowsAbout(?string $knowsAbout): static { $this->knowsAbout = trim($knowsAbout ?? '') ?: null; return $this; }
+    public function getSameAs(): ?string { return $this->sameAs; }
+    public function setSameAs(?string $sameAs): static { $this->sameAs = trim($sameAs ?? '') ?: null; return $this; }
+
+    /** @return string[] */
+    public function getKnowsAboutList(): array
+    {
+        return array_values(array_filter(array_map('trim', explode(',', (string) $this->knowsAbout))));
+    }
+
+    /** @return string[] */
+    public function getSameAsList(): array
+    {
+        return array_values(array_unique(array_filter(array_map('trim', preg_split('/\R/', (string) $this->sameAs)))));
+    }
+
+    /**
+     * Có trang tác giả công khai không: tài khoản đang hoạt động, bật hiển thị
+     * thông tin tác giả và đã đặt đường dẫn.
+     */
+    public function isPublicAuthor(): bool
+    {
+        return $this->enabled && $this->showAuthorInfo && $this->authorSlug !== null;
+    }
+
+    #[Assert\Callback]
+    public function validateAuthorProfile(ExecutionContextInterface $context): void
+    {
+        if ($this->authorSlug !== null && $this->authorSlug === strtolower($this->username)) {
+            $context->buildViolation('Không đặt đường dẫn trang tác giả trùng tên đăng nhập.')
+                ->atPath('authorSlug')->addViolation();
+        }
+
+        foreach ($this->getSameAsList() as $url) {
+            if (!preg_match('#^https://[^\s/]+\.[^\s]+$#i', $url) || filter_var($url, FILTER_VALIDATE_URL) === false) {
+                $context->buildViolation('Link không hợp lệ (cần bắt đầu bằng https://): {{ url }}')
+                    ->setParameter('{{ url }}', $url)
+                    ->atPath('sameAs')->addViolation();
+            }
+        }
+    }
 
     #[Gedmo\Timestampable(on: 'create')]
     #[ORM\Column(name: 'createdAt', type: Types::DATETIME_MUTABLE, nullable: true)]

@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\News;
 use App\Entity\NewsCategory;
+use App\Entity\User;
 use App\Enum\PostStatus;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -245,7 +246,40 @@ class SitemapService
             ['url' => $this->router->generate('building_density_calculator', [], UrlGeneratorInterface::ABSOLUTE_URL), 'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['url' => $this->router->generate('building_age_calculator', [], UrlGeneratorInterface::ABSOLUTE_URL), 'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['url' => $this->router->generate('house_direction_calculator', [], UrlGeneratorInterface::ABSOLUTE_URL), 'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.5'],
+            ...$this->getAuthorUrls(),
         ];
+    }
+
+    /**
+     * Trang tác giả công khai (User::isPublicAuthor) có ít nhất một bài đã đăng.
+     * lastmod = lần cập nhật gần nhất trong các bài của tác giả.
+     *
+     * @return array<int, array{url: string, lastmod: string, changefreq: string, priority: string}>
+     */
+    private function getAuthorUrls(): array
+    {
+        $rows = $this->em->createQueryBuilder()
+            ->select('u.authorSlug AS slug', 'MAX(COALESCE(n.updatedAt, n.createdAt)) AS lastmod')
+            ->from(User::class, 'u')
+            ->innerJoin(News::class, 'n', 'WITH', 'n.author = u')
+            ->where('u.enabled = true')
+            ->andWhere('u.showAuthorInfo = true')
+            ->andWhere('u.authorSlug IS NOT NULL')
+            ->andWhere('n.status = :status')
+            ->andWhere('n.postType = :postType')
+            ->setParameter('status', PostStatus::Published)
+            ->setParameter('postType', 'post')
+            ->groupBy('u.id')
+            ->orderBy('u.id', 'ASC')
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_map(fn (array $row): array => [
+            'url' => $this->router->generate('author', ['slug' => $row['slug']], UrlGeneratorInterface::ABSOLUTE_URL),
+            'lastmod' => substr((string) $row['lastmod'], 0, 10),
+            'changefreq' => 'weekly',
+            'priority' => '0.4',
+        ], $rows);
     }
 
     private function generateCategoryUrl(NewsCategory $category): string

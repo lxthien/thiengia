@@ -8,7 +8,7 @@
     <meta name="description" content="{% block description %}{{ get_setting('pageDescription') ?: v3.company.description }}{% endblock %}">
     <meta name="keywords" content="{% block keyword %}{{ get_setting('pageKeyword') }}{% endblock %}">
 
-    {% block robots %}<meta name="robots" content="index, follow">{% endblock %}
+    {% block robots %}<meta name="robots" content="{{ constant('App\\Seo\\RobotsMeta::INDEX_FOLLOW') }}">{% endblock %}
     <meta name="theme-color" content="{{ v3.colors.primary }}">
     <meta http-equiv="content-language" content="vi">
 

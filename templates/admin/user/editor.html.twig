@@ -16,11 +16,16 @@
 {% if form.plainPassword is defined %}{{ form_row(form.plainPassword,{attr:{autocomplete:'new-password'}}) }}{% endif %}
 <fieldset class="user-permissions"><legend>Vai trò và trạng thái</legend><p>Chỉ cấp các quyền cần thiết. Danh sách lựa chọn phụ thuộc quyền quản trị của bạn.</p>{{ form_row(form.roles) }}{{ form_row(form.enabled) }}</fieldset>
 <fieldset class="user-permissions"><legend>Hồ sơ tác giả công khai</legend>
-<p>Khối tác giả chỉ hiển thị cuối post, không hiển thị trên page. Ưu tiên tên công khai; để trống sẽ dùng “Tên hiển thị” phía trên.</p>
+<p>Khối tác giả hiển thị cuối post (không hiển thị trên page) và có trang riêng /tac-gia/…/ liệt kê bài đã viết. Ưu tiên tên công khai; để trống sẽ dùng “Tên hiển thị” phía trên. Chức danh, chuyên môn và link hồ sơ thật giúp Google đánh giá độ tin cậy (E-E-A-T) của bài viết.</p>
 {{ form_row(form.publicDisplayName) }}
+{{ form_row(form.jobTitle) }}
 {{ include('admin/components/_image_picker.html.twig', {field: form.avatar, picker_id: 'authorAvatarPicker', empty_label: 'Chưa chọn avatar, sẽ hiển thị chữ cái tên tác giả'}) }}
 {{ form_row(form.biography) }}
+{{ form_row(form.knowsAbout) }}
+{{ form_row(form.sameAs) }}
+{{ form_row(form.authorSlug) }}
 {{ form_row(form.showAuthorInfo) }}
+{% if user.authorSlug %}<p><a class="banner-button" href="{{ path('author', {slug: user.authorSlug}) }}" target="_blank" rel="noopener">{{ user.publicAuthor ? 'Xem trang tác giả' : 'Xem trước trang tác giả' }}</a>{% if not user.publicAuthor %} <small>Trang chưa công khai — khách sẽ thấy 404 cho tới khi tích “Hiển thị thông tin tác giả” và lưu.</small>{% endif %}</p>{% endif %}
 </fieldset>
 {% if mode == 'edit' %}<a class="banner-button" href="{{ path('admin_user_change_password',{id:user.id}) }}">Đổi mật khẩu</a>{% endif %}
 {% endif %}

@@ -1,0 +1,62 @@
+{#
+    Phân trang KnpPaginator theo markup v3 (style ở scss/v3/component/_pagination.scss,
+    đặt trong khối bọc .pagination-v3). Là template mặc định cho knp_pagination_render()
+    — xem knp_paginator.template.pagination trong config/packages/framework.yaml.
+
+    Trang 1 dùng URL gốc (không có ?page=1) để khớp canonical, tránh trùng URL.
+#}
+{% macro pageUrl(route, query, page, options, pageParameterName) %}
+    {%- if page == 1 -%}
+        {{ path(route, query|filter((v, k) => k != pageParameterName)) }}
+    {%- else -%}
+        {{ path(route, knp_pagination_query(query, page, options)) }}
+    {%- endif -%}
+{% endmacro %}
+
+{% if pageCount > 1 %}
+    {% import _self as p %}
+
+    <nav aria-label="Phân trang">
+        <ul>
+            {% if previous is defined %}
+                <li>
+                    <a href="{{ p.pageUrl(route, query, previous, options, pageParameterName) }}" rel="prev" aria-label="Trang trước">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    </a>
+                </li>
+            {% endif %}
+
+            {% if pagesInRange|first > 1 %}
+                <li><a href="{{ p.pageUrl(route, query, 1, options, pageParameterName) }}">1</a></li>
+                {% if pagesInRange|first > 2 %}
+                    <li><span class="pagination-ellipsis" aria-hidden="true">…</span></li>
+                {% endif %}
+            {% endif %}
+
+            {% for page in pagesInRange %}
+                <li>
+                    {% if page == current %}
+                        <span aria-current="page">{{ page }}</span>
+                    {% else %}
+                        <a href="{{ p.pageUrl(route, query, page, options, pageParameterName) }}">{{ page }}</a>
+                    {% endif %}
+                </li>
+            {% endfor %}
+
+            {% if pagesInRange|last < pageCount %}
+                {% if pagesInRange|last < pageCount - 1 %}
+                    <li><span class="pagination-ellipsis" aria-hidden="true">…</span></li>
+                {% endif %}
+                <li><a href="{{ p.pageUrl(route, query, pageCount, options, pageParameterName) }}">{{ pageCount }}</a></li>
+            {% endif %}
+
+            {% if next is defined %}
+                <li>
+                    <a href="{{ p.pageUrl(route, query, next, options, pageParameterName) }}" rel="next" aria-label="Trang sau">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}

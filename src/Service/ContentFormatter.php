@@ -138,11 +138,17 @@ class ContentFormatter
             $img->setAttribute('height', !empty($height) ? ($width > 900 ? round(($height * 900) / $width) : $height) : 500);
         }
 
-        $newContent = $dom->saveHTML();
-
-        // Remove the wrapper div we added
-        $newContent = preg_replace('/<div id="lazyload-wrapper">/', '', $newContent);
-        $newContent = preg_replace('/<\/div>$/', '', $newContent);
+        // Xuất từng node con của div bọc ngoài bằng saveHTML($node): cách này
+        // giữ nguyên UTF-8. saveHTML() cả document (sau khi đã bỏ khai báo
+        // <?xml encoding>) đổi mọi chữ có dấu thành &acirc; / &#7885; — HTML
+        // nặng gấp nhiều lần và khó đọc với bot/AI khi xem nguồn trang.
+        $wrapper = (new \DOMXPath($dom))->query('//div[@id="lazyload-wrapper"]')->item(0);
+        $newContent = '';
+        if ($wrapper) {
+            foreach ($wrapper->childNodes as $child) {
+                $newContent .= $dom->saveHTML($child);
+            }
+        }
 
         // Clean up any remaining DOCTYPE, html, head, body tags
         $newContent = preg_replace('/^<!DOCTYPE[^>]*>/i', '', $newContent);

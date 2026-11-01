@@ -1,0 +1,160 @@
+{% extends 'layout.html.twig' %}
+
+{#
+    Trang tác giả công khai (ProfileController::indexAction).
+    Biến: author (User), baseUrl (URL tuyệt đối trang 1), pagination (KnpPaginator),
+          bioText / bioSummary (≤300) / metaDescription (≤155): giới thiệu dạng chữ thuần.
+#}
+{% set authorName = author.authorDisplayName %}
+{% set currentPage = pagination.currentPageNumber %}
+{% set pageCount = pagination.itemNumberPerPage > 0 ? (pagination.totalItemCount / pagination.itemNumberPerPage)|round(0, 'ceil') : 1 %}
+{% set pageSuffix = currentPage > 1 ? ' - Trang ' ~ currentPage : '' %}
+{% set avatarUrl = author.avatar and convert_images.fileExists(author.avatar) ? absolute_url(asset(author.avatar)) : null %}
+{% set expertise = author.knowsAboutList %}
+{% set profiles = author.sameAsList %}
+
+{% block title %}{{ authorName }}{% if author.jobTitle %} – {{ author.jobTitle }}{% endif %} | {{ v3.company.shortName }}{{ pageSuffix }}{% endblock %}
+{% block description %}{{ metaDescription ?: ('Các bài viết về xây dựng của ' ~ authorName ~ (author.jobTitle ? ', ' ~ author.jobTitle : '') ~ ' tại ' ~ v3.company.shortName ~ '.') }}{{ pageSuffix }}{% endblock %}
+{% block keyword %}{{ expertise|join(', ') }}{% endblock %}
+
+{% block robots %}<meta name="robots" content="{{ preview ? 'noindex, nofollow' : constant('App\\Seo\\RobotsMeta::INDEX_FOLLOW') }}">{% endblock %}
+
+{% block canonical %}
+    <link rel="canonical" href="{{ currentPage > 1 ? baseUrl ~ '?page=' ~ currentPage : baseUrl }}">
+    {% if currentPage > 1 %}
+        <link rel="prev" href="{{ currentPage == 2 ? baseUrl : baseUrl ~ '?page=' ~ (currentPage - 1) }}">
+    {% endif %}
+    {% if currentPage < pageCount %}
+        <link rel="next" href="{{ baseUrl ~ '?page=' ~ (currentPage + 1) }}">
+    {% endif %}
+{% endblock %}
+
+{% block structuredOpenGraph %}
+    <meta property="og:type" content="profile">
+    <meta property="og:title" content="{{ block('title') }}">
+    <meta property="og:description" content="{{ block('description') }}">
+    {% if avatarUrl %}<meta property="og:image" content="{{ avatarUrl }}">{% endif %}
+{% endblock %}
+
+{% block jsonld %}
+    {# ProfilePage + Person: https://developers.google.com/search/docs/appearance/structured-data/profile-page
+       @id của Person trùng với author.@id trong schema Article (news/show.html.twig)
+       để Google biết các bài đó cùng một người viết. #}
+    {% set person = {
+        '@type': 'Person',
+        '@id': baseUrl ~ '#person',
+        'name': authorName,
+        'url': baseUrl,
+    } %}
+    {% if author.jobTitle %}{% set person = person|merge({ 'jobTitle': author.jobTitle }) %}{% endif %}
+    {% if avatarUrl %}{% set person = person|merge({ 'image': avatarUrl }) %}{% endif %}
+    {% if bioSummary %}{% set person = person|merge({ 'description': bioSummary }) %}{% endif %}
+    {% if expertise %}{% set person = person|merge({ 'knowsAbout': expertise }) %}{% endif %}
+    {% if profiles %}{% set person = person|merge({ 'sameAs': profiles }) %}{% endif %}
+    {% set person = person|merge({ 'worksFor': { '@type': 'Organization', 'name': v3.company.legalName, 'url': url('homepage') } }) %}
+    <script type="application/ld+json">{{ {
+        '@context': 'https://schema.org',
+        '@type': 'ProfilePage',
+        'url': currentPage > 1 ? baseUrl ~ '?page=' ~ currentPage : baseUrl,
+        'inLanguage': 'vi',
+        'mainEntity': person,
+    }|json_encode(constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_UNESCAPED_SLASHES') b-or constant('JSON_HEX_TAG'))|raw }}</script>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('build/css/v3-list.css') }}">
+{% endblock %}
+
+{% block body %}
+
+    {% if preview %}
+        <div class="author-preview-note" role="status">
+            <div class="container max-w-7xl">
+                <strong>Bản xem trước:</strong> trang này chưa công khai, khách truy cập sẽ thấy lỗi 404.
+                Vào <a href="{{ path('admin_user_edit', { id: author.id }) }}">hồ sơ người dùng</a>
+                và tích “Hiển thị thông tin tác giả”{% if not author.enabled %}, đồng thời mở khóa tài khoản{% endif %} để công khai.
+            </div>
+        </div>
+    {% endif %}
+
+    {{ include('v3/components/_page_hero.html.twig', {
+        breadcrumb: [
+            { label: 'Trang chủ', path: path('homepage') },
+            { label: authorName }
+        ],
+        title: authorName|e,
+        description: author.jobTitle ? author.jobTitle|e : null
+    }) }}
+
+    <section class="author-profile py-16 lg:py-20" aria-label="Giới thiệu tác giả">
+        <div class="container max-w-7xl author-profile-grid">
+            <div class="author-profile-photo">
+                {% if author.avatar and convert_images.fileExists(author.avatar) %}
+                    <img src="{{ asset(author.avatar) }}" alt="Chân dung {{ authorName }}" width="200" height="200" decoding="async" fetchpriority="high">
+                {% else %}
+                    <span class="author-profile-fallback" aria-hidden="true">{{ authorName|slice(0, 1)|upper }}</span>
+                {% endif %}
+            </div>
+
+            <div class="author-profile-body">
+                {# Tên + chức danh đã ở banner (h1) → ở đây chỉ giới thiệu. #}
+                <p class="sec-label">Giới thiệu</p>
+
+                {% if author.biography %}
+                    <div class="author-profile-bio">{{ author.biography|author_biography }}</div>
+                {% endif %}
+
+                {% if expertise %}
+                    <div class="author-profile-block">
+                        <p class="author-profile-label">Chuyên môn</p>
+                        <ul class="author-profile-tags">
+                            {% for item in expertise %}<li>{{ item }}</li>{% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                {% if profiles %}
+                    <div class="author-profile-block">
+                        <p class="author-profile-label">Hồ sơ khác</p>
+                        <ul class="author-profile-links">
+                            {% for link in profiles %}
+                                {% set host = link|split('/')[2]|default(link)|replace({'www.': '', 'm.': ''}) %}
+                                {% set label = {
+                                    'facebook.com': 'Facebook', 'linkedin.com': 'LinkedIn', 'youtube.com': 'YouTube',
+                                    'tiktok.com': 'TikTok', 'zalo.me': 'Zalo', 'x.com': 'X', 'twitter.com': 'X',
+                                    'instagram.com': 'Instagram', 'github.com': 'GitHub'
+                                }[host]|default(host) %}
+                                <li><a href="{{ link }}" target="_blank" rel="me noopener">{{ label }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <p class="author-profile-count">{{ pagination.totalItemCount }} bài viết</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="pb-16 lg:pb-20" aria-labelledby="bai-viet-tac-gia">
+        <div class="container max-w-7xl">
+            <h2 id="bai-viet-tac-gia" class="h-display text-3xl lg:text-4xl">Bài viết của <em>{{ authorName }}</em></h2>
+
+            {% if pagination|length %}
+                <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-x-8 gap-y-12 mt-12">
+                    {% for post in pagination %}
+                        {{ include('v3/components/_post_card.html.twig', { post: post, headingLevel: 'h3' }) }}
+                    {% endfor %}
+                </div>
+
+                <div class="pagination-v3 mt-16">
+                    {{ knp_pagination_render(pagination) }}
+                </div>
+            {% else %}
+                <p class="list-empty mt-8">Tác giả chưa có bài viết nào.</p>
+            {% endif %}
+        </div>
+    </section>
+
+    {{ include('v3/components/_newsletter.html.twig') }}
+
+{% endblock %}

@@ -1,6 +1,7 @@
 {% set author = post.author %}
 {% if author and author.showAuthorInfo %}
     {% set authorName = author.authorDisplayName %}
+    {% set authorUrl = author_url(author) %}
     <aside class="author-box mt-12" aria-label="Thông tin tác giả">
         {% if author.avatar and convert_images.fileExists(author.avatar) %}
             <img src="{{ asset(author.avatar) }}" alt="Chân dung {{ authorName }}" width="72" height="72" loading="lazy" decoding="async">
@@ -9,8 +10,14 @@
         {% endif %}
         <div class="author-details">
             <p class="author-label">Tác giả</p>
-            <p class="author-name">{{ authorName }}</p>
+            <p class="author-name">
+                {% if authorUrl %}<a href="{{ authorUrl }}" rel="author">{{ authorName }}</a>{% else %}{{ authorName }}{% endif %}
+            </p>
+            {% if author.jobTitle %}<p class="author-job">{{ author.jobTitle }}</p>{% endif %}
             {% if author.biography %}<div class="author-bio">{{ author.biography|author_biography }}</div>{% endif %}
+            {% if authorUrl %}
+                <a class="author-more" href="{{ authorUrl }}">Xem tất cả bài viết<span class="sr-only"> của {{ authorName }}</span> <span aria-hidden="true">→</span></a>
+            {% endif %}
         </div>
     </aside>
 {% endif %}

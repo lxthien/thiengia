@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Seo\RobotsMeta;
 use App\Enum\PostStatus;
 use App\Repository\NewsRepository;
 use Doctrine\DBAL\Types\Types;
@@ -758,7 +759,7 @@ class News
      */
     public function getRobotsContent(): string
     {
-        return ($this->metaIndex ? 'index' : 'noindex') . ', ' . ($this->metaFollow ? 'follow' : 'nofollow');
+        return RobotsMeta::build((bool) $this->metaIndex, (bool) $this->metaFollow);
     }
 
     public function setSchemaMarkup($schemaMarkup)

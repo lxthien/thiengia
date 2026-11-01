@@ -12,16 +12,16 @@
     {
         "@context": "https://schema.org",
         "@type": "ContactPage",
-        "url": {{ app.request.uri|json_encode|raw }},
+        "url": {{ app.request.uri|json_ld }},
         "mainEntity": {
             "@type": "GeneralContractor",
-            "name": {{ v3.company.legalName|json_encode|raw }},
-            "slogan": {{ v3.company.slogan|json_encode|raw }},
-            "telephone": {{ v3.company.phoneRaw|json_encode|raw }},
-            "email": {{ v3.company.email|json_encode|raw }},
+            "name": {{ v3.company.legalName|json_ld }},
+            "slogan": {{ v3.company.slogan|json_ld }},
+            "telephone": {{ v3.company.phoneRaw|json_ld }},
+            "email": {{ v3.company.email|json_ld }},
             "address": {
                 "@type": "PostalAddress",
-                "streetAddress": {{ v3.company.address|json_encode|raw }},
+                "streetAddress": {{ v3.company.address|json_ld }},
                 "addressCountry": "VN"
             }
         }

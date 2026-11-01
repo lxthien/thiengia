@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Seo\RobotsMeta;
 use App\Repository\NewsCategoryRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -272,7 +273,7 @@ class NewsCategory
      */
     public function getRobotsContent(): string
     {
-        return ($this->metaIndex ? 'index' : 'noindex') . ', ' . ($this->metaFollow ? 'follow' : 'nofollow');
+        return RobotsMeta::build((bool) $this->metaIndex, (bool) $this->metaFollow);
     }
 
     public function setPageTitle($pageTitle)
