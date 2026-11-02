@@ -2,6 +2,40 @@ $media-workspace-scope: '#admin_gallery_album_edit';
 @import 'banner-index';
 
 #admin_gallery_album_edit {
+    #album-media-dialog {
+        width: min(1080px, calc(100% - 32px));
+        max-height: calc(100vh - 32px);
+        max-height: calc(100dvh - 32px);
+        overflow: hidden;
+        &[open] { display: flex; flex-direction: column; }
+        .banner-dialog__header, .banner-dialog__footer { flex-shrink: 0; }
+        .banner-dialog__body { min-height: 0; overflow-y: auto; overflow-x: hidden; }
+        .banner-media-tools { display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr); gap: 12px; margin: 16px 0; }
+        label { min-width: 0; }
+        input:not([type=file]), select { box-sizing: border-box; width: 100%; min-width: 0; height: 42px; margin: 5px 0 0; padding: 8px 12px; }
+        .banner-media-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 3px; }
+        .banner-media-item {
+            position: relative; display: flex; flex-direction: column; min-width: 0; padding: 0; overflow: hidden; border: 1px solid #dce2eb; border-radius: 6px;
+            img { width: 100%; height: 120px; object-fit: contain; background: #f0f3f7; }
+            span { height: 48px; padding: 6px; font-size: 12px; line-height: 18px; overflow: hidden; overflow-wrap: anywhere; }
+            &[aria-pressed=true] { border-color: #195c9e; box-shadow: 0 0 0 2px #195c9e; }
+            &[aria-pressed=true]::after { content: attr(data-selection-label); position: absolute; top: 6px; right: 6px; padding: 4px 7px; border-radius: 3px; background: #195c9e; color: #fff; font-size: 12px; }
+            &[hidden] { display: none; }
+        }
+        .album-upload { background: #f8fafc; border: 1px solid #dce2eb; border-radius: 6px; padding: 12px; margin-bottom: 16px; }
+        .album-upload summary { cursor: pointer; color: #195c9e; font-weight: 600; }
+        .album-upload-zone { display: block; border: 2px dashed #9caec5; background: #fff; padding: 16px; margin: 12px 0; }
+        input[type=file] { display: block; max-width: 100%; margin-top: 8px; }
+        .album-picker-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+        [data-media-status], [data-upload-status] { margin: 12px 0; }
+        @media (max-width: 767px) {
+            width: calc(100% - 16px);
+            .banner-dialog__body { padding: 12px; }
+            .banner-media-tools { grid-template-columns: minmax(0, 1fr); }
+            .banner-media-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            [data-selected-name] { width: 100%; }
+        }
+    }
     .album-header-actions, .album-image-actions { display: flex; flex-wrap: wrap; gap: 8px; }
     .banner-manager__header h1 { overflow-wrap: anywhere; }
     .album-breadcrumb { margin-bottom: 8px; }

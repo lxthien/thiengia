@@ -1,33 +1,71 @@
 {% extends 'admin/layout.html.twig' %}
-
+{% block title %}Sửa thẻ: {{ object.name }}{% endblock %}
 {% block body_id 'admin_tag_edit' %}
+{% block admin_editor_stylesheets %}
+    <link rel="stylesheet" href="{{ asset('build/css/ckeditor5-editor.css') }}">
+    <link rel="stylesheet" href="{{ asset('build/css/ckeditor-content.css') }}">
+    <link rel="stylesheet" href="{{ asset('build/css/page-editor.css') }}">
+{% endblock %}
+{% block flash_messages %}{% endblock %}
 
 {% block main %}
-    <div class="content mt-3">
-        <div class="animated fadeIn">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <strong class="card-title">{{ 'title.edit_tag'|trans({'%id%': object.id}) }}</strong>
-                        </div>
-                        <div class="card-body">
-                            <!-- Credit Card -->
-                            <div id="pay-invoice">
-                                <div class="card-body">
-                                    {{ include('admin/tag/_form.html.twig', {
-                                        form: form,
-                                        button_label: 'action.save'|trans,
-                                        include_back_to_home_link: true,
-                                    }, with_context = false) }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- .card -->
-                </div>
-                <!--/.col-->
-            </div>
+<section class="page-editor">
+    <header class="page-editor__header">
+        <div>
+            <a href="{{ path('admin_tag_index') }}">← Danh sách thẻ</a>
+            <h1>Sửa thẻ nội dung</h1>
+            <p>#{{ object.name }} · {{ news_count ? news_count ~ ' bài viết đang gắn thẻ này' : 'Chưa gắn bài viết nào' }}</p>
         </div>
-    </div>
+        {% if news_count %}
+            <a class="btn btn-default" href="{{ path('tags', {slug: object.url}) }}" target="_blank" rel="noopener">
+                <i class="fa fa-external-link" aria-hidden="true"></i> Xem trang thẻ<span class="sr-only"> (mở tab mới)</span>
+            </a>
+        {% endif %}
+    </header>
+
+    {{ include('admin/redirect/_messages.html.twig') }}
+
+    <nav class="page-editor__nav" aria-label="Các phần của thẻ">
+        <a href="#tag-general">Thông tin chung</a>
+        <a href="#tag-content">Mô tả</a>
+        <a href="#tag-seo">SEO</a>
+    </nav>
+
+    {{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
+        {% if not form.vars.valid %}
+            <div class="page-editor__errors" role="alert"><strong>Chưa thể lưu thẻ.</strong> Kiểm tra các trường được đánh dấu bên dưới.{{ form_errors(form) }}</div>
+        {% endif %}
+
+        <section class="page-editor__section" id="tag-general" aria-labelledby="tag-general-title">
+            <h2 id="tag-general-title">Thông tin chung</h2>
+            <div class="page-editor__grid">
+                {{ form_row(form.name) }}
+                {{ form_row(form.url) }}
+            </div>
+            <p class="page-editor__hint">URL tự tạo lại từ tên thẻ khi lưu. Đổi tên thẻ đã có bài viết sẽ đổi luôn URL — nhớ tạo chuyển hướng từ URL cũ.</p>
+        </section>
+
+        <section class="page-editor__section" id="tag-content" aria-labelledby="tag-content-title">
+            <h2 id="tag-content-title">Mô tả</h2>
+            <p class="page-editor__hint">Hiển thị đầu trang thẻ. Một đoạn giới thiệu ngắn giúp người đọc hiểu nhóm bài viết này nói về gì.</p>
+            {{ form_row(form.contents, {label: 'Mô tả trang thẻ', attr: {class: 'txt-ckeditor5', 'data-height': '260'}}) }}
+        </section>
+
+        <section class="page-editor__section" id="tag-seo" aria-labelledby="tag-seo-title">
+            <h2 id="tag-seo-title">SEO</h2>
+            <p class="page-editor__hint">Để trống thì dùng tên thẻ. Trang thẻ đang để noindex nên các trường này chủ yếu dùng cho tiêu đề tab và khi chia sẻ link.</p>
+            {{ form_row(form.pageTitle) }}
+            {{ form_row(form.pageDescription) }}
+            {{ form_row(form.pageKeyword) }}
+        </section>
+
+        <footer class="page-editor__savebar">
+            <span class="page-editor__hint">Thay đổi áp dụng cho trang /tag/{{ object.url }}.</span>
+            <div class="page-editor__save-actions">
+                <button type="submit" class="btn btn-primary"><i class="fa fa-save" aria-hidden="true"></i> Lưu thay đổi</button>
+                <a href="{{ path('admin_tag_index') }}" class="btn btn-link"><i class="fa fa-list-alt" aria-hidden="true"></i> {{ 'action.back_to_list'|trans }}</a>
+            </div>
+        </footer>
+    {{ form_end(form) }}
+</section>
 {% endblock %}

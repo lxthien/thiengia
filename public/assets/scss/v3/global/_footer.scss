@@ -118,5 +118,28 @@
     font-size: 0.76rem;
     letter-spacing: 0.04em;
     color: rgba($white, 0.38);
+
+    // Mobile: chừa chỗ cho cụm nút gọi/Zalo nổi ở góc trái dưới (_float-contact.scss,
+    // cao ~135px) để dòng bản quyền, chính sách và badge DMCA không bị che khi cuộn hết trang.
+    @media (max-width: 767px) {
+      padding-bottom: 8rem;
+    }
+  }
+
+  // Badge DMCA: ảnh nền xám/đen của DMCA chìm trên footer tối → viền sáng nhẹ để tách nền,
+  // hơi mờ cho đồng tông với chữ ft-bottom, rõ hẳn khi rê chuột.
+  .ft-dmca {
+    display: inline-flex;
+    line-height: 0;
+    padding: 2px;
+    border-radius: 3px;
+    background: rgba($white, 0.9);
+    opacity: 0.7;
+    transition: opacity $dur $ease;
+
+    &:hover,
+    &:focus-visible { opacity: 1; }
+
+    img { display: block; width: 121px; height: 24px; }
   }
 }

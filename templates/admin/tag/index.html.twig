@@ -1,56 +1,127 @@
 {% extends 'admin/layout.html.twig' %}
-
-{% block admin_datatables_stylesheets %}
-    <link rel="stylesheet" href="{{ asset('assets/sufeeadmin/assets/css/lib/datatable/dataTables.bootstrap.min.css') }}">
-{% endblock %}
-
-{% block admin_datatables_javascripts %}
-    {{ include('admin/components/_datatables_scripts.html.twig', with_context = false) }}
-{% endblock %}
-
+{% block title %}Thẻ nội dung{% endblock %}
 {% block body_id 'admin_tag_index' %}
+{% block flash_messages %}{% endblock %}
+{% block stylesheets %}{{ parent() }}<link rel="stylesheet" href="{{ asset('build/css/tag-index.css') }}">{% endblock %}
+{% block javascripts %}{{ parent() }}<script src="{{ asset('build/js/tag-index.js') }}" defer></script>{% endblock %}
+
+{% set filtering = filters.q != '' or filters.usage != '' %}
 
 {% block main %}
-    <div class="content mt-3">
-        <div class="animated fadeIn">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <strong class="card-title">{{ 'title.tag_list'|trans }}</strong>
-                        </div>
-                        <div class="card-body">
-                            <table id="bootstrap-data-table" class="table table-striped table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>{{ 'label.name'|trans }}</th>
-                                        <th>{{ 'label.url'|trans }}</th>
-                                        <th>{{ 'label.actions'|trans }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for row in objects %}
-                                    <tr>
-                                        <td>{{ row.getName() }}</td>
-                                        <td>{{ row.getUrl() }}</td>
-                                        <td>
-                                            <div class="item-actions">
-                                                <a href="{{ path('admin_tag_edit', {id: row.id}) }}" class="btn-sm">
-                                                    <i class="fa fa-edit" aria-hidden="true"></i>
-                                                </a>
-
-                                                {{ include('admin/tag/_delete_form.html.twig', {object: row}, with_context = false) }}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<section class="banner-manager tag-manager">
+    <header class="banner-manager__header">
+        <div>
+            <h1>Thẻ nội dung</h1>
+            <p>Thẻ được tạo khi gắn vào bài viết (ô “Thẻ” trong trang soạn bài). Tại đây bạn chỉnh mô tả, SEO hoặc dọn các thẻ không còn dùng.</p>
         </div>
-        <!-- .animated -->
-    </div>
+        <a class="banner-button banner-button--primary" href="{{ path('admin_news_new') }}">Viết bài mới</a>
+    </header>
+
+    {{ include('admin/redirect/_messages.html.twig') }}
+
+    <dl class="tag-stats">
+        <div><dt>Tổng số thẻ</dt><dd>{{ total }}</dd></div>
+        <div><dt>Đang gắn bài viết</dt><dd>{{ total - unused }}</dd></div>
+        <div class="{{ unused ? 'is-warning' }}">
+            <dt>Chưa gắn bài nào</dt>
+            <dd>{{ unused }}</dd>
+            {% if unused and filters.usage != 'unused' %}<a href="{{ path('admin_tag_index', {usage: 'unused'}) }}">Xem để dọn dẹp</a>{% endif %}
+        </div>
+    </dl>
+
+    <form class="banner-panel tag-search" method="get" action="{{ path('admin_tag_index') }}">
+        <label class="tag-search__query">Tìm thẻ
+            <input type="search" name="q" value="{{ filters.q }}" placeholder="Tên thẻ, URL hoặc tiêu đề SEO…">
+        </label>
+        <label>Tình trạng
+            <select name="usage">
+                <option value="">Tất cả thẻ</option>
+                <option value="used" {{ filters.usage == 'used' ? 'selected' }}>Đang gắn bài viết</option>
+                <option value="unused" {{ filters.usage == 'unused' ? 'selected' }}>Chưa gắn bài nào</option>
+            </select>
+        </label>
+        <label>Sắp xếp
+            <select name="order">
+                {% for value, label in sorts %}<option value="{{ value }}" {{ filters.sort == value ? 'selected' }}>{{ label }}</option>{% endfor %}
+            </select>
+        </label>
+        <button class="banner-button banner-button--primary" type="submit">Tìm kiếm</button>
+        <a class="banner-button" href="{{ path('admin_tag_index') }}">Xóa bộ lọc</a>
+    </form>
+
+    <section class="banner-panel" aria-labelledby="tag-results">
+        <header class="banner-panel__toolbar">
+            <h2 id="tag-results">Danh sách thẻ</h2>
+            <span>{{ pagination.totalItemCount }} {{ filtering ? 'kết quả phù hợp' : 'thẻ' }}{% if pagination.pageCount > 1 %} · Trang {{ pagination.currentPageNumber }}/{{ pagination.pageCount }}{% endif %}</span>
+        </header>
+        <p class="tag-guide">Trang thẻ (/tag/…) đang để <strong>noindex</strong>: Google không lập chỉ mục nên không ảnh hưởng thứ hạng. Mô tả và tiêu đề SEO vẫn hiện cho người đọc và khi chia sẻ link. Thẻ chưa gắn bài nào có thể xóa an toàn.</p>
+
+        <div class="tag-table-wrap" role="region" aria-label="Danh sách thẻ" tabindex="0">
+            <table class="tag-table">
+                <colgroup><col><col style="width:13%"><col style="width:24%"><col style="width:190px"></colgroup>
+                <thead>
+                    <tr>
+                        <th scope="col">Thẻ</th>
+                        <th scope="col">Bài viết</th>
+                        <th scope="col">Nội dung &amp; SEO</th>
+                        <th scope="col">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for tag in pagination %}
+                    {% set count = news_counts[tag.id]|default(0) %}
+                    <tr>
+                        <td>
+                            <a class="tag-title" href="{{ path('admin_tag_edit', {id: tag.id}) }}"><span aria-hidden="true">#</span>{{ tag.name }}</a>
+                            <p class="tag-url">/tag/{{ tag.url }}</p>
+                        </td>
+                        <td>
+                            {% if count %}
+                                <span class="tag-count">{{ count }} bài</span>
+                            {% else %}
+                                <span class="tag-badge is-muted">Chưa gắn bài</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <ul class="tag-checks">
+                                <li class="{{ tag.contents|striptags|trim ? 'is-ok' : 'is-missing' }}">{{ tag.contents|striptags|trim ? 'Có mô tả' : 'Thiếu mô tả' }}</li>
+                                <li class="{{ tag.pageTitle ? 'is-ok' : 'is-missing' }}">{{ tag.pageTitle ? 'Có tiêu đề SEO' : 'Thiếu tiêu đề SEO' }}</li>
+                                <li class="{{ tag.pageDescription ? 'is-ok' : 'is-missing' }}">{{ tag.pageDescription ? 'Có meta description' : 'Thiếu meta description' }}</li>
+                            </ul>
+                        </td>
+                        <td>
+                            <div class="tag-actions">
+                                <a class="banner-button" href="{{ path('admin_tag_edit', {id: tag.id}) }}">Sửa</a>
+                                {% if count %}
+                                    <a class="banner-button" href="{{ path('tags', {slug: tag.url}) }}" target="_blank" rel="noopener">Xem<span class="sr-only"> trang thẻ {{ tag.name }} (mở tab mới)</span></a>
+                                {% endif %}
+                                <form method="post" action="{{ path('admin_tag_delete', {id: tag.id}) }}" data-tag-delete data-title="{{ tag.name }}" data-news="{{ count }}">
+                                    <input type="hidden" name="token" value="{{ csrf_token('delete') }}">
+                                    <button class="banner-button banner-button--delete" type="submit">Xóa<span class="sr-only"> thẻ {{ tag.name }}</span></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="4" class="tag-empty">{{ filtering ? 'Không có thẻ phù hợp. Thử từ khóa khác hoặc xóa bộ lọc.' : 'Chưa có thẻ nào. Thẻ sẽ xuất hiện ở đây sau khi bạn gắn thẻ cho bài viết.' }}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if pagination.pageCount > 1 %}
+            <nav class="tag-pagination" aria-label="Phân trang thẻ">{{ knp_pagination_render(pagination, '@KnpPaginator/Pagination/twitter_bootstrap_v4_pagination.html.twig') }}</nav>
+        {% endif %}
+    </section>
+
+    <dialog id="tag-confirm" aria-labelledby="tag-confirm-title" aria-describedby="tag-confirm-message tag-confirm-warning">
+        <h2 id="tag-confirm-title">Xóa thẻ?</h2>
+        <p id="tag-confirm-message"></p>
+        <p id="tag-confirm-warning"></p>
+        <div class="tag-actions">
+            <button class="banner-button" type="button" id="tag-cancel" autofocus>Hủy</button>
+            <button class="banner-button banner-button--danger" type="button" id="tag-delete">Xóa thẻ</button>
+        </div>
+    </dialog>
+</section>
 {% endblock %}

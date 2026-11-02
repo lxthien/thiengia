@@ -22,12 +22,19 @@
         </section>
     </div>
 </main>
-<dialog class="banner-media-dialog" id="album-media-dialog" aria-labelledby="album-media-title" data-picker-url="{{ path('admin_media_picker', {_format: 'json'}) }}">
+<dialog class="banner-media-dialog" id="album-media-dialog" aria-labelledby="album-media-title" data-picker-url="{{ path('admin_media_picker', {_format: 'json'}) }}" data-upload-url="{{ path('admin_media_upload') }}">
     <div class="banner-dialog__header"><h2 id="album-media-title">Thêm ảnh từ thư viện</h2><button class="banner-dialog__close" type="button" data-close-media aria-label="Đóng thư viện">&times;</button></div>
     <div class="banner-dialog__body">
+        <details class="album-upload"><summary>Tải ảnh mới lên thư viện</summary>
+            <label class="album-upload-zone">Chọn nhiều ảnh để tải lên<input type="file" data-upload-files multiple accept=".jpg,.jpeg,.png,.gif"></label>
+            <p class="album-help">JPG, PNG, GIF · Tối đa 10 MB/ảnh. Ảnh tải thành công sẽ được chọn tiếp theo các ảnh đã chọn.</p>
+            <div class="banner-media-tools"><label>Thư mục tải lên<select data-upload-folder><option value="">Thư mục gốc</option></select></label><label>Hoặc tạo thư mục mới<input data-upload-new-folder placeholder="Ví dụ: hoat-dong"></label></div>
+            <button type="button" class="banner-button banner-button--primary" data-upload-start disabled>Tải ảnh đã chọn</button>
+            <p data-upload-status role="status" aria-live="polite" class="album-help"></p>
+        </details>
         <div class="banner-media-tools"><label>Thư mục<select data-media-folder><option value="">Tất cả thư mục</option></select></label><label>Tìm trong danh sách<input type="search" data-media-search placeholder="Tên ảnh..."></label></div>
-        <p class="album-help">Hiển thị tối đa 48 ảnh mới nhất của thư mục. Chọn ảnh rồi bấm “Thêm vào album”.</p>
-        <div class="banner-media-tools"><a class="banner-button" href="{{ path('admin_media_index') }}" target="_blank" rel="noopener">Tải ảnh mới (tab mới)</a><button class="banner-button" type="button" data-media-refresh>Làm mới</button></div>
+        <p class="album-help">Tối đa 48 ảnh mới nhất của thư mục. Chọn nhiều ảnh theo thứ tự mong muốn; bấm lại để bỏ chọn. Ảnh được thêm vào cuối album theo số thứ tự đã chọn.</p>
+        <div class="album-picker-actions"><button class="banner-button" type="button" data-media-refresh>Làm mới</button><button class="banner-button" type="button" data-media-clear>Bỏ chọn tất cả</button></div>
         <p data-media-status role="status" aria-live="polite" class="album-help"></p>
         <p data-media-error class="banner-panel-error" role="alert" hidden></p>
         <div class="banner-media-grid" data-media-grid></div>

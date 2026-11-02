@@ -1,35 +1,44 @@
-{# Nội dung lấy từ entity GalleryAlbum (admin: Thư viện ảnh) #}
+{# Nội dung lấy từ entity GalleryAlbum (admin: Thư viện ảnh).
+   Bố cục: cột giới thiệu bên trái + lưới album bên phải (mobile: dải vuốt ngang).
+   Số album lẻ (≥3) thì album đầu tiên chiếm trọn 1 hàng để lưới không bị hở. #}
+{% set visibleAlbums = galleryAlbums|filter(album => album.coverImage) %}
+{% if visibleAlbums|length %}
+{% set photoTotal = visibleAlbums|reduce((sum, album) => sum + album.images|length, 0) %}
+{% set albumCount = visibleAlbums|length %}
 <section id="hoat-dong" class="gallery py-20 lg:py-24" aria-labelledby="hoat-dong-h">
-    <div class="container max-w-7xl">
-        <div class="flex flex-wrap items-end justify-between gap-6">
-            <div>
-                <p class="sec-label fade">{{ section.label|default('Hình ảnh hoạt động')|raw }}</p>
-                <h2 id="hoat-dong-h" class="h-display text-3xl lg:text-4xl mt-5 fade">
-                    {{ section.title|default(v3.company.shortNameOnly ~ ' trên <em>từng công trường</em>')|raw }}
-                </h2>
-            </div>
-            <div class="flex gap-3 fade">
-                <button class="gallery-nav" data-gallery-prev aria-label="Ảnh trước">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-                </button>
-                <button class="gallery-nav" data-gallery-next aria-label="Ảnh tiếp theo">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-            </div>
+    <div class="container max-w-7xl gallery-layout">
+        <div class="gallery-intro">
+            <p class="sec-label fade">{{ section.label|default('Hình ảnh hoạt động')|raw }}</p>
+            <h2 id="hoat-dong-h" class="h-display text-3xl lg:text-4xl mt-5 fade">
+                {{ section.title|default(v3.company.shortNameOnly ~ ' trên <em>từng công trường</em>')|raw }}
+            </h2>
+            <p class="gallery-lead fade">{{ section.subtitle|default('Ảnh chụp trực tiếp tại công trình, cập nhật qua từng giai đoạn thi công — để bạn thấy cách chúng tôi làm việc mỗi ngày.')|raw }}</p>
+
+            <dl class="gallery-stats fade">
+                <div><dt>Album</dt><dd>{{ albumCount }}</dd></div>
+                <div><dt>Hình ảnh</dt><dd>{{ photoTotal }}</dd></div>
+            </dl>
         </div>
 
-        <div class="gallery-track mt-10 fade" data-gallery-track>
-            {% for album in galleryAlbums %}
+        <div class="gallery-track{{ albumCount > 1 and albumCount is odd ? ' gallery-track--lead' }} fade" data-gallery-track>
+            {% for album in visibleAlbums %}
                 {% set cover = album.coverImage %}
-                {% if cover %}
-                    <button type="button" class="gallery-item"
-                            data-album-images="{{ album.images|map(i => {src: v3_image_url(i.imageUrl, 1920), caption: i.caption ?: album.name, alt: i.alt ?: album.name})|json_encode|e('html_attr') }}">
-                        <figure>
-                            {{ v3_image(cover.imageUrl, 'card', {alt: cover.alt ?: album.name}) }}
-                            <figcaption>{{ album.name }}</figcaption>
-                        </figure>
-                    </button>
-                {% endif %}
+                {% set featured = albumCount == 1 or (albumCount is odd and loop.first) %}
+                <button type="button" class="gallery-item" aria-label="Xem album {{ album.name }}, {{ album.images|length }} ảnh"
+                        data-album-images="{{ album.images|map(i => {src: v3_image_url(i.imageUrl, 1920), caption: i.caption ?: album.name, alt: i.alt ?: album.name})|json_encode|e('html_attr') }}">
+                    <figure>
+                        {{ v3_image(cover.imageUrl, featured ? 'half' : 'card', {alt: cover.alt ?: album.name}) }}
+                        <span class="gallery-count">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1"/><circle cx="12" cy="12" r="3.2"/><path d="M8 5l1.5-2h5L16 5"/></svg>
+                            {{ album.images|length }} ảnh
+                        </span>
+                        <figcaption>
+                            <span class="gallery-title">{{ album.name }}</span>
+                            {% if album.description %}<span class="gallery-description">{{ album.description|striptags }}</span>{% endif %}
+                            <span class="gallery-open">Xem album <span aria-hidden="true">→</span></span>
+                        </figcaption>
+                    </figure>
+                </button>
             {% endfor %}
         </div>
     </div>
@@ -49,3 +58,4 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
     </button>
 </div>
+{% endif %}

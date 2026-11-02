@@ -14,14 +14,22 @@
         <div class="banner-dialog__body"><p id="testimonial-confirm-description"></p><p data-confirm-error role="alert" hidden></p></div>
         <div class="banner-dialog__footer"><button type="button" class="banner-button" data-testimonial-confirm-close autofocus>Hủy</button><button type="button" class="banner-button banner-button--danger" data-testimonial-confirm-submit>Xóa đánh giá</button></div>
     </dialog>
-    <dialog class="banner-media-dialog" id="testimonial-media-dialog" aria-labelledby="testimonial-media-title" data-picker-url="{{ path('admin_media_picker', {_format: 'json'}) }}">
+    <dialog class="banner-media-dialog" id="testimonial-media-dialog" aria-labelledby="testimonial-media-title" data-picker-url="{{ path('admin_media_picker', {_format: 'json'}) }}" data-upload-url="{{ path('admin_media_upload') }}">
         <div class="banner-dialog__header"><h2 id="testimonial-media-title">Chọn ảnh đại diện</h2><button type="button" class="banner-dialog__close" data-media-close aria-label="Đóng thư viện">&times;</button></div>
         <div class="banner-dialog__body">
+            <details class="testimonial-upload"><summary>Tải ảnh mới lên thư viện</summary>
+                <label class="testimonial-upload-zone">Chọn ảnh đại diện<input type="file" data-upload-file accept=".jpg,.jpeg,.png,.gif"></label>
+                <p class="banner-media-help">JPG, PNG, GIF · Tối đa 10 MB/ảnh. Ảnh tải lên sẽ được chọn sẵn để bạn xác nhận.</p>
+                <div class="banner-media-tools"><label>Thư mục tải lên<select data-upload-folder><option value="">Thư mục gốc</option></select></label><label>Hoặc tạo thư mục mới<input data-upload-new-folder placeholder="Ví dụ: khach-hang"></label></div>
+                <button type="button" class="banner-button banner-button--primary" data-upload-start disabled>Tải ảnh đã chọn</button>
+                <p data-upload-status role="status" aria-live="polite"></p>
+            </details>
             <div class="banner-media-tools"><label>Thư mục<select data-media-folder><option value="">Tất cả thư mục</option></select></label><label>Tìm trong danh sách<input type="search" data-media-search placeholder="Tên ảnh..."></label></div>
             <p class="banner-media-help">Hiển thị tối đa 48 ảnh mới nhất của thư mục. Chọn thư mục để tìm thêm ảnh.</p>
-            <div class="banner-media-tools"><a class="banner-button" href="{{ path('admin_media_index') }}" target="_blank" rel="noopener">Tải ảnh mới (tab mới)</a><button type="button" class="banner-button" data-media-refresh>Làm mới</button></div>
+            <div class="banner-media-tools"><button type="button" class="banner-button" data-media-refresh>Làm mới</button></div>
             <p data-media-status role="status"></p><div class="banner-media-grid" data-media-grid></div>
         </div>
+        <div class="banner-dialog__footer"><span data-selected-name role="status" aria-live="polite">Chưa chọn ảnh</span><button type="button" class="banner-button" data-media-close>Hủy</button><button type="button" class="banner-button banner-button--primary" data-media-confirm disabled>Chọn ảnh này</button></div>
     </dialog>
 {% endblock %}
 {% block javascripts %}{{ parent() }}<script src="{{ asset('build/js/menu-editor.js') }}"></script><script src="{{ asset('build/js/testimonial-index.js') }}"></script>{% endblock %}

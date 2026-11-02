@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -13,6 +14,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class GlobalSettingsType extends AbstractType
 {
+    private const DMCA_ID_PATTERN = '[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}';
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -49,6 +52,15 @@ class GlobalSettingsType extends AbstractType
             ->add('GTM', TextType::class, ['required' => false, 'label' => 'Google Tag Manager ID'])
             ->add('ga4MeasurementID', TextType::class, ['required' => false, 'label' => 'GA4 Measurement ID'])
             ->add('fbApp', TextType::class, ['required' => false, 'label' => 'Facebook App ID'])
+            ->add('dmcaId', TextType::class, [
+                'required' => false,
+                'label' => 'DMCA Protection ID',
+                'attr' => ['placeholder' => 'Dán ID hoặc nguyên đoạn mã badge của DMCA.com', 'spellcheck' => 'false'],
+                'constraints' => [new \Symfony\Component\Validator\Constraints\Regex(
+                    pattern: '/^$|^'.self::DMCA_ID_PATTERN.'$/i',
+                    message: 'Không tìm thấy DMCA ID hợp lệ (dạng xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).',
+                )],
+            ])
             
             ->add('linkToFacebook', TextType::class, ['required' => false, 'label' => 'Link Facebook'])
             ->add('linkToTiktok', TextType::class, ['required' => false, 'label' => 'Link TikTok'])
@@ -75,6 +87,17 @@ class GlobalSettingsType extends AbstractType
             ->add('schemaOrganization', TextareaType::class, ['required' => false, 'attr' => ['rows' => 14], 'label' => 'Schema Organization'])
             ->add('schemaLocalBusiness', TextareaType::class, ['required' => false, 'attr' => ['rows' => 14], 'label' => 'Schema LocalBusiness'])
         ;
+
+        // Chỉ lưu ID: dán nguyên đoạn <a>…<script> của DMCA cũng được, ID được tách ra.
+        // Footer tự dựng badge từ ID nên không cần (và không nạp) DMCABadgeHelper.min.js.
+        $builder->get('dmcaId')->addModelTransformer(new CallbackTransformer(
+            fn ($value) => $value,
+            function ($value) {
+                $value = trim((string) $value);
+
+                return preg_match('/'.self::DMCA_ID_PATTERN.'/i', $value, $m) ? strtolower($m[0]) : $value;
+            },
+        ));
     }
 
     public function configureOptions(OptionsResolver $resolver): void

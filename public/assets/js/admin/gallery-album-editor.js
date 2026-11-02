@@ -5,7 +5,9 @@
     const board = document.querySelector('#album-image-nestable'), list = document.querySelector('#album-image-list');
     const media = document.querySelector('#album-media-dialog'), removeDialog = document.querySelector('#album-delete-dialog');
     const preview = document.querySelector('#album-preview-dialog'), $n = window.NestableJQuery;
-    let busy = false, infoDirty = false, selected = null, pendingRow = null, mediaRequest = null;
+    let busy = false, infoDirty = false, pendingRow = null, mediaRequest = null;
+    const selected = new Map();
+    let uploadQueue = [];
     const rows = () => Array.from(list.querySelectorAll(':scope > .dd-item'));
     const ids = () => rows().map((row) => Number(row.dataset.id));
     let savedOrder = ids();
@@ -34,7 +36,11 @@
         const missing = all.filter((row) => !row.dataset.savedAlt.trim()).length;
         root.querySelector('[data-alt-count]').textContent = missing ? missing + ' ảnh chưa có alt' : 'Các ảnh đã có alt';
         root.querySelector('[data-image-empty]').hidden = all.length > 0;
-        media.querySelector('[data-media-add]').disabled = busy || !selected;
+        media.querySelectorAll('input, select, button').forEach(field => { field.disabled = busy; });
+        media.querySelectorAll('[data-media-choice]').forEach(button => { button.disabled = busy || rows().some(row => row.dataset.imageUrl === button.dataset.mediaChoice); });
+        media.querySelector('[data-media-add]').disabled = busy || !selected.size;
+        media.querySelector('[data-media-add]').textContent = selected.size ? 'Thêm ' + selected.size + ' ảnh vào album' : 'Thêm vào album';
+        media.querySelector('[data-upload-start]').disabled = busy || !uploadQueue.length;
         removeDialog.querySelector('[data-delete-confirm]').disabled = busy;
     }
     async function request(url, options = {}) {
@@ -125,24 +131,38 @@
         finally { busy = false; controls(); }
     }
     function selection(file) {
-        selected = file;
-        media.querySelector('[data-selected-name]').textContent = file ? file.filename : 'Chưa chọn ảnh';
-        media.querySelectorAll('[data-media-choice]').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.mediaChoice === file?.url)));
+        if (file) {
+            if (selected.has(file.url)) selected.delete(file.url);
+            else selected.set(file.url, file);
+        } else selected.clear();
+        renderSelection();
+    }
+    function renderSelection() {
+        const order = Array.from(selected.keys());
+        media.querySelector('[data-selected-name]').textContent = selected.size ? 'Đã chọn ' + selected.size + ' ảnh · Thứ tự theo số trên ảnh' : 'Chưa chọn ảnh';
+        media.querySelectorAll('[data-media-choice]').forEach(button => {
+            const index = order.indexOf(button.dataset.mediaChoice);
+            button.setAttribute('aria-pressed', String(index >= 0));
+            button.dataset.selectionLabel = index >= 0 ? '✓ Đã chọn · ' + (index + 1) : '';
+            button.setAttribute('aria-label', button.textContent + (index >= 0 ? ' · Đã chọn, thứ tự ' + (index + 1) : ''));
+        });
         controls();
     }
     async function loadMedia() {
         if (busy) return;
         mediaRequest?.abort(); const controller = new AbortController(); mediaRequest = controller;
-        selection(null);
         const status = media.querySelector('[data-media-status]'), grid = media.querySelector('[data-media-grid]'), folder = media.querySelector('[data-media-folder]');
         const url = new URL(media.dataset.pickerUrl, location.origin); url.searchParams.set('folder', folder.value);
-        status.textContent = 'Đang tải ảnh…'; grid.replaceChildren(); media.querySelector('[data-media-error]').hidden = true;
+        status.textContent = 'Đang tải ảnh…'; grid.replaceChildren();
         try {
             const response = await request(url, {controller});
             if (!response.ok) throw new Error('Không tải được thư viện ảnh.');
             const data = await response.json(); if (controller.signal.aborted) return;
             const current = folder.value; folder.replaceChildren(new Option('Tất cả thư mục', ''));
             data.folders.forEach((name) => folder.add(new Option(name, name))); folder.value = current;
+            const uploadFolder = media.querySelector('[data-upload-folder]'), previous = uploadFolder.value;
+            uploadFolder.replaceChildren(new Option('Thư mục gốc', ''));
+            data.folders.forEach(name => uploadFolder.add(new Option(name, name))); uploadFolder.value = previous;
             const existing = new Set(rows().map((row) => row.dataset.imageUrl));
             data.files.forEach((file) => {
                 const button = document.createElement('button'); button.type = 'button'; button.className = 'banner-media-item';
@@ -155,6 +175,7 @@
             });
             status.textContent = data.files.length ? 'Ảnh đã có trong album sẽ không được chọn lại.' : 'Thư mục chưa có ảnh.';
             filterMedia();
+            renderSelection();
         } catch (error) { if (!controller.signal.aborted) status.textContent = error.message; }
     }
     function filterMedia() {
@@ -164,17 +185,50 @@
         if (query) media.querySelector('[data-media-status]').textContent = choices.filter((button) => !button.hidden).length + ' ảnh phù hợp trong danh sách.';
     }
     async function addImage() {
-        if (busy || !selected) return;
+        if (busy || !selected.size) return;
         let addedRow = null;
         busy = true; controls(); const errorBox = media.querySelector('[data-media-error]'); errorBox.hidden = true;
         try {
-            const result = await post(root.dataset.addUrl, {imageUrl: selected.url});
+            for (const file of Array.from(selected.values())) {
+            const result = await post(root.dataset.addUrl, {imageUrl: file.url});
             const row = new DOMParser().parseFromString('<ul>' + result.html + '</ul>', 'text/html').querySelector('.album-image-item');
             if (!row) throw new Error('Ảnh có thể đã được thêm. Vui lòng tải lại trang để kiểm tra.');
-            list.append(row); bindImage(row); savedOrder = ids(); bindOrder(); selection(null); media.close(); notice(result.message);
+            list.append(row); bindImage(row); savedOrder = ids(); selected.delete(file.url);
             addedRow = row;
+            }
+            media.close(); notice('Đã thêm các ảnh vào cuối album theo thứ tự đã chọn.');
         } catch (error) { errorBox.textContent = error.message; errorBox.hidden = false; }
-        finally { busy = false; controls(); addedRow?.querySelector('[name=caption]').focus({preventScroll: true}); }
+        finally { busy = false; bindOrder(); renderSelection(); if (!media.open) addedRow?.querySelector('[name=caption]').focus({preventScroll: true}); }
+    }
+    async function uploadImages() {
+        if (busy || !uploadQueue.length) return;
+        mediaRequest?.abort();
+        const folder = media.querySelector('[data-upload-folder]').value;
+        const newFolder = media.querySelector('[data-upload-new-folder]').value.trim();
+        const status = media.querySelector('[data-upload-status]');
+        const errorBox = media.querySelector('[data-media-error]'); errorBox.hidden = true;
+        busy = true; controls();
+        let count = 0;
+        try {
+            while (uploadQueue.length) {
+                const file = uploadQueue[0];
+                status.textContent = 'Đang tải: ' + file.name;
+                const data = new FormData(); data.append('file', file); data.append('folder', folder); data.append('newFolder', newFolder);
+                const response = await request(media.dataset.uploadUrl, {method: 'POST', body: data});
+                const result = await response.json();
+                if (!response.ok || result.status !== 'success') throw new Error(result.message || 'Không tải được ảnh.');
+                selected.set(result.url, result); uploadQueue.shift(); count++;
+            }
+        } catch (error) { errorBox.textContent = error.message; errorBox.hidden = false; }
+        finally {
+            busy = false;
+            media.querySelector('[data-upload-files]').value = '';
+            status.textContent = 'Đã tải ' + count + ' ảnh. ' + (uploadQueue.length ? 'Còn ' + uploadQueue.length + ' ảnh chưa tải; có thể thử lại hoặc chọn tệp khác.' : 'Các ảnh đã được chọn, bấm Thêm vào album để xác nhận.');
+            // Include uploaded images even when the current folder filter differs.
+            media.querySelector('[data-media-folder]').value = '';
+            renderSelection();
+            await loadMedia();
+        }
     }
     async function removeImage() {
         if (busy || !pendingRow) return;
@@ -204,8 +258,10 @@
         if (busy) return;
         if (target.closest('[data-close-media]')) { media.close(); return; }
         if (target.closest('[data-delete-close]')) { removeDialog.close(); return; }
-        if (target.closest('[data-open-media]')) { media.showModal(); loadMedia(); return; }
+        if (target.closest('[data-open-media]')) { media.querySelector('[data-media-error]').hidden = true; media.showModal(); loadMedia(); return; }
         if (target.closest('[data-media-refresh]')) { loadMedia(); return; }
+        if (target.closest('[data-media-clear]')) { selection(null); return; }
+        if (target.closest('[data-upload-start]')) { uploadImages(); return; }
         if (target.closest('[data-media-add]')) { addImage(); return; }
         if (target.closest('[data-delete-confirm]')) { removeImage(); return; }
         const row = target.closest('.album-image-item');
@@ -231,6 +287,11 @@
     });
     media.querySelector('[data-media-folder]').addEventListener('change', loadMedia);
     media.querySelector('[data-media-search]').addEventListener('input', filterMedia);
+    media.querySelector('[data-upload-files]').addEventListener('change', event => {
+        uploadQueue = Array.from(event.target.files);
+        media.querySelector('[data-upload-status]').textContent = uploadQueue.length + ' ảnh chờ tải.';
+        controls();
+    });
     media.addEventListener('close', () => { mediaRequest?.abort(); selection(null); });
     [media, removeDialog].forEach((dialog) => dialog.addEventListener('cancel', (event) => { if (busy) event.preventDefault(); }));
     preview.querySelector('[data-large-image]').addEventListener('error', (event) => { event.target.hidden = true; preview.querySelector('[data-preview-error]').hidden = false; });

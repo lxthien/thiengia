@@ -4,18 +4,6 @@ export default function initGallery() {
   const track = document.querySelector("[data-gallery-track]");
   if (!track) return;
 
-  // --- Điều hướng slider ---
-  const stride = () => {
-    const item = track.querySelector(".gallery-item");
-    return item ? item.offsetWidth + 20 : 320;
-  };
-  document
-    .querySelector("[data-gallery-prev]")
-    ?.addEventListener("click", () => track.scrollBy({ left: -stride(), behavior: "smooth" }));
-  document
-    .querySelector("[data-gallery-next]")
-    ?.addEventListener("click", () => track.scrollBy({ left: stride(), behavior: "smooth" }));
-
   // --- Lightbox ---
   const lightbox = document.querySelector(".lightbox");
   if (!lightbox) return;
@@ -25,6 +13,7 @@ export default function initGallery() {
   const caption = lightbox.querySelector(".lightbox-caption");
   let items = [];
   let current = 0;
+  let opener = null, previousOverflow = '';
 
   const show = (i) => {
     if (!items.length) return;
@@ -39,16 +28,22 @@ export default function initGallery() {
     items = albumImages;
     if (!items.length) return;
     show(startIndex);
+    opener = document.activeElement;
+    previousOverflow = document.body.style.overflow;
+    lightbox.querySelectorAll('.lightbox-prev, .lightbox-next').forEach(button => { button.hidden = items.length < 2; });
     lightbox.classList.add("is-open");
     lightbox.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
-    lightbox.querySelector(".lightbox-close")?.focus();
+    requestAnimationFrame(() => {
+      if (lightbox.classList.contains('is-open')) lightbox.querySelector(".lightbox-close")?.focus();
+    });
   };
 
   const close = () => {
     lightbox.classList.remove("is-open");
     lightbox.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
+    document.body.style.overflow = previousOverflow;
+    opener?.focus({preventScroll: true});
   };
 
   cards.forEach((card) => {
@@ -70,6 +65,12 @@ export default function initGallery() {
   });
   document.addEventListener("keydown", (e) => {
     if (!lightbox.classList.contains("is-open")) return;
+    if (e.key === 'Tab') {
+      const buttons = [...lightbox.querySelectorAll('button')].filter(button => !button.hidden);
+      const first = buttons[0], last = buttons[buttons.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
     if (e.key === "Escape") close();
     if (e.key === "ArrowLeft") show(current - 1);
     if (e.key === "ArrowRight") show(current + 1);

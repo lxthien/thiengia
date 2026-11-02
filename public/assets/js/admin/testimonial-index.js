@@ -9,6 +9,39 @@
     const manager = () => document.querySelector('[data-testimonial-manager]');
     let mutationBusy = false, dirty = false, panelRequest = null, openedHref = '', pendingDelete = null, mediaRequest = null;
     const media = document.querySelector('#testimonial-media-dialog');
+    let selectedMedia = null, uploading = false;
+    function renderMediaSelection() {
+        media.querySelectorAll('[data-media-url]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mediaUrl === selectedMedia?.url)));
+        media.querySelector('[data-selected-name]').textContent = selectedMedia ? 'Đã chọn: ' + selectedMedia.filename : 'Chưa chọn ảnh';
+        media.querySelector('[data-media-confirm]').disabled = uploading || !selectedMedia;
+        media.querySelector('[data-upload-start]').disabled = uploading || !media.querySelector('[data-upload-file]').files.length;
+    }
+    async function uploadMedia() {
+        const file = media.querySelector('[data-upload-file]').files[0];
+        if (uploading || !file) return;
+        const data = new FormData(); data.append('file', file);
+        data.append('folder', media.querySelector('[data-upload-folder]').value);
+        data.append('newFolder', media.querySelector('[data-upload-new-folder]').value.trim());
+        const status = media.querySelector('[data-upload-status]');
+        mediaRequest?.abort(); uploading = true;
+        media.querySelectorAll('button, input, select').forEach(field => { field.disabled = true; });
+        status.textContent = 'Đang tải ảnh…';
+        try {
+            const response = await request(media.dataset.uploadUrl, {method: 'POST', body: data});
+            const result = await response.json();
+            if (!response.ok || result.status !== 'success') throw new Error(result.message || 'Không tải được ảnh.');
+            selectedMedia = result;
+            media.querySelector('[data-upload-file]').value = '';
+            media.querySelector('[data-media-folder]').value = '';
+            media.querySelector('[data-media-search]').value = '';
+            status.textContent = 'Đã tải ảnh. Bấm Chọn ảnh này để sử dụng; sau đó Lưu đánh giá.';
+        } catch (error) { status.textContent = 'Tải ảnh thất bại: ' + error.message; }
+        finally {
+            uploading = false;
+            media.querySelectorAll('button, input, select').forEach(field => { field.disabled = false; });
+            renderMediaSelection(); await loadMedia();
+        }
+    }
     let updateControls = () => {};
 
     async function request(url, options = {}) {
@@ -164,6 +197,7 @@
     }
 
     async function loadMedia() {
+        if (uploading) return;
         mediaRequest?.abort();
         const controller = new AbortController();
         mediaRequest = controller;
@@ -183,11 +217,17 @@
             folder.replaceChildren(new Option('Tất cả thư mục', ''));
             data.folders.forEach((name) => folder.add(new Option(name, name)));
             folder.value = current;
+            const uploadFolder = media.querySelector('[data-upload-folder]'), oldFolder = uploadFolder.value;
+            uploadFolder.replaceChildren(new Option('Thư mục gốc', ''));
+            data.folders.forEach(name => uploadFolder.add(new Option(name, name))); uploadFolder.value = oldFolder;
+            // Keep a newly uploaded/current image visible even outside the latest 48.
+            if (selectedMedia && !current && !data.files.some(file => file.url === selectedMedia.url)) data.files.unshift({...selectedMedia, thumb: selectedMedia.thumb || selectedMedia.url});
             data.files.forEach((file) => {
                 const button = document.createElement('button');
                 button.type = 'button';
                 button.className = 'banner-media-item';
                 button.dataset.filename = file.filename.toLocaleLowerCase();
+                button.dataset.mediaUrl = file.url;
                 const image = document.createElement('img');
                 image.src = file.thumb;
                 image.alt = file.filename;
@@ -196,11 +236,12 @@
                 const label = document.createElement('span');
                 label.textContent = file.filename;
                 button.append(image, label);
-                button.addEventListener('click', () => { chooseImage(file.url); media.close(); });
+                button.addEventListener('click', () => { if (!uploading) { selectedMedia = file; renderMediaSelection(); } });
                 grid.append(button);
             });
-            status.textContent = data.files.length ? 'Bấm vào ảnh để chọn; thay đổi chỉ được lưu khi bấm Lưu đánh giá.' : 'Chưa có ảnh trong thư mục này.';
+            status.textContent = data.files.length ? 'Bấm ảnh rồi xác nhận Chọn ảnh này. Thay đổi chỉ được lưu khi bấm Lưu đánh giá.' : 'Chưa có ảnh trong thư mục này.';
             filterMedia();
+            renderMediaSelection();
         } catch (error) { if (!controller.signal.aborted) status.textContent = error.message; }
     }
 
@@ -211,6 +252,9 @@
     media.querySelector('[data-media-search]').addEventListener('input', filterMedia);
     media.querySelector('[data-media-folder]').addEventListener('change', loadMedia);
     media.addEventListener('close', () => mediaRequest?.abort());
+    media.addEventListener('cancel', event => { if (uploading) event.preventDefault(); });
+    media.querySelector('[data-upload-file]').addEventListener('change', renderMediaSelection);
+    window.addEventListener('beforeunload', event => { if (uploading) { event.preventDefault(); event.returnValue = ''; } });
 
 
     function mount() {
@@ -274,9 +318,16 @@
         if (target.closest('[data-testimonial-confirm-close]')) { if (!mutationBusy) confirmation.close(); return; }
         if (target.closest('[data-testimonial-confirm-submit]')) { confirmDelete(); return; }
         if (mutationBusy) return;
+        if (uploading) return;
+        if (target.closest('[data-upload-start]')) { uploadMedia(); return; }
+        if (target.closest('[data-media-confirm]')) { if (selectedMedia) { chooseImage(selectedMedia.url); media.close(); } return; }
         if (target.closest('[data-media-close]')) { media.close(); return; }
         if (target.closest('[data-media-refresh]')) { loadMedia(); return; }
-        if (target.closest('[data-testimonial-choose-image]')) { media.showModal(); loadMedia(); return; }
+        if (target.closest('[data-testimonial-choose-image]')) {
+            const url = content.querySelector('[data-testimonial-image-field]')?.value;
+            selectedMedia = url ? {url, filename: url.split('/').pop()} : null;
+            media.showModal(); renderMediaSelection(); loadMedia(); return;
+        }
         if (target.closest('[data-testimonial-clear-image]')) { chooseImage(''); return; }
         const remove = target.closest('[data-testimonial-delete]');
         if (remove) { openDelete(remove); return; }

@@ -43,6 +43,8 @@ Encore
     .addStyleEntry('css/page-editor', './public/assets/scss/admin/page-editor.scss')
     .addEntry('js/newscategory-index', './public/assets/js/admin/newscategory-index.js')
     .addStyleEntry('css/newscategory-index', './public/assets/scss/admin/newscategory-index.scss')
+    .addEntry('js/tag-index', './public/assets/js/admin/tag-index.js')
+    .addStyleEntry('css/tag-index', './public/assets/scss/admin/tag-index.scss')
     .addEntry('js/news-index', './public/assets/js/admin/news-index.js')
     .addStyleEntry('css/news-index', './public/assets/scss/admin/news-index.scss')
     .addEntry('js/news-editor', './public/assets/js/admin/news-editor.js')

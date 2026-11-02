@@ -11,7 +11,7 @@
 'search':{title:'Tìm kiếm', description:'Các từ khóa gợi ý hiển thị khi mở tìm kiếm trên header.', fields:['searchSuggestions']},
 'homepage':{title:'Trang chủ & hiển thị', description:'Giữ nguyên định dạng dữ liệu đang sử dụng khi chỉnh danh mục và bảng giá.', fields:['listPrices','listCategoryOnHomepage','numberRecordOnPage','marqueeHomepage']},
 'seo':{title:'SEO', description:'Thông tin tiêu đề, mô tả và từ khóa mặc định.', fields:['pageTitle','pageDescription','pageKeyword','topKeyword']},
-'tracking':{title:'Analytics & tích hợp', description:'Chỉ sử dụng mã từ nguồn tin cậy. Tránh cấu hình trùng một dịch vụ ở nhiều trường.', fields:['GTM','ga4MeasurementID','googleAnalytic','fbApp','facebookMessenger']},
+'tracking':{title:'Analytics & tích hợp', description:'Chỉ sử dụng mã từ nguồn tin cậy. Tránh cấu hình trùng một dịch vụ ở nhiều trường.', fields:['GTM','ga4MeasurementID','googleAnalytic','fbApp','facebookMessenger','dmcaId']},
 'variables':{title:'Biến nội dung', description:'Các giá trị thay thế cho placeholder trong nội dung. Đây là cấu hình riêng với thông tin liên hệ phía trên.', fields:['content_ten_cong_ty','content_ten_day_du','content_chuyen_gia','content_chuc_danh','content_dia_chi','content_hotline_1','content_hotline_2','content_hotline_3','content_email','content_mst','content_website']},
 'social':{title:'Mạng xã hội', description:'Nhập URL đầy đủ bắt đầu bằng https:// hoặc http://. Footer chỉ hiển thị icon của các kênh đã có link; để trống để ẩn.', fields:['linkToZalo','linkToFacebook','linkToYoutube','linkToTiktok','linkToTwitter','linkToLinkedin','linkToInstagram']},
 'schema':{title:'Dữ liệu có cấu trúc', description:'Cấu hình JSON-LD dùng chung. Dán nguyên thẻ script type="application/ld+json" theo định dạng hiện tại.', fields:['schemaOrganization','schemaLocalBusiness']}
@@ -38,6 +38,7 @@
 {% if name == 'emailSender' %}<p class="settings-hint">Để trống thì dùng Email Liên hệ.</p>{% endif %}
 {% if name == 'GTM' %}<p class="settings-hint">Nhập ID dạng GTM-…, không phải toàn bộ đoạn script.</p>{% endif %}
 {% if name == 'ga4MeasurementID' %}<p class="settings-hint">Nhập Measurement ID dạng G-….</p>{% endif %}
+{% if name == 'dmcaId' %}<p class="settings-hint">Dán nguyên đoạn mã badge DMCA.com hoặc chỉ ID — hệ thống chỉ lưu ID và tự hiển thị badge ở chân trang (không tải script của DMCA). Để trống để ẩn badge.</p>{% endif %}
 </div>
 {% endfor %}
 </div>
