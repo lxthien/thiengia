@@ -27,7 +27,8 @@ $check(substr_count($html, 'rel="noopener noreferrer"') === 7, 'New tab links mu
 if (in_array('--html', $argv, true)) { echo $html; exit; }
 $settings = ['linkToFacebook' => 'javascript:alert(1)', 'linkToTiktok' => 'https://tiktok.com/a b'];
 $check(!str_contains($twig->render('v3/layout/_footer.html.twig', $context), 'class="ft-socials"'), 'Unsafe and malformed links must be hidden');
-$form = Forms::createFormFactory()->create(GlobalSettingsType::class, ['linkToGooglePlus' => 'legacy']);
+$form = Forms::createFormFactoryBuilder()->addExtension(new \Symfony\Component\Form\Extension\Validator\ValidatorExtension(\Symfony\Component\Validator\Validation::createValidator()))->getFormFactory()->create(GlobalSettingsType::class, ['linkToGooglePlus' => 'legacy']);
 $check($form->has('linkToZalo') && $form->has('linkToTiktok') && !$form->has('linkToGooglePlus'), 'Admin must expose Zalo and TikTok instead of Google+');
+$check($form->has('linkToMessenger'), 'Admin must expose the Messenger link');
 $check($form->get('linkToTiktok')->getConfig()->getOption('label') === 'Link TikTok', 'TikTok label must be correct');
 echo "Footer social smoke checks passed.\n";

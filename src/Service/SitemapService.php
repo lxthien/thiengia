@@ -138,7 +138,9 @@ class SitemapService
         foreach ($posts as $article) {
             $entry = [
                 'url' => $this->generateNewsUrl($article),
-                'lastmod' => $this->formatLastModified($article->getUpdatedAt(), $article->getCreatedAt()),
+                // Bài viết: ngày nội dung (cập nhật đáng kể / ngày đăng). Page không có checkbox
+                // "Cập nhật nội dung đáng kể" (PageType) nên vẫn dùng updatedAt.
+                'lastmod' => $this->formatLastModified($article->getPostType() === 'page' ? $article->getUpdatedAt() : $article->getContentModifiedAt(), $article->getCreatedAt()),
                 'changefreq' => 'weekly',
                 'priority' => '0.9',
             ];
@@ -186,7 +188,7 @@ class SitemapService
                 ->getQuery()
                 ->getSingleScalarResult();
             $latestPost = (string) $this->em->getRepository(News::class)->createQueryBuilder('n')
-                ->select('MAX(n.updatedAt)')
+                ->select("MAX(CASE WHEN n.postType = 'page' THEN n.updatedAt ELSE COALESCE(n.contentUpdatedAt, n.publishedAt, n.createdAt) END)")
                 ->getQuery()
                 ->getSingleScalarResult();
             $lastmod = substr(max($latestCategory, $latestPost), 0, 10) ?: (new \DateTimeImmutable())->format('Y-m-d');
@@ -259,7 +261,7 @@ class SitemapService
     private function getAuthorUrls(): array
     {
         $rows = $this->em->createQueryBuilder()
-            ->select('u.authorSlug AS slug', 'MAX(COALESCE(n.updatedAt, n.createdAt)) AS lastmod')
+            ->select('u.authorSlug AS slug', 'MAX(COALESCE(n.contentUpdatedAt, n.publishedAt, n.createdAt)) AS lastmod')
             ->from(User::class, 'u')
             ->innerJoin(News::class, 'n', 'WITH', 'n.author = u')
             ->where('u.enabled = true')

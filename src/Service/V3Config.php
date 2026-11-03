@@ -30,6 +30,7 @@ final class V3Config
         'company.workingHours'  => ['companyWorkingHours'],
         'company.phone'         => ['hotLine1'],
         'company.email'         => ['emailContact'],
+        'company.messenger'     => ['linkToMessenger'],
     ];
 
     private ?array $config = null;

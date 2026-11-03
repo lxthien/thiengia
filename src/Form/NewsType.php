@@ -160,7 +160,20 @@ class NewsType extends AbstractType
             ])
             ->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
                 $form = $event->getForm();
-                
+                $news = $event->getData();
+
+                // Chỉ hiện khi sửa bài đã có: bài mới dùng ngày đăng.
+                if ($news instanceof News && $news->getId()) {
+                    $last = $news->getContentUpdatedAt();
+                    $form->add('significantUpdate', CheckboxType::class, [
+                        'mapped' => false,
+                        'required' => false,
+                        'label' => 'Cập nhật nội dung đáng kể',
+                        'help' => 'Tích khi bổ sung/sửa thông tin quan trọng (giá, số liệu, quy định, thêm mục mới). Ngày "Cập nhật" trên bài và dateModified sẽ đổi sang hôm nay. Không tích khi chỉ sửa lỗi chính tả, ảnh, định dạng.'
+                            .($last ? ' Lần cập nhật đáng kể gần nhất: '.$last->format('d/m/Y').'.' : ' Bài chưa có lần cập nhật đáng kể nào.'),
+                    ]);
+                }
+
                 // Remove postType field for non-admin users
                 if (!$this->authorizationChecker->isGranted('ROLE_ADMIN')) {
                     $form->remove('postType');
@@ -177,6 +190,14 @@ class NewsType extends AbstractType
                 // post when an editor changes the status.
                 $data['scheduledAt'] = '';
                 $event->setData($data);
+            })
+            ->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) {
+                $form = $event->getForm();
+                $news = $form->getData();
+
+                if ($news instanceof News && $form->has('significantUpdate') && $form->get('significantUpdate')->getData()) {
+                    $news->setContentUpdatedAt(new \DateTime());
+                }
             });
 
         $builder->get('schemaMarkup')->addModelTransformer($this->jsonLdMarkupTransformer);

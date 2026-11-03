@@ -127,6 +127,15 @@ class News
     private $updatedAt;
 
     /**
+     * Ngày cập nhật NỘI DUNG — chỉ đổi khi biên tập viên tích "Cập nhật nội dung
+     * đáng kể" lúc lưu (NewsType). Khác updatedAt (đổi sau mọi lần lưu, kể cả sửa
+     * một dấu phẩy — chỉ dùng cho cache/ETag). Dùng cho dòng "Cập nhật …" trên
+     * trang, dateModified (schema), article:modified_time và lastmod sitemap.
+     */
+    #[ORM\Column(name: 'contentUpdatedAt', type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $contentUpdatedAt = null;
+
+    /**
      * @var User
      */
     #[ORM\ManyToOne(targetEntity: User::class)]
@@ -463,6 +472,46 @@ class News
     public function getPublishedAt(): ?\DateTimeInterface
     {
         return $this->publishedAt;
+    }
+
+    public function getContentUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->contentUpdatedAt;
+    }
+
+    public function setContentUpdatedAt(?\DateTimeInterface $contentUpdatedAt): static
+    {
+        $this->contentUpdatedAt = $contentUpdatedAt;
+
+        return $this;
+    }
+
+    /** Ngày đăng hiển thị: publishedAt, bài cũ chưa có thì createdAt. */
+    public function getPublicationDate(): ?\DateTimeInterface
+    {
+        return $this->publishedAt ?: $this->createdAt;
+    }
+
+    /**
+     * Ngày nội dung thay đổi gần nhất: ngày cập nhật đáng kể nếu có (và sau ngày
+     * đăng), ngược lại là ngày đăng. Dùng cho dateModified / lastmod.
+     */
+    public function getContentModifiedAt(): ?\DateTimeInterface
+    {
+        $published = $this->getPublicationDate();
+
+        return $this->contentUpdatedAt && (!$published || $this->contentUpdatedAt > $published)
+            ? $this->contentUpdatedAt
+            : $published;
+    }
+
+    /** true khi có cập nhật đáng kể vào NGÀY KHÁC ngày đăng — để hiện dòng "Cập nhật". */
+    public function hasVisibleContentUpdate(): bool
+    {
+        $published = $this->getPublicationDate();
+
+        return $this->contentUpdatedAt && $published
+            && $this->contentUpdatedAt->format('Y-m-d') > $published->format('Y-m-d');
     }
 
     public function setPublishedAt(?\DateTimeInterface $publishedAt): static

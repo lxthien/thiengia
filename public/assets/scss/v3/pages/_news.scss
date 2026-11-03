@@ -17,6 +17,22 @@
     color: $white;
     font-weight: 600;
   }
+
+  // Ngày cập nhật nội dung: sáng hơn ngày đăng + chấm cam để người đọc thấy bài còn mới
+  .post-meta-updated {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: rgba($white, 0.9);
+
+    &::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: $accent;
+    }
+  }
 }
 
 // Ảnh đại diện kéo đè lên mép banner

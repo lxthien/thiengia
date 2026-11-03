@@ -107,6 +107,11 @@
 {% if form.postType is defined %}{{ form_row(form.postType) }}{% endif %}
 </div>
 <p class="page-editor__hint">Nút lưu áp dụng trạng thái đã chọn. Nếu chọn “Đặt lịch”, hãy nhập ngày giờ xuất bản.{% if form.postType is defined %} Đổi loại sang “Page” sẽ gỡ toàn bộ danh mục của bài.{% endif %}</p>
+{% if form.significantUpdate is defined %}
+<div class="news-significant-update">
+{{ form_row(form.significantUpdate) }}
+</div>
+{% endif %}
 </section>
 <section class="page-editor__section" id="news-advanced" aria-labelledby="news-advanced-heading">
 <h2 id="news-advanced-heading">Thiết lập nâng cao &amp; ghi chú</h2>

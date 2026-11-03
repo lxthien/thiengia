@@ -13,14 +13,15 @@
     <link rel="stylesheet" href="{{ asset('build/css/v3-news.css') }}">
 {% endblock %}
 
-{% block openGraph %}
+{% block structuredOpenGraph %}
     <meta property="og:type" content="article">
     <meta property="og:title" content="{{ block('title') }}">
     <meta property="og:description" content="{{ block('description') }}">
     <meta property="og:image" content="{{ absolute_url(coverSrc) }}">
     <meta property="article:published_time" content="{{ (post.publishedAt ?: post.createdAt)|date('c') }}">
-    {% if post.updatedAt %}
-        <meta property="article:modified_time" content="{{ post.updatedAt|date('c') }}">
+    {# Ngày nội dung thật (chỉ đổi khi tích "Cập nhật nội dung đáng kể"), không phải updatedAt. #}
+    {% if post.contentModifiedAt %}
+        <meta property="article:modified_time" content="{{ post.contentModifiedAt|date('c') }}">
     {% endif %}
     {% if category %}
         <meta property="article:section" content="{{ category.name }}">
@@ -47,7 +48,7 @@
         'image': absolute_url(coverSrc),
         'datePublished': (post.publishedAt ?: post.createdAt)|date('c'),
     } %}
-    {% if post.updatedAt %}{% set article = article|merge({ 'dateModified': post.updatedAt|date('c') }) %}{% endif %}
+    {% if post.contentModifiedAt %}{% set article = article|merge({ 'dateModified': post.contentModifiedAt|date('c') }) %}{% endif %}
     {% set article = article|merge({ 'inLanguage': 'vi' }) %}
     {% if category %}{% set article = article|merge({ 'articleSection': category.name }) %}{% endif %}
     {% set article = article|merge({
@@ -110,6 +111,9 @@
             {% if publicationDate %}
                 <p class="post-meta mt-8 fade">
                     <span>Đăng ngày <time datetime="{{ publicationDate|date('c') }}">{{ publicationDate|date('d/m/Y') }}</time></span>
+                    {% if post.hasVisibleContentUpdate %}
+                        <span class="post-meta-updated">Cập nhật <time datetime="{{ post.contentUpdatedAt|date('c') }}">{{ post.contentUpdatedAt|date('d/m/Y') }}</time></span>
+                    {% endif %}
                 </p>
             {% endif %}
         </div>

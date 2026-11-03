@@ -15,7 +15,9 @@ class ContentDecayReporter
     public function analyze(News $post, \DateTimeInterface $now = null)
     {
         $now = $now ?: new \DateTime();
-        $updatedAt = $post->getUpdatedAt() ?: $post->getCreatedAt() ?: $now;
+        // Tuổi nội dung tính từ lần cập nhật đáng kể gần nhất (hoặc ngày đăng), không
+        // phải updatedAt — sửa một dấu phẩy không làm bài "mới" lại.
+        $updatedAt = $post->getContentModifiedAt() ?: $now;
         $ageDays = (int) $updatedAt->diff($now)->format('%a');
         $score = 0;
         $reasons = [];

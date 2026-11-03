@@ -119,10 +119,10 @@
     letter-spacing: 0.04em;
     color: rgba($white, 0.38);
 
-    // Mobile: chừa chỗ cho cụm nút gọi/Zalo nổi ở góc trái dưới (_float-contact.scss,
-    // cao ~135px) để dòng bản quyền, chính sách và badge DMCA không bị che khi cuộn hết trang.
+    // Mobile: chừa chỗ cho cụm nút gọi/Zalo/Messenger nổi ở góc trái dưới (_float-contact.scss,
+    // cao ~200px) để dòng bản quyền, chính sách và badge DMCA không bị che khi cuộn hết trang.
     @media (max-width: 767px) {
-      padding-bottom: 8rem;
+      padding-bottom: 13rem;
     }
   }
 

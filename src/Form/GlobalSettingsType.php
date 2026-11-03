@@ -65,6 +65,15 @@ class GlobalSettingsType extends AbstractType
             ->add('linkToFacebook', TextType::class, ['required' => false, 'label' => 'Link Facebook'])
             ->add('linkToTiktok', TextType::class, ['required' => false, 'label' => 'Link TikTok'])
             ->add('linkToZalo', TextType::class, ['required' => false, 'label' => 'Link Zalo'])
+            ->add('linkToMessenger', TextType::class, [
+                'required' => false,
+                'label' => 'Link Messenger',
+                'help' => 'Dạng https://m.me/<tên trang>. Dùng cho nút Messenger nổi góc trái dưới; để trống sẽ dùng https://m.me/xaydungthiengia.',
+                'constraints' => [new \Symfony\Component\Validator\Constraints\Regex(
+                    pattern: '#^$|^https://\S+$#',
+                    message: 'Link Messenger phải bắt đầu bằng https://',
+                )],
+            ])
             ->add('linkToTwitter', TextType::class, ['required' => false, 'label' => 'Link Twitter'])
             ->add('linkToYoutube', TextType::class, ['required' => false, 'label' => 'Link Youtube'])
             ->add('linkToLinkedin', TextType::class, ['required' => false, 'label' => 'Link Linkedin'])

@@ -37,6 +37,7 @@ parameters:
             phone:    '0901 234 567'
             phoneRaw: '+84901234567'
             zalo:     'https://zalo.me/0901234567'
+            messenger: 'https://m.me/xaydungthiengia'
             email:    'contact@xaydungthiengia.com'
 
             street:   '123 Nguyễn Văn Linh'

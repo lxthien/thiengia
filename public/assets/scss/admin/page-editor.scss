@@ -58,6 +58,11 @@
     #page_schemaMarkup, #news_schemaMarkup { font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
     .cms-block-editor-layout, .cms-block-editor-layout__field, .page-builder-legacy-field { min-width: 0; }
     // Cây danh mục của bài viết (form/hierarchical_category_theme.html.twig).
+    // Checkbox "Cập nhật nội dung đáng kể" (NewsType::significantUpdate)
+    .news-significant-update { margin-top: 8px; padding: 14px 16px; background: #fffaf0; border: 1px solid #f0d9a8; border-radius: 6px; }
+    .news-significant-update .form-group, .news-significant-update .form-check, .news-significant-update .checkbox { margin: 0; }
+    .news-significant-update label { font-weight: 600; color: var(--page-ink); }
+    .news-significant-update .help-block, .news-significant-update .form-text { margin: 6px 0 0; }
     .news-editor__category-filter { max-width: 420px; }
     .news-editor__category-filter > label { display: block; margin-bottom: 7px; font-weight: 600; font-size: 14px; }
     .category-tree-wrapper { max-height: 360px; margin: 8px 0 0; padding: 8px; border-color: var(--page-line); border-radius: 6px; }
