@@ -56,6 +56,18 @@ class SettingsManager
     }
 
     /**
+     * Số bài mỗi trang cho lưới bài viết (chuyên mục, tìm kiếm, tác giả).
+     * Lưới có 4 / 2 / 1 cột nên làm tròn lên bội số của 4 để hàng cuối không bị
+     * trống ô: setting 10 → 12. Bỏ trống → 12.
+     */
+    public function postsPerPage(): int
+    {
+        $value = (int) $this->get('numberRecordOnPage', 0);
+
+        return $value > 0 ? (int) (ceil($value / 4) * 4) : 12;
+    }
+
+    /**
      * Get all settings.
      *
      * @return array

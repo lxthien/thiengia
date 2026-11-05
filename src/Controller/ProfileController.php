@@ -63,7 +63,7 @@ class ProfileController extends AbstractController
         $pagination = $this->paginator->paginate(
             $query,
             $page,
-            $this->settingsManager->get('numberRecordOnPage') ?: 12
+            $this->settingsManager->postsPerPage()
         );
 
         // Trang vượt quá số trang thật → 404, tránh Google index trang rỗng.

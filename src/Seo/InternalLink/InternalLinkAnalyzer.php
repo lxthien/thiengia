@@ -197,7 +197,7 @@ class InternalLinkAnalyzer
      */
     private function addStructuralLinks(): void
     {
-        $perPage = max(1, (int) ($this->settings->get('numberRecordOnPage') ?: 10));
+        $perPage = $this->settings->postsPerPage();
 
         foreach ($this->pages as $key => $page) {
             if ($page['parent'] && isset($this->pages[$page['parent']])) {

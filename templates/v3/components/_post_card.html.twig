@@ -23,8 +23,10 @@
             <a href="{{ path('dynamic_post_page', { slug: post.url }) }}">{% if searchHighlight|default(false) %}{{ post.highlightedTitle|raw }}{% else %}{{ (post.title|title_tokens) }}{% endif %}</a>
         </{{ headingLevel }}>
 
-        {% if post.description %}
-            <p class="post-card-excerpt">{% if searchHighlight|default(false) %}{{ post.highlightedDescription|raw }}{% else %}{{ post.description }}{% endif %}</p>
+        {% if searchHighlight|default(false) %}
+            {% if post.highlightedDescription|default %}<p class="post-card-excerpt">{{ post.highlightedDescription|raw }}</p>{% endif %}
+        {% elseif post.description %}
+            <p class="post-card-excerpt">{{ post.description }}</p>
         {% endif %}
     </div>
 </article>

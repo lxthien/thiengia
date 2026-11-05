@@ -45,7 +45,7 @@ class GlobalSettingsType extends AbstractType
             
             ->add('listPrices', TextType::class, ['required' => false, 'label' => 'Bảng giá (ID bài viết/danh mục)'])
             ->add('listCategoryOnHomepage', TextareaType::class, ['required' => false, 'attr' => ['rows' => 7], 'label' => 'Danh mục hiển thị trang chủ'])
-            ->add('numberRecordOnPage', NumberType::class, ['required' => false, 'label' => 'Số bài viết mỗi trang'])
+            ->add('numberRecordOnPage', NumberType::class, ['required' => false, 'label' => 'Số bài viết mỗi trang', 'help' => 'Dùng cho trang chuyên mục, tìm kiếm, tác giả. Lưới 4 cột nên tự làm tròn lên bội số của 4 (vd. 10 → 12).'])
             
             ->add('facebookMessenger', TextareaType::class, ['required' => false, 'attr' => ['rows' => 10], 'label' => 'Code Facebook Messenger'])
             ->add('googleAnalytic', TextareaType::class, ['required' => false, 'attr' => ['rows' => 7], 'label' => 'Mã Google Analytics'])
