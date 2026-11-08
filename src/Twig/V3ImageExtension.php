@@ -3,6 +3,7 @@
 namespace App\Twig;
 
 use Liip\ImagineBundle\Imagine\Cache\CacheManager;
+use Liip\ImagineBundle\Service\FilterService;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -53,8 +54,12 @@ final class V3ImageExtension extends AbstractExtension
         'avatar' => ['widths' => [400], 'sizes' => '96px'],
     ];
 
+    /** Filter set ảnh chia sẻ MXH 1200×630 trong config/packages/framework.yaml. */
+    private const SHARE_FILTER = 'news_share_1200_630';
+
     public function __construct(
         private readonly CacheManager $cacheManager,
+        private readonly FilterService $filterService,
         private readonly Packages $packages,
         private readonly CacheInterface $cache,
         #[Autowire('%kernel.project_dir%/public')]
@@ -67,7 +72,37 @@ final class V3ImageExtension extends AbstractExtension
         return [
             new TwigFunction('v3_image', [$this, 'image'], ['is_safe' => ['html']]),
             new TwigFunction('v3_image_url', [$this, 'imageUrl']),
+            new TwigFunction('v3_share_image', [$this, 'shareImage']),
         ];
+    }
+
+    /**
+     * Bản 1200×630 (tỉ lệ 1.91:1 của Facebook/Zalo) cắt giữa từ ảnh đại diện, dạng JPG.
+     * Tạo ngay ở lần gọi đầu và trả URL file tĩnh — crawler MXH không phải đi qua
+     * URL resolve/redirect. Trả null nếu không phải ảnh nội bộ hoặc tạo lỗi
+     * (template khi đó dùng ảnh gốc).
+     *
+     * @return array{url: string, width: int, height: int}|null
+     */
+    public function shareImage(?string $path): ?array
+    {
+        $relative = $this->localPath($path);
+
+        if ($relative === null) {
+            return null;
+        }
+
+        try {
+            $url = $this->filterService->getUrlOfFilteredImage($relative, self::SHARE_FILTER);
+        } catch (\Throwable) {
+            return null;
+        }
+
+        // Ảnh gốc nhỏ hơn 1200×630 thì Liip không phóng to — đọc kích thước thật của file đã tạo.
+        $file = $this->publicDir . '/' . ltrim((string) parse_url($url, PHP_URL_PATH), '/');
+        [$width, $height] = is_file($file) ? $this->dimensionsOf($file) : [0, 0];
+
+        return ['url' => $url, 'width' => $width ?: 1200, 'height' => $height ?: 630];
     }
 
     /**
@@ -199,8 +234,15 @@ final class V3ImageExtension extends AbstractExtension
      */
     private function dimensions(string $relative): array
     {
-        $file = $this->publicDir . '/' . $relative;
-        $key = 'v3_image_dim_' . md5($relative . '|' . (string) @filemtime($file));
+        return $this->dimensionsOf($this->publicDir . '/' . $relative);
+    }
+
+    /**
+     * @return array{0: int, 1: int}
+     */
+    private function dimensionsOf(string $file): array
+    {
+        $key = 'v3_image_dim_' . md5(substr($file, strlen($this->publicDir)) . '|' . (string) @filemtime($file));
 
         return $this->cache->get($key, static function () use ($file): array {
             $size = @getimagesize($file);

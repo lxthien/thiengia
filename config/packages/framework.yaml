@@ -161,8 +161,11 @@ liip_imagine:
             quality: 75
             filters:
                 thumbnail: { size: [218, 218], mode: outbound }
+        # Ảnh chia sẻ MXH (og:image) cắt giữa từ ảnh đại diện — App\Twig\V3ImageExtension::shareImage().
+        # Luôn xuất JPG: Facebook/Zalo không đọc ổn WebP, ảnh gốc PNG thì nặng.
         news_share_1200_630:
-            quality: 75
+            quality: 82
+            format: jpg
             filters:
                 thumbnail: { size: [1200, 630], mode: outbound }
         banner_768_400:

@@ -17,7 +17,7 @@
     <meta property="og:title" content="{{ block('title') }}">
     <meta property="og:description" content="{{ block('description') }}">
     {% if coverSrc %}
-        <meta property="og:image" content="{{ absolute_url(coverSrc) }}">
+        {{ include('v3/components/_og_image.html.twig', {src: coverSrc, alt: media_alt(coverSrc) ?: (post.title|title_tokens)}, with_context = false) }}
     {% endif %}
 {% endblock %}
 
